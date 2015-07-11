@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Polymap4 GIS client
+Bundle-SymbolicName: org.polymap.p4;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.polymap.p4.P4Plugin
+Bundle-Vendor: polymap.org
+Require-Bundle: org.eclipse.rap.ui;bundle-version="2.3.1",
+ org.polymap.core;bundle-version="4.0.0",
+ org.polymap.core.data;bundle-version="4.0.0",
+ org.polymap.core.mapeditor;bundle-version="4.0.0",
+ org.polymap.core.project;bundle-version="4.0.0",
+ org.polymap.rhei.batik,
+ org.polymap.model2,
+ org.polymap.model2.store.recordstore
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy

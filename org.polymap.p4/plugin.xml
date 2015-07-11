@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.rap.ui.entrypoint">
+      <entrypoint
+            brandingId="org.polymap.batikapp.branding"
+            class="org.polymap.rhei.batik.BatikApplication"
+            id="org.polymap.batikapp.entrypoint"
+            path="/p4">
+      </entrypoint>
+   </extension>
+   <extension
+         point="org.eclipse.rap.ui.branding">
+      <branding
+            id="org.polymap.batikapp.branding"
+            themeId="org.polymap.rhei.batik.theme"
+            title="P4">
+      </branding>
+   </extension>
+   <extension
+         point="org.polymap.rhei.batik.design">
+      <design
+            class="org.polymap.p4.P4AppDesign"
+            id="org.polymap.batikapp.design"
+            servletNameMatcher="/p4">
+      </design>
+   </extension>
+   <extension
+         point="org.polymap.rhei.batik.panels">
+      <panel
+            class="org.polymap.p4.ProjectPanel"
+            id="org.polymap.batikapp.ProjectPanel">
+      </panel>
+      <panel
+            class="org.polymap.p4.LayersPanel"
+            id="org.polymap.batikapp.LayersPanel">
+      </panel>
+   </extension>
+
+</plugin>
