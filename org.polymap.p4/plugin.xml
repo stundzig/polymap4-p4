@@ -4,37 +4,52 @@
    <extension
          point="org.eclipse.rap.ui.entrypoint">
       <entrypoint
-            brandingId="org.polymap.batikapp.branding"
+            brandingId="org.polymap.p4.branding"
             class="org.polymap.rhei.batik.BatikApplication"
-            id="org.polymap.batikapp.entrypoint"
+            id="org.polymap.p4.entrypoint"
             path="/p4">
       </entrypoint>
    </extension>
    <extension
          point="org.eclipse.rap.ui.branding">
       <branding
-            id="org.polymap.batikapp.branding"
-            themeId="org.polymap.rhei.batik.theme"
+            id="org.polymap.p4.branding"
+            themeId="org.polymap.rhei.batik.materialDesign"
             title="P4">
+         <additionalHeaders>
+            <link
+                  href="batikres/css/roboto.css"
+                  rel="stylesheet">
+            </link>
+         </additionalHeaders>
       </branding>
    </extension>
    <extension
          point="org.polymap.rhei.batik.design">
       <design
             class="org.polymap.p4.P4AppDesign"
-            id="org.polymap.batikapp.design"
+            id="org.polymap.p4.design"
             servletNameMatcher="/p4">
       </design>
    </extension>
    <extension
          point="org.polymap.rhei.batik.panels">
       <panel
-            class="org.polymap.p4.ProjectPanel"
+            class="org.polymap.p4.project.ProjectPanel"
             id="org.polymap.batikapp.ProjectPanel">
       </panel>
       <panel
-            class="org.polymap.p4.LayersPanel"
-            id="org.polymap.batikapp.LayersPanel">
+            class="org.polymap.p4.project.LayersPanel"
+            id="org.polymap.batikapp.LayersPanel"
+            stackPriority="100">
+      </panel>
+      <panel
+            class="org.polymap.p4.ImportPanel"
+            id="org.polymap.p4.ImportPanel">
+      </panel>
+      <panel
+            class="org.polymap.p4.catalog.CatalogPanel"
+            id="org.polymap.p4.CatalogPanel">
       </panel>
    </extension>
 

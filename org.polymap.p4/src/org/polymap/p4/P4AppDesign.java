@@ -22,7 +22,7 @@ import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.app.IAppDesign;
-import org.polymap.rhei.batik.engine.DefaultAppDesign;
+import org.polymap.rhei.batik.toolkit.md.MdAppDesign;
 
 /**
  * 
@@ -30,7 +30,7 @@ import org.polymap.rhei.batik.engine.DefaultAppDesign;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class P4AppDesign
-        extends DefaultAppDesign {
+        extends MdAppDesign {
 
     private Label               title;
 

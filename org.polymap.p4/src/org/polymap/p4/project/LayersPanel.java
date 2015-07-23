@@ -1,7 +1,7 @@
 /* 
  * Copyright (C) 2015, Falko Br�utigam. All rights reserved.
  */
-package org.polymap.p4;
+package org.polymap.p4.project;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,12 +33,14 @@ public class LayersPanel
     
     @Override
     public boolean wantsToBeShown() {
-        if (parentPanel() instanceof ProjectPanel) {
-            getSite().setTitle( "Layers" );
-            getSite().setPreferredWidth( 200 );
-            return true;
-        }
-        return false;
+        return parentPanel()
+                .filter( parent -> parent instanceof ProjectPanel )
+                .map( parent -> {
+                    getSite().setTitle( "Layers" );
+                    getSite().setPreferredWidth( 200 );
+                    return true;
+                })
+                .orElse( false );
     }
 
 

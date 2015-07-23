@@ -14,8 +14,21 @@
  */
 package org.polymap.p4;
 
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import org.polymap.core.CorePlugin;
+import org.polymap.core.ui.ImageRegistryHelper;
+
+import org.polymap.p4.catalog.LocalCatalog;
 
 /**
  *
@@ -24,7 +37,8 @@ import org.osgi.framework.BundleContext;
 public class P4Plugin 
         extends AbstractUIPlugin {
 
-	// The plug-in ID
+    private static Log log = LogFactory.getLog( P4Plugin.class );
+    
 	public static final String ID = "org.polymap.p4"; //$NON-NLS-1$
 
 	private static P4Plugin instance;
@@ -34,18 +48,40 @@ public class P4Plugin
         return instance;
     }
 
-
+    
     // instance *******************************************
+
+    private ImageRegistryHelper     images = new ImageRegistryHelper( this );
+    
+    public LocalCatalog             localCatalog;
+    
     
     public void start( BundleContext context ) throws Exception {
         super.start( context );
         instance = this;
+        log.info( "Bundle state: " + getStateLocation() );
+        log.info( "Bundle data: " + CorePlugin.getDataLocation( instance() ) );
+        
+        localCatalog = new LocalCatalog();
     }
 
-
     public void stop( BundleContext context ) throws Exception {
+        localCatalog.close();
+        
         instance = null;
         super.stop( context );
     }
+
+    public Image imageForDescriptor( ImageDescriptor descriptor, String key ) {
+        return images.image( descriptor, key );
+    }
+
+    public Image imageForName( String resName ) {
+        return images.image( resName );
+    }
+    
+    public ImageDescriptor imageDescriptor( String path ) {
+        return images.imageDescriptor( path );
+    }    
 
 }
