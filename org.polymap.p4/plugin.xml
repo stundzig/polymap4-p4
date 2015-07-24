@@ -51,6 +51,10 @@
             class="org.polymap.p4.catalog.CatalogPanel"
             id="org.polymap.p4.CatalogPanel">
       </panel>
+      <panel
+            class="org.polymap.p4.catalog.ResourceInfoPanel"
+            id="org.polymap.p4.ResourceInfoPanel">
+      </panel>
    </extension>
 
 </plugin>

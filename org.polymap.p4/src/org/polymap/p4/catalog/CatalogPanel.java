@@ -22,14 +22,19 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.ViewerCell;
 
 import org.polymap.core.catalog.IMetadata;
+import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.catalog.ui.MetadataContentProvider;
 import org.polymap.core.catalog.ui.MetadataDescriptionProvider;
 import org.polymap.core.catalog.ui.MetadataLabelProvider;
 import org.polymap.core.data.wms.catalog.WmsServiceResolver;
+import org.polymap.core.ui.SelectionAdapter;
 
+import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
@@ -50,8 +55,10 @@ public class CatalogPanel
 
     public static final PanelIdentifier ID = PanelIdentifier.parse( "catalog" );
 
-    private MdListViewer        viewer;
+    private MdListViewer                viewer;
 
+    private Context<IResourceInfo>      res;
+    
     
     @Override
     public boolean wantsToBeShown() {
@@ -59,7 +66,7 @@ public class CatalogPanel
                 .filter( parent -> parent instanceof ProjectPanel )
                 .map( parent -> {
                     getSite().setTitle( "Catalog" );
-                    getSite().setPreferredWidth( 200 );
+                    getSite().setPreferredWidth( 350 );
                     return true;
                 })
                 .orElse( false );
@@ -71,7 +78,7 @@ public class CatalogPanel
         getSite().setTitle( "Catalog" );
         parent.setLayout( new FillLayout() );
         
-        viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.VIRTUAL/*, SWT.FULL_SELECTION*/ );
+        viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION );
         viewer.setContentProvider( new MetadataContentProvider( new WmsServiceResolver() ) );
         viewer.firstLineLabelProvider.set( new MetadataLabelProvider() );
         viewer.secondLineLabelProvider.set( new MetadataDescriptionProvider() );
@@ -83,8 +90,21 @@ public class CatalogPanel
                 }
             }
         });
+        viewer.addOpenListener( new IOpenListener() {
+            @Override
+            public void open( OpenEvent ev ) {
+                SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
+                    if (elm instanceof IResourceInfo) {
+                        res.set( (IResourceInfo)elm );
+                        getContext().openPanel( getSite().getPath(), ResourceInfoPanel.ID );                        
+                    }
+                    else {
+                        viewer.toggleItemExpand( elm );
+                    }
+                });
+            }
+        } );
         viewer.setInput( P4Plugin.instance().localCatalog );
-        viewer.expandAll();
         
 //        viewer.getControl().setLayoutData( new ConstraintData( 
 //                new MinWidthConstraint( 500, 1 ), new MinHeightConstraint( 3000, 1 ) ) );
