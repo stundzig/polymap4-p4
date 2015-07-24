@@ -34,6 +34,7 @@ import org.polymap.core.catalog.ui.MetadataLabelProvider;
 import org.polymap.core.data.wms.catalog.WmsServiceResolver;
 import org.polymap.core.ui.SelectionAdapter;
 
+import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
@@ -87,6 +88,12 @@ public class CatalogPanel
             public void update( ViewerCell cell ) {
                 if (cell.getElement() instanceof IMetadata) {
                     cell.setImage( P4Plugin.instance().imageForName( "resources/icons/archive.png" ) );
+                }
+                else if (cell.getElement() == MetadataContentProvider.LOADING) {
+                    cell.setImage( BatikPlugin.instance().imageForName( "resources/icons/md/loading24.gif" ) );
+                }
+                else {
+                    cell.setImage( null );
                 }
             }
         });
