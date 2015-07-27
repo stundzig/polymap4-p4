@@ -25,7 +25,10 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -48,6 +51,7 @@ import org.polymap.rhei.batik.dashboard.DefaultDashlet;
 import org.polymap.rhei.batik.toolkit.MinHeightConstraint;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import org.polymap.rap.openlayers.base.OlFeature;
 import org.polymap.rap.openlayers.control.MousePositionControl;
@@ -56,10 +60,13 @@ import org.polymap.rap.openlayers.format.GeoJSONFormat;
 import org.polymap.rap.openlayers.geom.PolygonGeometry;
 import org.polymap.rap.openlayers.layer.ImageLayer;
 import org.polymap.rap.openlayers.layer.Layer;
+import org.polymap.rap.openlayers.layer.TileLayer;
 import org.polymap.rap.openlayers.layer.VectorLayer;
-import org.polymap.rap.openlayers.source.ImageSource;
 import org.polymap.rap.openlayers.source.ImageWMSSource;
+import org.polymap.rap.openlayers.source.TileSource;
+import org.polymap.rap.openlayers.source.TileWMSSource;
 import org.polymap.rap.openlayers.source.VectorSource;
+import org.polymap.rap.openlayers.source.WMSRequestParams;
 import org.polymap.rap.openlayers.style.FillStyle;
 import org.polymap.rap.openlayers.style.StrokeStyle;
 import org.polymap.rap.openlayers.style.Style;
@@ -102,6 +109,14 @@ public class ResourceInfoPanel
         dashboard.addDashlet( new MetadataDashlet() );
         dashboard.addDashlet( new MapDashlet() );
         dashboard.createContents( parent );
+        
+        Button fab = ((MdToolkit)getSite().toolkit()).createFab();
+        fab.addSelectionListener( new SelectionAdapter() {
+            @Override
+            public void widgetSelected( SelectionEvent ev ) {
+                //OperationSupport.instance().execute( );
+            }
+        });
     }
 
     
@@ -151,9 +166,10 @@ public class ResourceInfoPanel
             mapViewer.addMapControl( new ScaleLineControl() );
             
             // OSM layer
-            Layer<ImageSource> background = new ImageLayer().source.put( new ImageWMSSource()
-                    .url.put( "http://ows.terrestris.de/osm/service/" )
-                    .params.put( new ImageWMSSource.RequestParams().layers.put( "OSM-WMS" ) ) );
+            Layer<TileSource> background = new TileLayer()
+                     .source.put( new TileWMSSource()
+                             .url.put( "http://ows.terrestris.de/osm/service/" )
+                             .params.put( new WMSRequestParams().layers.put( "OSM-WMS" ) ) );
     
             // data layer
             Layer data = null;
@@ -164,7 +180,7 @@ public class ResourceInfoPanel
                 String layerName = res.get().getName();
                 data = new ImageLayer().source.put( new ImageWMSSource()
                         .url.put( url )
-                        .params.put( new ImageWMSSource.RequestParams().layers.put( layerName ) ) );
+                        .params.put( new WMSRequestParams().layers.put( layerName ) ) );
                 
                 org.geotools.data.ows.Layer layer = wms.getCapabilities().getLayerList().stream()
                         .filter( l -> layerName.equals( l.getName() ) )

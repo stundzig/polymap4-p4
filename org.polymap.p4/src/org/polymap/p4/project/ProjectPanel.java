@@ -96,6 +96,17 @@ public class ProjectPanel
         mapViewer = new MapViewer( parent );
         mapViewer.contentProvider.set( new ProjectContentProvider() );
         mapViewer.layerProvider.set( new ProjectLayerProvider() );
+        
+//        // FAB
+//        Button fab = ((MdToolkit)getSite().toolkit()).createFab();
+//        fab.setToolTipText( "Create a new layer for this resource" );
+//        fab.addSelectionListener( new SelectionAdapter() {
+//            @Override
+//            public void widgetSelected( SelectionEvent ev ) {
+//                log.info( "..." );
+//                //OperationSupport.instance().execute( );
+//            }
+//        });
     }
 
 }
