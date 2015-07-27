@@ -197,7 +197,11 @@ public class ResourceInfoPanel
 
             mapViewer.maxExtent.set( bounds );
             mapViewer.setInput( new Object[] {/*background, data,*/ background, vectorLayer, data} );
+
+            // funktioniert einmal; danach sind keine weiteren karten zu sehen
+//            mapViewer.zoomTo( bounds );
             
+            // funktioniert mit mehreren panel; ab der zweiten ist aber extent nicht richtig gesetzt
             ReferencedEnvelope finalBounds = bounds;
             UIThreadExecutor.async( () -> mapViewer.zoomTo( finalBounds ), UIThreadExecutor.logErrorMsg( "" ) );
         }
