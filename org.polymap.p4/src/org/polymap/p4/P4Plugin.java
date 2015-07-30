@@ -28,7 +28,11 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.polymap.core.CorePlugin;
 import org.polymap.core.ui.ImageRegistryHelper;
 
+import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.contribution.ContributionManager;
+
 import org.polymap.p4.catalog.LocalCatalog;
+import org.polymap.p4.catalog.LocalResolver;
 
 /**
  *
@@ -39,9 +43,12 @@ public class P4Plugin
 
     private static Log log = LogFactory.getLog( P4Plugin.class );
     
-	public static final String ID = "org.polymap.p4"; //$NON-NLS-1$
+    public static final String  ID = "org.polymap.p4"; //$NON-NLS-1$
 
-	private static P4Plugin instance;
+    /** The globale {@link Context} scope for the {@link P4Plugin}. */
+    public static final String  Scope = "org.polymap.p4"; //$NON-NLS-1$
+
+    private static P4Plugin     instance;
 	
 
     public static P4Plugin instance() {
@@ -55,6 +62,8 @@ public class P4Plugin
     
     public LocalCatalog             localCatalog;
     
+    public LocalResolver            localResolver = new LocalResolver( localCatalog );
+    
     
     public void start( BundleContext context ) throws Exception {
         super.start( context );
@@ -63,8 +72,12 @@ public class P4Plugin
         log.info( "Bundle data: " + CorePlugin.getDataLocation( instance() ) );
         
         localCatalog = new LocalCatalog();
+        
+        ContributionManager.addStaticSupplier( () -> new NewLayerContribution() );
+//        ContributionManager.addStaticSupplier( () -> new TestProjectContribution() );
     }
 
+    
     public void stop( BundleContext context ) throws Exception {
         localCatalog.close();
         
@@ -72,13 +85,16 @@ public class P4Plugin
         super.stop( context );
     }
 
+    
     public Image imageForDescriptor( ImageDescriptor descriptor, String key ) {
         return images.image( descriptor, key );
     }
 
+    
     public Image imageForName( String resName ) {
         return images.image( resName );
     }
+    
     
     public ImageDescriptor imageDescriptor( String path ) {
         return images.imageDescriptor( path );

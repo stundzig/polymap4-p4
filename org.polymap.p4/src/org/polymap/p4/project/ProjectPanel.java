@@ -14,6 +14,9 @@
  */
 package org.polymap.p4.project;
 
+import java.util.List;
+
+import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
@@ -25,6 +28,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.StatusDispatcher;
 
@@ -33,12 +38,14 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
+import org.polymap.rhei.batik.contribution.ContributionManager;
 import org.polymap.rhei.batik.tx.TxProvider;
 import org.polymap.rhei.batik.tx.TxProvider.Propagation;
 
 import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4AppDesign;
+import org.polymap.p4.P4Plugin;
 
 /**
  * 
@@ -54,12 +61,12 @@ public class ProjectPanel
     
     private static final IMessages      i18n = Messages.forPrefix( "ProjectPanel" );
 
-    @Scope("org.polymap.p4")
+    @Scope(P4Plugin.Scope)
     private Context<ProjectUowProvider> uowProvider;
     
     private TxProvider<UnitOfWork>.Tx   uow;
     
-    @Scope("org.polymap.p4")
+    @Scope(P4Plugin.Scope)
     protected Context<IMap>             map;
 
     private MapViewer<ILayer>           mapViewer;
@@ -71,12 +78,23 @@ public class ProjectPanel
             uowProvider.compareAndSet( null, new ProjectUowProvider() );
             uow = uowProvider.get().newTx( this ).start( Propagation.REQUIRES_NEW );
             map.compareAndSet( null, uow.get().entity( IMap.class, "root" ) );
+            
+            EventManager.instance().subscribe( this, ev -> 
+                    ev instanceof PropertyChangeEvent && ev.getSource() == map.get() );
         }
         catch (IOException e) {
             StatusDispatcher.handleError( "Unable to start application.", e );
         }
     }
 
+    
+    @EventHandler(delay=100,display=true)
+    protected void onEntityChange( List<PropertyChangeEvent> evs ) {
+        log.info( "evs: " + evs.size() );
+        evs.forEach( ev -> log.info( "    ev=" + ev ) );
+        mapViewer.refresh();    
+    }
+    
     
     @Override
     public void createContents( Composite parent ) {
@@ -96,17 +114,8 @@ public class ProjectPanel
         mapViewer = new MapViewer( parent );
         mapViewer.contentProvider.set( new ProjectContentProvider() );
         mapViewer.layerProvider.set( new ProjectLayerProvider() );
-        
-//        // FAB
-//        Button fab = ((MdToolkit)getSite().toolkit()).createFab();
-//        fab.setToolTipText( "Create a new layer for this resource" );
-//        fab.addSelectionListener( new SelectionAdapter() {
-//            @Override
-//            public void widgetSelected( SelectionEvent ev ) {
-//                log.info( "..." );
-//                //OperationSupport.instance().execute( );
-//            }
-//        });
+
+        ContributionManager.instance().contributeFab( this );
     }
 
 }

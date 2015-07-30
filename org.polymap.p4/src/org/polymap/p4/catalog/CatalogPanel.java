@@ -31,13 +31,13 @@ import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.catalog.ui.MetadataContentProvider;
 import org.polymap.core.catalog.ui.MetadataDescriptionProvider;
 import org.polymap.core.catalog.ui.MetadataLabelProvider;
-import org.polymap.core.data.wms.catalog.WmsServiceResolver;
 import org.polymap.core.ui.SelectionAdapter;
 
 import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
@@ -58,6 +58,7 @@ public class CatalogPanel
 
     private MdListViewer                viewer;
 
+    @Scope(P4Plugin.Scope)
     private Context<IResourceInfo>      res;
     
     
@@ -80,7 +81,7 @@ public class CatalogPanel
         parent.setLayout( new FillLayout() );
         
         viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION );
-        viewer.setContentProvider( new MetadataContentProvider( new WmsServiceResolver() ) );
+        viewer.setContentProvider( new MetadataContentProvider( LocalResolver.instance() ) );
         viewer.firstLineLabelProvider.set( new MetadataLabelProvider() );
         viewer.secondLineLabelProvider.set( new MetadataDescriptionProvider() );
         viewer.iconProvider.set( new CellLabelProvider() {

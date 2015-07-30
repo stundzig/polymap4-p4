@@ -25,10 +25,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,20 +36,23 @@ import org.polymap.core.data.util.Geometries;
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.mapeditor.OlContentProvider;
 import org.polymap.core.mapeditor.OlLayerProvider;
+import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.UIJob;
-import org.polymap.core.ui.UIThreadExecutor;
+import org.polymap.core.runtime.UIThreadExecutor;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.Scope;
+import org.polymap.rhei.batik.contribution.ContributionManager;
 import org.polymap.rhei.batik.dashboard.Dashboard;
 import org.polymap.rhei.batik.dashboard.DashletSite;
 import org.polymap.rhei.batik.dashboard.DefaultDashlet;
 import org.polymap.rhei.batik.toolkit.MinHeightConstraint;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
-import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
+import org.polymap.p4.P4Plugin;
 import org.polymap.rap.openlayers.base.OlFeature;
 import org.polymap.rap.openlayers.control.MousePositionControl;
 import org.polymap.rap.openlayers.control.ScaleLineControl;
@@ -88,6 +88,10 @@ public class ResourceInfoPanel
     
     public static final String          DASHBOARD_ID = "org.polymap.p4.catalog.resource";
     
+    @Scope(P4Plugin.Scope)
+    private Context<IMap>               map;
+    
+    @Scope(P4Plugin.Scope)
     private Context<IResourceInfo>      res;
 
     private Dashboard                   dashboard;
@@ -107,16 +111,10 @@ public class ResourceInfoPanel
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
         dashboard.addDashlet( new BasicInfoDashlet() );
         dashboard.addDashlet( new MetadataDashlet() );
-        dashboard.addDashlet( new MapDashlet() );
+//        dashboard.addDashlet( new MapDashlet() );
         dashboard.createContents( parent );
-        
-        Button fab = ((MdToolkit)getSite().toolkit()).createFab();
-        fab.addSelectionListener( new SelectionAdapter() {
-            @Override
-            public void widgetSelected( SelectionEvent ev ) {
-                //OperationSupport.instance().execute( );
-            }
-        });
+
+        ContributionManager.instance().contributeFab( this );
     }
 
     
