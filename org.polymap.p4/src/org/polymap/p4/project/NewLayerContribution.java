@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4;
+package org.polymap.p4.project;
 
 import static org.polymap.rhei.batik.contribution.ContributionSiteFilters.panelType;
 
@@ -32,9 +32,11 @@ import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.DefaultContribution;
 import org.polymap.rhei.batik.contribution.IContributionSite;
+import org.polymap.rhei.batik.tx.TxProvider;
 
+import org.polymap.model2.runtime.UnitOfWork;
+import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.ResourceInfoPanel;
-import org.polymap.p4.project.ProjectUowProvider;
 
 /**
  * 
@@ -67,9 +69,11 @@ public class NewLayerContribution
     @Override
     protected void execute( IContributionSite site ) throws Exception {
         String resId = P4Plugin.instance().localResolver.resourceIdentifier( res.get() );
-
+        
+        TxProvider<UnitOfWork>.Tx tx = uowProvider.get().newTx( site.getPanel() );
+        
         NewLayerOperation op = new NewLayerOperation()
-                .tx.put( uowProvider.get().newTx( site.getPanel() ) )
+                .tx.put( tx )
                 .map.put( map.get() )
                 .label.put( res.get().getName() )
                 .resourceIdentifier.put( resId );

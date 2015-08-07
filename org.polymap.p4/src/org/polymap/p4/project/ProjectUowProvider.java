@@ -14,11 +14,13 @@
  */
 package org.polymap.p4.project;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.polymap.core.CorePlugin;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
 
@@ -27,6 +29,7 @@ import org.polymap.rhei.batik.tx.TxProvider;
 import org.polymap.model2.runtime.EntityRepository;
 import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.model2.store.recordstore.RecordStoreAdapter;
+import org.polymap.p4.P4Plugin;
 import org.polymap.recordstore.lucene.LuceneRecordStore;
 
 /**
@@ -46,8 +49,9 @@ public class ProjectUowProvider
 
     
     public ProjectUowProvider() throws IOException {
-        //File workspace;
-        LuceneRecordStore store = new LuceneRecordStore();
+        File dir = new File( CorePlugin.getDataLocation( P4Plugin.instance() ), "project" );
+        dir.mkdirs();
+        LuceneRecordStore store = new LuceneRecordStore( dir, false );
         repo = EntityRepository.newConfiguration()
                 .entities.set( new Class[] {ILayer.class, IMap.class} )
                 .store.set( new RecordStoreAdapter( store ) )

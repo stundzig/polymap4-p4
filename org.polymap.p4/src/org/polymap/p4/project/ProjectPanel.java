@@ -19,12 +19,16 @@ import java.util.List;
 import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import org.polymap.core.data.util.Geometries;
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
@@ -92,7 +96,7 @@ public class ProjectPanel
     protected void onEntityChange( List<PropertyChangeEvent> evs ) {
         log.info( "evs: " + evs.size() );
         evs.forEach( ev -> log.info( "    ev=" + ev ) );
-        mapViewer.refresh();    
+        //mapViewer.refresh();
     }
     
     
@@ -107,13 +111,21 @@ public class ProjectPanel
         
         parent.setLayout( new FillLayout() /*FormLayoutFactory.defaults().margins( 0 ).create()*/ );
 
-//        getSite().toolkit().createLabel( parent, "Karte... (" + hashCode() + ")" )
-//                .setLayoutData( FormDataFactory.filled().width( 600 ).create() );
-
         // mapViewer
-        mapViewer = new MapViewer( parent );
-        mapViewer.contentProvider.set( new ProjectContentProvider() );
-        mapViewer.layerProvider.set( new ProjectLayerProvider() );
+        try {
+            mapViewer = new MapViewer( parent );
+            mapViewer.contentProvider.set( new ProjectContentProvider() );
+            mapViewer.layerProvider.set( new ProjectLayerProvider() );
+            
+            // FIXME
+            CoordinateReferenceSystem epsg3857 = Geometries.crs( "EPSG:3857" );
+            mapViewer.maxExtent.set( new ReferencedEnvelope( 1380000, 1390000, 6680000, 6690000, epsg3857 ) );
+            
+            mapViewer.setInput( map.get() );
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e );
+        }
 
         ContributionManager.instance().contributeFab( this );
     }

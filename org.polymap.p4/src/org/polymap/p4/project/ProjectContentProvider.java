@@ -41,6 +41,7 @@ public class ProjectContentProvider
 
     @Override
     public Object[] getElements( Object inputElement ) {
+        log.info( "Layers: " + map.layers );
         return map.layers.toArray();
     }
 

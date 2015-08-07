@@ -16,6 +16,8 @@ package org.polymap.p4.catalog;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +29,7 @@ import org.polymap.core.catalog.resolve.IMetadataResourceResolver;
 import org.polymap.core.catalog.resolve.IResolvableInfo;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.catalog.resolve.IServiceInfo;
+import org.polymap.core.data.pipeline.DataSourceDescription;
 import org.polymap.core.data.wms.catalog.WmsServiceResolver;
 import org.polymap.core.project.ILayer;
 
@@ -61,7 +64,9 @@ public class LocalResolver
     
     private LocalCatalog            localCatalog;
     
+    
     public LocalResolver( LocalCatalog localCatalog ) {
+        assert localCatalog != null;
         this.localCatalog = localCatalog;
     }
 
@@ -73,8 +78,25 @@ public class LocalResolver
     }
     
     
-    public void connectLayer( ILayer layer, IProgressMonitor monitor ) {
+    public Optional<DataSourceDescription> connectLayer( ILayer layer, IProgressMonitor monitor ) throws Exception {
+        StringTokenizer tokens = new StringTokenizer( layer.resourceIdentifier.get(), ID_DELIMITER );
+        String metadataId = tokens.nextToken();
+        String resName = tokens.nextToken();
         
+        IMetadata metadata = localCatalog.entry( metadataId ).get();
+        
+        if (metadata != null) {
+            IServiceInfo serviceInfo = (IServiceInfo)resolve( metadata, monitor );
+            Object service = serviceInfo.createService( monitor );
+            
+            DataSourceDescription result = new DataSourceDescription();
+            result.service.set( service );
+            result.resourceName.set( resName );
+            return Optional.of( result );
+        }
+        else {
+            return Optional.empty();
+        }
     }
     
     
