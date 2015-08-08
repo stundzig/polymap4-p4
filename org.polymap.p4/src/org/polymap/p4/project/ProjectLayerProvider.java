@@ -58,6 +58,7 @@ public class ProjectLayerProvider
     
     public ProjectLayerProvider() {
         try {
+            // register WMS servlet
             alias = "/mapviewer" + hashCode();
             P4Plugin.instance().httpService().registerServlet( alias, new SimpleWmsServer() {
                 @Override
