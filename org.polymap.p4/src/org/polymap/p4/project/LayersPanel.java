@@ -14,13 +14,22 @@
  */
 package org.polymap.p4.project;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ViewerCell;
+
+import org.polymap.core.mapeditor.MapViewer;
+import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
 import org.polymap.core.project.ui.ProjectNodeContentProvider;
 import org.polymap.core.project.ui.ProjectNodeLabelProvider;
@@ -30,6 +39,7 @@ import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.Mandatory;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
+import org.polymap.rhei.batik.toolkit.md.CheckboxActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.rhei.batik.tx.TxProvider;
@@ -61,6 +71,9 @@ public class LayersPanel
     protected Context<IMap>             map;
     
     private MdListViewer                viewer;
+    
+    /** The {@link MapViewer} of the parent panel ({@link ProjectPanel}). */
+    private MapViewer<ILayer>           mapViewer;
 
     
     @Override
@@ -70,7 +83,6 @@ public class LayersPanel
                 .map( parent -> {
                     getSite().setTitle( "Layers" );
                     getSite().setPreferredWidth( 200 );
-                    uow = uowProvider.get().newTx( this ).start( Propagation.MANDATORY );
                     return true;
                 })
                 .orElse( false );
@@ -78,29 +90,56 @@ public class LayersPanel
 
 
     @Override
-    public void createContents( Composite parent ) {
+    public void init() {
         getSite().setTitle( "Layers" );
+        getSite().setPreferredWidth( 200 );
+
+        uow = uowProvider.get().newTx( this ).start( Propagation.MANDATORY );
+        mapViewer = ((ProjectPanel)parentPanel().get()).mapViewer;
+    }
+
+
+    @Override
+    public void createContents( Composite parent ) {
         parent.setLayout( new FillLayout() );
         
         viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.FULL_SELECTION );
         viewer.setContentProvider( new ProjectNodeContentProvider() );
         viewer.firstLineLabelProvider.set( new ProjectNodeLabelProvider() );
         
-//        viewer.secondLineLabelProvider.set( new MetadataDescriptionProvider() );
-//        viewer.iconProvider.set( new CellLabelProvider() {
-//            @Override
-//            public void update( ViewerCell cell ) {
-//                if (cell.getElement() instanceof IMetadata) {
-//                    cell.setImage( P4Plugin.instance().imageForName( "resources/icons/archive.png" ) );
-//                }
-//                else if (cell.getElement() == MetadataContentProvider.LOADING) {
-//                    cell.setImage( BatikPlugin.instance().imageForName( "resources/icons/md/loading24.gif" ) );
-//                }
-//                else {
-//                    cell.setImage( null );
-//                }
-//            }
-//        });
+        viewer.iconProvider.set( new CellLabelProvider() {
+            private Map<Object,Image> legendGraphics = new HashMap();
+            
+            @Override
+            public void update( ViewerCell cell ) {
+                ILayer layer = (ILayer)cell.getElement();
+                cell.setImage( legendGraphics.containsKey( layer.id() )
+                        ? legendGraphics.get( layer.id() )
+                        : P4Plugin.instance().imageForName( "resources/icons/layers.png" ) );
+                
+//                new UIJob( "Legend graphic" ) {
+//                    @Override
+//                    protected void runWithException( IProgressMonitor monitor ) throws Exception {
+//                        Thread.sleep( 3000 );
+//                        UIThreadExecutor.async( () -> {
+//                            legendGraphics.put( layer.id(), P4Plugin.instance().imageForName( "resources/icons/map.png" ) );
+//                            viewer.update( layer, null );
+//                        }, UIThreadExecutor.runtimeException() );
+//                    }
+//                }.scheduleWithUIUpdate();
+            }
+        });
+        
+        viewer.firstSecondaryActionProvider.set( new CheckboxActionProvider() {
+            @Override
+            protected boolean initSelection( MdListViewer _viewer, Object elm ) {
+                return mapViewer.isVisible( (ILayer)elm );
+            }
+            @Override
+            protected void onSelectionChange( MdListViewer _viewer, Object elm ) {
+                mapViewer.setVisible( (ILayer)elm, isSelected( elm ) );
+            }
+        });
         
 //        viewer.addOpenListener( new IOpenListener() {
 //            @Override

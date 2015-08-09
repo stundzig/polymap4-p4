@@ -73,7 +73,7 @@ public class ProjectPanel
     @Scope(P4Plugin.Scope)
     protected Context<IMap>             map;
 
-    private MapViewer<ILayer>           mapViewer;
+    protected MapViewer<ILayer>         mapViewer;
     
     
     @Override
