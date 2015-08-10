@@ -26,6 +26,8 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.ViewerCell;
 
 import org.polymap.core.mapeditor.MapViewer;
@@ -33,6 +35,7 @@ import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
 import org.polymap.core.project.ui.ProjectNodeContentProvider;
 import org.polymap.core.project.ui.ProjectNodeLabelProvider;
+import org.polymap.core.ui.SelectionAdapter;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
@@ -69,6 +72,10 @@ public class LayersPanel
     @Mandatory
     @Scope(P4Plugin.Scope)
     protected Context<IMap>             map;
+    
+    /** Set before opening {@link LayerInfoPanel}. */
+    @Scope(P4Plugin.Scope)
+    protected Context<ILayer>           layer;
     
     private MdListViewer                viewer;
     
@@ -141,20 +148,16 @@ public class LayersPanel
             }
         });
         
-//        viewer.addOpenListener( new IOpenListener() {
-//            @Override
-//            public void open( OpenEvent ev ) {
-//                SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
-//                    if (elm instanceof IResourceInfo) {
-//                        res.set( (IResourceInfo)elm );
-//                        getContext().openPanel( getSite().getPath(), ResourceInfoPanel.ID );                        
-//                    }
-//                    else {
-//                        viewer.toggleItemExpand( elm );
-//                    }
-//                });
-//            }
-//        } );
+        viewer.addOpenListener( new IOpenListener() {
+            @Override
+            public void open( OpenEvent ev ) {
+                SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
+                    layer.set( (ILayer)elm );
+                    getContext().openPanel( getSite().getPath(), LayerInfoPanel.ID );                        
+                });
+            }
+        } );
+
         viewer.setInput( map.get() );
     }
 

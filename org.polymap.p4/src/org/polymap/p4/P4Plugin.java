@@ -31,14 +31,19 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.polymap.core.CorePlugin;
+import org.polymap.core.project.IMap;
 import org.polymap.core.ui.ImageRegistryHelper;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.contribution.ContributionManager;
 
+import org.polymap.service.geoserver.GeoServerServlet;
+
+import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.catalog.LocalCatalog;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.project.NewLayerContribution;
+import org.polymap.p4.project.ProjectRepository;
 
 /**
  *
@@ -68,7 +73,7 @@ public class P4Plugin
     
     public LocalCatalog             localCatalog;
     
-    public LocalResolver            localResolver;
+    public LocalResolver            localResolver;    
 
     private ServiceTracker          httpServiceTracker;
     
@@ -87,8 +92,24 @@ public class P4Plugin
         // register HTTP resource
         httpServiceTracker = new ServiceTracker( context, HttpService.class.getName(), null ) {
             public Object addingService( ServiceReference reference ) {
-                httpService = Optional.ofNullable( (HttpService)super.addingService( reference ) );                
-                return httpService;
+                httpService = Optional.ofNullable( (HttpService)super.addingService( reference ) );
+                
+                httpService.ifPresent( service -> {
+                    // fake/test GeoServer
+                    UnitOfWork uow = ProjectRepository.instance.get().newUnitOfWork();
+                    IMap map = uow.entity( IMap.class, "root" );
+                    try {
+                        // @Jörg: map enthält an dieser stelle unsere projektstruktur; diese muss
+                        // im GeoServerLoader als basis verwendet werden; mir ist nicht ganz klar wie ich
+                        // map zum GeoServerLoader gebracht habe und ob das so richtig gut war
+                        service.registerServlet( "/wms", new GeoServerServlet(), null, null );
+                    }
+                    catch (Exception e) {
+                        throw new RuntimeException( e );
+                    }
+                });
+
+                return httpService.get();
             }
         };
         httpServiceTracker.open();

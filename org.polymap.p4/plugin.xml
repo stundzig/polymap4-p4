@@ -55,6 +55,14 @@
             class="org.polymap.p4.catalog.ResourceInfoPanel"
             id="org.polymap.p4.ResourceInfoPanel">
       </panel>
+      <panel
+            class="org.polymap.p4.project.LayerInfoPanel"
+            id="org.polymap.p4.project.LayerPanel">
+      </panel>
+      <panel
+            class="org.polymap.p4.project.ProjectInfoPanel"
+            id="org.polymap.p4.project.ProjectInfoPanel">
+      </panel>
    </extension>
 
 </plugin>
