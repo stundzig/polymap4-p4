@@ -17,6 +17,10 @@ package org.polymap.p4.data;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.polymap.core.data.feature.DataSourceProcessor;
+import org.polymap.core.data.feature.FeatureRenderProcessor2;
+import org.polymap.core.data.image.ImageDecodeProcessor;
+import org.polymap.core.data.image.ImageEncodeProcessor;
 import org.polymap.core.data.pipeline.DefaultPipelineIncubator;
 import org.polymap.core.data.pipeline.PipelineIncubator;
 import org.polymap.core.data.pipeline.PipelineProcessor;
@@ -36,11 +40,10 @@ public class P4PipelineIncubator
 
     /** Terminal and transformer processors. */
     private static Class<PipelineProcessor>[] procTypes = new Class[] {
-//        ImageEncodeProcessor.class,
-//        ImageDecodeProcessor.class,
-//        FeatureRenderProcessor2.class,
-//        DataSourceProcessor.class,
-//        RasterRenderProcessor.class
+        ImageEncodeProcessor.class,
+        ImageDecodeProcessor.class,
+        FeatureRenderProcessor2.class,
+        DataSourceProcessor.class,
         WmsRenderProcessor.class
     };
 

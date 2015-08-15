@@ -30,6 +30,7 @@ import org.polymap.core.catalog.resolve.IResolvableInfo;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.catalog.resolve.IServiceInfo;
 import org.polymap.core.data.pipeline.DataSourceDescription;
+import org.polymap.core.data.shapefile.catalog.ShapefileServiceResolver;
 import org.polymap.core.data.wms.catalog.WmsServiceResolver;
 import org.polymap.core.project.ILayer;
 
@@ -51,7 +52,7 @@ public class LocalResolver
 
     private static Log log = LogFactory.getLog( LocalResolver.class );
 
-    public static IMetadataResourceResolver[]   resolvers = { new WmsServiceResolver() };
+    public static IMetadataResourceResolver[]   resolvers = { new WmsServiceResolver(), new ShapefileServiceResolver() };
     
     public static final String                  ID_DELIMITER = "|";
     

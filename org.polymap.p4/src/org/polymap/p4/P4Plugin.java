@@ -30,27 +30,15 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.polymap.core.CorePlugin;
-import org.polymap.core.data.pipeline.DataSourceDescription;
-import org.polymap.core.data.pipeline.Pipeline;
-import org.polymap.core.data.pipeline.PipelineUsecase;
-import org.polymap.core.project.ILayer;
-import org.polymap.core.project.IMap;
 import org.polymap.core.ui.ImageRegistryHelper;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.contribution.ContributionManager;
 
-import org.polymap.service.geoserver.GeoServerServlet;
-
-import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.catalog.LocalCatalog;
 import org.polymap.p4.catalog.LocalResolver;
-import org.polymap.p4.data.P4PipelineIncubator;
 import org.polymap.p4.project.NewLayerContribution;
-import org.polymap.p4.project.ProjectRepository;
 
 /**
  *
@@ -101,34 +89,34 @@ public class P4Plugin
             public Object addingService( ServiceReference reference ) {
                 httpService = Optional.ofNullable( (HttpService)super.addingService( reference ) );
                 
-                httpService.ifPresent( service -> {
-                    // fake/test GeoServer
-                    UnitOfWork uow = ProjectRepository.instance.get().newUnitOfWork();
-                    IMap map = uow.entity( IMap.class, "root" );
-                    try {
-                        service.registerServlet( "/wms", new GeoServerServlet() {
-                            @Override
-                            public IMap getMap() {
-                                return map;
-                            }
-                            @Override
-                            protected Pipeline createPipeline( ILayer layer, Class<? extends PipelineUsecase> usecase )
-                                    throws Exception {
-                                // resolve service
-                                NullProgressMonitor monitor = new NullProgressMonitor();
-                                DataSourceDescription dsd = LocalResolver.instance()
-                                        .connectLayer( layer, monitor )
-                                        .orElseThrow( () -> new RuntimeException( "No data source for layer: " + layer ) );
-                                
-                                // create pipeline for it
-                                return P4PipelineIncubator.forLayer( layer ).newPipeline( usecase, dsd, null );
-                            }
-                        }, null, null );
-                    }
-                    catch (Exception e) {
-                        throw new RuntimeException( e );
-                    }
-                });
+//                httpService.ifPresent( service -> {
+//                    // fake/test GeoServer
+//                    UnitOfWork uow = ProjectRepository.instance.get().newUnitOfWork();
+//                    IMap map = uow.entity( IMap.class, "root" );
+//                    try {
+//                        service.registerServlet( "/wms", new GeoServerServlet() {
+//                            @Override
+//                            public IMap getMap() {
+//                                return map;
+//                            }
+//                            @Override
+//                            protected Pipeline createPipeline( ILayer layer, Class<? extends PipelineProcessor> usecase )
+//                                    throws Exception {
+//                                // resolve service
+//                                NullProgressMonitor monitor = new NullProgressMonitor();
+//                                DataSourceDescription dsd = LocalResolver.instance()
+//                                        .connectLayer( layer, monitor )
+//                                        .orElseThrow( () -> new RuntimeException( "No data source for layer: " + layer ) );
+//                                
+//                                // create pipeline for it
+//                                return P4PipelineIncubator.forLayer( layer ).newPipeline( usecase, dsd, null );
+//                            }
+//                        }, null, null );
+//                    }
+//                    catch (Exception e) {
+//                        throw new RuntimeException( e );
+//                    }
+//                });
 
                 return httpService.get();
             }
