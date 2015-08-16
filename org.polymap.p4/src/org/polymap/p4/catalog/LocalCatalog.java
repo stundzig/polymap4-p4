@@ -21,7 +21,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.polymap.core.CorePlugin;
 import org.polymap.core.catalog.local.LocalMetadataCatalog;
-import org.polymap.core.data.shapefile.catalog.ShapefileServiceResolver;
 import org.polymap.core.data.wms.catalog.WmsServiceResolver;
 
 import org.polymap.model2.store.recordstore.RecordStoreAdapter;
@@ -61,11 +60,11 @@ public class LocalCatalog
                     metadata.setDescription( "Standardeintrag" );
                     metadata.setConnectionParams( WmsServiceResolver.createParams( "http://www.mittelsachsen-atlas.de/polymap-atlas/services/INSPIRE/Schutzgebiete" ) );
                 });
-                update.newEntry( metadata -> {
-                    metadata.setTitle( "Allgemeinmediziner" );
-                    metadata.setDescription( "Aus Daten des Mittelsachsen-Atlas" );
-                    metadata.setConnectionParams( ShapefileServiceResolver.createParams( "file:///home/falko/Data/lka/allgemeinmediziner.shp" ) );
-                });
+//                update.newEntry( metadata -> {
+//                    metadata.setTitle( "Allgemeinmediziner" );
+//                    metadata.setDescription( "Aus Daten des Mittelsachsen-Atlas" );
+//                    metadata.setConnectionParams( ShapefileServiceResolver.createParams( "file:///home/falko/Data/lka/allgemeinmediziner.shp" ) );
+//                });
                 update.commit();
             }
         }

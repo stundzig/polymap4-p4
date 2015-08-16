@@ -78,7 +78,7 @@ public class NewLayerContribution
                 .label.put( res.get().getName() )
                 .resourceIdentifier.put( resId );
 
-        OperationSupport.instance().execute( op, true, false, ev2 -> UIThreadExecutor.async( () -> {
+        OperationSupport.instance().execute2( op, true, false, ev2 -> UIThreadExecutor.asyncFast( () -> {
             if (ev2.getResult().isOK()) {
                 PanelPath panelPath = site.getPanel().getSite().getPath();
                 site.getContext().closePanel( panelPath.removeLast( 1 /*2*/ ) );
