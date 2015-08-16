@@ -42,7 +42,7 @@ import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import org.polymap.p4.P4Plugin;
-import org.polymap.p4.project.ProjectPanel;
+import org.polymap.p4.map.ProjectMapPanel;
 
 /**
  * 
@@ -65,7 +65,7 @@ public class CatalogPanel
     @Override
     public boolean wantsToBeShown() {
         return parentPanel()
-                .filter( parent -> parent instanceof ProjectPanel )
+                .filter( parent -> parent instanceof ProjectMapPanel )
                 .map( parent -> {
                     getSite().setTitle( "Catalog" );
                     getSite().setPreferredWidth( 350 );

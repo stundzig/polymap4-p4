@@ -111,7 +111,7 @@ public class ResourceInfoPanel
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
         dashboard.addDashlet( new BasicInfoDashlet() );
         dashboard.addDashlet( new MetadataDashlet() );
-//        dashboard.addDashlet( new MapDashlet() );
+        dashboard.addDashlet( new MapDashlet() );
         dashboard.createContents( parent );
 
         ContributionManager.instance().contributeFab( this );
@@ -141,7 +141,7 @@ public class ResourceInfoPanel
                 protected void runWithException( IProgressMonitor monitor ) throws Exception {
                     Object service = res.get().getServiceInfo().createService( monitor );
                     UIThreadExecutor.async( 
-                            () -> { createMap( parent, service); return null; }, 
+                            () -> { createMap( parent, service ); return null; }, 
                             UIThreadExecutor.logErrorMsg( "Unable to create map." ) );
                 }
             }.schedule();
@@ -210,7 +210,7 @@ public class ResourceInfoPanel
             vectorSource.addFeature( feature );
 
             mapViewer.maxExtent.set( bounds );
-            mapViewer.setInput( new Object[] {/*background, data,*/ background, vectorLayer, data} );
+            mapViewer.setInput( new Object[] {/*background,*/ vectorLayer, data} );
 
             // funktioniert einmal; danach sind keine weiteren karten zu sehen
 //            mapViewer.zoomTo( bounds );

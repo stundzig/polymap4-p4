@@ -20,12 +20,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.polymap.core.project.IMap;
+
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.DefaultContribution;
 import org.polymap.rhei.batik.contribution.IContributionSite;
 
-import org.polymap.p4.project.ProjectPanel;
+import org.polymap.p4.map.ProjectMapPanel;
 
 /**
  * 
@@ -42,7 +43,7 @@ public class TestProjectContribution
     
     
     public TestProjectContribution() {
-        super( panelType( ProjectPanel.class ), Place.Toolbar, Place.FAB );
+        super( panelType( ProjectMapPanel.class ), Place.Toolbar, Place.FAB );
     }
 
     

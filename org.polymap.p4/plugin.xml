@@ -35,7 +35,7 @@
    <extension
          point="org.polymap.rhei.batik.panels">
       <panel
-            class="org.polymap.p4.project.ProjectPanel"
+            class="org.polymap.p4.map.ProjectMapPanel"
             id="org.polymap.batikapp.ProjectPanel">
       </panel>
       <panel

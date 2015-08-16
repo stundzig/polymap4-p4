@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.project;
+package org.polymap.p4.map;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,13 +35,13 @@ import org.polymap.core.runtime.UIJob;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
+import org.polymap.rap.openlayers.layer.ImageLayer;
 import org.polymap.rap.openlayers.layer.Layer;
-import org.polymap.rap.openlayers.layer.TileLayer;
-import org.polymap.rap.openlayers.source.TileWMSSource;
+import org.polymap.rap.openlayers.source.ImageWMSSource;
 import org.polymap.rap.openlayers.source.WMSRequestParams;
 
 /**
- * Builds OpenLayers layer objects for the {@link MapViewer} of the {@link ProjectPanel}
+ * Builds OpenLayers layer objects for the {@link MapViewer} of the {@link ProjectMapPanel}
  * out of {@link ILayer} instances.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
@@ -93,6 +93,7 @@ public class ProjectLayerProvider
                 // create pipeline for it
                 Pipeline pipeline = P4PipelineIncubator.forLayer( layer )
                         .newPipeline( EncodedImageProducer.class, dsd, null );
+                assert pipeline != null && pipeline.length() > 0 : "Unable to build pipeline for: " + dsd;
                 emptyRef.set( pipeline );
             }
         }.schedule();
@@ -106,14 +107,23 @@ public class ProjectLayerProvider
         // start creating pipeline
         String layerName = createPipeline( elm );
         
-        // make OpenLayers layer
-        return new TileLayer()
-                 .source.put( new TileWMSSource()
+        // make OpenLayers single-tile layer
+        return new ImageLayer()
+                 .source.put( new ImageWMSSource()
                          .url.put( ".." + alias )
                          .params.put( new WMSRequestParams()
                                  .version.put( "1.1.1" )  // send "SRS" param
                                  .layers.put( layerName )
-                                 .format.put( "image/jpeg" ) ) );
+                                 .format.put( "image/png" ) ) );
+        
+//        // make OpenLayers tiled layer
+//        return new TileLayer()
+//                 .source.put( new TileWMSSource()
+//                         .url.put( ".." + alias )
+//                         .params.put( new WMSRequestParams()
+//                                 .version.put( "1.1.1" )  // send "SRS" param
+//                                 .layers.put( layerName )
+//                                 .format.put( "image/png" ) ) );
     }
 
     

@@ -41,7 +41,7 @@ import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 
-import org.polymap.p4.project.ProjectPanel;
+import org.polymap.p4.map.ProjectMapPanel;
 import org.polymap.rap.updownload.upload.IUploadHandler;
 import org.polymap.rap.updownload.upload.Upload;
 import org.polymap.rap.updownload.upload.UploadService;
@@ -64,7 +64,7 @@ public class ImportPanel
     
     @Override
     public boolean wantsToBeShown() {
-        if (parentPanel().isPresent() && parentPanel().get() instanceof ProjectPanel) {
+        if (parentPanel().isPresent() && parentPanel().get() instanceof ProjectMapPanel) {
             getSite().setTitle( "Import" );
             getSite().setPreferredWidth( 300 );
             return true;

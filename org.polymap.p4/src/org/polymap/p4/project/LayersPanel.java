@@ -50,6 +50,7 @@ import org.polymap.rhei.batik.tx.TxProvider.Propagation;
 
 import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.map.ProjectMapPanel;
 
 /**
  * 
@@ -79,14 +80,14 @@ public class LayersPanel
     
     private MdListViewer                viewer;
     
-    /** The {@link MapViewer} of the parent panel ({@link ProjectPanel}). */
+    /** The {@link MapViewer} of the parent panel ({@link ProjectMapPanel}). */
     private MapViewer<ILayer>           mapViewer;
 
     
     @Override
     public boolean wantsToBeShown() {
         return parentPanel()
-                .filter( parent -> parent instanceof ProjectPanel )
+                .filter( parent -> parent instanceof ProjectMapPanel )
                 .map( parent -> {
                     getSite().setTitle( "Layers" );
                     getSite().setPreferredWidth( 200 );
@@ -102,7 +103,7 @@ public class LayersPanel
         getSite().setPreferredWidth( 200 );
 
         uow = uowProvider.get().newTx( this ).start( Propagation.MANDATORY );
-        mapViewer = ((ProjectPanel)parentPanel().get()).mapViewer;
+        mapViewer = ((ProjectMapPanel)parentPanel().get()).mapViewer;
     }
 
 

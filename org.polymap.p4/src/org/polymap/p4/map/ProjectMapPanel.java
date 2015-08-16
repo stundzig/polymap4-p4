@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.project;
+package org.polymap.p4.map;
 
 import java.util.List;
 
@@ -40,6 +40,7 @@ import org.polymap.core.ui.StatusDispatcher;
 import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
+import org.polymap.rhei.batik.Memento;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.ContributionManager;
@@ -50,16 +51,19 @@ import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4AppDesign;
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.project.ProjectUowProvider;
+import org.polymap.rap.openlayers.control.MousePositionControl;
+import org.polymap.rap.openlayers.control.ScaleLineControl;
 
 /**
  * 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class ProjectPanel
+public class ProjectMapPanel
         extends DefaultPanel {
 
-    private static Log log = LogFactory.getLog( ProjectPanel.class );
+    private static Log log = LogFactory.getLog( ProjectMapPanel.class );
 
     public static final PanelIdentifier ID = PanelIdentifier.parse( "start" );
     
@@ -73,7 +77,7 @@ public class ProjectPanel
     @Scope(P4Plugin.Scope)
     protected Context<IMap>             map;
 
-    protected MapViewer<ILayer>         mapViewer;
+    public MapViewer<ILayer>            mapViewer;
     
     
     @Override
@@ -92,6 +96,19 @@ public class ProjectPanel
     }
 
     
+    @Override
+    public void dispose() {
+        if (mapViewer != null) {
+            Memento memento = getSite().getMemento();
+            Memento visibleLayers = memento.getOrCreateChild( "visibleLayers" );
+
+            for (ILayer l : mapViewer.getLayers()) {
+                visibleLayers.putBoolean( (String)l.id(), mapViewer.isVisible( l ) );
+            }
+        }
+    }
+
+
     @EventHandler(delay=100,display=true)
     protected void onEntityChange( List<PropertyChangeEvent> evs ) {
         log.info( "evs: " + evs.size() );
@@ -121,7 +138,18 @@ public class ProjectPanel
             CoordinateReferenceSystem epsg3857 = Geometries.crs( "EPSG:3857" );
             mapViewer.maxExtent.set( new ReferencedEnvelope( 1380000, 1390000, 6680000, 6690000, epsg3857 ) );
             
+            mapViewer.addMapControl( new MousePositionControl() );
+            mapViewer.addMapControl( new ScaleLineControl() );
+            
             mapViewer.setInput( map.get() );
+            
+            // restore state
+            Memento memento = getSite().getMemento();
+            Memento visibleLayers = memento.getChild( "visibleLayers" );
+            
+            for (ILayer l : mapViewer.getLayers()) {
+                mapViewer.setVisible( l, visibleLayers.optBoolean( (String)l.id() ).orElse( true ) );
+            }
         }
         catch (Exception e) {
             throw new RuntimeException( e );

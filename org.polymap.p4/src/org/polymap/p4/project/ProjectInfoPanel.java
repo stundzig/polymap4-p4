@@ -33,6 +33,7 @@ import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.map.ProjectMapPanel;
 
 /**
  * 
@@ -57,7 +58,7 @@ public class ProjectInfoPanel
     @Override
     public boolean wantsToBeShown() {
         return parentPanel()
-                .filter( parent -> parent instanceof ProjectPanel )
+                .filter( parent -> parent instanceof ProjectMapPanel )
                 .map( parent -> {
                     getSite().setTitle( "Settings" );
                     getSite().setPreferredWidth( 200 );
