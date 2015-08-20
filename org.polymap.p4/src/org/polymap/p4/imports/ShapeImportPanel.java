@@ -20,13 +20,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import java.io.File;
 import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -38,29 +36,26 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
-
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.client.service.ClientFileUploader;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
-
+import org.eclipse.rap.rwt.internal.serverpush.ServerPushManager;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.StatusDispatcher;
-
+import org.polymap.core.ui.UIUtils;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.toolkit.md.ListTreeContentProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
-
 import org.polymap.p4.Messages;
 import org.polymap.p4.map.ProjectMapPanel;
 import org.polymap.rap.updownload.upload.IUploadHandler;
@@ -87,6 +82,8 @@ public class ShapeImportPanel
     private MdListViewer                fileList;
 
     private MdToolkit                   tk;
+
+    private Button fab;
     
     
     @Override
@@ -110,7 +107,7 @@ public class ShapeImportPanel
         FormDataFactory.on( dropLabel ).fill().noBottom().height( dp( 100 ).pix() );
                 
         // upload field
-        Upload upload = new Upload( parent, SWT.NONE );
+        Upload upload = new Upload( parent, SWT.NONE/*, Upload.SHOW_PROGRESS*/ );
         FormDataFactory.on( upload ).noBottom().top( 0, dp( 40 ).pix() ).width( dp( 200 ).pix() );
         upload.setHandler( ShapeImportPanel.this );
         upload.moveAbove( dropLabel );
@@ -149,6 +146,10 @@ public class ShapeImportPanel
         });
         fileList.setInput( files );
         FormDataFactory.on( fileList.getControl() ).fill().top( dropLabel );
+
+        fab = tk.createFab();
+        fab.setToolTipText( "Import this uploaded Shapefile" );
+        fab.setVisible( false );
     }
 
     
@@ -167,15 +168,15 @@ public class ShapeImportPanel
         fileList.refresh();
         Optional<File> shp = files.stream().filter( f -> f.getName().toLowerCase().endsWith( ".shp" ) ).findAny();
         if (shp.isPresent()) {
-            Button fab = tk.createFab();
-            fab.setToolTipText( "Import this uploaded Shapefile" );
             fab.addSelectionListener( new SelectionAdapter() {
                 @Override
                 public void widgetSelected( SelectionEvent ev ) {
                     importFiles( shp.get() );
                 }
             } );
+            fab.setVisible( true );
         }
+        UIUtils.deactivateCallback( "upload" );
     }
 
 
