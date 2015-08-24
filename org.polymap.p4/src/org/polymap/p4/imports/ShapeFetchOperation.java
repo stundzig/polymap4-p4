@@ -15,78 +15,52 @@
 package org.polymap.p4.imports;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.polymap.core.catalog.IUpdateableMetadataCatalog.Updater;
-import org.polymap.core.data.shapefile.catalog.ShapefileServiceResolver;
-import org.polymap.core.runtime.Streams;
-import org.polymap.core.runtime.Streams.ExceptionCollector;
-import org.polymap.core.runtime.config.Config2;
 import org.polymap.core.runtime.config.ConfigurationFactory;
-import org.polymap.core.runtime.config.Mandatory;
-import org.polymap.p4.P4Plugin;
 
 /**
  * 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class ShapeImportOperation
+public class ShapeFetchOperation
         extends AbstractFileDataAwareOperation
         implements IUndoableOperation {
 
-    private static Log log = LogFactory.getLog( ShapeImportOperation.class );
+    private List<File> files = new ArrayList<File>();
 
-    @Mandatory
-    public Config2<ShapeImportOperation,File>   shpFile;
-    
-    
-    public ShapeImportOperation() {
-        super( "Shapefile import" );
+    public ShapeFetchOperation() {
+        super( "Shapefile fetch" );
         ConfigurationFactory.inject( this );
     }
 
 
     @Override
     public IStatus execute( IProgressMonitor monitor, IAdaptable info ) throws ExecutionException {
-        String shpBasename = FilenameUtils.getBaseName( shpFile.get().getAbsolutePath() );
-        
-        try (
-            ExceptionCollector excs = Streams.exceptions();
-            Updater update = P4Plugin.instance().localCatalog.prepareUpdate();
-        ){
-            // filter basename, copy files to dataDir
-            Arrays.stream( shpFile.get().getParentFile().listFiles() )
-                    .filter( f -> f.getName().startsWith( shpBasename ) )
-                    .forEach( f -> excs.check( () -> {
-                        FileUtils.moveFileToDirectory( f, getDataDir(), true );
-                        return null;
-                    }));
-            
-            // createcatalog entry
-            String shpFileURL = new File( getDataDir(), shpFile.get().getName() ).toURI().toURL().toString();
-            update.newEntry( metadata -> {
-                metadata.setTitle( shpFile.get().getName() );
-                metadata.setConnectionParams( ShapefileServiceResolver.createParams( shpFileURL ) );
-            });
-            update.commit();
+        try {
+            files = Arrays.asList(getDataDir().listFiles());
             return Status.OK_STATUS;
         }
         catch (Exception e) {
             throw new ExecutionException( e.getMessage(), e );
         }
     }
-
+    
+    /**
+     * @return the fileNames
+     */
+    public List<File> getFiles() {
+        return files;
+    }
 
     @Override
     public IStatus redo( IProgressMonitor monitor, IAdaptable info ) throws ExecutionException {
