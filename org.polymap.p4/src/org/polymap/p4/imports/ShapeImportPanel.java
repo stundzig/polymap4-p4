@@ -54,6 +54,7 @@ import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.StatusDispatcher;
 import org.polymap.core.ui.UIUtils;
 import org.polymap.p4.Messages;
+import org.polymap.p4.catalog.CatalogPanel;
 import org.polymap.p4.map.ProjectMapPanel;
 import org.polymap.rap.updownload.upload.IUploadHandler;
 import org.polymap.rap.updownload.upload.Upload;
@@ -262,7 +263,8 @@ public class ShapeImportPanel
         OperationSupport.instance().execute2( op, true, false, ev -> UIThreadExecutor.asyncFast( ( ) -> {
             if (ev.getResult().isOK()) {
                 PanelPath panelPath = getSite().getPath();
-                getContext().closePanel( panelPath.removeLast( 1 /* 2 */) );
+                getContext().closePanel( panelPath/*.removeLast( 1 )*/ );
+                getContext().openPanel( getSite().getPath(), CatalogPanel.ID );
             }
             else {
                 StatusDispatcher.handleError( file, "Unable to import file.", ev.getResult().getException() );

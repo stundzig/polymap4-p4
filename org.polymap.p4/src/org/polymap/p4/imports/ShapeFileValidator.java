@@ -20,11 +20,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.polymap.core.catalog.MetadataQuery;
 import org.polymap.core.ui.StatusDispatcher;
+import org.polymap.p4.P4Plugin;
 
 import com.google.common.base.Joiner;
 
@@ -43,12 +46,52 @@ public class ShapeFileValidator {
 
     public boolean validateAll( Map<String,Map<String,List<File>>> files ) {
         boolean valid = true;
-        for (Map<String,List<File>> entry : files.values()) {
-            valid &= validate( entry );
+        Set<String> names = files.values().stream().flatMap( map -> map.keySet().stream() )
+                .collect( Collectors.toSet() );
+        valid &= validateNonExistingCatalogEntries( names );
+        if (valid) {
+            valid &= validateDuplicates( files );
+            if (valid) {
+                for (Map<String,List<File>> entry : files.values()) {
+                    valid &= validate( entry );
+                }
+            }
         }
-        valid &= validateDuplicates( files );
         return valid;
     }
+
+
+    /**
+     * @param keySet
+     * @return
+     */
+    private boolean validateNonExistingCatalogEntries( Set<String> names ) {
+        Function<String,Boolean> predicate = (String title) -> names.contains( title );
+        return validateNonExistingCatalogEntry( predicate );
+    }
+
+
+    private boolean validateNonExistingCatalogEntry( String name ) {
+        Function<String,Boolean> predicate = (String title) -> name.equals( title );
+        return validateNonExistingCatalogEntry( predicate );
+    }
+    
+    private boolean validateNonExistingCatalogEntry( Function<String,Boolean> predicate ) {
+        MetadataQuery entries = P4Plugin.instance().localCatalog.query( "" );
+        return entries
+                .execute()
+                .stream()
+                .noneMatch(
+                        e -> {
+                            String title = e.getTitle().replace( ".shp", "" );
+                            boolean contains = predicate.apply( title );
+                            if (contains) {
+                                StatusDispatcher.handleError( title, e.getTitle()
+                                        + " is already imported as catalog entry.", null );
+                            }
+                            return contains;
+                        } );
+    }    
 
 
     /**
@@ -114,9 +157,16 @@ public class ShapeFileValidator {
         boolean valid = hasValidRootFileExtension( root );
         if (valid) {
             String rootFileName = root.getName().replace( FilenameUtils.getExtension( root.getName() ), "" );
-            valid &= containsShpFile( rootFileName, files );
-            valid &= containsAllOptionalFiles( rootFileName, files );
-            valid &= containsAllRequiredFiles( rootFileName, files );
+            valid &= validateNonExistingCatalogEntry( rootFileName );
+            if (valid) {
+                valid &= containsShpFile( rootFileName, files );
+                if (valid) {
+                    valid &= containsAllOptionalFiles( rootFileName, files );
+                }
+                if (valid) {
+                    valid &= containsAllRequiredFiles( rootFileName, files );
+                }
+            }
         }
         return valid;
     }
@@ -124,12 +174,21 @@ public class ShapeFileValidator {
 
     public boolean validate( String root, List<File> files ) {
         boolean valid = true;
-        for (File file : files) {
-            valid &= validate( file );
+        valid &= validateNonExistingCatalogEntry( root );
+        if (valid) {
+            for (File file : files) {
+                valid &= validate( file );
+            }
+            if (valid) {
+                valid &= containsShpFile( root, files );
+                if (valid) {
+                    valid &= containsAllRequiredFiles( root, files );
+                }
+                if (valid) {
+                    valid &= containsAllOptionalFiles( root, files );
+                }
+            }
         }
-        valid &= containsShpFile( root, files );
-        valid &= containsAllRequiredFiles( root, files );
-        valid &= containsAllOptionalFiles( root, files );
         return valid;
     }
 

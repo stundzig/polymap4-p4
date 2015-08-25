@@ -14,22 +14,25 @@
  */
 package org.polymap.p4.catalog;
 
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.geotools.data.wms.WebMapServer;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.geometry.jts.ReferencedEnvelope;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-
+import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.data.store.ContentFeatureCollection;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.data.wms.WebMapServer;
+import org.geotools.geojson.feature.FeatureJSON;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.feature.simple.SimpleFeature;
 import org.polymap.core.catalog.IMetadata;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.data.util.Geometries;
@@ -39,19 +42,6 @@ import org.polymap.core.mapeditor.OlLayerProvider;
 import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.UIJob;
 import org.polymap.core.runtime.UIThreadExecutor;
-
-import org.polymap.rhei.batik.Context;
-import org.polymap.rhei.batik.DefaultPanel;
-import org.polymap.rhei.batik.PanelIdentifier;
-import org.polymap.rhei.batik.Scope;
-import org.polymap.rhei.batik.contribution.ContributionManager;
-import org.polymap.rhei.batik.dashboard.Dashboard;
-import org.polymap.rhei.batik.dashboard.DashletSite;
-import org.polymap.rhei.batik.dashboard.DefaultDashlet;
-import org.polymap.rhei.batik.toolkit.MinHeightConstraint;
-import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
-import org.polymap.rhei.batik.toolkit.PriorityConstraint;
-
 import org.polymap.p4.P4Plugin;
 import org.polymap.rap.openlayers.base.OlFeature;
 import org.polymap.rap.openlayers.control.MousePositionControl;
@@ -73,6 +63,22 @@ import org.polymap.rap.openlayers.style.Style;
 import org.polymap.rap.openlayers.types.Attribution;
 import org.polymap.rap.openlayers.types.Color;
 import org.polymap.rap.openlayers.types.Coordinate;
+import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.DefaultPanel;
+import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.Scope;
+import org.polymap.rhei.batik.contribution.ContributionManager;
+import org.polymap.rhei.batik.dashboard.Dashboard;
+import org.polymap.rhei.batik.dashboard.DashletSite;
+import org.polymap.rhei.batik.dashboard.DefaultDashlet;
+import org.polymap.rhei.batik.toolkit.MinHeightConstraint;
+import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
+import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+
+import com.google.common.base.Joiner;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * 
@@ -185,6 +191,48 @@ public class ResourceInfoPanel
                         .filter( l -> layerName.equals( l.getName() ) )
                         .findFirst().get();
                 bounds = wms.getInfo( layer ).getBounds().transform( Geometries.crs( "EPSG:3857" ), false );
+            }
+            else if (service instanceof ShapefileDataStore) {
+                // TODO: this is just a dummy implementation
+                ShapefileDataStore sfds = (ShapefileDataStore)service;
+                ContentFeatureSource featureSource = sfds.getFeatureSource();
+                
+                ContentFeatureCollection features = featureSource.getFeatures();
+
+                VectorSource vectorSource = new VectorSource()
+                    .format.put( new GeoJSONFormat() )
+                    .attributions.put( Arrays.asList( new Attribution( Joiner.on( ", " ).join( sfds.getNames() ) ) ) );
+
+                
+
+                SimpleFeatureIterator featureIterator = features.features();
+                while(featureIterator.hasNext()) {
+                    SimpleFeature simpleFeature = featureIterator.next();
+                    if(simpleFeature.getDefaultGeometry() instanceof Geometry) {
+                        Geometry geometry = (Geometry) simpleFeature.getDefaultGeometry();
+                        List<Coordinate> coords = Arrays.asList(geometry.getCoordinates()).stream().map(  c -> new Coordinate( c.x, c.y ) )
+                                .collect( Collectors.toList() );
+                        OlFeature feature = new OlFeature();
+                        feature.name.set( featureSource.getName().toString() );
+                        feature.geometry.set( new PolygonGeometry( coords ) );
+                        vectorSource.addFeature( feature );
+                    }
+                }
+                
+                //org.json.simple.parser.ContentHandler cannot be found by org.polymap.core.data_4.0.0.qualifier
+//              FeatureJSON fjson = new FeatureJSON();
+//              StringWriter writer = new StringWriter();
+//                fjson.writeFeature(features.features().next(), writer);
+//                String json = writer.toString();
+                
+                data = new VectorLayer()
+                        .style.put( new Style()
+                        .fill.put( new FillStyle().color.put( new Color( 0, 0, 255, 0.1f ) ) )
+                        .stroke.put( new StrokeStyle().color.put( new Color( "red" ) ).width.put( 1f ) ) )
+                        .source.put( vectorSource );
+
+                bounds = featureSource.getBounds().transform( Geometries.crs( "EPSG:3857" ), false );;
+                
             }
             else {
                 throw new RuntimeException( "Unhandled service type: " + service );

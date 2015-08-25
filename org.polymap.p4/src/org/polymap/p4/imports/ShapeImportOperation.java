@@ -69,7 +69,9 @@ public class ShapeImportOperation
             Arrays.stream( shpFile.get().getParentFile().listFiles() )
                     .filter( f -> f.getName().startsWith( shpBasename ) )
                     .forEach( f -> excs.check( () -> {
-                        FileUtils.moveFileToDirectory( f, getDataDir(), true );
+                        if(!getDataDir().getAbsolutePath().equals(f.getParentFile().getAbsolutePath())) {
+                            FileUtils.moveFileToDirectory( f, getDataDir(), true );
+                        }
                         return null;
                     }));
             

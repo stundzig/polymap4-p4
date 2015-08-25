@@ -64,7 +64,6 @@ public class MessageCellLabelProvider
                         if (!status.isOK()) {
                             ViewerRow row = cell.getViewerRow();
                             if(row != null) {
-                                cell.setText( getIndentation() + status.getMessage() );
                                 int color = SWT.COLOR_BLACK;
                                 if (status.getSeverity() == IStatus.ERROR) {
                                     color = SWT.COLOR_RED;
@@ -73,6 +72,7 @@ public class MessageCellLabelProvider
                                     color = SWT.COLOR_DARK_YELLOW;
                                 }
                                 cell.setForeground( Display.getCurrent().getSystemColor( color ) );
+                                cell.setText( getIndentation() + status.getMessage() );
                             }
                         }
                     }
@@ -81,6 +81,7 @@ public class MessageCellLabelProvider
                 adapters.put( cell, adapter );
             }
             if (adapter != null) {
+                cell.setText("");
                 new ShapeFileValidator().validate( files, cell.getElement() );
             }
         }
@@ -98,7 +99,7 @@ public class MessageCellLabelProvider
             File srcFile = (File)src;
             return elementFile.getName().equals( srcFile.getName() );
         }
-        return element == src;
+        return element.equals( src);
     }
 
     /*
