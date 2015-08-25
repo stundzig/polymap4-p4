@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
@@ -32,6 +31,9 @@ import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.client.service.ClientFileUploader;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
+import org.eclipse.rap.rwt.template.Cell;
+import org.eclipse.rap.rwt.template.Template;
+import org.eclipse.rap.rwt.template.TextCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -42,6 +44,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
@@ -140,6 +143,7 @@ public class ShapeImportPanel
 
         //
         fileList = tk.createListViewer( parent );
+        
         fileList.setContentProvider( new ShapeImportTreeContentProvider( files ) );
         fileList.firstLineLabelProvider.set( new ShapeImportCellLabelProvider() );
         fileList.secondLineLabelProvider.set( new MessageCellLabelProvider( files ) );
@@ -212,6 +216,7 @@ public class ShapeImportPanel
     public void updateListAndFAB() {
         fileList.refresh();
         fileList.expandAll();
+        
         boolean valid = new ShapeFileValidator().validateAll( files );
         if (valid) {
             List<?> shps = files

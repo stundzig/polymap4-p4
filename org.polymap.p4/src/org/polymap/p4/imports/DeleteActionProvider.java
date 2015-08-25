@@ -19,9 +19,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.rap.rwt.RWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.TreeItem;
+import org.polymap.core.data.DataPlugin;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.ui.StatusDispatcher;
+import org.polymap.p4.P4Plugin;
 import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 
@@ -37,9 +42,13 @@ public class DeleteActionProvider
      */
     private static final long serialVersionUID = 5968111183538777162L;
 
+    private static final String CSS_DELETE = "deleteCell";
+
     private Map<String,Map<String,List<File>>> files;
     
     private UpdatableList updatableList;
+    
+    private Image image = P4Plugin.imageDescriptorFromPlugin( DataPlugin.PLUGIN_ID, "icons/etool16/delete.gif" ).createImage();
 
 
     /**
@@ -55,7 +64,8 @@ public class DeleteActionProvider
     public void update( ViewerCell cell ) {
         Object elem = cell.getElement();
         if (elem instanceof File) {
-            cell.setText( "Delete" );
+            cell.setImage( image );
+//            ((TreeItem) cell.getItem()).setData( RWT.CUSTOM_VARIANT, CSS_DELETE );
         }
     }
 
