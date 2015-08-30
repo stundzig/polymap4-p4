@@ -164,6 +164,7 @@ public class ResourceInfoPanel
             mapViewer.addMapControl( new ScaleLineControl() );
             
             // OSM layer
+            @SuppressWarnings("unused")
             Layer<TileSource> background = new TileLayer()
                      .source.put( new TileWMSSource()
                              .url.put( "http://ows.terrestris.de/osm/service/" )
