@@ -18,14 +18,18 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.polymap.core.catalog.MetadataQuery;
 import org.polymap.core.runtime.config.ConfigurationFactory;
+import org.polymap.p4.P4Plugin;
 
 /**
  * 
@@ -48,6 +52,9 @@ public class ShapeFetchOperation
     public IStatus execute( IProgressMonitor monitor, IAdaptable info ) throws ExecutionException {
         try {
             files = Arrays.asList(getDataDir().listFiles());
+            MetadataQuery entries = P4Plugin.instance().localCatalog.query( "" );
+            List<String> fileNames =  entries.execute().stream().map( e -> e.getTitle().replace( ".shp", "" )).collect( Collectors.toList() );
+            files = files.stream().filter( file -> !fileNames.contains( FilenameUtils.getBaseName( file.getName() ))).collect( Collectors.toList() );
             return Status.OK_STATUS;
         }
         catch (Exception e) {

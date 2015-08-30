@@ -15,7 +15,6 @@
 package org.polymap.p4.imports;
 
 import java.io.File;
-import java.util.Map;
 
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerRow;
@@ -39,9 +38,6 @@ public class ShapeImportCellLabelProvider extends AbstractShapeImportCellLabelPr
             ViewerRow row = cell.getViewerRow();
             ((TreeItem) row.getItem()).setData( RWT.CUSTOM_VARIANT, CSS_FIRST_ROW );
             cell.setText( getIndentation() + (String)elem );
-        }
-        else if (elem instanceof Map.Entry<?,?>) {
-            cell.setText( getIndentation() + ((Map.Entry<?,?>)elem).getKey() );
         }
         else if (elem instanceof File) {
             cell.setText( getIndentation() + ((File)elem).getName() );

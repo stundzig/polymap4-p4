@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,13 +28,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.client.service.ClientFileUploader;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
-import org.eclipse.rap.rwt.template.Cell;
-import org.eclipse.rap.rwt.template.Template;
-import org.eclipse.rap.rwt.template.TextCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -44,14 +44,12 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
-import org.polymap.core.ui.StatusDispatcher;
 import org.polymap.core.ui.UIUtils;
 import org.polymap.p4.Messages;
 import org.polymap.p4.catalog.CatalogPanel;
@@ -64,6 +62,8 @@ import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
+import org.polymap.rhei.batik.toolkit.md.Snackbar;
+import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
 
 /**
  * 
@@ -88,7 +88,9 @@ public class ShapeImportPanel
 
     private Button                             fab;
 
-    private SelectionAdapter selectionListener;
+    private SelectionAdapter                   selectionListener;
+
+    private Snackbar                           snackBar;
 
 
     @Override
@@ -143,24 +145,44 @@ public class ShapeImportPanel
         fab.setVisible( false );
 
         //
-        fileList = tk.createListViewer( parent );
-        
+        fileList = tk.createListViewer( parent, SWT.VIRTUAL );
+        // would cause exception when later refresh calculates visible rows, as then
+        // height is then in some cases 0
+        // ColumnViewerToolTipSupport.enableFor(fileList);
+
         fileList.setContentProvider( new ShapeImportTreeContentProvider( files ) );
         fileList.firstLineLabelProvider.set( new ShapeImportCellLabelProvider() );
-        fileList.secondLineLabelProvider.set( new MessageCellLabelProvider( files ) );
+        fileList.secondLineLabelProvider.set( new MessageCellLabelProvider(files) );
 
-        fileList.firstSecondaryActionProvider.set( new DeleteActionProvider( files, this ) );
+        fileList.firstSecondaryActionProvider.set( new ShapeFileDeleteActionProvider( files, this ) );
         fileList.setInput( files );
 
         initFileList();
 
+        fileList.addOpenListener( new IOpenListener() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public void open( OpenEvent ev ) {
+                org.polymap.core.ui.SelectionAdapter.on( ev.getSelection() ).forEach( (Object elm) -> {
+                    fileList.toggleItemExpand( elm );
+                } );
+            }
+        } );
+
         FormDataFactory.on( fileList.getControl() ).fill().top( dropTarget.getControl(), 40 );
+
+        snackBar = tk.createFloatingSnackbar( SWT.NONE );
     }
 
 
+    @SuppressWarnings("unchecked")
     private void initFileList() {
         ShapeFetchOperation shapeFetchOperation = new ShapeFetchOperation();
-        OperationSupport.instance().execute2( shapeFetchOperation, true, false,
+        OperationSupport.instance().execute2(
+                shapeFetchOperation,
+                true,
+                false,
                 ev -> UIThreadExecutor.asyncFast( ( ) -> {
                     if (ev.getResult().isOK()) {
                         List<File> fs = shapeFetchOperation.getFiles();
@@ -173,9 +195,13 @@ public class ShapeImportPanel
                         }
                     }
                     else {
-                        StatusDispatcher.handleError( "Couldn't read out data.", ev.getResult().getException() );
+                        snackBar.showIssue( MessageType.ERROR, "Couldn't read out data." );
+                        log.error( "Couldn't read out data.", ev.getResult().getException() );
                     }
-                    UIThreadExecutor.async( ( ) -> updateListAndFAB(), UIThreadExecutor.runtimeException() );
+                    if (!files.isEmpty()) {
+                        UIThreadExecutor.async( ( ) -> updateListAndFAB( files.keySet().iterator().next(), false ),
+                                UIThreadExecutor.runtimeException() );
+                    }
                 } ) );
     }
 
@@ -183,7 +209,10 @@ public class ShapeImportPanel
     private Map<String,List<File>> groupFilesByName( List<File> fs ) {
         Map<String,List<File>> files = new HashMap<String,List<File>>();
         for (File f : fs) {
-            int index = f.getName().lastIndexOf( "." );
+            int index = f.getName().lastIndexOf( ".shp.xml" );
+            if (index == -1) {
+                index = f.getName().lastIndexOf( "." );
+            }
             if (index > 0) {
                 String fName = f.getName().substring( 0, index );
                 List<File> gFs = files.get( fName );
@@ -198,26 +227,41 @@ public class ShapeImportPanel
     }
 
 
+    @SuppressWarnings("unchecked")
     public void uploadStarted( ClientFile clientFile, InputStream in ) throws Exception {
         log.info( clientFile.getName() + " - " + clientFile.getType() + " - " + clientFile.getSize() );
 
-        List<File> read = new FileImporter()/* .overwrite.put( true ) */
-        .run( clientFile.getName(), clientFile.getType(), in );
-        Map<String,List<File>> grouped = groupFilesByName( read );
-        if(!files.containsKey( clientFile.getName() )) {
-            files.put( clientFile.getName(), grouped );
-        } else {
-            files.put( clientFile.getName() + "_duplicated", grouped );
+        try { 
+            List<File> read = new FileImporter().run( clientFile.getName(), clientFile.getType(), in );
+            if (read.isEmpty()) {
+                ShapeFileValidator.reportError( clientFile.getName(), "There are no files contained." );
+            }
+            else {
+                Map<String,List<File>> grouped = groupFilesByName( read );
+                if (!files.containsKey( clientFile.getName() )) {
+                    files.put( clientFile.getName(), grouped );
+                }
+                else {
+                    files.put( clientFile.getName() + "_duplicated", grouped );
+                }
+            }
+            UIThreadExecutor.async( ( ) -> updateListAndFAB( clientFile.getName(), true ), UIThreadExecutor.runtimeException() );
+        } catch(Exception e) {
+            files.put( clientFile.getName(), Collections.EMPTY_MAP );
+            log.error( "Unable to import file.", e );
+            UIThreadExecutor.async( ( ) -> {
+                updateListAndFAB( clientFile.getName(), false );
+                ShapeFileValidator.reportError( clientFile.getName(), "Unable to import file." );
+                snackBar.showIssue( MessageType.ERROR, "Unable to import file." );
+            }, UIThreadExecutor.runtimeException() );
         }
-
-        UIThreadExecutor.async( ( ) -> updateListAndFAB(), UIThreadExecutor.runtimeException() );
     }
 
 
-    public void updateListAndFAB() {
+    public void updateListAndFAB( Object root, boolean fromUpload ) {
         fileList.refresh();
-        fileList.expandAll();
-        
+        fileList.toggleItemExpand( root );
+
         boolean valid = new ShapeFileValidator().validateAll( files );
         if (valid) {
             List<?> shps = files
@@ -232,11 +276,13 @@ public class ShapeImportPanel
                                                     .filter( f -> f.getName().toLowerCase().endsWith( ".shp" ) ) ) )
                     .collect( Collectors.toList() );
             if (shps.size() > 0) {
-                if(selectionListener != null) {
+                if (selectionListener != null) {
                     fab.removeSelectionListener( selectionListener );
                 }
                 selectionListener = new SelectionAdapter() {
+
                     private static final long serialVersionUID = -1075952252353984655L;
+
 
                     @Override
                     public void widgetSelected( SelectionEvent ev ) {
@@ -247,29 +293,43 @@ public class ShapeImportPanel
                         }
                     }
                 };
-                
+
                 fab.addSelectionListener( selectionListener );
                 fab.setVisible( true );
+                if(fromUpload) {
+                    snackBar.showIssue( MessageType.SUCCESS, root + " successfully uploaded." );
+                }
             }
-        } else {
+        }
+        else {
             fab.setVisible( false );
         }
     }
 
 
+    @SuppressWarnings("unchecked")
     protected void importFiles( File file ) {
         ShapeImportOperation op = new ShapeImportOperation().shpFile.put( file );
         // XXX progress?
         OperationSupport.instance().execute2( op, true, false, ev -> UIThreadExecutor.asyncFast( ( ) -> {
             if (ev.getResult().isOK()) {
                 PanelPath panelPath = getSite().getPath();
-                getContext().closePanel( panelPath/*.removeLast( 1 )*/ );
+                getContext().closePanel( panelPath/* .removeLast( 1 ) */);
                 getContext().openPanel( getSite().getPath(), CatalogPanel.ID );
             }
             else {
-                StatusDispatcher.handleError( file, "Unable to import file.", ev.getResult().getException() );
+                ShapeFileValidator.reportError( file, "Unable to import file." );
+                log.error( "Unable to import file.", ev.getResult().getException() );
             }
         } ) );
     }
 
+
+    /* (non-Javadoc)
+     * @see org.polymap.p4.imports.UpdatableList#refresh()
+     */
+    @Override
+    public void refresh() {
+        fileList.refresh();
+    }
 }

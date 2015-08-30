@@ -19,8 +19,6 @@ import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.runtime.IAdaptable;
@@ -45,8 +43,6 @@ public class ShapeImportOperation
         extends AbstractFileDataAwareOperation
         implements IUndoableOperation {
 
-    private static Log log = LogFactory.getLog( ShapeImportOperation.class );
-
     @Mandatory
     public Config2<ShapeImportOperation,File>   shpFile;
     
@@ -62,7 +58,7 @@ public class ShapeImportOperation
         String shpBasename = FilenameUtils.getBaseName( shpFile.get().getAbsolutePath() );
         
         try (
-            ExceptionCollector excs = Streams.exceptions();
+            ExceptionCollector<?> excs = Streams.exceptions();
             Updater update = P4Plugin.instance().localCatalog.prepareUpdate();
         ){
             // filter basename, copy files to dataDir
@@ -109,5 +105,4 @@ public class ShapeImportOperation
     public boolean canRedo() {
         return false;
     }
-
 }

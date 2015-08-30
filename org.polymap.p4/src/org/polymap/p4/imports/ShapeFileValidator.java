@@ -25,24 +25,105 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.core.runtime.IStatus;
 import org.polymap.core.catalog.MetadataQuery;
-import org.polymap.core.ui.StatusDispatcher;
+import org.polymap.core.runtime.event.EventManager;
+import org.polymap.core.runtime.event.ValidationEvent;
 import org.polymap.p4.P4Plugin;
 
 import com.google.common.base.Joiner;
 
 /**
+ * <p>
+ * validations:
+ * <ul>
+ *   <li>global
+ *     <ul>
+ *       <li><b>error:</b> duplicate among uploaded file groups</li>
+ *     </ul>
+ *   </li>    
+ *   <li>per common name = group
+ *     <ul>
+ *       <li><b>error:</b> group with that name has been already imported as catalog entry</li>
+ *       <li><b>error:</b> group is empty (either archive is empty or cannot be read)</li>
+ *       <li><b>error:</b> invalid file type for an archive: .zip, .tar, .gz, .gzip</li>
+ *       <li><b>error:</b> missing required file types: [name].dbf, [name].shp, [name].shx</li>
+ *       <li><b>warning:</b> missing optional file types: [name].atx, [name].aih, [name].cpg, [name].prj, [name].qix, [name].sbx, [name].shp.xml</li>
+ *     </ul>
+ *   </li>
+ *   <li>per file
+ *     <ul>
+ *       <li><b>error:</b> invalid file type as not in [name].dbf, [name].shp, [name].shx, [name].atx, [name].aih, [name].cpg, [name].prj, [name].qix, [name].sbx, [name].shp.xml</li>
+ *       <li>(<b>error:</b> file is corrupt / cannot be parsed, only be detectable when importing)</li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ * </p>
+ * <p>
+ * re-validation:
+ * <ul>
+ *   <li>upload
+ *     <ul>
+ *       <li>group(s) resp. archive file
+ *         <ul>
+ *           <li>retrigger group validation for each new group</li>
+ *           <li>retrigger duplicate validation</li>
+ *         </ul>
+ *       </li>
+ *       <li>single file (of existing group)
+ *         <ul>
+ *           <li>duplicate file will be replaced?<li>
+ *           <li>retrigger file type validation</li>
+ *           <li>retrigger all required file type validation for containing group</li>
+ *           <li>retrigger all optional file type validation for containing group</li>
+ *         </ul>
+ *       </li>
+ *   </li>
+ *   <li>delete
+ *     <ul>
+ *       <li>deletion of group resp. deletion of last file of group
+ *         <ul>
+ *           <li>retrigger duplicate validation</li>
+ *           <li>vanish validation issue for existing catalog entry</li>
+ *           <li>vanish all validation issues for removed files</li>
+ *         </ul>
+ *       </li>
+ *       <li>deletion of file
+ *         <ul>
+ *           <li>vanish all validation issues for removed file</li>
+ *         </ul>
+ *       </li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ * </p>
+ * <p>
+ * 2nd line update:
+ * <ul>
+ *   <li>upload
+ *   </li>
+ *   <li>delete
+ *   </li>
+ *   <li>expand tree node
+ *   </li>
+ *   <li>collapse tree node
+ *   </li>
+ * </ul>
+ * </p>
+ * 
  * @author Joerg Reichert <joerg@mapzone.io>
  *
  */
 public class ShapeFileValidator {
 
-    private static String[] VALID_ARCHIV_FILE_EXTS         = { "zip", "tar", "tar.gz", "7z" };
+    private static String[] VALID_ARCHIV_FILE_EXTS         = { "zip", "tar", "tar.gz", "gzip" };
 
     private static String[] REQUIRED_VALID_SHAPE_FILE_EXTS = { "dbf", "shp", "shx" };
 
     private static String[] OPTIONAL_VALID_SHAPE_FILE_EXTS = { "atx", "aih", "cpg", "prj", "qix", "sbx", "shp.xml" };
 
+
+    /* *** validate by traversing everything *** */
 
     public boolean validateAll( Map<String,Map<String,List<File>>> files ) {
         boolean valid = true;
@@ -60,7 +141,6 @@ public class ShapeFileValidator {
         return valid;
     }
 
-
     /**
      * @param keySet
      * @return
@@ -70,29 +150,27 @@ public class ShapeFileValidator {
         return validateNonExistingCatalogEntry( predicate );
     }
 
+    /* *** validate by element type *** */
 
-    private boolean validateNonExistingCatalogEntry( String name ) {
-        Function<String,Boolean> predicate = (String title) -> name.equals( title );
-        return validateNonExistingCatalogEntry( predicate );
+    /**
+     * @param files
+     * @param element
+     */
+    public boolean validate( Map<String,Map<String,List<File>>> files, Object element ) {
+        if (element instanceof String) {
+            Map<String,List<File>> entry = files.get( element );
+            if (entry != null) {
+                return validate( entry );
+            }
+        }
+        else if (element instanceof File) {
+            return validate( (File)element );
+        }
+        return false;
     }
-    
-    private boolean validateNonExistingCatalogEntry( Function<String,Boolean> predicate ) {
-        MetadataQuery entries = P4Plugin.instance().localCatalog.query( "" );
-        return entries
-                .execute()
-                .stream()
-                .noneMatch(
-                        e -> {
-                            String title = e.getTitle().replace( ".shp", "" );
-                            boolean contains = predicate.apply( title );
-                            if (contains) {
-                                StatusDispatcher.handleError( title, e.getTitle()
-                                        + " is already imported as catalog entry.", null );
-                            }
-                            return contains;
-                        } );
-    }    
 
+    
+    /* *** validate set of groups of files *** */
 
     /**
      * @param files
@@ -107,39 +185,13 @@ public class ShapeFileValidator {
             }
         } ) ) );
         for (File duplicate : duplicates) {
-            StatusDispatcher.handleError( duplicate, duplicate.getName()
-                    + " is contained more then once in the files to be imported.", null );
+            reportError( duplicate, duplicate.getName() + " is contained more then once in the files to be imported.");
         }
         return duplicates.isEmpty();
     }
 
 
-    /**
-     * @param files
-     * @param element
-     */
-    public boolean validate( Map<String,Map<String,List<File>>> files, Object element ) {
-        if (element instanceof String) {
-            Map<String,List<File>> entry = files.get( element );
-            if (entry != null) {
-                return validate( entry );
-            }
-        }
-        else if (element instanceof Map<?,?>) {
-            @SuppressWarnings("unchecked")
-            Map<String,List<File>> map = (Map<String,List<File>>)element;
-            boolean valid = true;
-            for (Map.Entry<String,List<File>> entry : map.entrySet()) {
-                valid &= validate( entry.getKey(), entry.getValue() );
-            }
-            return valid;
-        }
-        else if (element instanceof File) {
-            return validate( (File)element );
-        }
-        return false;
-    }
-
+    /* *** validate group of files *** */
 
     /**
      * @param grouped
@@ -152,7 +204,13 @@ public class ShapeFileValidator {
         return valid;
     }
 
+    
+    private boolean validateNonExistingCatalogEntry( String name ) {
+        Function<String,Boolean> predicate = (String title) -> name.equals( title );
+        return validateNonExistingCatalogEntry( predicate );
+    }
 
+    
     public boolean validate( File root, List<File> files ) {
         boolean valid = hasValidRootFileExtension( root );
         if (valid) {
@@ -210,7 +268,7 @@ public class ShapeFileValidator {
             }
         }
         if (!valid) {
-            StatusDispatcher.handleError( root, Joiner.on( ", " ).join( missing ) + " must be provided.", null );
+            reportError( root, Joiner.on( ", " ).join( missing ) + " must be provided." );
         }
         return valid;
     }
@@ -232,8 +290,7 @@ public class ShapeFileValidator {
             }
         }
         if (missing.size() > 0) {
-            StatusDispatcher.handleWarning( root, Joiner.on( ", " ).join( missing ) + " might be required as well.",
-                    null );
+            reportWarning( root, Joiner.on( ", " ).join( missing ) + " might be required as well.");
         }
         return valid;
     }
@@ -247,11 +304,13 @@ public class ShapeFileValidator {
         boolean valid = files.stream().anyMatch(
                 f -> "shp".equalsIgnoreCase( FilenameUtils.getExtension( f.getName() ) ) );
         if (!valid) {
-            StatusDispatcher.handleError( root, root + ".shp isn't provided.", null );
+            reportError( root, root + ".shp isn't provided." );
         }
         return valid;
     }
-
+    
+    
+    /* *** validate single file *** */
 
     public boolean validate( File file ) {
         boolean validRequired = hasValidShapeFileExtension( file );
@@ -267,10 +326,10 @@ public class ShapeFileValidator {
     private void handleValidShapeFileExtension( File file, boolean validOptional ) {
         String fileExtension = FilenameUtils.getExtension( file.getName() );
         if (!validOptional) {
-            StatusDispatcher.handleError( file, fileExtension + " is not a valid shape file extension", null );
+            reportError( file, fileExtension + " is not a valid shape file extension" );
         }
         else {
-            StatusDispatcher.handleError( file, fileExtension + " is not a valid shape file extension", null );
+            reportError( file, fileExtension + " is not a valid shape file extension" );
         }
     }
 
@@ -283,7 +342,7 @@ public class ShapeFileValidator {
         if (!valid) {
             if (!validArchive) {
                 String fileExtension = FilenameUtils.getExtension( file.getName() );
-                StatusDispatcher.handleError( file, fileExtension + " is not a valid archive file extension", null );
+                reportError( file, fileExtension + " is not a valid archive file extension" );
             }
             else {
                 handleValidShapeFileExtension( file, validOptional );
@@ -323,4 +382,37 @@ public class ShapeFileValidator {
         }
         return false;
     }
+    
+    /* *** utils *** */
+    
+    private boolean validateNonExistingCatalogEntry( Function<String,Boolean> predicate ) {
+        MetadataQuery entries = P4Plugin.instance().localCatalog.query( "" );
+        return entries
+                .execute()
+                .stream()
+                .noneMatch(
+                        e -> {
+                            String title = e.getTitle().replace( ".shp", "" );
+                            boolean contains = predicate.apply( title );
+                            if (contains) {
+                                reportError( title, e.getTitle() + " is already imported as catalog entry." );
+                            }
+                            return contains;
+                        } );
+    }
+
+    
+    /* *** report issues *** */
+
+    public static void reportError( Object source, String message ) {
+        reportIssue(source, IStatus.ERROR, message);
+    }    
+
+    public static void reportWarning( Object source, String message ) {
+        reportIssue(source, IStatus.WARNING, message);
+    }    
+
+    private static void reportIssue( Object source, int severity, String message ) {
+        EventManager.instance().publish( new ValidationEvent( source, severity, message));
+    }    
 }

@@ -25,5 +25,10 @@ public interface UpdatableList {
     /**
      * 
      */
-    void updateListAndFAB();
+    void updateListAndFAB(Object root, boolean fromUpload);
+
+    /**
+     * 
+     */
+    void refresh();
 }

@@ -15,20 +15,22 @@
 package org.polymap.p4.imports;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.jface.viewers.ViewerRow;
+import org.eclipse.rap.rwt.RWT;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.polymap.core.ui.StatusDispatcher;
-import org.polymap.core.ui.StatusDispatcher.Adapter2;
-import org.polymap.core.ui.StatusDispatcher.Style;
+import org.eclipse.swt.widgets.TreeItem;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
+import org.polymap.core.runtime.event.ValidationEvent;
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
@@ -37,11 +39,11 @@ import org.polymap.core.ui.StatusDispatcher.Style;
 public class MessageCellLabelProvider
         extends AbstractShapeImportCellLabelProvider {
 
-    private static final long                     serialVersionUID = 1901185636012005022L;
+    private static final long                        serialVersionUID    = 1901185636012005022L;
 
-    private Map<ViewerCell,StatusDispatcher.Adapter2> adapters         = new WeakHashMap<ViewerCell,StatusDispatcher.Adapter2>();
+    private Map<Object,StatusEventHandler>           statusEventHandlers = new HashMap<Object,StatusEventHandler>();
 
-    private Map<String,Map<String,List<File>>>    files;
+    private final Map<String,Map<String,List<File>>> files;
 
 
     /**
@@ -56,35 +58,88 @@ public class MessageCellLabelProvider
     public void update( ViewerCell cell ) {
         super.update( cell );
         Object element = cell.getElement();
-        if(element != null) {
-            Adapter2 adapter = adapters.get( cell );
-            if (adapter == null) {
-                adapter = ( Object src, IStatus status, Style... styles ) -> {
-                    if (isEqual( element, src )) {
-                        if (!status.isOK()) {
-                            ViewerRow row = cell.getViewerRow();
-                            if(row != null) {
-                                int color = SWT.COLOR_BLACK;
-                                if (status.getSeverity() == IStatus.ERROR) {
-                                    color = SWT.COLOR_RED;
-                                }
-                                else if (status.getSeverity() == IStatus.WARNING) {
-                                    color = SWT.COLOR_DARK_YELLOW;
-                                }
-                                cell.setForeground( Display.getCurrent().getSystemColor( color ) );
-                                cell.setText( getIndentation() + status.getMessage() );
-                            }
-                        }
-                    }
-                };
-                StatusDispatcher.registerAdapter( adapter );
-                adapters.put( cell, adapter );
+        if (element != null) {
+            if (statusEventHandlers.get( element ) == null) {
+                StatusEventHandler statusEventHandler = new StatusEventHandler( cell );
+                EventManager.instance().subscribe( statusEventHandler,
+                        ev -> ev instanceof ValidationEvent && isEqual( element, ev.getSource() ) );
+                statusEventHandlers.put( element, statusEventHandler );
             }
-            if (adapter != null) {
-                cell.setText("");
-                new ShapeFileValidator().validate( files, cell.getElement() );
+            new ShapeFileValidator().validate( files, element );
+        }
+    }
+
+
+    private class StatusEventHandler {
+
+        private final ViewerCell cell;
+
+
+        public StatusEventHandler( ViewerCell cell ) {
+            this.cell = cell;
+        }
+
+
+        @EventHandler(delay = 100, display = true)
+        protected void onStatusChange( List<ValidationEvent> evs ) {
+            evs.forEach( ev -> {
+                if (cell.getItem().isDisposed()) {
+                    if (statusEventHandlers.containsKey( cell.getElement() )) {
+                        EventManager.instance().unsubscribe( this );
+                        statusEventHandlers.remove( cell.getElement() );
+                    }
+                }
+                else {
+                    handleStatus( cell, ev.getSeverity(), ev.getMessage() );
+                }
+            } );
+        }
+    }
+
+
+    public void handleStatus( ViewerCell cell, int severity, String message ) {
+        if (severity != IStatus.OK) {
+            ViewerRow row = cell.getViewerRow();
+            if (row != null) {
+                applyStyle( cell, severity );
+                cell.setText( getIndentation() + message );
             }
         }
+        else {
+            cell.setText( "" );
+        }
+    }
+
+
+    private void applyStyle( ViewerCell cell, int severity ) {
+        // TODO: CSS doesn't work, as there seems to be no control identifying the
+        // cell, where to call .setData
+        // applyStyleViaCSS( cell, status );
+        applyStyleViaSWT( cell, severity );
+    }
+
+
+    private void applyStyleViaCSS( ViewerCell cell, int severity ) {
+        String cssCode = "none";
+        if (severity == IStatus.ERROR) {
+            cssCode = "error";
+        }
+        else if (severity == IStatus.WARNING) {
+            cssCode = "warning";
+        }
+        ((TreeItem)cell.getItem()).setData( RWT.CUSTOM_VARIANT, cssCode );
+    }
+
+
+    private void applyStyleViaSWT( ViewerCell cell, int severity ) {
+        int color = SWT.COLOR_BLACK;
+        if (severity == IStatus.ERROR) {
+            color = SWT.COLOR_RED;
+        }
+        else if (severity == IStatus.WARNING) {
+            color = SWT.COLOR_DARK_YELLOW;
+        }
+        cell.setForeground( Display.getCurrent().getSystemColor( color ) );
     }
 
 
@@ -99,8 +154,17 @@ public class MessageCellLabelProvider
             File srcFile = (File)src;
             return elementFile.getName().equals( srcFile.getName() );
         }
-        return element.equals( src);
+        if (element instanceof String && src instanceof String) {
+            String elementString = (String)element;
+            if (elementString.contains( "/" )) {
+                elementString = elementString.substring( elementString.indexOf( "/" ) + 1 ).trim();
+            }
+            return elementString.equals( src );
+
+        }
+        return element.equals( src );
     }
+
 
     /*
      * (non-Javadoc)
@@ -110,10 +174,8 @@ public class MessageCellLabelProvider
      */
     @Override
     public void dispose( ColumnViewer viewer, ViewerColumn column ) {
-        for (Adapter2 adapter : adapters.values()) {
-            StatusDispatcher.unregisterAdapter( adapter );
-        }
-        adapters.clear();
+        statusEventHandlers.forEach( ( element, handler ) -> EventManager.instance().unsubscribe( handler ) );
+        statusEventHandlers.clear();
         super.dispose( viewer, column );
     }
 }

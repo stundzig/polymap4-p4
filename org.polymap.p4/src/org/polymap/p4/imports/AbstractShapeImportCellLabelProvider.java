@@ -15,7 +15,6 @@
 package org.polymap.p4.imports;
 
 import java.io.File;
-import java.util.Map;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -37,10 +36,6 @@ public abstract class AbstractShapeImportCellLabelProvider extends CellLabelProv
         if (elem instanceof String) {
             indent = 0;
             indentation = "";
-        }
-        else if (elem instanceof Map.Entry<?,?>) {
-            indent = 1;
-            indentation = DEFAULT_IDENT;
         }
         else if (elem instanceof File) {
             StringBuilder sb = new StringBuilder();

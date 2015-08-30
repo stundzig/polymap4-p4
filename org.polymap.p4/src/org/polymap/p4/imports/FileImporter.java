@@ -67,7 +67,7 @@ public class FileImporter
     @Mandatory
     public Config2<FileImporter,Charset>    charset;
     
-    private List<File>                      results = new ArrayList();
+    private List<File>                      results = new ArrayList<>();
     
     
     protected FileImporter() {
