@@ -112,6 +112,7 @@ public class CatalogPanel
                 });
             }
         } );
+        viewer.firstSecondaryActionProvider.set( new CatalogEntryDeleteActionProvider() );
         viewer.setInput( P4Plugin.instance().localCatalog );
         
 //        viewer.getControl().setLayoutData( new ConstraintData( 
