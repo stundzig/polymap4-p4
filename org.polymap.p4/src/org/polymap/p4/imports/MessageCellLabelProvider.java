@@ -15,22 +15,26 @@
 package org.polymap.p4.imports;
 
 import java.io.File;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.jface.viewers.ViewerRow;
+
 import org.eclipse.rap.rwt.RWT;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeItem;
+
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
-import org.polymap.core.runtime.event.ValidationEvent;
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>

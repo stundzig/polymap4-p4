@@ -15,6 +15,7 @@
 package org.polymap.p4.imports;
 
 import java.io.File;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,10 +26,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+
 import org.eclipse.core.runtime.IStatus;
+
 import org.polymap.core.catalog.MetadataQuery;
 import org.polymap.core.runtime.event.EventManager;
-import org.polymap.core.runtime.event.ValidationEvent;
+
 import org.polymap.p4.P4Plugin;
 
 import com.google.common.base.Joiner;
