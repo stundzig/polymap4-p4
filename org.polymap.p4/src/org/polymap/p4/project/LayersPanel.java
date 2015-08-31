@@ -148,6 +148,7 @@ public class LayersPanel
                 mapViewer.setVisible( (ILayer)elm, isSelected( elm ) );
             }
         });
+        viewer.secondSecondaryActionProvider.set( new LayerDeleteActionProvider());
         
         viewer.addOpenListener( new IOpenListener() {
             @Override

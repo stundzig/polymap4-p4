@@ -69,5 +69,16 @@ public class LocalCatalog
             }
         }
     }
+
+
+    /**
+     * 
+     */
+    public void deleteEntry(String identifier) throws Exception {
+        try (Updater update = prepareUpdate()) {
+            update.removeEntry( identifier );
+            update.commit();
+        }
+    }
     
 }
