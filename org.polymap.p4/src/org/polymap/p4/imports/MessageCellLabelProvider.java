@@ -37,13 +37,11 @@ import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 
 /**
+ * 
  * @author Joerg Reichert <joerg@mapzone.io>
- *
  */
 public class MessageCellLabelProvider
         extends AbstractShapeImportCellLabelProvider {
-
-    private static final long                        serialVersionUID    = 1901185636012005022L;
 
     private Map<Object,StatusEventHandler>           statusEventHandlers = new HashMap<Object,StatusEventHandler>();
 
@@ -74,6 +72,9 @@ public class MessageCellLabelProvider
     }
 
 
+    /**
+     * 
+     */
     private class StatusEventHandler {
 
         private final ViewerCell cell;

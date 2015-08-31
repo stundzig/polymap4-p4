@@ -14,21 +14,20 @@
  */
 package org.polymap.p4.imports;
 
-
 /**
+ * 
  * @author Joerg Reichert <joerg@mapzone.io>
- *
  */
 public interface UpdatableList {
 
-    
     /**
      * 
      */
-    void updateListAndFAB(Object root, boolean fromUpload);
+    void updateListAndFAB( Object root, boolean fromUpload );
 
     /**
      * 
      */
     void refresh();
+    
 }

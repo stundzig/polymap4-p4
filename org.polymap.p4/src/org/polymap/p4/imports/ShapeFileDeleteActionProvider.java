@@ -30,8 +30,8 @@ import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 
 /**
+ * 
  * @author Joerg Reichert <joerg@mapzone.io>
- *
  */
 public class ShapeFileDeleteActionProvider
         extends ActionProvider {

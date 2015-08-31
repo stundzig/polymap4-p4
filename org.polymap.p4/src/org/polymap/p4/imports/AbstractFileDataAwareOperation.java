@@ -16,9 +16,15 @@ package org.polymap.p4.imports;
 
 import java.io.File;
 
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.AbstractOperation;
 import org.eclipse.core.commands.operations.IUndoableOperation;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+
 import org.polymap.core.CorePlugin;
+
 import org.polymap.p4.P4Plugin;
 
 /**
@@ -49,4 +55,26 @@ public abstract class AbstractFileDataAwareOperation
         }
         return dataDir;
     }
+    
+
+    @Override
+    public IStatus redo( IProgressMonitor monitor, IAdaptable info ) throws ExecutionException {
+        throw new RuntimeException( "not yet implemented." );
+    }
+
+    @Override
+    public IStatus undo( IProgressMonitor monitor, IAdaptable info ) throws ExecutionException {
+        throw new RuntimeException( "not yet implemented." );
+    }
+
+    @Override
+    public boolean canUndo() {
+        return false;
+    }
+    
+    @Override
+    public boolean canRedo() {
+        return false;
+    }
+
 }

@@ -69,24 +69,4 @@ public class ShapeFetchOperation
         return files;
     }
 
-    @Override
-    public IStatus redo( IProgressMonitor monitor, IAdaptable info ) throws ExecutionException {
-        throw new RuntimeException( "not yet implemented." );
-    }
-
-    @Override
-    public IStatus undo( IProgressMonitor monitor, IAdaptable info ) throws ExecutionException {
-        throw new RuntimeException( "not yet implemented." );
-    }
-
-    @Override
-    public boolean canUndo() {
-        return false;
-    }
-    
-    @Override
-    public boolean canRedo() {
-        return false;
-    }
-
 }

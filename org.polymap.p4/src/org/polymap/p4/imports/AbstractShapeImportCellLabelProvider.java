@@ -19,16 +19,19 @@ import java.io.File;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 
-
 /**
+ * 
  * @author Joerg Reichert <joerg@mapzone.io>
- *
  */
-public abstract class AbstractShapeImportCellLabelProvider extends CellLabelProvider {
-    private static final long serialVersionUID = 3274272030290362203L;
+public abstract class AbstractShapeImportCellLabelProvider 
+        extends CellLabelProvider {
+
     private static final String DEFAULT_IDENT = "     ";
-    private int indent = 0;
-    private String indentation = "";
+
+    private int                 indent = 0;
+
+    private String              indentation = "";
+
 
     @Override
     public void update( ViewerCell cell ) {
