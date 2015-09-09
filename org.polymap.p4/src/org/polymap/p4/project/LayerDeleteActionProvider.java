@@ -16,10 +16,8 @@ package org.polymap.p4.project;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
-import org.polymap.core.data.DataPlugin;
 import org.polymap.core.project.ILayer;
 import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Plugin;
@@ -39,8 +37,7 @@ public class LayerDeleteActionProvider extends ActionProvider {
 	
 	private static Log log = LogFactory.getLog( LayerDeleteActionProvider.class );
 	
-	private Image image = P4Plugin.imageDescriptorFromPlugin(
-			DataPlugin.PLUGIN_ID, "icons/etool16/delete.gif").createImage();
+    private Image image = P4Plugin.instance().imageDescriptor( "resources/icons/png/gray/16/ic_delete_48px.png" ).createImage();
 
 	/*
 	 * (non-Javadoc)
