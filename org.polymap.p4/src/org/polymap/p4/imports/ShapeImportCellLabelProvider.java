@@ -36,7 +36,12 @@ public class ShapeImportCellLabelProvider extends AbstractShapeImportCellLabelPr
         Object elem = cell.getElement();
         if (elem instanceof String) {
             ViewerRow row = cell.getViewerRow();
-            ((TreeItem) row.getItem()).setData( RWT.CUSTOM_VARIANT, CSS_FIRST_ROW );
+            TreeItem treeItem = (TreeItem) cell.getViewerRow().getItem();
+            if(treeItem.getExpanded()) {
+                ((TreeItem) row.getItem()).setData( RWT.CUSTOM_VARIANT, CSS_FIRST_ROW );
+            } else {
+                ((TreeItem) row.getItem()).setData( RWT.CUSTOM_VARIANT, null );
+            }
             cell.setText( getIndentation() + (String)elem );
         }
         else if (elem instanceof File) {
