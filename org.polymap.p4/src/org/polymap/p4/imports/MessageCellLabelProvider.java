@@ -14,27 +14,35 @@
  */
 package org.polymap.p4.imports;
 
+import java.awt.Color;
 import java.io.File;
-
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.jface.viewers.ViewerRow;
-
 import org.eclipse.rap.rwt.RWT;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.FontMetrics;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+
+import com.google.common.base.Joiner;
 
 /**
  * 
@@ -107,12 +115,112 @@ public class MessageCellLabelProvider
             ViewerRow row = cell.getViewerRow();
             if (row != null) {
                 applyStyle( cell, severity );
-                cell.setText( getIndentation() + message );
+                setCellText( cell, getIndentation() + message );
             }
         }
         else {
-            cell.setText( "" );
+            setCellText( cell, getDescription( cell.getElement() ) );
         }
+    }
+    
+    /**
+     * @param cell
+     * @param string
+     */
+    private void setCellText( ViewerCell cell, String text ) {
+        GC gc = new GC(cell.getControl());
+        Point point = gc.textExtent( text );
+        FontMetrics fontMetrics = gc.getFontMetrics();
+        gc.dispose();
+        Rectangle cellBounds = cell.getControl().getBounds();
+        if(point.x > cellBounds.width - 10) {
+            List<String> tokens = new ArrayList<String>();
+            for(String token : text.split("\n")) {
+                int currentWidth = fontMetrics.getAverageCharWidth() * token.toCharArray().length;
+                if(currentWidth > cellBounds.width - 10) {
+                    int index = token.lastIndexOf( " " );
+                    if(index<=0) {
+                        index = Math.round( (token.length() * (cellBounds.width - 10)) / currentWidth);
+                    }
+                    StringBuilder sb = new StringBuilder(token);
+                    sb.insert( index, "\n" );
+                    tokens.add(sb.toString());
+                }
+            }
+            setCellText(cell, Joiner.on( "\n" ).join( tokens ));
+        } else {
+            int times = text.split( "\n" ).length;
+            Tree tree = (Tree) cell.getControl();
+            int newHeight = tree.getItemHeight() * times;
+            tree.setData( RWT.CUSTOM_ITEM_HEIGHT, newHeight );
+            cell.setBackground( Display.getDefault().getSystemColor( SWT.COLOR_BLUE ));
+            cell.setText( text );
+            ViewerCell below = cell.getNeighbor( ViewerCell.BELOW, true );
+            if(below != null) {
+                below.setText( "second" );
+            }
+        }
+    }
+
+
+    /**
+     * @param element
+     * @return
+     */
+    private String getDescription( Object element ) {
+        if (element instanceof File) {
+            File file = (File)element;
+            String sizeStr = getSizeStr( file );
+            String lastChangedStr = getLastChangedStr( file );
+            ShapeFileFormats format = ShapeFileFormats.getFormat( file );
+            String description = "description: "
+                    + ((format != null) ? format.getDescription() : "unsupported file format");
+            return description + ", " + lastChangedStr + ", " + sizeStr;
+        }
+        else if (element instanceof String) {
+            String str = (String)element;
+            Optional<ArchiveFormats> ext = Arrays.asList( ArchiveFormats.values() ).stream()
+                    .filter( f -> str.contains( "." + f.getFileExtension() ) ).findFirst();
+            if (ext.isPresent()) {
+                return "description: " + ext.get().getDescription();
+            }
+            else {
+                return "description: Shapefile group";
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * @param file
+     * @return
+     */
+    private String getLastChangedStr( File file ) {
+        DateFormat dateFormat = DateFormat.getDateInstance( DateFormat.MEDIUM );
+        return "last modified: " + dateFormat.format( new Date( file.lastModified() ) );
+    }
+
+
+    private String getSizeStr( File file ) {
+        String size = "size: ";
+        if (file.exists()) {
+            double bytes = file.length();
+            if (bytes < 1024) {
+                double kilobytes = (bytes / 1024);
+                if (kilobytes < 1024) {
+                    double megabytes = (kilobytes / 1024);
+                    size += megabytes + " MB";
+                }
+                else {
+                    size += kilobytes + " KB";
+                }
+            }
+            else {
+                size += bytes + " B";
+            }
+        }
+        return size;
     }
 
 
