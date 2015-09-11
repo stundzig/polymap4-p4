@@ -12,7 +12,7 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
+package org.polymap.p4.imports.shape;
 
 import java.io.File;
 
@@ -33,6 +33,7 @@ import org.polymap.core.catalog.MetadataQuery;
 import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.imports.ValidationEvent;
 
 import com.google.common.base.Joiner;
 

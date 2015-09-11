@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+import org.polymap.p4.imports.shape.ShapeFileValidator;
 
 /**
  * 

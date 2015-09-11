@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
+package org.polymap.p4.imports.shape;
 
 import static org.polymap.rhei.batik.toolkit.md.dp.dp;
 
@@ -53,6 +53,10 @@ import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.UIUtils;
 import org.polymap.p4.Messages;
 import org.polymap.p4.catalog.CatalogPanel;
+import org.polymap.p4.imports.FileImportHandler;
+import org.polymap.p4.imports.FileImporter;
+import org.polymap.p4.imports.MessageCellLabelProvider;
+import org.polymap.p4.imports.UpdatableList;
 import org.polymap.p4.map.ProjectMapPanel;
 import org.polymap.rap.updownload.upload.IUploadHandler;
 import org.polymap.rap.updownload.upload.Upload;
@@ -70,11 +74,11 @@ import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class ShapeImportPanel
-        extends DefaultPanel
-        implements IUploadHandler, UpdatableList {
+public class ShapeFileImportPanel
+        extends Composite
+        implements FileImportHandler, UpdatableList {
 
-    private static Log                         log   = LogFactory.getLog( ShapeImportPanel.class );
+    private static Log                         log   = LogFactory.getLog( ShapeFileImportPanel.class );
 
     public static final PanelIdentifier        ID    = PanelIdentifier.parse( "shapeimport" );
 
@@ -92,16 +96,16 @@ public class ShapeImportPanel
 
     private Snackbar                           snackBar;
 
-
-    @Override
-    public boolean wantsToBeShown() {
-        if (parentPanel().isPresent() && parentPanel().get() instanceof ProjectMapPanel) {
-            getSite().setTitle( "Import" );
-            getSite().setPreferredWidth( 300 );
-            return true;
-        }
-        return false;
-    }
+//
+//    @Override
+//    public boolean wantsToBeShown() {
+//        if (parentPanel().isPresent() && parentPanel().get() instanceof ProjectMapPanel) {
+//            getSite().setTitle( "Import" );
+//            getSite().setPreferredWidth( 300 );
+//            return true;
+//        }
+//        return false;
+//    }
 
 
     @Override
@@ -109,36 +113,6 @@ public class ShapeImportPanel
         parent.setLayout( FormLayoutFactory.defaults().spacing( dp( 16 ).pix() ).create() );
         tk = (MdToolkit)getSite().toolkit();
 
-        // DnD
-        Label dropLabel = tk.createLabel( parent, "Drop files here...", SWT.BORDER | SWT.CENTER );
-        FormDataFactory.on( dropLabel ).fill().noBottom().height( dp( 100 ).pix() );
-
-        // upload field
-        Upload upload = new Upload( parent, SWT.NONE/* , Upload.SHOW_PROGRESS */);
-        upload.setHandler( ShapeImportPanel.this );
-        FormDataFactory.on( upload ).noBottom().top( 0, dp( 40 ).pix() ).width( dp( 200 ).pix() );
-        upload.moveAbove( dropLabel );
-
-        DropTarget dropTarget = new DropTarget( dropLabel, DND.DROP_MOVE );
-        dropTarget.setTransfer( new Transfer[] { ClientFileTransfer.getInstance() } );
-        dropTarget.addDropListener( new DropTargetAdapter() {
-
-            private static final long serialVersionUID = 4701279360320517568L;
-
-
-            @Override
-            public void drop( DropTargetEvent ev ) {
-                ClientFile[] clientFiles = (ClientFile[])ev.data;
-                Arrays.stream( clientFiles ).forEach( clientFile -> {
-                    log.info( clientFile.getName() + " - " + clientFile.getType() + " - " + clientFile.getSize() );
-
-                    String uploadUrl = UploadService.registerHandler( ShapeImportPanel.this );
-
-                    ClientFileUploader uploader = RWT.getClient().getService( ClientFileUploader.class );
-                    uploader.submit( uploadUrl, new ClientFile[] { clientFile } );
-                } );
-            }
-        } );
 
         fab = tk.createFab();
         fab.setToolTipText( "Import this uploaded Shapefile" );
@@ -228,7 +202,7 @@ public class ShapeImportPanel
 
 
     @SuppressWarnings("unchecked")
-    public void uploadStarted( ClientFile clientFile, InputStream in ) throws Exception {
+    public void handle( File file, Composite parent) throws Exception {
         log.info( clientFile.getName() + " - " + clientFile.getType() + " - " + clientFile.getSize() );
 
         try { 
@@ -332,4 +306,25 @@ public class ShapeImportPanel
     public void refresh() {
         fileList.refresh();
     }
+
+
+	@Override
+	public boolean canHandle(File file) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public void handle(File file, Composite parent) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public boolean isValid() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

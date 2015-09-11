@@ -12,7 +12,7 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
+package org.polymap.p4.imports.shape;
 
 import java.io.File;
 
@@ -20,6 +20,7 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerRow;
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.swt.widgets.TreeItem;
+import org.polymap.p4.imports.AbstractShapeImportCellLabelProvider;
 
 
 /**

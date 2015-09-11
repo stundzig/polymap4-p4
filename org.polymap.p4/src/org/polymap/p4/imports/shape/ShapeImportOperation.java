@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
+package org.polymap.p4.imports.shape;
 
 import java.io.File;
 import java.util.Arrays;
@@ -33,6 +33,7 @@ import org.polymap.core.runtime.config.Config2;
 import org.polymap.core.runtime.config.ConfigurationFactory;
 import org.polymap.core.runtime.config.Mandatory;
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.imports.AbstractFileDataAwareOperation;
 
 /**
  * 

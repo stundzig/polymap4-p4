@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.polymap.p4.imports.FileImportHandler" name="FileImportHandler" schema="schema/org.polymap.p4.imports.FileImportHandler.exsd"/>
    <extension
          point="org.eclipse.rap.ui.entrypoint">
       <entrypoint
@@ -44,7 +45,7 @@
             stackPriority="100">
       </panel>
       <panel
-            class="org.polymap.p4.imports.ShapeImportPanel"
+            class="org.polymap.p4.imports.shape.ShapeFileImportPanel"
             id="org.polymap.p4.ImportPanel">
       </panel>
       <panel

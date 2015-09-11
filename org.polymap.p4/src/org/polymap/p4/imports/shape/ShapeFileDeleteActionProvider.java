@@ -12,7 +12,7 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
+package org.polymap.p4.imports.shape;
 
 import java.io.File;
 import java.util.List;
@@ -26,6 +26,7 @@ import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.ui.StatusDispatcher;
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.imports.UpdatableList;
 import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 
