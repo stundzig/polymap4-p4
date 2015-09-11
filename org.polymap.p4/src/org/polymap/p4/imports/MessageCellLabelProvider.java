@@ -14,7 +14,6 @@
  */
 package org.polymap.p4.imports;
 
-import java.awt.Color;
 import java.io.File;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -66,7 +64,7 @@ public class MessageCellLabelProvider
 
     @Override
     public void update( ViewerCell cell ) {
-        super.update( cell );
+        handleBackgroundColor( cell );
         Object element = cell.getElement();
         if (element != null) {
             if (statusEventHandlers.get( element ) == null) {
@@ -115,7 +113,7 @@ public class MessageCellLabelProvider
             ViewerRow row = cell.getViewerRow();
             if (row != null) {
                 applyStyle( cell, severity );
-                setCellText( cell, getIndentation() + message );
+                setCellText( cell, message );
             }
         }
         else {
@@ -149,16 +147,7 @@ public class MessageCellLabelProvider
             }
             setCellText(cell, Joiner.on( "\n" ).join( tokens ));
         } else {
-            int times = text.split( "\n" ).length;
-            Tree tree = (Tree) cell.getControl();
-            int newHeight = tree.getItemHeight() * times;
-            tree.setData( RWT.CUSTOM_ITEM_HEIGHT, newHeight );
-            cell.setBackground( Display.getDefault().getSystemColor( SWT.COLOR_BLUE ));
             cell.setText( text );
-            ViewerCell below = cell.getNeighbor( ViewerCell.BELOW, true );
-            if(below != null) {
-                below.setText( "second" );
-            }
         }
     }
 
@@ -172,7 +161,7 @@ public class MessageCellLabelProvider
             File file = (File)element;
             String sizeStr = getSizeStr( file );
             String lastChangedStr = getLastChangedStr( file );
-            ShapeFileFormats format = ShapeFileFormats.getFormat( file );
+            ShapeFileFormats format = ShapeFileFormats.getFileFormat( file );
             String description = "description: "
                     + ((format != null) ? format.getDescription() : "unsupported file format");
             return description + ", " + lastChangedStr + ", " + sizeStr;

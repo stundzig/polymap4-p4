@@ -14,45 +14,30 @@
  */
 package org.polymap.p4.imports;
 
-import java.io.File;
-
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.viewers.ViewerRow;
+import org.eclipse.rap.rwt.RWT;
+import org.eclipse.swt.widgets.TreeItem;
 
 /**
  * 
  * @author Joerg Reichert <joerg@mapzone.io>
  */
-public abstract class AbstractShapeImportCellLabelProvider 
+public abstract class AbstractShapeImportCellLabelProvider
         extends CellLabelProvider {
 
-    private static final String DEFAULT_IDENT = "     ";
-
-    private int                 indent = 0;
-
-    private String              indentation = "";
+    private static final Object CSS_FIRST_ROW = "firstRow";
 
 
-    @Override
-    public void update( ViewerCell cell ) {
-        Object elem = cell.getElement();
-        if (elem instanceof String) {
-            indent = 0;
-            indentation = "";
+    protected void handleBackgroundColor( ViewerCell cell ) {
+        ViewerRow row = cell.getViewerRow();
+        TreeItem treeItem = (TreeItem)cell.getViewerRow().getItem();
+        if (treeItem.getParentItem() != null) {
+            ((TreeItem)row.getItem()).setData( RWT.CUSTOM_VARIANT, CSS_FIRST_ROW );
         }
-        else if (elem instanceof File) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i <= (indent + 1); i++) {
-                sb.append( DEFAULT_IDENT );
-            }
-            indentation = sb.toString();
+        else {
+            ((TreeItem)row.getItem()).setData( RWT.CUSTOM_VARIANT, null );
         }
-    }
-    
-    /**
-     * @return the indentation
-     */
-    public String getIndentation() {
-        return indentation;
     }
 }

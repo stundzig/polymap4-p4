@@ -15,9 +15,10 @@
 package org.polymap.p4.imports;
 
 import java.io.File;
+import java.util.Arrays;
 
 // https://en.wikipedia.org/wiki/Shapefile
-enum ShapeFileFormats {
+enum ShapeFileFormats implements IFileFormat{
     // @formatter:off
     AIH("aih", "an attribute index of the active fields in a table"), 
     AIN("ain", "an attribute index of the active fields in a table"), 
@@ -62,12 +63,16 @@ enum ShapeFileFormats {
     }
 
 
-    public static ShapeFileFormats getFormat( File file ) {
-        for (ShapeFileFormats value : values()) {
-            if (ShapeFileValidator.getFileExtension( file.getName() ).equalsIgnoreCase( value.getFileExtension() )) {
-                return value;
-            }
-        }
-        return null;
+    public static ShapeFileFormats getFileFormat( File file ) {
+        return IFileFormat.getFileFormat(file, Arrays.asList( values()));
+    }
+
+
+    /* (non-Javadoc)
+     * @see org.polymap.p4.imports.IFormat#getImageName()
+     */
+    @Override
+    public String getImageName() {
+        return name().toLowerCase().replace( "_", "." );
     }
 }

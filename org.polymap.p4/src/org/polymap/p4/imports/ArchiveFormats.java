@@ -14,7 +14,7 @@
  */
 package org.polymap.p4.imports;
 
-enum ArchiveFormats {
+enum ArchiveFormats implements IFileFormat {
     // @formatter:off
     ZIP("zip", "application/zip"), 
     TAR("tar", "tape archiver"), 
@@ -44,5 +44,9 @@ enum ArchiveFormats {
      */
     public String getDescription() {
         return description;
+    }
+    
+    public String getImageName() {
+        return name().toLowerCase();
     }
 }

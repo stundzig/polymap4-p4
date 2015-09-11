@@ -14,6 +14,8 @@
  */
 package org.polymap.p4.imports;
 
+import static org.polymap.p4.imports.IFileFormat.getFileExtension;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +26,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.polymap.core.catalog.MetadataQuery;
@@ -385,22 +386,6 @@ public class ShapeFileValidator {
 
 
     /* *** utils *** */
-
-    /**
-     * @param name
-     * @return
-     */
-    static String getFileExtension( String fileName ) {
-        String fileExtension = FilenameUtils.getExtension( fileName );
-        if ("xml".equalsIgnoreCase( fileExtension )) {
-            int index = fileName.indexOf( "." + ShapeFileFormats.SHP_XML.getFileExtension() );
-            if (index > 0) {
-                fileExtension = ShapeFileFormats.SHP_XML.getFileExtension();
-            }
-        }
-        return fileExtension;
-    }
-
 
     private boolean validateNonExistingCatalogEntry( Function<String,Boolean> predicate ) {
         MetadataQuery entries = P4Plugin.instance().localCatalog.query( "" );
