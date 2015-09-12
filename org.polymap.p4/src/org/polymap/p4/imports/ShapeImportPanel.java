@@ -34,6 +34,7 @@ import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.client.service.ClientFileUploader;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
+import org.eclipse.rap.rwt.widgets.FileUpload;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -52,6 +53,7 @@ import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.UIUtils;
 import org.polymap.p4.Messages;
+import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.CatalogPanel;
 import org.polymap.p4.map.ProjectMapPanel;
 import org.polymap.rap.updownload.upload.IUploadHandler;
@@ -109,19 +111,7 @@ public class ShapeImportPanel
         parent.setLayout( FormLayoutFactory.defaults().spacing( dp( 16 ).pix() ).create() );
         tk = (MdToolkit)getSite().toolkit();
 
-        // DnD
-        Label dropLabel = tk.createLabel( parent, "Drop files here...", SWT.BORDER | SWT.CENTER );
-        FormDataFactory.on( dropLabel ).fill().noBottom().height( dp( 100 ).pix() );
-
-        // upload field
-        Upload upload = new Upload( parent, SWT.NONE/* , Upload.SHOW_PROGRESS */);
-        upload.setHandler( ShapeImportPanel.this );
-        FormDataFactory.on( upload ).noBottom().top( 0, dp( 40 ).pix() ).width( dp( 200 ).pix() );
-        upload.moveAbove( dropLabel );
-
-        DropTarget dropTarget = new DropTarget( dropLabel, DND.DROP_MOVE );
-        dropTarget.setTransfer( new Transfer[] { ClientFileTransfer.getInstance() } );
-        dropTarget.addDropListener( new DropTargetAdapter() {
+        DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
 
             private static final long serialVersionUID = 4701279360320517568L;
 
@@ -138,19 +128,23 @@ public class ShapeImportPanel
                     uploader.submit( uploadUrl, new ClientFile[] { clientFile } );
                 } );
             }
-        } );
+        };
 
-        fab = tk.createFab();
+        fab = tk.createFab(P4Plugin.instance().imageForName( "resources/icons/png/gray/16/import.png" ), SWT.UP | SWT.RIGHT);
         fab.setToolTipText( "Import this uploaded Shapefile" );
         fab.setVisible( false );
 
+        FileUpload uploadFab = tk.createFileUploadFab( "+", SWT.DOWN | SWT.RIGHT);
+        uploadFab.setToolTipText( i18n.get( "select" ) );
+        uploadFab.setVisible( true );
+        Upload upload = new Upload( parent, uploadFab, SWT.NONE/* , Upload.SHOW_PROGRESS */);
+        upload.setHandler( ShapeImportPanel.this );
+
         //
         fileList = tk.createListViewer( parent, SWT.VIRTUAL );
-        // would cause exception when later refresh calculates visible rows, as then
-        // height is then in some cases 0
-        // ColumnViewerToolTipSupport.enableFor(fileList);
 
         fileList.setContentProvider( new ShapeImportTreeContentProvider( files ) );
+        fileList.iconProvider.set( new ShapeImportImageLabelProvider() );
         fileList.firstLineLabelProvider.set( new ShapeImportCellLabelProvider() );
         fileList.secondLineLabelProvider.set( new MessageCellLabelProvider(files) );
 
@@ -169,8 +163,20 @@ public class ShapeImportPanel
                 } );
             }
         } );
+        
+        DropTarget fileListDropTarget = new DropTarget( fileList.getControl(), DND.DROP_MOVE );
+        fileListDropTarget.setTransfer( new Transfer[] { ClientFileTransfer.getInstance() } );
+        fileListDropTarget.addDropListener(dropTargetAdapter);
 
-        FormDataFactory.on( fileList.getControl() ).fill().top( dropTarget.getControl(), 40 );
+        FormDataFactory.on( fileList.getControl() ).fill();
+
+        // DnD
+        Label dropLabel = tk.createLabel( parent, "Drop files here...", SWT.CENTER );
+        
+        DropTarget labelDropTarget = new DropTarget( dropLabel, DND.DROP_MOVE );
+        labelDropTarget.setTransfer( new Transfer[] { ClientFileTransfer.getInstance() } );
+        labelDropTarget.addDropListener(dropTargetAdapter);
+        FormDataFactory.on( dropLabel ).top( 90 ).left( 0 ).right( 100 ).bottom( 100 );
 
         snackBar = tk.createFloatingSnackbar( SWT.NONE );
     }

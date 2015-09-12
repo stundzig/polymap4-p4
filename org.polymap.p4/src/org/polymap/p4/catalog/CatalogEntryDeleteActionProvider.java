@@ -17,7 +17,6 @@ package org.polymap.p4.catalog;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.polymap.core.catalog.local.LocalMetadata;
-import org.polymap.core.data.DataPlugin;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.ui.StatusDispatcher;
@@ -32,8 +31,7 @@ import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 public class CatalogEntryDeleteActionProvider
         extends ActionProvider {
     private static final long serialVersionUID = -2906293958552374122L;
-    private Image image = P4Plugin.imageDescriptorFromPlugin( DataPlugin.PLUGIN_ID, "icons/etool16/delete.gif" ).createImage();
-
+    private Image image = P4Plugin.instance().imageDescriptor( "resources/icons/png/gray/16/ic_delete_48px.png" ).createImage();
 
     @Override
     public void update( ViewerCell cell ) {

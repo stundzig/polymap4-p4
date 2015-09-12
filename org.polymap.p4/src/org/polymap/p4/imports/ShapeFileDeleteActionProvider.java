@@ -21,7 +21,6 @@ import java.util.Map;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.polymap.core.data.DataPlugin;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.ui.StatusDispatcher;
@@ -47,7 +46,7 @@ public class ShapeFileDeleteActionProvider
     
     private UpdatableList updatableList;
     
-    private Image image = P4Plugin.imageDescriptorFromPlugin( DataPlugin.PLUGIN_ID, "icons/etool16/delete.gif" ).createImage();
+    private Image image = P4Plugin.instance().imageDescriptor( "resources/icons/png/gray/16/ic_delete_48px.png" ).createImage();
 
 
     /**

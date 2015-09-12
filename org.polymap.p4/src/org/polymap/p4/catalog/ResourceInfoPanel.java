@@ -14,7 +14,6 @@
  */
 package org.polymap.p4.catalog;
 
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +28,6 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.store.ContentFeatureCollection;
 import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.data.wms.WebMapServer;
-import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
@@ -47,6 +45,9 @@ import org.polymap.rap.openlayers.base.OlFeature;
 import org.polymap.rap.openlayers.control.MousePositionControl;
 import org.polymap.rap.openlayers.control.ScaleLineControl;
 import org.polymap.rap.openlayers.format.GeoJSONFormat;
+import org.polymap.rap.openlayers.geom.LinearRingGeometry;
+import org.polymap.rap.openlayers.geom.MultilineStringGeometry;
+import org.polymap.rap.openlayers.geom.PointGeometry;
 import org.polymap.rap.openlayers.geom.PolygonGeometry;
 import org.polymap.rap.openlayers.layer.ImageLayer;
 import org.polymap.rap.openlayers.layer.Layer;
@@ -77,8 +78,10 @@ import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
 import com.google.common.base.Joiner;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * 
@@ -214,7 +217,25 @@ public class ResourceInfoPanel
                                 .collect( Collectors.toList() );
                         OlFeature feature = new OlFeature();
                         feature.name.set( featureSource.getName().toString() );
-                        feature.geometry.set( new PolygonGeometry( coords ) );
+                        if(geometry instanceof Polygon) {
+                            feature.geometry.set( new PolygonGeometry( coords ) );
+                        } else if(geometry instanceof Point) {
+                            feature.geometry.set( new PointGeometry( coords.get( 0 ) ) );
+                        } else if(geometry instanceof LinearRing) {
+                            feature.geometry.set( new LinearRingGeometry( coords ) );
+                        } else if(geometry instanceof MultiLineString) {
+                            feature.geometry.set( new MultilineStringGeometry( coords ) );
+                        } else {
+                            feature.geometry.set( new PolygonGeometry( coords ) );
+                        }
+                        for (Object att : simpleFeature.getAttributes()) {
+//                            feature.setAttribute( String.valueOf(att), att );
+                            System.out.println(att);
+                        }
+                        for (org.opengis.feature.Property prop : simpleFeature.getProperties()) {
+                            System.out.println(prop);
+                        }
+                        
                         vectorSource.addFeature( feature );
                     }
                 }
@@ -228,7 +249,7 @@ public class ResourceInfoPanel
                 data = new VectorLayer()
                         .style.put( new Style()
                         .fill.put( new FillStyle().color.put( new Color( 0, 0, 255, 0.1f ) ) )
-                        .stroke.put( new StrokeStyle().color.put( new Color( "red" ) ).width.put( 1f ) ) )
+                        .stroke.put( new StrokeStyle().color.put( new Color( "red" ) ).width.put( 10f ) ) )
                         .source.put( vectorSource );
 
                 bounds = featureSource.getBounds().transform( Geometries.crs( "EPSG:3857" ), false );;
