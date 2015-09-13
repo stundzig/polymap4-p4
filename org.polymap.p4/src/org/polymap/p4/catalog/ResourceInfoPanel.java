@@ -46,7 +46,6 @@ import org.polymap.rap.openlayers.control.MousePositionControl;
 import org.polymap.rap.openlayers.control.ScaleLineControl;
 import org.polymap.rap.openlayers.format.GeoJSONFormat;
 import org.polymap.rap.openlayers.geom.LinearRingGeometry;
-import org.polymap.rap.openlayers.geom.MultilineStringGeometry;
 import org.polymap.rap.openlayers.geom.PointGeometry;
 import org.polymap.rap.openlayers.geom.PolygonGeometry;
 import org.polymap.rap.openlayers.layer.ImageLayer;
@@ -205,7 +204,6 @@ public class ResourceInfoPanel
                 VectorSource vectorSource = new VectorSource()
                     .format.put( new GeoJSONFormat() )
                     .attributions.put( Arrays.asList( new Attribution( Joiner.on( ", " ).join( sfds.getNames() ) ) ) );
-
                 
 
                 SimpleFeatureIterator featureIterator = features.features();
@@ -217,23 +215,27 @@ public class ResourceInfoPanel
                                 .collect( Collectors.toList() );
                         OlFeature feature = new OlFeature();
                         feature.name.set( featureSource.getName().toString() );
-                        if(geometry instanceof Polygon) {
+                        if (geometry instanceof Polygon) {
                             feature.geometry.set( new PolygonGeometry( coords ) );
-                        } else if(geometry instanceof Point) {
+                        }
+                        else if (geometry instanceof Point) {
                             feature.geometry.set( new PointGeometry( coords.get( 0 ) ) );
-                        } else if(geometry instanceof LinearRing) {
+                        }
+                        else if (geometry instanceof LinearRing) {
                             feature.geometry.set( new LinearRingGeometry( coords ) );
-                        } else if(geometry instanceof MultiLineString) {
-                            feature.geometry.set( new MultilineStringGeometry( coords ) );
-                        } else {
+                        }
+//                        else if (geometry instanceof MultiLineString) {
+//                            feature.geometry.set( new MultilineStringGeometry( coords ) );
+//                        }
+                        else {
                             feature.geometry.set( new PolygonGeometry( coords ) );
                         }
                         for (Object att : simpleFeature.getAttributes()) {
-//                            feature.setAttribute( String.valueOf(att), att );
-                            System.out.println(att);
+                            // feature.setAttribute( String.valueOf(att), att );
+                            System.out.println( att );
                         }
                         for (org.opengis.feature.Property prop : simpleFeature.getProperties()) {
-                            System.out.println(prop);
+                            System.out.println( prop );
                         }
                         
                         vectorSource.addFeature( feature );

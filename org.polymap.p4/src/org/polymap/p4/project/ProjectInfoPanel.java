@@ -17,6 +17,7 @@ package org.polymap.p4.project;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.polymap.core.project.IMap;
@@ -97,6 +98,7 @@ public class ProjectInfoPanel
 
         @Override
         public void createContents( Composite parent ) {
+            getSite().toolkit().createButton( parent, "Checkbox", SWT.CHECK );
             getSite().toolkit().createFlowText( parent, "..." );
         }        
     }

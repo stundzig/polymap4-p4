@@ -14,13 +14,18 @@
  */
 package org.polymap.p4.project;
 
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.swt.graphics.Image;
+
 import org.polymap.core.project.ILayer;
+
 import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Plugin;
+
 import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 
@@ -30,15 +35,12 @@ import org.polymap.rhei.batik.toolkit.md.MdListViewer;
  * org.polymap.core.project.ui.layer.RemoveLayerAction migrated.
  * 
  * @author Joerg Reichert <joerg@mapzone.io>
- *
  */
-public class LayerDeleteActionProvider extends ActionProvider {
-	private static final long serialVersionUID = 6411582131381118166L;
+public class LayerDeleteActionProvider 
+        extends ActionProvider {
 	
 	private static Log log = LogFactory.getLog( LayerDeleteActionProvider.class );
 	
-    private Image image = P4Plugin.instance().imageDescriptor( "resources/icons/png/gray/16/ic_delete_48px.png" ).createImage();
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -48,7 +50,7 @@ public class LayerDeleteActionProvider extends ActionProvider {
 	 */
 	@Override
 	public void update(ViewerCell cell) {
-		cell.setImage(image);
+		cell.setImage( P4Plugin.images().svgImage( "ic_delete_48px.svg", NORMAL24 ) );
 	}
 
 	/*
@@ -59,17 +61,19 @@ public class LayerDeleteActionProvider extends ActionProvider {
 	 * rhei.batik.toolkit.md.MdListViewer, java.lang.Object)
 	 */
 	@Override
-	public void perform(MdListViewer viewer, Object element) {
-		if (element instanceof ILayer) {
-			ILayer layer = (ILayer) element;
-			try {
-				UnitOfWork uow = ProjectRepository.instance.get().newUnitOfWork();
-				uow.removeEntity(layer);
-				layer.parentMap.get().layers.remove(layer);
-				viewer.refresh();
-			} catch (Throwable e) {
-				log.error(e);
-			}
-		}
-	}
+    public void perform( MdListViewer viewer, Object element ) {
+        if (element instanceof ILayer) {
+            ILayer layer = (ILayer)element;
+            try {
+                UnitOfWork uow = ProjectRepository.instance.get().newUnitOfWork();
+                uow.removeEntity( layer );
+                layer.parentMap.get().layers.remove( layer );
+                viewer.refresh();
+            }
+            catch (Throwable e) {
+                log.error( e );
+            }
+        }
+    }
+	
 }

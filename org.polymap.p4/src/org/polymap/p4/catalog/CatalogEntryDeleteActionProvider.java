@@ -14,13 +14,17 @@
  */
 package org.polymap.p4.catalog;
 
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
+
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.swt.graphics.Image;
+
 import org.polymap.core.catalog.local.LocalMetadata;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.ui.StatusDispatcher;
+
 import org.polymap.p4.P4Plugin;
+
 import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 
@@ -30,13 +34,13 @@ import org.polymap.rhei.batik.toolkit.md.MdListViewer;
  */
 public class CatalogEntryDeleteActionProvider
         extends ActionProvider {
-    private static final long serialVersionUID = -2906293958552374122L;
-    private Image image = P4Plugin.instance().imageDescriptor( "resources/icons/png/gray/16/ic_delete_48px.png" ).createImage();
+    
+//    private Image image = P4Plugin.instance().imageDescriptor( "resources/icons/png/gray/16/ic_delete_48px.png" ).createImage();
 
     @Override
     public void update( ViewerCell cell ) {
         if(cell.getElement() instanceof LocalMetadata) {
-            cell.setImage( image );
+            cell.setImage( P4Plugin.images().svgImage( "ic_delete_48px.svg", NORMAL24 ) );
 //          ((TreeItem) cell.getItem()).setData( RWT.CUSTOM_VARIANT, CSS_DELETE );
         } else {
             cell.setImage( null );

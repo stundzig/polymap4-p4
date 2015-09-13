@@ -14,6 +14,8 @@
  */
 package org.polymap.p4.catalog;
 
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -88,10 +90,10 @@ public class CatalogPanel
             @Override
             public void update( ViewerCell cell ) {
                 if (cell.getElement() instanceof IMetadata) {
-                    cell.setImage( P4Plugin.instance().imageForName( "resources/icons/archive.png" ) );
+                    cell.setImage( P4Plugin.images().svgImage( "layers.svg", NORMAL24 ) );
                 }
                 else if (cell.getElement() == MetadataContentProvider.LOADING) {
-                    cell.setImage( BatikPlugin.instance().imageForName( "resources/icons/md/loading24.gif" ) );
+                    cell.setImage( BatikPlugin.images().image( "resources/icons/loading24.gif" ) );
                 }
                 else {
                     cell.setImage( null );

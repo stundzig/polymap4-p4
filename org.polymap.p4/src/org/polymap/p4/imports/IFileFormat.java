@@ -19,10 +19,10 @@ import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 
-
 /**
+ * 
  * @author Joerg Reichert <joerg@mapzone.io>
- *
+ * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public interface IFileFormat {
 
@@ -33,15 +33,15 @@ public interface IFileFormat {
     public String getImageName();
     
     public default String getImagePath() {
-        return "resources/icons/png/gray/16/" + getImageName() + ".png";
+        return getImageName() + ".svg";
     }
 
     public static String getUnknownFileImagePath() {
-        return "resources/icons/png/gray/16/unknown_file.png";
+        return "unknown_file.svg";
     }
 
     public static String getMultipleFileImagePath() {
-        return "resources/icons/png/gray/16/file-multiple.png";
+        return "file-multiple.svg";
     }
     
     public static <T extends IFileFormat> T getFileFormat( File file, List<T> values ) {

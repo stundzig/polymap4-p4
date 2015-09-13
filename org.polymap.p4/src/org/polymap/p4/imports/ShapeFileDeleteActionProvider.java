@@ -14,17 +14,23 @@
  */
 package org.polymap.p4.imports;
 
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
+
 import java.io.File;
+
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.swt.graphics.Point;
+
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.ui.StatusDispatcher;
+
 import org.polymap.p4.P4Plugin;
+
 import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 
@@ -46,8 +52,6 @@ public class ShapeFileDeleteActionProvider
     
     private UpdatableList updatableList;
     
-    private Image image = P4Plugin.instance().imageDescriptor( "resources/icons/png/gray/16/ic_delete_48px.png" ).createImage();
-
 
     /**
      * 
@@ -60,7 +64,7 @@ public class ShapeFileDeleteActionProvider
 
     @Override
     public void update( ViewerCell cell ) {
-        cell.setImage( image );
+        cell.setImage( P4Plugin.images().svgImage( "ic_delete_48px.svg", NORMAL24 ) );
         // TODO: doesn't work as cell.getItem() represents the hole row (= TreeItem), cell.getControl() doesn't work either
 //        ((TreeItem) cell.getItem()).setData( RWT.CUSTOM_VARIANT, CSS_DELETE );
     }

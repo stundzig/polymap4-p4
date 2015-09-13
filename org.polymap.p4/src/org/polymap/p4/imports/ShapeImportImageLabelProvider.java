@@ -14,16 +14,20 @@
  */
 package org.polymap.p4.imports;
 
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
+
 import java.io.File;
+
 import java.util.Arrays;
 import java.util.Optional;
 
 import org.eclipse.jface.viewers.ViewerCell;
+
 import org.polymap.p4.P4Plugin;
 
 /**
+ * 
  * @author Joerg Reichert <joerg@mapzone.io>
- *
  */
 public class ShapeImportImageLabelProvider
         extends AbstractShapeImportCellLabelProvider {
@@ -37,19 +41,19 @@ public class ShapeImportImageLabelProvider
             Optional<ArchiveFormats> ext = Arrays.asList( ArchiveFormats.values() ).stream()
                     .filter( f -> str.contains( "." + f.getFileExtension() ) ).findFirst();
             if (ext.isPresent()) {
-                cell.setImage( P4Plugin.instance().imageForName( ext.get().getImagePath() ) );
+                cell.setImage( P4Plugin.images().svgImage( ext.get().getImagePath(), NORMAL24 ) );
             }
             else {
-                cell.setImage( P4Plugin.instance().imageForName( IFileFormat.getMultipleFileImagePath() ) );
+                cell.setImage( P4Plugin.images().svgImage( IFileFormat.getMultipleFileImagePath(), NORMAL24 ) );
             }
         }
         else if (elem instanceof File) {
             ShapeFileFormats shapeFileFormat = ShapeFileFormats.getFileFormat( (File)elem );
             if (shapeFileFormat != null) {
-                cell.setImage( P4Plugin.instance().imageForName( shapeFileFormat.getImagePath() ) );
+                cell.setImage( P4Plugin.images().svgImage( shapeFileFormat.getImagePath(), NORMAL24 ) );
             }
             else {
-                cell.setImage( P4Plugin.instance().imageForName( IFileFormat.getUnknownFileImagePath() ) );
+                cell.setImage( P4Plugin.images().svgImage( IFileFormat.getUnknownFileImagePath(), NORMAL24 ) );
             }
         }
     }

@@ -14,6 +14,8 @@
  */
 package org.polymap.p4.project;
 
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,7 +91,8 @@ public class LayersPanel
         return parentPanel()
                 .filter( parent -> parent instanceof ProjectMapPanel )
                 .map( parent -> {
-                    getSite().setTitle( "Layers" );
+                    getSite().setIcon( P4Plugin.images().svgImage( "layers.svg", NORMAL24 ) );
+                    getSite().setTitle( "" );
                     getSite().setPreferredWidth( 200 );
                     return true;
                 })
@@ -99,9 +102,6 @@ public class LayersPanel
 
     @Override
     public void init() {
-        getSite().setTitle( "Layers" );
-        getSite().setPreferredWidth( 200 );
-
         uow = uowProvider.get().newTx( this ).start( Propagation.MANDATORY );
         mapViewer = ((ProjectMapPanel)parentPanel().get()).mapViewer;
     }
@@ -123,7 +123,7 @@ public class LayersPanel
                 ILayer layer = (ILayer)cell.getElement();
                 cell.setImage( legendGraphics.containsKey( layer.id() )
                         ? legendGraphics.get( layer.id() )
-                        : P4Plugin.instance().imageForName( "resources/icons/layers.png" ) );
+                        : P4Plugin.images().svgImage( "layers.svg", NORMAL24 ) );
                 
 //                new UIJob( "Legend graphic" ) {
 //                    @Override

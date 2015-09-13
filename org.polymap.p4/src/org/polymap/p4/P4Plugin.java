@@ -14,46 +14,38 @@
  */
 package org.polymap.p4;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Optional;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.polymap.core.CorePlugin;
 import org.polymap.core.data.pipeline.DataSourceDescription;
 import org.polymap.core.data.pipeline.Pipeline;
 import org.polymap.core.data.pipeline.PipelineProcessor;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
-import org.polymap.core.ui.ImageRegistryHelper;
+import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
+import org.polymap.rhei.batik.contribution.ContributionManager;
+
+import org.polymap.service.geoserver.GeoServerServlet;
+
 import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.catalog.LocalCatalog;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
 import org.polymap.p4.project.NewLayerContribution;
 import org.polymap.p4.project.ProjectRepository;
-import org.polymap.rhei.batik.Context;
-import org.polymap.rhei.batik.ant.ImageConfiguration;
-import org.polymap.rhei.batik.ant.ImageConfiguration.ReplaceConfiguration;
-import org.polymap.rhei.batik.ant.Scale;
-import org.polymap.rhei.batik.ant.Svg2Png;
-import org.polymap.rhei.batik.ant.Svg2Png.COLOR_TYPE;
-import org.polymap.rhei.batik.contribution.ContributionManager;
-import org.polymap.service.geoserver.GeoServerServlet;
 
 /**
  *
@@ -62,35 +54,48 @@ import org.polymap.service.geoserver.GeoServerServlet;
 public class P4Plugin
         extends AbstractUIPlugin {
 
-    private static Log         log                      = LogFactory.getLog( P4Plugin.class );
+    private static Log              log = LogFactory.getLog( P4Plugin.class );
 
-    public static final String ID                       = "org.polymap.p4";                   //$NON-NLS-1$
+    public static final String      ID = "org.polymap.p4";
 
     /** The globale {@link Context} scope for the {@link P4Plugin}. */
-    public static final String Scope                    = "org.polymap.p4";                   //$NON-NLS-1$
+    public static final String      Scope = "org.polymap.p4";
 
-    private static P4Plugin    instance;
+    private static P4Plugin         instance;
 
-    private static String[]    IMAGE_CONTAINING_PLUGINS = new String[] { "org.polymap.p4", "org.polymap.rhei.batik",
-            "org.polymap.core.mapeditor", "org.polymap.core.project", "org.polymap.core.catalog",
-            "org.polymap.core.data", "org.polymap.core" };
+//    private static String[]         IMAGE_CONTAINING_PLUGINS = new String[] { 
+//            "org.polymap.p4", 
+//            "org.polymap.rhei.batik",
+//            "org.polymap.core.mapeditor", 
+//            "org.polymap.core.project", 
+//            "org.polymap.core.catalog",
+//            "org.polymap.core.data", 
+//            "org.polymap.core" };
 
 
     public static P4Plugin instance() {
         return instance;
     }
 
+    /**
+     * Shortcut for <code>instance().images</code>.
+     */
+    public static SvgImageRegistryHelper images() {
+        return instance().images;
+    }
+    
+    
     // instance *******************************************
 
-    private ImageRegistryHelper   images      = new ImageRegistryHelper( this );
+    public SvgImageRegistryHelper   images = new SvgImageRegistryHelper( this );
 
-    public LocalCatalog           localCatalog;
+    public LocalCatalog             localCatalog;
 
-    public LocalResolver          localResolver;
+    public LocalResolver            localResolver;
 
-    private ServiceTracker        httpServiceTracker;
+    private ServiceTracker          httpServiceTracker;
 
-    private Optional<HttpService> httpService = Optional.empty();
+    private Optional<HttpService>   httpService = Optional.empty();
 
 
     public void start( BundleContext context ) throws Exception {
@@ -104,7 +109,7 @@ public class P4Plugin
 
         // register HTTP resource
         httpServiceTracker = new ServiceTracker( context, HttpService.class.getName(), null ) {
-
+            @Override
             public Object addingService( ServiceReference reference ) {
                 httpService = Optional.ofNullable( (HttpService)super.addingService( reference ) );
 
@@ -114,13 +119,10 @@ public class P4Plugin
                         IMap map = uow.entity( IMap.class, "root" );
                         try {
                             service.registerServlet( "/wms", new GeoServerServlet() {
-
                                 @Override
                                 public IMap getMap() {
                                     return map;
                                 }
-
-
                                 @Override
                                 protected Pipeline createPipeline( ILayer layer,
                                         Class<? extends PipelineProcessor> usecase ) throws Exception {
@@ -129,19 +131,20 @@ public class P4Plugin
                                     DataSourceDescription dsd = LocalResolver
                                             .instance()
                                             .connectLayer( layer, monitor )
-                                            .orElseThrow(
-                                                    ( ) -> new RuntimeException( "No data source for layer: " + layer ) );
+                                            .orElseThrow( () -> new RuntimeException( "No data source for layer: " + layer ) );
 
                                     // create pipeline for it
                                     return P4PipelineIncubator.forLayer( layer ).newPipeline( usecase, dsd, null );
                                 }
                             }, null, null );
                         }
+                        catch (NoClassDefFoundError e) {
+                            log.warn( "No GeoServer plugin found!" );
+                        }
                         catch (Exception e) {
                             throw new RuntimeException( e );
                         }
                     } );
-
                 return httpService.get();
             }
         };
@@ -163,79 +166,7 @@ public class P4Plugin
 
 
     public HttpService httpService() {
-        return httpService.orElseThrow( ( ) -> new IllegalStateException( "No HTTP service!" ) );
-    }
-
-
-    public Image imageForDescriptor( ImageDescriptor descriptor, String key ) {
-        return images.image( descriptor, key );
-    }
-
-
-    public Image imageForName( String path ) {
-        return images.image( imageDescriptor( path ), path );
-    }
-
-
-    public ImageDescriptor imageDescriptor( String path ) {
-        ImageRegistry imageRegistry = images.getImageRegistry();
-        ImageDescriptor image = imageRegistry.getDescriptor( path );
-        if (image == null) {
-            for (String pluginId : IMAGE_CONTAINING_PLUGINS) {
-                image = AbstractUIPlugin.imageDescriptorFromPlugin( pluginId, path );
-                if (image != null) {
-                    imageRegistry.put( path, image );
-                    break;
-                }
-            }
-            if (image == null) {
-                int index = path.lastIndexOf( "/" );
-                if (index >= 0) {
-                    String imageFile = path.substring( index + 1 );
-                    String completeFolderPath = path.substring( 0, index );
-                    index = completeFolderPath.lastIndexOf( "/" );
-                    if (index >= 0) {
-                        String size = completeFolderPath.substring( index + 1 );
-                        String folderPath = completeFolderPath.substring( 0, index );
-                        index = folderPath.lastIndexOf( "/" );
-                        if (index >= 0) {
-                            String colorScheme = folderPath.substring( index + 1 );
-                            folderPath = folderPath.substring( 0, index );
-                            String svgPath = folderPath + "/" + imageFile.replace( ".png", ".svg" );
-                            svgPath = svgPath.replace( "/png/", "/svg/" );
-                            try (InputStream svgInput = getClass().getClassLoader().getResourceAsStream( svgPath )) {
-                                ImageConfiguration imageConfig = new ImageConfiguration();
-                                imageConfig.setName( colorScheme );
-                                if ("gray".equals( colorScheme )) {
-                                    imageConfig.setRGB( new RGB( 95, 95, 95 ) );
-                                    ReplaceConfiguration replaceConfig = new ReplaceConfiguration( new RGB( 0, 0, 0 ),
-                                            new RGB( 95, 95, 95 ) );
-                                    imageConfig.getReplaceConfigurations().add( replaceConfig );
-                                    imageConfig.setColorType( COLOR_TYPE.ARGB );
-                                }
-                                Svg2Png svg2Png = new Svg2Png();
-                                Scale scale = Scale.getAsScale( Integer.valueOf( size ) );
-                                Path temp = Files.createTempDirectory( ID );
-                                Path absolutePNGPath = temp.resolve( folderPath );
-                                svg2Png.transcode( absolutePNGPath.toString(), imageFile.replace( ".png", ".svg" ),
-                                        svgInput, Collections.singletonList( scale ),
-                                        Collections.singletonList( imageConfig ) );
-                                Path absolutePNGFilePath = temp.resolve( completeFolderPath ).resolve( imageFile );
-                                image = ImageDescriptor.createFromURL( absolutePNGFilePath.toFile()
-                                        .toURI().toURL() );
-                                if (image != null) {
-                                    imageRegistry.put( path, image );
-                                }
-                            }
-                            catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return image;
+        return httpService.orElseThrow( () -> new IllegalStateException( "No HTTP service!" ) );
     }
 
 }
