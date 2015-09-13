@@ -16,8 +16,6 @@ package org.polymap.p4.imports;
 
 import static org.polymap.rhei.batik.toolkit.md.dp.dp;
 
-import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,15 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import java.io.File;
+import java.io.InputStream;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.jface.viewers.IOpenListener;
-import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.rap.rwt.RWT;
-import org.eclipse.rap.rwt.client.ClientFile;
-import org.eclipse.rap.rwt.client.service.ClientFileUploader;
-import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
-import org.eclipse.rap.rwt.widgets.FileUpload;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -45,13 +40,30 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.OpenEvent;
+
+import org.eclipse.rap.rwt.RWT;
+import org.eclipse.rap.rwt.client.ClientFile;
+import org.eclipse.rap.rwt.client.service.ClientFileUploader;
+import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
+
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.UIUtils;
+
+import org.polymap.rhei.batik.DefaultPanel;
+import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.PanelPath;
+import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
+import org.polymap.rhei.batik.toolkit.md.MdListViewer;
+import org.polymap.rhei.batik.toolkit.md.MdToolkit;
+import org.polymap.rhei.batik.toolkit.md.Snackbar;
+import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
+
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.CatalogPanel;
@@ -59,13 +71,6 @@ import org.polymap.p4.map.ProjectMapPanel;
 import org.polymap.rap.updownload.upload.IUploadHandler;
 import org.polymap.rap.updownload.upload.Upload;
 import org.polymap.rap.updownload.upload.UploadService;
-import org.polymap.rhei.batik.DefaultPanel;
-import org.polymap.rhei.batik.PanelIdentifier;
-import org.polymap.rhei.batik.PanelPath;
-import org.polymap.rhei.batik.toolkit.md.MdListViewer;
-import org.polymap.rhei.batik.toolkit.md.MdToolkit;
-import org.polymap.rhei.batik.toolkit.md.Snackbar;
-import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
 
 /**
  * 
@@ -112,10 +117,6 @@ public class ShapeImportPanel
         tk = (MdToolkit)getSite().toolkit();
 
         DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
-
-            private static final long serialVersionUID = 4701279360320517568L;
-
-
             @Override
             public void drop( DropTargetEvent ev ) {
                 ClientFile[] clientFiles = (ClientFile[])ev.data;
@@ -130,19 +131,14 @@ public class ShapeImportPanel
             }
         };
 
-        fab = tk.createFab(P4Plugin.instance().imageForName( "resources/icons/png/gray/16/import.png" ), SWT.UP | SWT.RIGHT);
+        // FAB
+        fab = tk.createFab( /*P4Plugin.instance().imageForName( "resources/icons/png/gray/16/import.png" ), SWT.UP | SWT.RIGHT*/ );
         fab.setToolTipText( "Import this uploaded Shapefile" );
         fab.setVisible( false );
+        fab.moveAbove( null );
 
-        FileUpload uploadFab = tk.createFileUploadFab( "+", SWT.DOWN | SWT.RIGHT);
-        uploadFab.setToolTipText( i18n.get( "select" ) );
-        uploadFab.setVisible( true );
-        Upload upload = new Upload( parent, uploadFab, SWT.NONE/* , Upload.SHOW_PROGRESS */);
-        upload.setHandler( ShapeImportPanel.this );
-
-        //
-        fileList = tk.createListViewer( parent, SWT.VIRTUAL );
-
+        // filelIst
+        fileList = tk.createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION );
         fileList.setContentProvider( new ShapeImportTreeContentProvider( files ) );
         fileList.iconProvider.set( new ShapeImportImageLabelProvider() );
         fileList.firstLineLabelProvider.set( new ShapeImportCellLabelProvider() );
@@ -154,7 +150,6 @@ public class ShapeImportPanel
         initFileList();
 
         fileList.addOpenListener( new IOpenListener() {
-
             @SuppressWarnings("unchecked")
             @Override
             public void open( OpenEvent ev ) {
@@ -163,20 +158,24 @@ public class ShapeImportPanel
                 } );
             }
         } );
+        FormDataFactory.on( fileList.getControl() ).fill().bottom( 90, -5 );
         
         DropTarget fileListDropTarget = new DropTarget( fileList.getControl(), DND.DROP_MOVE );
         fileListDropTarget.setTransfer( new Transfer[] { ClientFileTransfer.getInstance() } );
-        fileListDropTarget.addDropListener(dropTargetAdapter);
+        fileListDropTarget.addDropListener( dropTargetAdapter );
 
-        FormDataFactory.on( fileList.getControl() ).fill();
+        // DnD and upload
+        Upload upload = new Upload( parent, SWT.NONE/* , Upload.SHOW_PROGRESS */);
+        upload.setImage( P4Plugin.images().svgImage( "upload.svg", SvgImageRegistryHelper.NORMAL48 ) );
+        upload.setText( "" );
+        upload.setToolTipText( "<b>Drop</b> files here<br/>or <b>click</b> to open file dialog" );
+        upload.setHandler( ShapeImportPanel.this );
+        FormDataFactory.on( upload ).fill().bottom( 100, -5 ).top( 90 );
+        upload.moveAbove( null );
 
-        // DnD
-        Label dropLabel = tk.createLabel( parent, "Drop files here...", SWT.CENTER );
-        
-        DropTarget labelDropTarget = new DropTarget( dropLabel, DND.DROP_MOVE );
+        DropTarget labelDropTarget = new DropTarget( upload, DND.DROP_MOVE );
         labelDropTarget.setTransfer( new Transfer[] { ClientFileTransfer.getInstance() } );
-        labelDropTarget.addDropListener(dropTargetAdapter);
-        FormDataFactory.on( dropLabel ).top( 90 ).left( 0 ).right( 100 ).bottom( 100 );
+        labelDropTarget.addDropListener( dropTargetAdapter );
 
         snackBar = tk.createFloatingSnackbar( SWT.NONE );
     }
