@@ -12,7 +12,7 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
+package org.polymap.p4.imports.labels;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -39,6 +39,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeItem;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+import org.polymap.p4.imports.ShapeFileValidator;
+import org.polymap.p4.imports.ValidationEvent;
+import org.polymap.p4.imports.formats.ArchiveFormats;
+import org.polymap.p4.imports.formats.ShapeFileFormats;
 
 import com.google.common.base.Joiner;
 
@@ -48,6 +52,11 @@ import com.google.common.base.Joiner;
  */
 public class MessageCellLabelProvider
         extends AbstractShapeImportCellLabelProvider {
+
+    /**
+     * 
+     */
+    private static final String LINE_BREAK = "\n";
 
     private Map<Object,StatusEventHandler>           statusEventHandlers = new HashMap<Object,StatusEventHandler>();
 
@@ -133,7 +142,7 @@ public class MessageCellLabelProvider
         Rectangle cellBounds = cell.getControl().getBounds();
         if(point.x > cellBounds.width - 10) {
             List<String> tokens = new ArrayList<String>();
-            for(String token : text.split("\n")) {
+            for(String token : text.split(LINE_BREAK)) {
                 int currentWidth = fontMetrics.getAverageCharWidth() * token.toCharArray().length;
                 if(currentWidth > cellBounds.width - 10) {
                     int index = token.lastIndexOf( " " );
@@ -141,11 +150,11 @@ public class MessageCellLabelProvider
                         index = Math.round( (token.length() * (cellBounds.width - 10)) / currentWidth);
                     }
                     StringBuilder sb = new StringBuilder(token);
-                    sb.insert( index, "\n" );
+                    sb.insert( index, LINE_BREAK );
                     tokens.add(sb.toString());
                 }
             }
-            setCellText(cell, Joiner.on( "\n" ).join( tokens ));
+            setCellText(cell, Joiner.on( LINE_BREAK ).join( tokens ));
         } else {
             cell.setText( text );
         }

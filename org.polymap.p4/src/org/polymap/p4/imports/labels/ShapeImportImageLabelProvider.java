@@ -12,18 +12,19 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
+package org.polymap.p4.imports.labels;
 
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
 import java.io.File;
-
 import java.util.Arrays;
 import java.util.Optional;
 
 import org.eclipse.jface.viewers.ViewerCell;
-
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.imports.formats.ArchiveFormats;
+import org.polymap.p4.imports.formats.IFileFormat;
+import org.polymap.p4.imports.formats.ShapeFileFormats;
 
 /**
  * 

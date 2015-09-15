@@ -12,9 +12,10 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
+package org.polymap.p4.imports.formats;
 
-enum ArchiveFormats implements IFileFormat {
+
+public enum ArchiveFormats implements IFileFormat {
     // @formatter:off
     ZIP("zip", "application/zip"), 
     TAR("tar", "tape archiver"), 

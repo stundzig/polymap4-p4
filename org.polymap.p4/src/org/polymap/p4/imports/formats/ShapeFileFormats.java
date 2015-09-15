@@ -12,13 +12,13 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
+package org.polymap.p4.imports.formats;
 
 import java.io.File;
 import java.util.Arrays;
 
 // https://en.wikipedia.org/wiki/Shapefile
-enum ShapeFileFormats implements IFileFormat{
+public enum ShapeFileFormats implements IFileFormat{
     // @formatter:off
     AIH("aih", "an attribute index of the active fields in a table"), 
     AIN("ain", "an attribute index of the active fields in a table"), 

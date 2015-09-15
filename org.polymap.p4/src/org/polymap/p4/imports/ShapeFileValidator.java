@@ -14,7 +14,7 @@
  */
 package org.polymap.p4.imports;
 
-import static org.polymap.p4.imports.IFileFormat.getFileExtension;
+import static org.polymap.p4.imports.formats.IFileFormat.getFileExtension;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.polymap.core.catalog.MetadataQuery;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.imports.formats.ArchiveFormats;
+import org.polymap.p4.imports.formats.ShapeFileFormats;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;

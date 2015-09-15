@@ -70,7 +70,7 @@ public class FileImporter
     private List<File>                      results = new ArrayList<>();
     
     
-    protected FileImporter() {
+    public FileImporter() {
         charset.set( Charset.forName( "UTF8" ) );
         try {
             targetDir.set( Files.createTempDirectory( "P4-" ).toFile() );

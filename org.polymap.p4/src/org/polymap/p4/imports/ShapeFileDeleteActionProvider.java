@@ -17,20 +17,16 @@ package org.polymap.p4.imports;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
 import java.io.File;
-
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.ViewerCell;
-
 import org.eclipse.swt.graphics.Point;
-
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.ui.StatusDispatcher;
-
 import org.polymap.p4.P4Plugin;
-
+import org.polymap.p4.imports.ops.ShapeDeleteOperation;
 import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 

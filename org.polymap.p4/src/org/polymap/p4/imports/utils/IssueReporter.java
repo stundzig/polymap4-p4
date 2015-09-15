@@ -12,28 +12,24 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
+package org.polymap.p4.imports.utils;
 
-import java.io.File;
-
-import org.eclipse.jface.viewers.ViewerCell;
+import org.polymap.rhei.batik.toolkit.md.Snackbar;
+import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
 
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
  *
  */
-public class ShapeImportCellLabelProvider extends AbstractShapeImportCellLabelProvider {
+public class IssueReporter {
+    private Snackbar snackbar;
+    
+    public IssueReporter(Snackbar snackbar) {
+        this.snackbar = snackbar;
+    }
 
-    @Override
-    public void update( ViewerCell cell ) {
-        handleBackgroundColor( cell );
-        Object elem = cell.getElement();
-        if (elem instanceof String) {
-            cell.setText( String.valueOf( elem) );
-        }
-        else if (elem instanceof File) {
-            cell.setText( ((File)elem).getName() );
-        }
+    public void showIssue( MessageType messageStyle, String message ) {
+        snackbar.showIssue( messageStyle, message );
     }
 }
