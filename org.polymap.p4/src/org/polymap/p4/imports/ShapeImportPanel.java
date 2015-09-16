@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -66,17 +67,17 @@ public class ShapeImportPanel
 
     @Override
     public boolean wantsToBeShown() {
-        if (parentPanel().isPresent() && parentPanel().get() instanceof ProjectMapPanel) {
+        return parentPanel().filter( parent -> parent instanceof ProjectMapPanel ).map( parent -> {
             getSite().setTitle( "Import" );
-            getSite().setPreferredWidth( 300 );
+            getSite().setPreferredWidth( 350 );
             return true;
-        }
-        return false;
+        } ).orElse( false );
     }
 
 
     @Override
     public void createContents( Composite parent ) {
+        
         parent.setLayout( FormLayoutFactory.defaults().spacing( dp( 16 ).pix() ).create() );
         MdToolkit tk = (MdToolkit)getSite().toolkit();
 
@@ -103,6 +104,8 @@ public class ShapeImportPanel
         Upload upload = new Upload( parent, SWT.NONE/* , Upload.SHOW_PROGRESS */);
         upload.setImage( P4Plugin.images().svgImage( "upload.svg", SvgImageRegistryHelper.NORMAL48 ) );
         upload.setText( "" );
+        upload.setData( RWT.TOOLTIP_MARKUP_ENABLED, true );
+        upload.setData( /*MarkupValidator.MARKUP_VALIDATION_DISABLED*/"org.eclipse.rap.rwt.markupValidationDisabled", false ); 
         upload.setToolTipText( "<b>Drop</b> files here<br/>or <b>click</b> to open file dialog" );
         upload.setHandler( uploadHelper );
         FormDataFactory.on( upload ).fill().bottom( 100, -5 ).top( 90 );
@@ -118,7 +121,8 @@ public class ShapeImportPanel
             IssueReporter issueReporter, DropTargetAdapter dropTargetAdapter, Map<String,Map<String,List<File>>> files ) {
 
         initFileListProviders( files, fileList, shapeImportPanelUpdater );
-        // label providers have to be in place here, as otherwise the tileHeight wouldn't be
+        // label providers have to be in place here, as otherwise the tileHeight
+        // wouldn't be
         // adjusted and then the custom height is 0, leading to a / by zero in
         // getVisibleRowCount
         initFileListWithContent( issueReporter, files, fileList, shapeImportPanelUpdater );
@@ -126,7 +130,7 @@ public class ShapeImportPanel
         initOpenListener( fileList );
 
         enableDropTarget( dropTargetAdapter, fileList );
-        
+
         FormDataFactory.on( fileList.getControl() ).fill().bottom( 90, -5 );
         return fileList;
     }
