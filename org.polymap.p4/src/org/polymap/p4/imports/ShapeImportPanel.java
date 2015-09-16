@@ -68,15 +68,21 @@ public class ShapeImportPanel
     @Override
     public boolean wantsToBeShown() {
         return parentPanel().filter( parent -> parent instanceof ProjectMapPanel ).map( parent -> {
-            getSite().setTitle( "Import" );
+            setTitle();
             getSite().setPreferredWidth( 350 );
             return true;
         } ).orElse( false );
     }
 
 
+    private void setTitle() {
+        getSite().setTitle( "Import" );
+    }
+
+
     @Override
     public void createContents( Composite parent ) {
+        setTitle();
         
         parent.setLayout( FormLayoutFactory.defaults().spacing( dp( 16 ).pix() ).create() );
         MdToolkit tk = (MdToolkit)getSite().toolkit();
