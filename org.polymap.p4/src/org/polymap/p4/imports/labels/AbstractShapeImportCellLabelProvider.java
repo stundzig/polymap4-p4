@@ -31,15 +31,27 @@ public abstract class AbstractShapeImportCellLabelProvider
 
 
     protected void handleBackgroundColor( ViewerCell cell ) {
-        ViewerRow row = cell.getViewerRow();
-        TreeItem treeItem = (TreeItem)cell.getViewerRow().getItem();
         String data;
-        if (treeItem.getExpanded()) {
+        if (isCellExpanded(cell)) {
             data = CSS_FIRST_ROW;
         }
         else {
             data = null;
         }
-        ((TreeItem)row.getItem()).setData( RWT.CUSTOM_VARIANT, data );
+        setCellData( cell, RWT.CUSTOM_VARIANT, data );
+    }
+
+    protected void setCellData( ViewerCell cell, String key, String data ) {
+        ViewerRow row = cell.getViewerRow();
+        ((TreeItem)row.getItem()).setData( key, data );
+    }
+    
+    protected boolean isCellExpanded(ViewerCell cell) {
+        TreeItem treeItem = getTreeItem( cell );
+        return treeItem.getExpanded();
+    }
+
+    protected TreeItem getTreeItem( ViewerCell cell ) {
+        return (TreeItem)cell.getViewerRow().getItem();
     }
 }

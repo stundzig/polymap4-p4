@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -110,18 +111,25 @@ public class MessageCellLabelProvider
                     }
                 }
                 else {
-                    handleStatus( cell, ev.getSeverity(), ev.getMessage() );
+                    handleStatus( cell, ev );
                 }
             } );
         }
     }
 
 
-    public void handleStatus( ViewerCell cell, int severity, String message ) {
+    public void handleStatus( ViewerCell cell, ValidationEvent event ) {
+        int severity = event.getSeverity();
         if (severity != IStatus.OK) {
             ViewerRow row = cell.getViewerRow();
             if (row != null) {
                 applyStyle( cell, severity );
+                String message;
+                if(event.getSource() instanceof File && cell.getElement() instanceof String) {
+                    message = "There are issues with one or more contained files.";
+                } else {
+                    message = event.getMessage();
+                }
                 setCellText( cell, message );
             }
         }
@@ -272,6 +280,15 @@ public class MessageCellLabelProvider
             }
             return elementString.equals( src );
 
+        }
+        if (element instanceof String && src instanceof File) {
+            File srcFile = (File)src;
+            String elementString = (String)element;
+            if (elementString.contains( "/" )) {
+                elementString = elementString.substring( elementString.indexOf( "/" ) + 1 ).trim();
+            }
+            String baseName = FilenameUtils.getBaseName( srcFile.getName() );
+            return elementString.equals( baseName );
         }
         return element.equals( src );
     }
