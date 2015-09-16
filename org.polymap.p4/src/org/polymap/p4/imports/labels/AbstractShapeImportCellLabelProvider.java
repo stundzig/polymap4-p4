@@ -27,17 +27,19 @@ import org.eclipse.swt.widgets.TreeItem;
 public abstract class AbstractShapeImportCellLabelProvider
         extends CellLabelProvider {
 
-    private static final Object CSS_FIRST_ROW = "firstRow";
+    private static final String CSS_FIRST_ROW = "firstRow";
 
 
     protected void handleBackgroundColor( ViewerCell cell ) {
         ViewerRow row = cell.getViewerRow();
         TreeItem treeItem = (TreeItem)cell.getViewerRow().getItem();
-        if (treeItem.getParentItem() != null) {
-            ((TreeItem)row.getItem()).setData( RWT.CUSTOM_VARIANT, CSS_FIRST_ROW );
+        String data;
+        if (treeItem.getExpanded()) {
+            data = CSS_FIRST_ROW;
         }
         else {
-            ((TreeItem)row.getItem()).setData( RWT.CUSTOM_VARIANT, null );
+            data = null;
         }
+        ((TreeItem)row.getItem()).setData( RWT.CUSTOM_VARIANT, data );
     }
 }
