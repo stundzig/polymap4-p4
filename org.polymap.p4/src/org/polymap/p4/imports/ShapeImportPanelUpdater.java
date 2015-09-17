@@ -16,13 +16,13 @@ package org.polymap.p4.imports;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.polymap.core.ui.UIUtils;
+import org.polymap.p4.imports.formats.FileDescription;
 import org.polymap.p4.imports.formats.ShapeFileFormats;
 import org.polymap.p4.imports.utils.IssueReporter;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
@@ -35,23 +35,23 @@ import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
 public class ShapeImportPanelUpdater
         implements UpdatableList {
 
-    private final Map<String,Map<String,List<File>>> files;
+    private final List<FileDescription> files;
 
-    private final MdListViewer                       fileList;
+    private final MdListViewer          fileList;
 
-    private final Button                             importFab;
+    private final Button                importFab;
 
-    private SelectionAdapter                         selectionListener = null;
+    private SelectionAdapter            selectionListener = null;
 
-    private final IssueReporter                      issueReporter;
+    private final IssueReporter         issueReporter;
 
-    private final ShapeFileImporter                  shapeFileImporter;
+    private final ShapeFileImporter     shapeFileImporter;
 
 
     /**
      * 
      */
-    public ShapeImportPanelUpdater( Map<String,Map<String,List<File>>> files, MdListViewer fileList, Button importFab,
+    public ShapeImportPanelUpdater( List<FileDescription> files, MdListViewer fileList, Button importFab,
             IssueReporter issueReporter, ShapeFileImporter shapeFileImporter ) {
         this.files = files;
         this.issueReporter = issueReporter;
@@ -68,17 +68,8 @@ public class ShapeImportPanelUpdater
 
         boolean valid = new ShapeFileValidator().validateAll( files );
         if (valid) {
-            List<?> shps = files
-                    .values()
-                    .stream()
-                    .flatMap(
-                            map -> map
-                                    .values()
-                                    .stream()
-                                    .flatMap(
-                                            fs -> fs.stream().filter(
-                                                    f -> f.getName().toLowerCase()
-                                                            .endsWith( "." + ShapeFileFormats.SHP ) ) ) )
+            List<FileDescription> shps = files.stream().flatMap( file -> file.getContainedFiles().stream() )
+                    .filter( cf -> cf.name.get().toLowerCase().endsWith( "." + ShapeFileFormats.SHP ) )
                     .collect( Collectors.toList() );
             if (shps.size() > 0) {
                 if (selectionListener != null) {

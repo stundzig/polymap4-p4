@@ -14,7 +14,7 @@
  */
 package org.polymap.p4.imports.formats;
 
-import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
@@ -31,7 +31,7 @@ public interface IFileFormat {
     public String getDescription();
     
     public String getImageName();
-    
+
     public default String getImagePath() {
         return getImageName() + ".svg";
     }
@@ -43,10 +43,18 @@ public interface IFileFormat {
     public static String getMultipleFileImagePath() {
         return "file-multiple.svg";
     }
+
+    public static IFileFormat getKnownFileFormat( String fileName ) {
+        IFileFormat value = getFileFormat( fileName, Arrays.asList( ArchiveFormats.values()));
+        if(value == null) {
+            value = getFileFormat( fileName, Arrays.asList( ShapeFileFormats.values()));
+        }
+        return value;
+    }
     
-    public static <T extends IFileFormat> T getFileFormat( File file, List<T> values ) {
+    public static <T extends IFileFormat> T getFileFormat( String fileName, List<T> values ) {
         for (T value : values) {
-            if (getFileExtension( file.getName() ).equalsIgnoreCase( value.getFileExtension() )) {
+            if (getFileExtension( fileName ).equalsIgnoreCase( value.getFileExtension() )) {
                 return value;
             }
         }

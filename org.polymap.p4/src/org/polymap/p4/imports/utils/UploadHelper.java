@@ -17,7 +17,6 @@ package org.polymap.p4.imports.utils;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +31,8 @@ import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.p4.imports.FileImporter;
 import org.polymap.p4.imports.ShapeFileValidator;
 import org.polymap.p4.imports.ShapeImportPanelUpdater;
+import org.polymap.p4.imports.formats.FileDescription;
+import org.polymap.p4.imports.formats.IFileFormat;
 import org.polymap.rap.updownload.upload.IUploadHandler;
 import org.polymap.rap.updownload.upload.UploadService;
 import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
@@ -43,16 +44,16 @@ import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
 public class UploadHelper
         implements IUploadHandler {
 
-    private static Log                               log = LogFactory.getLog( UploadHelper.class );
+    private static Log                    log = LogFactory.getLog( UploadHelper.class );
 
-    private final Map<String,Map<String,List<File>>> files;
+    private final List<FileDescription>   files;
 
-    private final ShapeImportPanelUpdater            shapeImportPanelUpdater;
+    private final ShapeImportPanelUpdater shapeImportPanelUpdater;
 
-    private final IssueReporter                      issueReporter;
+    private final IssueReporter           issueReporter;
 
 
-    public UploadHelper( Map<String,Map<String,List<File>>> files, ShapeImportPanelUpdater shapeImportPanelUpdater,
+    public UploadHelper( List<FileDescription> files, ShapeImportPanelUpdater shapeImportPanelUpdater,
             IssueReporter issueReporter ) {
         this.files = files;
         this.shapeImportPanelUpdater = shapeImportPanelUpdater;
@@ -70,19 +71,14 @@ public class UploadHelper
                 ShapeFileValidator.reportError( clientFile.getName(), "There are no files contained." );
             }
             else {
-                Map<String,List<File>> grouped = FileGroupHelper.groupFilesByName( read );
-                if (!files.containsKey( clientFile.getName() )) {
-                    files.put( clientFile.getName(), grouped );
-                }
-                else {
-                    files.put( clientFile.getName() + "_duplicated", grouped );
-                }
+                FileGroupHelper.fillFilesList(files, clientFile.getName(), clientFile.getSize(), read);
             }
             UIThreadExecutor.async( ( ) -> shapeImportPanelUpdater.updateListAndFAB( clientFile.getName(), true ),
                     UIThreadExecutor.runtimeException() );
         }
         catch (Exception e) {
-            files.put( clientFile.getName(), Collections.EMPTY_MAP );
+            FileDescription fd = new FileDescription().groupName.put( clientFile.getName() );
+            files.add( fd );
             log.error( "Unable to import file.", e );
             UIThreadExecutor.async( ( ) -> {
                 shapeImportPanelUpdater.updateListAndFAB( clientFile.getName(), false );
@@ -91,7 +87,8 @@ public class UploadHelper
             }, UIThreadExecutor.runtimeException() );
         }
     }
-    
+
+
     public DropTargetAdapter createDropTargetAdapter() {
         DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
 
@@ -109,5 +106,5 @@ public class UploadHelper
             }
         };
         return dropTargetAdapter;
-    }    
+    }
 }

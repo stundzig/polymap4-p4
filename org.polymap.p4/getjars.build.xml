@@ -49,6 +49,11 @@
 			<remoteRepository refid="central.repository" />
 
 		    <dependency groupId="org.apache.commons" artifactId="commons-compress" version="1.9" />
+			
+			<!-- testing -->
+		    <dependency groupId="org.mockito" artifactId="mockito-all" version="1.10.19" />
+		    <dependency groupId="org.powermock" artifactId="powermock-module-junit4" version="1.6.2" />
+		    <dependency groupId="org.powermock" artifactId="powermock-api-mockito" version="1.6.2" />
 		</artifact:dependencies>
 	</target>
 

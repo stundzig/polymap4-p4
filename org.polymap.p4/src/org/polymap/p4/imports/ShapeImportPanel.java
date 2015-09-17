@@ -16,11 +16,10 @@ package org.polymap.p4.imports;
 
 import static org.polymap.rhei.batik.toolkit.md.dp.dp;
 
-import java.io.File;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.rap.rwt.RWT;
@@ -37,6 +36,7 @@ import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.imports.formats.FileDescription;
 import org.polymap.p4.imports.labels.MessageCellLabelProvider;
 import org.polymap.p4.imports.labels.ShapeImportCellLabelProvider;
 import org.polymap.p4.imports.labels.ShapeImportImageLabelProvider;
@@ -93,7 +93,7 @@ public class ShapeImportPanel
         MdListViewer fileList = tk.createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION );
 
         IssueReporter issueReporter = new IssueReporter( snackBar );
-        Map<String,Map<String,List<File>>> files = new HashMap<String,Map<String,List<File>>>();
+        List<FileDescription> files = new ArrayList<FileDescription>();
         ShapeImportPanelUpdater shapeImportPanelUpdater = createShapeImportPanelUpdater( importFab, issueReporter,
                 files, fileList );
 
@@ -124,7 +124,7 @@ public class ShapeImportPanel
 
 
     private MdListViewer initFileList( MdListViewer fileList, ShapeImportPanelUpdater shapeImportPanelUpdater,
-            IssueReporter issueReporter, DropTargetAdapter dropTargetAdapter, Map<String,Map<String,List<File>>> files ) {
+            IssueReporter issueReporter, DropTargetAdapter dropTargetAdapter, List<FileDescription> files ) {
 
         initFileListProviders( files, fileList, shapeImportPanelUpdater );
         // label providers have to be in place here, as otherwise the tileHeight
@@ -137,13 +137,15 @@ public class ShapeImportPanel
 
         enableDropTarget( dropTargetAdapter, fileList );
 
+        ColumnViewerToolTipSupport.enableFor( fileList );
+
         FormDataFactory.on( fileList.getControl() ).fill().bottom( 90, -5 );
         return fileList;
     }
 
 
     private ShapeImportPanelUpdater createShapeImportPanelUpdater( Button importFab, IssueReporter issueReporter,
-            Map<String,Map<String,List<File>>> files, MdListViewer fileList ) {
+            List<FileDescription> files, MdListViewer fileList ) {
         ShapeFileImporter shapeFileImporter = new ShapeFileImporter( this );
         ShapeImportPanelUpdater shapeImportPanelUpdater = new ShapeImportPanelUpdater( files, fileList, importFab,
                 issueReporter, shapeFileImporter );
@@ -172,16 +174,17 @@ public class ShapeImportPanel
     }
 
 
-    private void initFileListProviders( Map<String,Map<String,List<File>>> files, MdListViewer fileList,
+    private void initFileListProviders( List<FileDescription> files, MdListViewer fileList,
             ShapeImportPanelUpdater shapeImportPanelUpdater ) {
         fileList.iconProvider.set( new ShapeImportImageLabelProvider() );
         fileList.firstLineLabelProvider.set( new ShapeImportCellLabelProvider() );
-        fileList.secondLineLabelProvider.set( new MessageCellLabelProvider( files ) );
+        fileList.secondLineLabelProvider.set( new MessageCellLabelProvider() );
         fileList.firstSecondaryActionProvider.set( new ShapeFileDeleteActionProvider( files, shapeImportPanelUpdater ) );
+//        fileList.setLabelProvider( new ShapeImportCellLabelProvider() );
     }
 
 
-    private void initFileListWithContent( IssueReporter issueReporter, Map<String,Map<String,List<File>>> files,
+    private void initFileListWithContent( IssueReporter issueReporter, List<FileDescription> files,
             MdListViewer fileList, ShapeImportPanelUpdater shapeImportPanelUpdater ) {
         fileList.setContentProvider( new ShapeImportTreeContentProvider( files ) );
         fileList.setInput( files );

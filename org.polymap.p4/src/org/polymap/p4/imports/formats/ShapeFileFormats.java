@@ -64,7 +64,7 @@ public enum ShapeFileFormats implements IFileFormat{
 
 
     public static ShapeFileFormats getFileFormat( File file ) {
-        return IFileFormat.getFileFormat(file, Arrays.asList( values()));
+        return IFileFormat.getFileFormat(file.getName(), Arrays.asList( values()));
     }
 
 

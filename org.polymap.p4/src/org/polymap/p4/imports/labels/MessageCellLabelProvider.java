@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -33,7 +32,6 @@ import org.eclipse.jface.viewers.ViewerRow;
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontMetrics;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
@@ -43,7 +41,10 @@ import org.polymap.core.runtime.event.EventManager;
 import org.polymap.p4.imports.ShapeFileValidator;
 import org.polymap.p4.imports.ValidationEvent;
 import org.polymap.p4.imports.formats.ArchiveFormats;
+import org.polymap.p4.imports.formats.FileDescription;
+import org.polymap.p4.imports.formats.IFileFormat;
 import org.polymap.p4.imports.formats.ShapeFileFormats;
+import org.polymap.p4.imports.utils.TextMetricHelper;
 
 import com.google.common.base.Joiner;
 
@@ -57,33 +58,72 @@ public class MessageCellLabelProvider
     /**
      * 
      */
-    private static final String LINE_BREAK = "\n";
+    private static final String            LINE_BREAK          = "\n";
 
-    private Map<Object,StatusEventHandler>           statusEventHandlers = new HashMap<Object,StatusEventHandler>();
+    private Map<Object,StatusEventHandler> statusEventHandlers = new HashMap<Object,StatusEventHandler>();
 
-    private final Map<String,Map<String,List<File>>> files;
+    private ShapeFileValidator             shapeFileValidator  = null;
 
-
-    /**
-     * 
-     */
-    public MessageCellLabelProvider( Map<String,Map<String,List<File>>> files ) {
-        this.files = files;
-    }
+    private TextMetricHelper               textMetricHelper    = null;
 
 
     @Override
     public void update( ViewerCell cell ) {
         handleBackgroundColor( cell );
         Object element = cell.getElement();
-        if (element != null) {
+        if (element instanceof FileDescription) {
             if (statusEventHandlers.get( element ) == null) {
-                StatusEventHandler statusEventHandler = new StatusEventHandler( cell );
+                StatusEventHandler statusEventHandler = createStatusEventHandler( cell );
                 EventManager.instance().subscribe( statusEventHandler,
                         ev -> ev instanceof ValidationEvent && isEqual( element, ev.getSource() ) );
                 statusEventHandlers.put( element, statusEventHandler );
             }
-            new ShapeFileValidator().validate( files, element );
+            getShapeFileValidator().validate( (FileDescription)element );
+        }
+    }
+
+
+    private StatusEventHandler createStatusEventHandler( ViewerCell cell ) {
+        return new StatusEventHandler( cell );
+    }
+
+
+    void setShapeFileValidator( ShapeFileValidator shapeFileValidator ) {
+        this.shapeFileValidator = shapeFileValidator;
+    }
+
+
+    ShapeFileValidator getShapeFileValidator() {
+        if (shapeFileValidator == null) {
+            shapeFileValidator = new ShapeFileValidator();
+        }
+        return shapeFileValidator;
+    }
+
+
+    void setTextMetricHelper( TextMetricHelper textMetricHelper ) {
+        this.textMetricHelper = textMetricHelper;
+    }
+
+
+    TextMetricHelper getTextMetricHelper() {
+        if (textMetricHelper == null) {
+            textMetricHelper = new TextMetricHelper();
+        }
+        return textMetricHelper;
+    }
+
+
+    @Override
+    public String getToolTipText( Object element ) {
+        if (element instanceof File) {
+            return "Description of " + ((File)element).getName();
+        }
+        else if (element instanceof String) {
+            return "Description of " + String.valueOf( element );
+        }
+        else {
+            return super.getToolTipText( element );
         }
     }
 
@@ -125,9 +165,10 @@ public class MessageCellLabelProvider
             if (row != null) {
                 applyStyle( cell, severity );
                 String message;
-                if(event.getSource() instanceof File && cell.getElement() instanceof String) {
+                if (event.getSource() instanceof File && cell.getElement() instanceof String) {
                     message = "There are issues with one or more contained files.";
-                } else {
+                }
+                else {
                     message = event.getMessage();
                 }
                 setCellText( cell, message );
@@ -137,35 +178,48 @@ public class MessageCellLabelProvider
             setCellText( cell, getDescription( cell.getElement() ) );
         }
     }
-    
+
+
     /**
      * @param cell
      * @param string
      */
     private void setCellText( ViewerCell cell, String text ) {
-        GC gc = new GC(cell.getControl());
-        Point point = gc.textExtent( text );
-        FontMetrics fontMetrics = gc.getFontMetrics();
-        gc.dispose();
         Rectangle cellBounds = cell.getControl().getBounds();
-        if(point.x > cellBounds.width - 10) {
-            List<String> tokens = new ArrayList<String>();
-            for(String token : text.split(LINE_BREAK)) {
-                int currentWidth = fontMetrics.getAverageCharWidth() * token.toCharArray().length;
-                if(currentWidth > cellBounds.width - 10) {
-                    int index = token.lastIndexOf( " " );
-                    if(index<=0) {
-                        index = Math.round( (token.length() * (cellBounds.width - 10)) / currentWidth);
-                    }
-                    StringBuilder sb = new StringBuilder(token);
-                    sb.insert( index, LINE_BREAK );
-                    tokens.add(sb.toString());
-                }
-            }
-            setCellText(cell, Joiner.on( LINE_BREAK ).join( tokens ));
-        } else {
-            cell.setText( text );
+        Point point = getTextExtent( cell, text );
+        if (point.x > cellBounds.width - 10) {
+            text = insertLineBreaksToFitCellWidth( cell, text, cellBounds );
         }
+        cell.setText( text );
+    }
+
+
+    private Point getTextExtent( ViewerCell cell, String text ) {
+        return textMetricHelper.getTextExtent( cell, text );
+    }
+
+
+    private String insertLineBreaksToFitCellWidth( ViewerCell cell, String text, Rectangle cellBounds ) {
+        List<String> tokens = new ArrayList<String>();
+        FontMetrics fontMetrics = getFontMetrics( cell );
+        for (String token : text.split( LINE_BREAK )) {
+            int currentWidth = fontMetrics.getAverageCharWidth() * token.toCharArray().length;
+            if (currentWidth > cellBounds.width - 10) {
+                int index = token.lastIndexOf( " " );
+                if (index <= 0) {
+                    index = Math.round( (token.length() * (cellBounds.width - 10)) / currentWidth );
+                }
+                StringBuilder sb = new StringBuilder( token );
+                sb.insert( index, LINE_BREAK );
+                tokens.add( sb.toString() );
+            }
+        }
+        return Joiner.on( LINE_BREAK ).join( tokens );
+    }
+
+
+    private FontMetrics getFontMetrics( ViewerCell cell ) {
+        return textMetricHelper.getFontMetrics( cell );
     }
 
 
@@ -174,27 +228,39 @@ public class MessageCellLabelProvider
      * @return
      */
     private String getDescription( Object element ) {
-        if (element instanceof File) {
-            File file = (File)element;
-            String sizeStr = getSizeStr( file );
-            String lastChangedStr = getLastChangedStr( file );
-            ShapeFileFormats format = ShapeFileFormats.getFileFormat( file );
-            String description = "description: "
-                    + ((format != null) ? format.getDescription() : "unsupported file format");
-            return description + ", " + lastChangedStr + ", " + sizeStr;
+        if (element instanceof FileDescription) {
+            FileDescription fd = (FileDescription) element;
+            if(fd.parentFile.isPresent()) {
+                return getDescriptionForShapeFile( fd );
+            } else {
+                return getDescriptionForFile( fd );
+            }
         }
         else if (element instanceof String) {
-            String str = (String)element;
-            Optional<ArchiveFormats> ext = Arrays.asList( ArchiveFormats.values() ).stream()
-                    .filter( f -> str.contains( "." + f.getFileExtension() ) ).findFirst();
-            if (ext.isPresent()) {
-                return "description: " + ext.get().getDescription();
-            }
-            else {
-                return "description: Shapefile group";
-            }
         }
         return null;
+    }
+
+
+    private String getDescriptionForShapeFile( FileDescription fd ) {
+        Optional<ArchiveFormats> ext = Arrays.asList( ArchiveFormats.values() ).stream()
+                .filter( f -> fd.name.get().endsWith( "." + f.getFileExtension() ) ).findFirst();
+        if (ext.isPresent()) {
+            return "description: " + ext.get().getDescription();
+        }
+        else {
+            return "description: Shapefile group";
+        }
+    }
+
+
+    private String getDescriptionForFile( FileDescription fd ) {
+        File file = fd.file.get();
+        String sizeStr = getSizeStr( fd.size.get() );
+        String lastChangedStr = getLastChangedStr( file );
+        IFileFormat format = fd.format.get();
+        String description = "description: " + ((format != null) ? format.getDescription() : "unsupported file format");
+        return description + ", " + lastChangedStr + ", " + sizeStr;
     }
 
 
@@ -208,10 +274,9 @@ public class MessageCellLabelProvider
     }
 
 
-    private String getSizeStr( File file ) {
+    private String getSizeStr( long bytes ) {
         String size = "size: ";
-        if (file.exists()) {
-            double bytes = file.length();
+        if (bytes != -1) {
             if (bytes < 1024) {
                 double kilobytes = (bytes / 1024);
                 if (kilobytes < 1024) {
@@ -268,27 +333,14 @@ public class MessageCellLabelProvider
      * @return
      */
     private boolean isEqual( Object element, Object src ) {
-        if (element instanceof File && src instanceof File) {
-            File elementFile = (File)element;
-            File srcFile = (File)src;
-            return elementFile.getName().equals( srcFile.getName() );
-        }
-        if (element instanceof String && src instanceof String) {
-            String elementString = (String)element;
-            if (elementString.contains( "/" )) {
-                elementString = elementString.substring( elementString.indexOf( "/" ) + 1 ).trim();
+        if (element instanceof FileDescription && src instanceof FileDescription) {
+            FileDescription elementFileDescription = (FileDescription) element;
+            FileDescription srcFileDescription = (FileDescription) src;
+            boolean equals = true;
+            if(elementFileDescription.groupName.isPresent() && srcFileDescription.groupName.isPresent()) {
+                equals = elementFileDescription.groupName.get().equals( srcFileDescription.groupName.get());
             }
-            return elementString.equals( src );
-
-        }
-        if (element instanceof String && src instanceof File) {
-            File srcFile = (File)src;
-            String elementString = (String)element;
-            if (elementString.contains( "/" )) {
-                elementString = elementString.substring( elementString.indexOf( "/" ) + 1 ).trim();
-            }
-            String baseName = FilenameUtils.getBaseName( srcFile.getName() );
-            return elementString.equals( baseName );
+            return equals && elementFileDescription.name.get().equals( srcFileDescription.name.get());
         }
         return element.equals( src );
     }

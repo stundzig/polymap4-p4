@@ -16,15 +16,15 @@ package org.polymap.p4.imports.labels;
 
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Optional;
 
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.graphics.Image;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.imports.formats.ArchiveFormats;
+import org.polymap.p4.imports.formats.FileDescription;
 import org.polymap.p4.imports.formats.IFileFormat;
-import org.polymap.p4.imports.formats.ShapeFileFormats;
 
 /**
  * 
@@ -37,24 +37,34 @@ public class ShapeImportImageLabelProvider
     public void update( ViewerCell cell ) {
         handleBackgroundColor( cell );
         Object elem = cell.getElement();
-        if (elem instanceof String) {
-            String str = String.valueOf( elem );
-            Optional<ArchiveFormats> ext = Arrays.asList( ArchiveFormats.values() ).stream()
-                    .filter( f -> str.contains( "." + f.getFileExtension() ) ).findFirst();
-            if (ext.isPresent()) {
-                cell.setImage( P4Plugin.images().svgImage( ext.get().getImagePath(), NORMAL24 ) );
+        if (elem instanceof FileDescription) {
+            FileDescription fileDesc = (FileDescription)elem;
+            if (!fileDesc.parentFile.isPresent()) {
+                Image image = null;
+                if(fileDesc.name.isPresent()) {
+                    Optional<ArchiveFormats> ext = Arrays.asList( ArchiveFormats.values() ).stream()
+                            .filter( f -> fileDesc.name.get().endsWith( "." + f.getFileExtension() ) ).findFirst();
+                    if (ext.isPresent()) {
+                        image = P4Plugin.images().svgImage( ext.get().getImagePath(), NORMAL24 );
+                    }
+                }
+                if(image == null) {
+                    image = P4Plugin.images().svgImage( IFileFormat.getMultipleFileImagePath(), NORMAL24 ); 
+                }
+                cell.setImage( image );
             }
             else {
-                cell.setImage( P4Plugin.images().svgImage( IFileFormat.getMultipleFileImagePath(), NORMAL24 ) );
-            }
-        }
-        else if (elem instanceof File) {
-            ShapeFileFormats shapeFileFormat = ShapeFileFormats.getFileFormat( (File)elem );
-            if (shapeFileFormat != null) {
-                cell.setImage( P4Plugin.images().svgImage( shapeFileFormat.getImagePath(), NORMAL24 ) );
-            }
-            else {
-                cell.setImage( P4Plugin.images().svgImage( IFileFormat.getUnknownFileImagePath(), NORMAL24 ) );
+                Image image = null;
+                if(fileDesc.format.isPresent()) {
+                    IFileFormat fileFormat = fileDesc.format.get();
+                    if (fileFormat != null) {
+                        image = P4Plugin.images().svgImage( fileFormat.getImagePath(), NORMAL24 );
+                    }
+                }
+                if(image == null) {
+                    image = P4Plugin.images().svgImage( IFileFormat.getUnknownFileImagePath(), NORMAL24 ); 
+                }
+                cell.setImage( image );
             }
         }
     }

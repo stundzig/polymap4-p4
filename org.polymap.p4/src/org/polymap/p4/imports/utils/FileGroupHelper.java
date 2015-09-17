@@ -20,8 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.polymap.p4.imports.formats.FileDescription;
+import org.polymap.p4.imports.formats.IFileFormat;
 import org.polymap.p4.imports.formats.ShapeFileFormats;
-
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
@@ -47,5 +48,31 @@ public class FileGroupHelper {
             }
         }
         return files;
+    }
+
+
+    public static void fillFilesList( List<FileDescription> files, String rootFileName, long fileSize, List<File> read ) {
+        Map<String,List<File>> grouped = FileGroupHelper.groupFilesByName( read );
+        String localRootFileName = rootFileName;
+        if (rootFileName != null) {
+            if (files.stream().anyMatch( f -> rootFileName.equals( f.name.get() ) )) {
+                localRootFileName = "_duplicated";
+            }
+        }
+        for (Map.Entry<String,List<File>> entry : grouped.entrySet()) {
+            FileDescription root = new FileDescription().groupName.put( entry.getKey() );
+            if (localRootFileName != null) {
+                root.name.put( localRootFileName ).format.put( IFileFormat.getKnownFileFormat( localRootFileName ) );
+            }
+            if (fileSize != -1) {
+                root.size.set( fileSize );
+            }
+            for (File file : entry.getValue()) {
+                FileDescription fileDesc = new FileDescription().name.put( file.getName() ).file.put( file ).size
+                        .put( file.length() ).format.put( IFileFormat.getKnownFileFormat( file.getName() ) );
+                root.addContainedFile( fileDesc );
+            }
+            files.add( root );
+        }
     }
 }

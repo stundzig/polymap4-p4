@@ -14,26 +14,44 @@
  */
 package org.polymap.p4.imports.labels;
 
-import java.io.File;
-
 import org.eclipse.jface.viewers.ViewerCell;
-
+import org.polymap.p4.imports.formats.FileDescription;
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
  *
  */
-public class ShapeImportCellLabelProvider extends AbstractShapeImportCellLabelProvider {
+public class ShapeImportCellLabelProvider
+        extends AbstractShapeImportCellLabelProvider {
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.eclipse.jface.viewers.CellLabelProvider#getToolTipText(java.lang.Object)
+     */
+    @Override
+    public String getToolTipText( Object elem ) {
+        if (elem instanceof FileDescription) {
+            return "TODO: ";
+        }
+        return null;
+    }
+
 
     @Override
     public void update( ViewerCell cell ) {
         handleBackgroundColor( cell );
         Object elem = cell.getElement();
-        if (elem instanceof String) {
-            cell.setText( String.valueOf( elem) );
-        }
-        else if (elem instanceof File) {
-            cell.setText( ((File)elem).getName() );
+        if (elem instanceof FileDescription) {
+            FileDescription fileDesc = (FileDescription)elem;
+            if (!fileDesc.parentFile.isPresent()) {
+                cell.setText( "Shapefile: " + (fileDesc.name.isPresent() ? fileDesc.name.get() + "/" : "")
+                        + fileDesc.groupName.get() );
+            }
+            else {
+                cell.setText( fileDesc.name.get() );
+            }
         }
     }
 }

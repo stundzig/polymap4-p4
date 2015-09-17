@@ -15,15 +15,14 @@
 package org.polymap.p4.imports.utils;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.p4.imports.ShapeImportPanelUpdater;
+import org.polymap.p4.imports.formats.FileDescription;
 import org.polymap.p4.imports.ops.ShapeFetchOperation;
 import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
 
@@ -33,17 +32,17 @@ import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
  */
 public class InitFileListHelper {
 
-    private static Log                               log = LogFactory.getLog( InitFileListHelper.class );
+    private static Log                    log = LogFactory.getLog( InitFileListHelper.class );
 
-    private final Map<String,Map<String,List<File>>> files;
+    private final List<FileDescription> files;
 
-    private final ShapeImportPanelUpdater            shapeImportPanelUpdater;
+    private final ShapeImportPanelUpdater shapeImportPanelUpdater;
 
-    private final IssueReporter                      issueReporter;
+    private final IssueReporter           issueReporter;
 
 
-    public InitFileListHelper( Map<String,Map<String,List<File>>> files,
-            ShapeImportPanelUpdater shapeImportPanelUpdater, IssueReporter issueReporter ) {
+    public InitFileListHelper( List<FileDescription> files, ShapeImportPanelUpdater shapeImportPanelUpdater,
+            IssueReporter issueReporter ) {
         this.files = files;
         this.shapeImportPanelUpdater = shapeImportPanelUpdater;
         this.issueReporter = issueReporter;
@@ -61,20 +60,16 @@ public class InitFileListHelper {
                     if (ev.getResult().isOK()) {
                         List<File> fs = shapeFetchOperation.getFiles();
                         files.clear();
-                        Map<String,List<File>> grouped = FileGroupHelper.groupFilesByName( fs );
-                        for (Map.Entry<String,List<File>> entry : grouped.entrySet()) {
-                            Map<String,List<File>> map = new HashMap<String,List<File>>();
-                            map.put( entry.getKey(), entry.getValue() );
-                            files.put( entry.getKey(), map );
-                        }
+                        FileGroupHelper.fillFilesList(files, null, -1, fs);
                     }
                     else {
                         issueReporter.showIssue( MessageType.ERROR, "Couldn't read out data." );
                         log.error( "Couldn't read out data.", ev.getResult().getException() );
                     }
                     if (!files.isEmpty()) {
-                        UIThreadExecutor.async( ( ) -> shapeImportPanelUpdater.updateListAndFAB( files.keySet()
-                                .iterator().next(), false ), UIThreadExecutor.runtimeException() );
+                        UIThreadExecutor.async(
+                                ( ) -> shapeImportPanelUpdater.updateListAndFAB( files.iterator().next(), false ),
+                                UIThreadExecutor.runtimeException() );
                     }
                 } ) );
     }
