@@ -25,8 +25,8 @@ import org.polymap.core.ui.UIUtils;
 import org.polymap.p4.imports.formats.FileDescription;
 import org.polymap.p4.imports.formats.ShapeFileFormats;
 import org.polymap.p4.imports.utils.IssueReporter;
+import org.polymap.rhei.batik.toolkit.md.AbstractFeedbackComponent;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
-import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
@@ -93,7 +93,7 @@ public class ShapeImportPanelUpdater
                 importFab.addSelectionListener( selectionListener );
                 importFab.setVisible( true );
                 if (fromUpload) {
-                    issueReporter.showIssue( MessageType.SUCCESS, root + " successfully uploaded." );
+                    issueReporter.showIssue( AbstractFeedbackComponent.MessageType.SUCCESS, root + " successfully uploaded." );
                 }
             }
         }

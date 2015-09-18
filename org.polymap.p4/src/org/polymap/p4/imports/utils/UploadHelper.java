@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,10 +31,9 @@ import org.polymap.p4.imports.FileImporter;
 import org.polymap.p4.imports.ShapeFileValidator;
 import org.polymap.p4.imports.ShapeImportPanelUpdater;
 import org.polymap.p4.imports.formats.FileDescription;
-import org.polymap.p4.imports.formats.IFileFormat;
 import org.polymap.rap.updownload.upload.IUploadHandler;
 import org.polymap.rap.updownload.upload.UploadService;
-import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
+import org.polymap.rhei.batik.toolkit.md.AbstractFeedbackComponent;
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
@@ -83,7 +81,7 @@ public class UploadHelper
             UIThreadExecutor.async( ( ) -> {
                 shapeImportPanelUpdater.updateListAndFAB( clientFile.getName(), false );
                 ShapeFileValidator.reportError( clientFile.getName(), "Unable to import file." );
-                issueReporter.showIssue( MessageType.ERROR, "Unable to import file." );
+                issueReporter.showIssue( AbstractFeedbackComponent.MessageType.ERROR, "Unable to import file." );
             }, UIThreadExecutor.runtimeException() );
         }
     }

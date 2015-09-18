@@ -50,7 +50,7 @@ import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
-import org.polymap.rhei.batik.toolkit.md.Snackbar;
+import org.polymap.rhei.batik.toolkit.md.Toast;
 
 /**
  * 
@@ -88,11 +88,11 @@ public class ShapeImportPanel
         MdToolkit tk = (MdToolkit)getSite().toolkit();
 
         Button importFab = createImportFAB( tk );
-        Snackbar snackBar = tk.createFloatingSnackbar( SWT.NONE );
+        Toast toast = tk.createToast( 70, SWT.NONE );
 
         MdListViewer fileList = tk.createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION );
 
-        IssueReporter issueReporter = new IssueReporter( snackBar );
+        IssueReporter issueReporter = new IssueReporter( toast );
         List<FileDescription> files = new ArrayList<FileDescription>();
         ShapeImportPanelUpdater shapeImportPanelUpdater = createShapeImportPanelUpdater( importFab, issueReporter,
                 files, fileList );

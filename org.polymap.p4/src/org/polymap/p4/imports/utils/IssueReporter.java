@@ -14,8 +14,9 @@
  */
 package org.polymap.p4.imports.utils;
 
-import org.polymap.rhei.batik.toolkit.md.Snackbar;
-import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
+
+
+import org.polymap.rhei.batik.toolkit.md.AbstractFeedbackComponent;
 
 
 /**
@@ -23,13 +24,13 @@ import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
  *
  */
 public class IssueReporter {
-    private Snackbar snackbar;
+    private AbstractFeedbackComponent feedbackComponent;
     
-    public IssueReporter(Snackbar snackbar) {
-        this.snackbar = snackbar;
+    public IssueReporter(AbstractFeedbackComponent feedbackComponent) {
+        this.feedbackComponent = feedbackComponent;
     }
 
-    public void showIssue( MessageType messageStyle, String message ) {
-        snackbar.showIssue( messageStyle, message );
+    public void showIssue( AbstractFeedbackComponent.MessageType messageStyle, String message ) {
+        feedbackComponent.showIssue( messageStyle, message );
     }
 }

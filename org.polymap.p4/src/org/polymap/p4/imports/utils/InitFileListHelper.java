@@ -24,7 +24,7 @@ import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.p4.imports.ShapeImportPanelUpdater;
 import org.polymap.p4.imports.formats.FileDescription;
 import org.polymap.p4.imports.ops.ShapeFetchOperation;
-import org.polymap.rhei.batik.toolkit.md.Snackbar.MessageType;
+import org.polymap.rhei.batik.toolkit.md.AbstractFeedbackComponent;
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
@@ -63,7 +63,7 @@ public class InitFileListHelper {
                         FileGroupHelper.fillFilesList(files, null, -1, fs);
                     }
                     else {
-                        issueReporter.showIssue( MessageType.ERROR, "Couldn't read out data." );
+                        issueReporter.showIssue( AbstractFeedbackComponent.MessageType.ERROR, "Couldn't read out data." );
                         log.error( "Couldn't read out data.", ev.getResult().getException() );
                     }
                     if (!files.isEmpty()) {
