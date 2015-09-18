@@ -46,7 +46,7 @@ public class ShapeImportCellLabelProvider
         if (elem instanceof FileDescription) {
             FileDescription fileDesc = (FileDescription)elem;
             if (!fileDesc.parentFile.isPresent()) {
-                cell.setText( "Shapefile: " + (fileDesc.name.isPresent() ? fileDesc.name.get() + "/" : "")
+                cell.setText( "<b>Shapefile:</b> " + (fileDesc.name.isPresent() ? fileDesc.name.get() + "/" : "")
                         + fileDesc.groupName.get() );
             }
             else {

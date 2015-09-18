@@ -16,7 +16,11 @@ package org.polymap.p4.imports;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 import org.junit.Assert;
@@ -41,11 +45,12 @@ import org.polymap.p4.imports.formats.FileDescription;
 @RunWith(MockitoJUnitRunner.class)
 public class ShapeFileValidatorTest {
 
-    private ShapeFileValidator shapeFileValidator;
+    private ShapeFileValidator              shapeFileValidator;
 
     @Captor
     private ArgumentCaptor<ValidationEvent> captor;
-    
+
+
     @Before
     public void setUp() {
         shapeFileValidator = new ShapeFileValidator();
@@ -70,34 +75,92 @@ public class ShapeFileValidatorTest {
 
         group.addContainedFile( fd );
 
-        EventManager eventManager = Mockito.mock( EventManager.class );
-        ShapeFileValidator.setEventManager( eventManager );
+        EventManager eventManager = executeTest( group, false );
 
-        executeTest( group, false );
-        
-        Mockito.verify( eventManager ).publish(captor.capture());
-        
-        Assert.assertEquals("txt is not a valid shape file extension", captor.getValue().getMessage());
-        Assert.assertEquals(IStatus.ERROR, captor.getValue().getSeverity());
-        Assert.assertEquals(fd, captor.getValue().getSource());
+        String expectedMessage = "txt is not a valid shape file extension";
+        int expectedSeverity = IStatus.ERROR;
+        assertValidationEvent( eventManager, expectedMessage, expectedSeverity, fd );
+    }
+    
+    @Test
+    public void testAlreadyExistingCatalogEntry() {
+        FileDescription group = new FileDescription().groupName.put( "test" );
+
+        EventManager eventManager = executeTest( group, false );
+
+        String expectedMessage = "test is already imported as catalog entry.";
+        int expectedSeverity = IStatus.ERROR;
+        assertValidationEvent( eventManager, expectedMessage, expectedSeverity, group );
+    }
+
+    
+    private void assertValidationEvent( EventManager eventManager, String expectedMessage,
+            int expectedSeverity, FileDescription fd ) {
+        Mockito.verify( eventManager ).publish( captor.capture() );
+
+        Assert.assertEquals( expectedMessage, captor.getValue().getMessage() );
+        Assert.assertEquals( expectedSeverity, captor.getValue().getSeverity() );
+        Assert.assertEquals( fd, captor.getValue().getSource() );
     }
 
 
-    private void executeTest( FileDescription fd, boolean expectedValid ) {
+    private EventManager executeTest( FileDescription fd, boolean expectedValid, String... existingCatalogEntries ) {
         LocalCatalog localCatalog = Mockito.mock( LocalCatalog.class );
         MetadataQuery metadataQuery = Mockito.mock( MetadataQuery.class );
+        EventManager eventManager = Mockito.mock( EventManager.class );
+
+        mockExistingCatalogEntries( localCatalog, metadataQuery, existingCatalogEntries );
+
+        ShapeFileValidator.setEventManager( eventManager );
+        shapeFileValidator.setLocalCatalog( localCatalog );
+
+        Assert.assertEquals( expectedValid, shapeFileValidator.validate( fd ) );
+
+        return eventManager;
+    }
+
+
+    private void mockExistingCatalogEntries( LocalCatalog localCatalog, MetadataQuery metadataQuery, String[] existingCatalogEntries  ) {
         Mockito.when( localCatalog.query( "" ) ).thenReturn( metadataQuery );
         ResultSet resultSet = new ResultSet() {
 
             @Override
             public Iterator<IMetadata> iterator() {
+                Arrays.asList( existingCatalogEntries).stream().map( existingCatalogEntry -> new IMetadata() {
+
+                    @Override
+                    public String getIdentifier() {
+                        return existingCatalogEntry;
+                    }
+
+                    @Override
+                    public String getTitle() {
+                        return existingCatalogEntry;
+                    }
+
+                    @Override
+                    public String getDescription() {
+                        return null;
+                    }
+
+                    @Override
+                    public Set<String> getKeywords() {
+                        return Collections.emptySet();
+                    }
+
+                    @Override
+                    public Map<String,String> getConnectionParams() {
+                        return Collections.emptyMap();
+                    }
+                    
+                });
                 return new ArrayList<IMetadata>().iterator();
             }
 
 
             @Override
             public int size() {
-                return 0;
+                return existingCatalogEntries.length;
             }
 
 
@@ -106,8 +169,5 @@ public class ShapeFileValidatorTest {
             }
         };
         Mockito.when( metadataQuery.execute() ).thenReturn( resultSet );
-
-        shapeFileValidator.setLocalCatalog( localCatalog );
-        Assert.assertEquals( expectedValid, shapeFileValidator.validate( fd ) );
     }
 }

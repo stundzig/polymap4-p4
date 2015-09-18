@@ -68,6 +68,11 @@ public interface IFileFormat {
             if (index > 0) {
                 fileExtension = ShapeFileFormats.SHP_XML.getFileExtension();
             }
+        } else if ("gz".equalsIgnoreCase( fileExtension )) {
+            int index = fileName.indexOf( "." + ArchiveFormats.TAR_GZ.getFileExtension() );
+            if (index > 0) {
+                fileExtension = ArchiveFormats.TAR_GZ.getFileExtension();
+            }
         }
         return fileExtension;
     }

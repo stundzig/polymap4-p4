@@ -139,6 +139,10 @@ public class ShapeImportPanel
 
         ColumnViewerToolTipSupport.enableFor( fileList );
 
+        fileList.getControl().setData( RWT.MARKUP_ENABLED, true );
+        fileList.getControl().setData(
+                /* MarkupValidator.MARKUP_VALIDATION_DISABLED */"org.eclipse.rap.rwt.markupValidationDisabled", false );
+
         FormDataFactory.on( fileList.getControl() ).fill().bottom( 90, -5 );
         return fileList;
     }

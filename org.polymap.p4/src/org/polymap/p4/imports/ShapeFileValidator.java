@@ -279,7 +279,7 @@ public class ShapeFileValidator {
         List<String> missing = new ArrayList<String>();
         for (String ext : OPTIONAL_VALID_SHAPE_FILE_EXTS) {
             if (!fileExtensions.contains( ext )) {
-                missing.add( root + "." + ext );
+                missing.add( root.groupName.get() + "." + ext );
             }
         }
         if (missing.size() > 0) {
@@ -295,7 +295,7 @@ public class ShapeFileValidator {
      */
     private boolean containsShpFile( ShapeFileDescription root ) {
         boolean valid = root.getContainedFiles().stream()
-                .anyMatch( f -> "shp".equalsIgnoreCase( getFileExtension( f.file.get().getName() ) ) );
+                .anyMatch( f -> ShapeFileFormats.SHP.getFileExtension().equalsIgnoreCase( getFileExtension( f.file.get().getName() ) ) );
         if (!valid) {
             reportError( root, root + ".shp isn't provided." );
         }

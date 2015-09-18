@@ -14,15 +14,10 @@
  */
 package org.polymap.p4.imports.labels;
 
-import java.io.File;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -40,10 +35,12 @@ import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.p4.imports.ShapeFileValidator;
 import org.polymap.p4.imports.ValidationEvent;
-import org.polymap.p4.imports.formats.ArchiveFormats;
 import org.polymap.p4.imports.formats.FileDescription;
-import org.polymap.p4.imports.formats.IFileFormat;
-import org.polymap.p4.imports.formats.ShapeFileFormats;
+import org.polymap.p4.imports.formats.ShapeFileDescription;
+import org.polymap.p4.imports.formats.ShapeFileDescription.DbfFileDescription;
+import org.polymap.p4.imports.formats.ShapeFileDescription.PrjFileDescription;
+import org.polymap.p4.imports.formats.ShapeFileDescription.ShapeFileRootDescription;
+import org.polymap.p4.imports.formats.ShapeFileDescription.ShpFileDescription;
 import org.polymap.p4.imports.utils.TextMetricHelper;
 
 import com.google.common.base.Joiner;
@@ -79,6 +76,9 @@ public class MessageCellLabelProvider
                 statusEventHandlers.put( element, statusEventHandler );
             }
             getShapeFileValidator().validate( (FileDescription)element );
+            // TODO: wait for any validation message to set and only if there are no issues, 
+            // set the description text
+            setCellText( cell, getDescription( cell.getElement() ) );
         }
     }
 
@@ -116,11 +116,8 @@ public class MessageCellLabelProvider
 
     @Override
     public String getToolTipText( Object element ) {
-        if (element instanceof File) {
-            return "Description of " + ((File)element).getName();
-        }
-        else if (element instanceof String) {
-            return "Description of " + String.valueOf( element );
+        if (element instanceof FileDescription) {
+            return "Description of " + ((FileDescription)element).name.get();
         }
         else {
             return super.getToolTipText( element );
@@ -164,11 +161,15 @@ public class MessageCellLabelProvider
             ViewerRow row = cell.getViewerRow();
             if (row != null) {
                 applyStyle( cell, severity );
-                String message;
-                if (event.getSource() instanceof File && cell.getElement() instanceof String) {
-                    message = "There are issues with one or more contained files.";
+                String message = null;
+                if (event.getSource() instanceof FileDescription && cell.getElement() instanceof FileDescription) {
+                    FileDescription sourceFd = (FileDescription)event.getSource();
+                    FileDescription cellFd = (FileDescription)cell.getElement();
+                    if (sourceFd.parentFile.isPresent() && !cellFd.parentFile.isPresent()) {
+                        message = "There are issues with one or more contained files.";
+                    }
                 }
-                else {
+                if (message == null) {
                     message = event.getMessage();
                 }
                 setCellText( cell, message );
@@ -186,7 +187,7 @@ public class MessageCellLabelProvider
      */
     private void setCellText( ViewerCell cell, String text ) {
         Rectangle cellBounds = cell.getControl().getBounds();
-        Point point = getTextExtent( cell, text );
+        Point point = getTextExtent( getTextMetricHelper(), cell, text );
         if (point.x > cellBounds.width - 10) {
             text = insertLineBreaksToFitCellWidth( cell, text, cellBounds );
         }
@@ -194,7 +195,10 @@ public class MessageCellLabelProvider
     }
 
 
-    private Point getTextExtent( ViewerCell cell, String text ) {
+    private Point getTextExtent( TextMetricHelper textMetricHelper, ViewerCell cell, String text ) {
+        if(text == null) {
+            return new Point(0, 0);
+        }
         return textMetricHelper.getTextExtent( cell, text );
     }
 
@@ -228,67 +232,62 @@ public class MessageCellLabelProvider
      * @return
      */
     private String getDescription( Object element ) {
-        if (element instanceof FileDescription) {
-            FileDescription fd = (FileDescription) element;
-            if(fd.parentFile.isPresent()) {
-                return getDescriptionForShapeFile( fd );
-            } else {
-                return getDescriptionForFile( fd );
+        if (element instanceof ShapeFileDescription) {
+            List<String> descriptionParts = new ArrayList<String>();
+            ShapeFileDescription shapeFileDescription = (ShapeFileDescription)element;
+            shapeFileDescription.format.ifPresent( format -> descriptionParts.add( "<b>description:</b> "
+                    + format.getDescription() ) );
+            if (element instanceof ShapeFileRootDescription) {
+                ShapeFileRootDescription shapeFileRootDescription = (ShapeFileRootDescription)element;
+                if (shapeFileRootDescription.featureType.isPresent()) {
+                    descriptionParts.add( "<b>feature type:</b> " + shapeFileRootDescription.featureType.get() );
+                }
+                if (shapeFileRootDescription.featureCount.isPresent()) {
+                    descriptionParts.add( "<b>feature count:</b> " + shapeFileRootDescription.featureCount.get() );
+                }
+                if (shapeFileRootDescription.size.isPresent()) {
+                    descriptionParts.add( "<b>file size:</b> " + getSizeStr( shapeFileRootDescription.size.get() ) );
+                }
             }
-        }
-        else if (element instanceof String) {
+            else if (element instanceof DbfFileDescription) {
+                DbfFileDescription dbfFileDescription = (DbfFileDescription)element;
+                if (dbfFileDescription.charset.isPresent()) {
+                    descriptionParts.add( "<b>charset:</b> " + dbfFileDescription.charset.get() );
+                }
+            }
+            else if (element instanceof PrjFileDescription) {
+                PrjFileDescription prjFileDescription = (PrjFileDescription)element;
+                if (prjFileDescription.crs.isPresent()) {
+                    descriptionParts.add( "<b>crs:</b> " + prjFileDescription.crs.get().getName().getCode() );
+                }
+            }
+            else if (element instanceof ShpFileDescription) {
+                ShpFileDescription shpFileDescription = (ShpFileDescription)element;
+                if (shpFileDescription.geometryType.isPresent()) {
+                    descriptionParts.add( "<b>geometry type:</b> " + shpFileDescription.geometryType.get().name );
+                }
+            }
+            return Joiner.on( ", " ).join( descriptionParts );
         }
         return null;
     }
 
 
-    private String getDescriptionForShapeFile( FileDescription fd ) {
-        Optional<ArchiveFormats> ext = Arrays.asList( ArchiveFormats.values() ).stream()
-                .filter( f -> fd.name.get().endsWith( "." + f.getFileExtension() ) ).findFirst();
-        if (ext.isPresent()) {
-            return "description: " + ext.get().getDescription();
-        }
-        else {
-            return "description: Shapefile group";
-        }
-    }
-
-
-    private String getDescriptionForFile( FileDescription fd ) {
-        File file = fd.file.get();
-        String sizeStr = getSizeStr( fd.size.get() );
-        String lastChangedStr = getLastChangedStr( file );
-        IFileFormat format = fd.format.get();
-        String description = "description: " + ((format != null) ? format.getDescription() : "unsupported file format");
-        return description + ", " + lastChangedStr + ", " + sizeStr;
-    }
-
-
-    /**
-     * @param file
-     * @return
-     */
-    private String getLastChangedStr( File file ) {
-        DateFormat dateFormat = DateFormat.getDateInstance( DateFormat.MEDIUM );
-        return "last modified: " + dateFormat.format( new Date( file.lastModified() ) );
-    }
-
-
     private String getSizeStr( long bytes ) {
-        String size = "size: ";
+        String size = null;
         if (bytes != -1) {
-            if (bytes < 1024) {
-                double kilobytes = (bytes / 1024);
-                if (kilobytes < 1024) {
-                    double megabytes = (kilobytes / 1024);
-                    size += megabytes + " MB";
+            if (bytes < 1024L) {
+                double kilobytes = (bytes / 1024L);
+                if (kilobytes < 1024L) {
+                    double megabytes = (kilobytes / 1024L);
+                    size = megabytes + " MB";
                 }
                 else {
-                    size += kilobytes + " KB";
+                    size = kilobytes + " KB";
                 }
             }
             else {
-                size += bytes + " B";
+                size = bytes + " B";
             }
         }
         return size;
@@ -334,13 +333,13 @@ public class MessageCellLabelProvider
      */
     private boolean isEqual( Object element, Object src ) {
         if (element instanceof FileDescription && src instanceof FileDescription) {
-            FileDescription elementFileDescription = (FileDescription) element;
-            FileDescription srcFileDescription = (FileDescription) src;
+            FileDescription elementFileDescription = (FileDescription)element;
+            FileDescription srcFileDescription = (FileDescription)src;
             boolean equals = true;
-            if(elementFileDescription.groupName.isPresent() && srcFileDescription.groupName.isPresent()) {
-                equals = elementFileDescription.groupName.get().equals( srcFileDescription.groupName.get());
+            if (elementFileDescription.groupName.isPresent() && srcFileDescription.groupName.isPresent()) {
+                equals = elementFileDescription.groupName.get().equals( srcFileDescription.groupName.get() );
             }
-            return equals && elementFileDescription.name.get().equals( srcFileDescription.name.get());
+            return equals && elementFileDescription.name.get().equals( srcFileDescription.name.get() );
         }
         return element.equals( src );
     }
