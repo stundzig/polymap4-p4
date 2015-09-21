@@ -194,7 +194,7 @@ public class ShapeFileValidator {
     /* *** validate group of files *** */
 
     private boolean validateNonExistingCatalogEntry( FileDescription root ) {
-        Function<String,Boolean> predicate = ( String title ) -> root.groupName.equals( title );
+        Function<String,Boolean> predicate = ( String title ) -> root.groupName.isPresent() && root.groupName.get().equals( title );
         return validateNonExistingCatalogEntry( predicate );
     }
 
@@ -377,6 +377,7 @@ public class ShapeFileValidator {
         return entries.execute().stream().noneMatch( e -> {
             String title = e.getTitle().replace( ".shp", "" );
             boolean contains = predicate.apply( title );
+            System.out.println("contains: " + contains + ": " + title);
             if (contains) {
                 reportError( title, e.getTitle() + " is already imported as catalog entry." );
             }

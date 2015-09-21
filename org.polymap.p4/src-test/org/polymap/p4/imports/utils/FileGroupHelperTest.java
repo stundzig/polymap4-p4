@@ -65,7 +65,7 @@ public class FileGroupHelperTest {
 
     private void assertRoot( ShapeFileRootDescription root ) {
         Assert.assertEquals( new Integer( 1301 ), root.featureCount.get() );
-        Assert.assertEquals( null, root.featureType.get() );
+        Assert.assertEquals( "nyc_roads", root.featureType.get().getName().getLocalPart() );
         Assert.assertFalse( root.file.isPresent() );
         Assert.assertFalse( root.format.isPresent() );
         Assert.assertEquals( "nyc_roads", root.groupName.get() );

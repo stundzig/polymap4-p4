@@ -86,7 +86,7 @@ public class ShapeFileValidatorTest {
     public void testAlreadyExistingCatalogEntry() {
         FileDescription group = new FileDescription().groupName.put( "test" );
 
-        EventManager eventManager = executeTest( group, false );
+        EventManager eventManager = executeTest( group, false, "test" );
 
         String expectedMessage = "test is already imported as catalog entry.";
         int expectedSeverity = IStatus.ERROR;

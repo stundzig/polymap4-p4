@@ -14,8 +14,13 @@
  */
 package org.polymap.p4.imports.labels;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.viewers.ViewerCell;
 import org.polymap.p4.imports.formats.FileDescription;
+
+import com.google.common.base.Joiner;
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
@@ -46,8 +51,14 @@ public class ShapeImportCellLabelProvider
         if (elem instanceof FileDescription) {
             FileDescription fileDesc = (FileDescription)elem;
             if (!fileDesc.parentFile.isPresent()) {
-                cell.setText( "<b>Shapefile:</b> " + (fileDesc.name.isPresent() ? fileDesc.name.get() + "/" : "")
-                        + fileDesc.groupName.get() );
+                List<String> descriptionParts = new ArrayList<String>();
+                if (fileDesc.name.isPresent()) {
+                    descriptionParts.add( fileDesc.name.get() );
+                }
+                if (fileDesc.groupName.isPresent()) {
+                    descriptionParts.add( fileDesc.groupName.get() );
+                }
+                cell.setText( "<b>Shapefile:</b> " + Joiner.on( " / " ).join( descriptionParts ) );
             }
             else {
                 cell.setText( fileDesc.name.get() );

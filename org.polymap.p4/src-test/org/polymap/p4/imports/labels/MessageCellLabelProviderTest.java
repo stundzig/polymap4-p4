@@ -18,8 +18,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerRow;
@@ -29,15 +27,24 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TreeItem;
+import org.geotools.data.shapefile.shp.ShapeType;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.polymap.p4.imports.ShapeFileValidator;
 import org.polymap.p4.imports.ValidationEvent;
 import org.polymap.p4.imports.formats.ArchiveFormats;
 import org.polymap.p4.imports.formats.FileDescription;
+import org.polymap.p4.imports.formats.ShapeFileDescription;
+import org.polymap.p4.imports.formats.ShapeFileDescription.DbfFileDescription;
+import org.polymap.p4.imports.formats.ShapeFileDescription.PrjFileDescription;
+import org.polymap.p4.imports.formats.ShapeFileDescription.ShapeFileRootDescription;
+import org.polymap.p4.imports.formats.ShapeFileDescription.ShpFileDescription;
 import org.polymap.p4.imports.formats.ShapeFileFormats;
 import org.polymap.p4.imports.utils.TextMetricHelper;
 import org.powermock.api.mockito.PowerMockito;
@@ -64,46 +71,177 @@ public class MessageCellLabelProviderTest {
     @Test
     public void testSetSecondLineForArchive() {
         String expectedLabel;
+        FileDescription fileDesc;
         for (ArchiveFormats archiveFormat : ArchiveFormats.values()) {
-            expectedLabel = "description: " + archiveFormat.getDescription();
-            executeSecondLineTextTest( "test." + archiveFormat.getFileExtension(), expectedLabel );
+            expectedLabel = "<b>description:</b> " + archiveFormat.getDescription();
+            fileDesc = new FileDescription().name.put( "test." + archiveFormat.getFileExtension() ).format
+                    .put( archiveFormat );
+            executeSecondLineTextTest( fileDesc, expectedLabel );
         }
     }
 
 
     @Test
     public void testSetSecondLineForShapefileFromArchive() {
-        executeSecondLineTextTest( "test.zip / testshape", "Shapefile: test.zip / testshape" );
+        SimpleFeatureTypeBuilder featureTypeBuilder = new SimpleFeatureTypeBuilder();
+        featureTypeBuilder.setName( "myFeatureType" );
+        SimpleFeatureType featureType = featureTypeBuilder.buildFeatureType();
+        ShapeFileRootDescription fileDesc = new ShapeFileRootDescription().featureType.put( featureType ).featureCount
+                .put( 30 ).size.put( 50567893L ).name.put( "test." + ArchiveFormats.ZIP.getFileExtension() ).format
+                .put( ArchiveFormats.ZIP ).groupName.put( "testshape" );
+        executeSecondLineTextTest(
+                fileDesc,
+                "<b>description:</b> application/zip, <b>feature type:</b> myFeatureType, <b>feature count:</b> 30, <b>file size:</b> 48,225 MB" );
     }
 
 
     @Test
     public void testSetSecondLineForShapefile() {
-        executeSecondLineTextTest( "testshape", "Shapefile: testshape" );
+        SimpleFeatureTypeBuilder featureTypeBuilder = new SimpleFeatureTypeBuilder();
+        featureTypeBuilder.setName( "myFeatureType" );
+        SimpleFeatureType featureType = featureTypeBuilder.buildFeatureType();
+        ShapeFileRootDescription fileDesc = new ShapeFileRootDescription().featureType.put( featureType ).featureCount
+                .put( 30 ).size.put( 50567893L ).groupName.put( "testshape" );
+        executeSecondLineTextTest( fileDesc,
+                "<b>feature type:</b> myFeatureType, <b>feature count:</b> 30, <b>file size:</b> 48,225 MB" );
     }
 
 
     @Test
-    public void testSetSecondLineForShapefilePart() {
-        File file = mock( File.class );
-        String fileName;
-        for (ShapeFileFormats shapeFileFormat : ShapeFileFormats.values()) {
-            fileName = "test." + shapeFileFormat.getFileExtension();
-            when( file.getName() ).thenReturn( fileName );
-            executeSecondLineTextTest( file, fileName );
-        }
+    public void testSetSecondLineForShapefilePartAIH() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.AIH );
+        executeSecondLineTextTest( fileDesc, "<b>description:</b> an attribute index of the active fields in a table" );
     }
 
 
-    private void executeSecondLineTextTest( File file, String expectedLabel ) {
-        FileDescription elementAssociatedWithCell = new FileDescription().name.put( file.getName() );
-        executeSecondLineTextTest( elementAssociatedWithCell, expectedLabel );
+    @Test
+    public void testSetSecondLineForShapefilePartAIN() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.AIN );
+        executeSecondLineTextTest( fileDesc, "<b>description:</b> an attribute index of the active fields in a table" );
     }
 
 
-    private void executeSecondLineTextTest( String fileName, String expectedLabel ) {
-        FileDescription elementAssociatedWithCell = new FileDescription().name.put( fileName );
-        executeSecondLineTextTest( elementAssociatedWithCell, expectedLabel );
+    @Test
+    public void testSetSecondLineForShapefilePartATX() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.ATX );
+        executeSecondLineTextTest( fileDesc,
+                "<b>description:</b> an attribute index for the .dbf file in the form of shapefile.columnname.atx (ArcGIS 8 and later)" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartCPG() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.CPG );
+        executeSecondLineTextTest( fileDesc,
+                "<b>description:</b> used to specify the code page (only for .dbf) for identifying the character encoding to be used" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartDBF() {
+        DbfFileDescription fileDesc = new DbfFileDescription().charset.put( "UTF-8" ).groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.DBF );
+        executeSecondLineTextTest( fileDesc,
+                "<b>description:</b> attribute format; columnar attributes for each shape, in dBase IV format, <b>charset:</b> UTF-8" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartFBN() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.FBN );
+        executeSecondLineTextTest( fileDesc, "<b>description:</b> a spatial index of the features that are read-only" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartFBX() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.FBX );
+        executeSecondLineTextTest( fileDesc, "<b>description:</b> a spatial index of the features that are read-only" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartIXS() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.IXS );
+        executeSecondLineTextTest( fileDesc, "<b>description:</b> a geocoding index for read-write datasets" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartMXS() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.MXS );
+        executeSecondLineTextTest( fileDesc,
+                "<b>description:</b> a geocoding index for read-write datasets (ODB format)" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartPRJ() {
+        PrjFileDescription fileDesc = new PrjFileDescription().crs.put( DefaultGeographicCRS.WGS84 ).groupName
+                .put( "testshape" ).format.put( ShapeFileFormats.PRJ );
+        executeSecondLineTextTest(
+                fileDesc,
+                "<b>description:</b> projection format; the coordinate system and projection information, a plain text file describing the projection using well-known text format, <b>crs:</b> WGS84(DD)" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartQIX() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.QIX );
+        executeSecondLineTextTest( fileDesc,
+                "<b>description:</b> an alternative quadtree spatial index used by MapServer and GDAL/OGR software" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartSBN() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.SBN );
+        executeSecondLineTextTest( fileDesc, "<b>description:</b> a spatial index of the features" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartSBX() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.SBX );
+        executeSecondLineTextTest( fileDesc, "<b>description:</b> a spatial index of the features" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartSHP() {
+        ShpFileDescription fileDesc = new ShpFileDescription().geometryType.put( ShapeType.POLYGON ).groupName
+                .put( "testshape" ).format.put( ShapeFileFormats.SHP );
+        executeSecondLineTextTest( fileDesc, "<b>description:</b> shape format; the feature geometry itself, <b>geometry type:</b> Polygon" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartSHP_XML() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.SHP_XML );
+        executeSecondLineTextTest( fileDesc,
+                "<b>description:</b> geospatial metadata in XML format, such as ISO 19115 or other XML schema" );
+    }
+
+
+    @Test
+    public void testSetSecondLineForShapefilePartSHX() {
+        ShapeFileDescription fileDesc = new ShapeFileDescription().groupName.put( "testshape" ).format
+                .put( ShapeFileFormats.SHX );
+        executeSecondLineTextTest(
+                fileDesc,
+                "<b>description:</b> shape index format; a positional index of the feature geometry to allow seeking forwards and backwards quickly" );
     }
 
 
@@ -137,6 +275,8 @@ public class MessageCellLabelProviderTest {
         when( treeItem.getExpanded() ).thenReturn( true );
         when( viewerCell.getControl() ).thenReturn( control );
         when( control.getBounds() ).thenReturn( bounds );
+        // for error case
+        when( textMetricHelper.getTextExtent( viewerCell, "" ) ).thenReturn( new Point( 0, 0 ) );
         when( textMetricHelper.getTextExtent( viewerCell, expectedLabel ) ).thenReturn( textExtent );
         when( textMetricHelper.getFontMetrics( viewerCell ) ).thenReturn( fontMetrics );
 

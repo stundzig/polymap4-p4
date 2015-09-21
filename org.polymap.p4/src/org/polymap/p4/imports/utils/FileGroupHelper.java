@@ -17,6 +17,7 @@ package org.polymap.p4.imports.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -27,12 +28,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
 
+import org.apache.commons.io.FileUtils;
+import org.geotools.data.DataStore;
+import org.geotools.data.DataStoreFinder;
+import org.geotools.data.FeatureSource;
 import org.geotools.data.PrjFileReader;
 import org.geotools.data.shapefile.dbf.DbaseFileHeader;
 import org.geotools.data.shapefile.dbf.DbaseFileReader;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.geotools.data.shapefile.shp.ShapefileHeader;
 import org.geotools.data.shapefile.shp.ShapefileReader;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.FeatureIterator;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.polymap.p4.imports.formats.FileDescription;
@@ -96,9 +105,13 @@ public class FileGroupHelper {
                     ShpFiles shpFilesPart = new ShpFiles( shpFile.get() );
                     dbaseHeader = parseDbaseFileHeader( shpFilesPart );
                     shapeHeader = parseShapeFile( shpFilesPart );
-                    // TODO: where to fetch feature type from?
-                    root = new ShapeFileRootDescription().featureCount.put( dbaseHeader != null ? dbaseHeader
-                            .getNumRecords() : -1 )/*.featureType.put( shapeHeader != null ? shapeHeader.getShapeType() : null )*/;
+                    ShapeFileRootDescription shapeFileRootDescription = new ShapeFileRootDescription().featureCount.put( dbaseHeader != null ? dbaseHeader
+                            .getNumRecords() : -1 );
+                    SimpleFeatureType featureType = parseFeatureType(shpFile.get());
+                    if(featureType != null) {
+                        shapeFileRootDescription.featureType.put( featureType );
+                    }
+                    root = shapeFileRootDescription;
                 }
                 else {
                     root = new FileDescription();
@@ -112,20 +125,36 @@ public class FileGroupHelper {
                     root.size.set( fileSize );
                 }
                 FileDescription fileDesc;
-                values.sort( (File file1, File file2) -> file1.getName().compareTo( file2.getName() ) );
+                values.sort( ( File file1, File file2 ) -> file1.getName().compareTo( file2.getName() ) );
+                String encoding = null;
+                for (File file : values) {
+                    ShapeFileFormats format = ShapeFileFormats.getFileFormat( file );
+                    if (format == ShapeFileFormats.CPG) {
+                        try {
+                            encoding = FileUtils.readFileToString( file );
+                        }
+                        catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
                 for (File file : values) {
                     ShapeFileFormats format = ShapeFileFormats.getFileFormat( file );
                     if (format != null) {
                         if (format == ShapeFileFormats.DBF) {
-                            // TODO: where to fetch charset from?
-                            fileDesc = new DbfFileDescription()/*.charset.put( "UTF-8" )*/;
+                            DbfFileDescription dbfFileDesc = new DbfFileDescription();
+                            if (encoding != null) {
+                                dbfFileDesc.charset.put( "UTF-8" );
+                            }
+                            fileDesc = dbfFileDesc;
                         }
                         else if (format == ShapeFileFormats.PRJ) {
-                            CoordinateReferenceSystem crs = parseCRS(file);
+                            CoordinateReferenceSystem crs = parseCRS( file );
                             fileDesc = new PrjFileDescription().crs.put( crs );
                         }
                         else if (format == ShapeFileFormats.SHP) {
-                            fileDesc = new ShpFileDescription().geometryType.put( shapeHeader != null ? shapeHeader.getShapeType() : null );
+                            fileDesc = new ShpFileDescription().geometryType.put( shapeHeader != null ? shapeHeader
+                                    .getShapeType() : null );
                         }
                         else {
                             fileDesc = new ShapeFileDescription();
@@ -134,8 +163,8 @@ public class FileGroupHelper {
                     else {
                         fileDesc = new FileDescription();
                     }
-                    fileDesc.groupName.put( groupName ).name.put( file.getName() ).file.put( file ).size.put( file.length() ).format
-                            .put( IFileFormat.getKnownFileFormat( file.getName() ) );
+                    fileDesc.groupName.put( groupName ).name.put( file.getName() ).file.put( file ).size.put( file
+                            .length() ).format.put( IFileFormat.getKnownFileFormat( file.getName() ) );
                     root.addContainedFile( fileDesc );
                 }
             }
@@ -155,8 +184,9 @@ public class FileGroupHelper {
         catch (IOException e) {
             e.printStackTrace();
             return null;
-        } finally {
-            if(shapefileReader != null) {
+        }
+        finally {
+            if (shapefileReader != null) {
                 try {
                     shapefileReader.close();
                 }
@@ -165,6 +195,32 @@ public class FileGroupHelper {
                 }
             }
         }
+    }
+
+
+    /**
+     * 
+     */
+    private static SimpleFeatureType parseFeatureType( File file ) {
+        SimpleFeatureType featureType = null;
+        try {
+            Map<String, Serializable> connectParameters = new HashMap<String, Serializable>();
+            connectParameters.put("url", file.toURI().toURL());
+            connectParameters.put("create spatial index", false);
+            DataStore dataStore = DataStoreFinder.getDataStore(connectParameters);
+            String[] typeNames = dataStore.getTypeNames();
+            String typeName = typeNames[0];
+            FeatureSource<SimpleFeatureType, SimpleFeature> featureSource = dataStore.getFeatureSource(typeName);
+            FeatureCollection<SimpleFeatureType, SimpleFeature> collection = featureSource.getFeatures();
+            FeatureIterator<SimpleFeature> iterator = collection.features();
+            if(iterator.hasNext()) {
+                SimpleFeature sf = iterator.next();
+                featureType = sf.getFeatureType();
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return featureType;
     }
 
 
@@ -196,7 +252,7 @@ public class FileGroupHelper {
         PrjFileReader prjFileReader = null;
         FileInputStream in = null;
         try {
-            in = new FileInputStream(prjFile);
+            in = new FileInputStream( prjFile );
             FileChannel channel = in.getChannel();
             prjFileReader = new PrjFileReader( channel );
             return prjFileReader.getCoordinateReferenceSystem();
