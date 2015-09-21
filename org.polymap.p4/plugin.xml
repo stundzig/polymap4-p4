@@ -64,5 +64,38 @@
             id="org.polymap.p4.project.ProjectInfoPanel">
       </panel>
    </extension>
+   <extension
+         point="org.polymap.service.fs.contentProviders">
+      <contentProvider
+            class="org.polymap.p4.fs.ProjectContentProvider"
+            id="org.polymap.p4.fs.ProjectContentProvider"
+            name="Projects">
+      </contentProvider>
+      <contentProvider
+            class="org.polymap.p4.fs.ShapefileContentProvider"
+            id="org.polymap.p4.fs.ShapefileContentProvider"
+            name="Shapefile">
+      </contentProvider>
+      <contentProvider
+            class="org.polymap.p4.fs.GeoJsonContentProvider"
+            id="org.polymap.p4.fs.GeoJsonContentProvider"
+            name="GeoJSON">
+      </contentProvider>
+      <contentProvider
+            class="org.polymap.p4.fs.SldContentProvider"
+            id="org.polymap.p4.fs.SldContentProvider"
+            name="SLD">
+      </contentProvider>
+      <contentProvider
+            class="org.polymap.p4.fs.CsvContentProvider"
+            id="org.polymap.p4.fs.CsvContentProvider"
+            name="CSV">
+      </contentProvider>
+      <contentProvider
+            class="org.polymap.p4.fs.WorkbenchContentProvider"
+            id="org.polymap.p4.fs.WorkbenchContentProvider"
+            name="Workbench">
+      </contentProvider>
+   </extension>
 
 </plugin>
