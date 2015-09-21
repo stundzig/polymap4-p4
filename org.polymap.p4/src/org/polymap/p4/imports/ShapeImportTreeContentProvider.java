@@ -14,14 +14,11 @@
  */
 package org.polymap.p4.imports;
 
-import java.io.File;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.polymap.p4.imports.formats.FileDescription;
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
@@ -35,40 +32,27 @@ public class ShapeImportTreeContentProvider
      */
     private static final long                  serialVersionUID = 5968111183538777162L;
 
-    private Map<String,Map<String,List<File>>> files;
+    private List<? extends FileDescription> files;
 
 
     /**
      * 
      */
-    public ShapeImportTreeContentProvider( Map<String,Map<String,List<File>>> files ) {
+    public ShapeImportTreeContentProvider( List<? extends FileDescription> files ) {
         this.files = files;
     }
 
 
     @Override
     public Object[] getElements( Object elm ) {
-        return files.keySet().stream().flatMap( key -> {
-            if(files.get( key ).isEmpty()) {
-                return Collections.singletonList( key ).stream();
-            } else if(files.get( key ).containsKey( key )) { 
-                return files.get( key ).keySet().stream(); 
-            } else {
-                return files.get( key ).entrySet().stream().map( e -> key + " / " + e.getKey() ).collect( Collectors.toList()).stream();
-            }
-        } ).toArray();
+        return files.toArray();
     }
 
 
     @Override
     public Object getParent( Object element ) {
-        if (element instanceof File) {
-            return files
-                    .entrySet()
-                    .stream()
-                    .filter(
-                            e -> e.getValue().entrySet().stream().filter( e2 -> e2.getValue().contains( element ) )
-                                    .count() == 1 ).findFirst();
+        if (element instanceof FileDescription ) {
+            return ((FileDescription) element).parentFile.get();
         }
         return null;
     }
@@ -76,35 +60,17 @@ public class ShapeImportTreeContentProvider
 
     @Override
     public boolean hasChildren( Object element ) {
-        return element instanceof String;
+        if (element instanceof FileDescription ) {
+            return ((FileDescription) element).getContainedFiles().size() > 0;
+        }
+        return false;
     }
 
 
     @Override
     public Object[] getChildren( Object parentElement ) {
-        if (parentElement instanceof String) {
-            String key = (String) parentElement;
-            String key1 = null;
-            String key2 = null;
-            if(key.contains( "/" )) {
-                key1 = key.substring( 0, key.indexOf( "/" )).trim();
-                key2 = key.substring( key.indexOf( "/" )+1).trim();
-            } else {
-                key1 = key;
-                key2 = key;
-            }
-            Map<String,List<File>> map = files.get( key1 );
-            if(map != null) {
-                if (map.containsKey( key2 )) {
-                    return map.get( key2 ).toArray();
-                }
-                else {
-                    return map.entrySet().stream().flatMap( e -> e.getValue().stream() ).collect( Collectors.toList() )
-                            .toArray();
-                }
-            } else {
-                return new Object[0];
-            }
+        if (parentElement instanceof FileDescription ) {
+            return ((FileDescription) parentElement).getContainedFiles().toArray();
         }
         else {
             return new Object[0];
@@ -121,7 +87,7 @@ public class ShapeImportTreeContentProvider
     @Override
     public void inputChanged( Viewer viewer, Object oldInput, Object newInput ) {
         if(newInput != null) {
-            new ShapeFileValidator().validateAll( (Map<String,Map<String,List<File>>>) newInput );
+            new ShapeFileValidator().validateAll( (List<FileDescription>) newInput );
         }
     }
 }

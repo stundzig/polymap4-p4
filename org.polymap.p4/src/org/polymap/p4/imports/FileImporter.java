@@ -70,7 +70,7 @@ public class FileImporter
     private List<File>                      results = new ArrayList<>();
     
     
-    protected FileImporter() {
+    public FileImporter() {
         charset.set( Charset.forName( "UTF8" ) );
         try {
             targetDir.set( Files.createTempDirectory( "P4-" ).toFile() );
@@ -132,18 +132,19 @@ public class FileImporter
     
     protected void handleGzip( String name, InputStream in ) throws Exception {
         log.info( "    GZIP: " + name );
-        GZIPInputStream gzip = new GZIPInputStream( in );
-        String nextName = null;
-        if (name.toLowerCase().endsWith( ".gz" )) {
-            nextName = name.substring( 0, name.length() - 3 );
+        try (GZIPInputStream gzip = new GZIPInputStream( in )) {
+            String nextName = null;
+            if (name.toLowerCase().endsWith( ".gz" )) {
+                nextName = name.substring( 0, name.length() - 3 );
+            }
+            else if (name.toLowerCase().endsWith( ".tgz" )) {
+                nextName = name.substring( 0, name.length() - 3 ) + "tar";
+            }
+            else {
+                nextName = name.substring( 0, name.length() - 2 );            
+            }
+            handle( nextName, null, gzip );
         }
-        else if (name.toLowerCase().endsWith( ".tgz" )) {
-            nextName = name.substring( 0, name.length() - 3 ) + "tar";
-        }
-        else {
-            nextName = name.substring( 0, name.length() - 2 );            
-        }
-        handle( nextName, null, gzip );
     }
 
 
@@ -197,7 +198,7 @@ public class FileImporter
                 if (entry.isDirectory()) {
                 }
                 else {
-                    handle( entry.getName(), null, in );
+                    handle( entry.getName(), null, tar );
                 }
             }
         }

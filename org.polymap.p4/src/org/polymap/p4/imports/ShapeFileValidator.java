@@ -14,14 +14,13 @@
  */
 package org.polymap.p4.imports;
 
-import static org.polymap.p4.imports.IFileFormat.getFileExtension;
+import static org.polymap.p4.imports.formats.IFileFormat.getFileExtension;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,6 +30,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.polymap.core.catalog.MetadataQuery;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.catalog.LocalCatalog;
+import org.polymap.p4.imports.formats.ArchiveFormats;
+import org.polymap.p4.imports.formats.FileDescription;
+import org.polymap.p4.imports.formats.ShapeFileDescription;
+import org.polymap.p4.imports.formats.ShapeFileFormats;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -135,19 +139,20 @@ public class ShapeFileValidator {
                                                                                        .contains( e ) )
                                                                        .collect( Collectors.toList() );
 
+    private LocalCatalog        localCatalog                   = null;
+
 
     /* *** validate by traversing everything *** */
 
-    public boolean validateAll( Map<String,Map<String,List<File>>> files ) {
+    public boolean validateAll( List<FileDescription> files ) {
         boolean valid = true;
-        Set<String> names = files.values().stream().flatMap( map -> map.keySet().stream() )
-                .collect( Collectors.toSet() );
+        Set<String> names = files.stream().map( file -> file.groupName.get() ).collect( Collectors.toSet() );
         valid &= validateNonExistingCatalogEntries( names );
         if (valid) {
             valid &= validateDuplicates( files );
             if (valid) {
-                for (Map<String,List<File>> entry : files.values()) {
-                    valid &= validate( entry );
+                for (FileDescription fd : files) {
+                    valid &= validate( fd );
                 }
             }
         }
@@ -165,42 +170,22 @@ public class ShapeFileValidator {
     }
 
 
-    /* *** validate by element type *** */
-
-    /**
-     * @param files
-     * @param element
-     */
-    public boolean validate( Map<String,Map<String,List<File>>> files, Object element ) {
-        if (element instanceof String) {
-            Map<String,List<File>> entry = files.get( element );
-            if (entry != null) {
-                return validate( entry );
-            }
-        }
-        else if (element instanceof File) {
-            return validate( (File)element );
-        }
-        return false;
-    }
-
-
     /* *** validate set of groups of files *** */
 
     /**
      * @param files
      * @return
      */
-    private boolean validateDuplicates( Map<String,Map<String,List<File>>> files ) {
+    private boolean validateDuplicates( List<FileDescription> files ) {
         Set<String> set = new HashSet<String>();
-        List<File> duplicates = new ArrayList<File>();
-        files.values().stream().forEach( map -> map.values().stream().forEach( fs -> fs.stream().forEach( f -> {
-            if (!set.add( f.getName() )) {
-                duplicates.add( f );
+        List<FileDescription> duplicates = new ArrayList<FileDescription>();
+        files.stream().forEach( root -> root.getContainedFiles().stream().forEach( cf -> {
+            if (!set.add( cf.name.get() )) {
+                duplicates.add( cf );
             }
-        } ) ) );
-        for (File duplicate : duplicates) {
-            reportError( duplicate, duplicate.getName() + " is contained more then once in the files to be imported." );
+        } ) );
+        for (FileDescription duplicate : duplicates) {
+            reportError( duplicate, duplicate.name.get() + " is contained more then once in the files to be imported." );
         }
         return duplicates.isEmpty();
     }
@@ -208,36 +193,39 @@ public class ShapeFileValidator {
 
     /* *** validate group of files *** */
 
-    /**
-     * @param grouped
-     */
-    public boolean validate( Map<String,List<File>> grouped ) {
-        boolean valid = true;
-        for (Map.Entry<String,List<File>> entry : grouped.entrySet()) {
-            valid &= validate( entry.getKey(), entry.getValue() );
-        }
-        return valid;
-    }
-
-
-    private boolean validateNonExistingCatalogEntry( String name ) {
-        Function<String,Boolean> predicate = ( String title ) -> name.equals( title );
+    private boolean validateNonExistingCatalogEntry( FileDescription root ) {
+        Function<String,Boolean> predicate = ( String title ) -> root.groupName.equals( title );
         return validateNonExistingCatalogEntry( predicate );
     }
 
 
-    public boolean validate( File root, List<File> files ) {
+    public boolean validate( FileDescription fd ) {
+        if (!fd.parentFile.isPresent()) {
+            return validateRoot( fd );
+        }
+        else {
+            return validateSingle( fd );
+        }
+    }
+
+
+    private boolean validateRoot( FileDescription root ) {
         boolean valid = hasValidRootFileExtension( root );
+        valid &= validateNonExistingCatalogEntry( root );
         if (valid) {
-            String rootFileName = root.getName().replace( getFileExtension( root.getName() ), "" );
-            valid &= validateNonExistingCatalogEntry( rootFileName );
+            for (FileDescription fd : root.getContainedFiles()) {
+                valid &= validate( fd );
+            }
             if (valid) {
-                valid &= containsShpFile( rootFileName, files );
-                if (valid) {
-                    valid &= containsAllOptionalFiles( rootFileName, files );
-                }
-                if (valid) {
-                    valid &= containsAllRequiredFiles( rootFileName, files );
+                if (root instanceof ShapeFileDescription) {
+                    ShapeFileDescription shapeRoot = (ShapeFileDescription)root;
+                    valid &= containsShpFile( shapeRoot );
+                    if (valid) {
+                        valid &= containsAllRequiredFiles( shapeRoot );
+                    }
+                    if (valid) {
+                        valid &= containsAllOptionalFiles( shapeRoot );
+                    }
                 }
             }
         }
@@ -245,22 +233,12 @@ public class ShapeFileValidator {
     }
 
 
-    public boolean validate( String root, List<File> files ) {
-        boolean valid = true;
-        valid &= validateNonExistingCatalogEntry( root );
-        if (valid) {
-            for (File file : files) {
-                valid &= validate( file );
-            }
-            if (valid) {
-                valid &= containsShpFile( root, files );
-                if (valid) {
-                    valid &= containsAllRequiredFiles( root, files );
-                }
-                if (valid) {
-                    valid &= containsAllOptionalFiles( root, files );
-                }
-            }
+    private boolean validateSingle( FileDescription fd ) {
+        boolean validRequired = hasValidShapeFileExtension( fd );
+        boolean validOptional = hasValidOptionalShapeFileExtension( fd );
+        boolean valid = validRequired || validOptional;
+        if (!valid) {
+            handleInvalidShapeFileExtension( fd, validOptional );
         }
         return valid;
     }
@@ -270,9 +248,10 @@ public class ShapeFileValidator {
      * @param files
      * @return
      */
-    private boolean containsAllRequiredFiles( String root, List<File> files ) {
+    private boolean containsAllRequiredFiles( ShapeFileDescription root ) {
         boolean valid = true;
-        Set<String> fileExtensions = files.stream().map( f -> StringUtils.lowerCase( getFileExtension( f.getName() ) ) )
+        Set<String> fileExtensions = root.getContainedFiles().stream()
+                .map( f -> StringUtils.lowerCase( getFileExtension( f.file.get().getName() ) ) )
                 .collect( Collectors.toSet() );
         List<String> missing = new ArrayList<String>();
         for (String ext : REQUIRED_VALID_SHAPE_FILE_EXTS) {
@@ -292,14 +271,15 @@ public class ShapeFileValidator {
      * @param files
      * @return
      */
-    private boolean containsAllOptionalFiles( String root, List<File> files ) {
+    private boolean containsAllOptionalFiles( ShapeFileDescription root ) {
         boolean valid = true;
-        Set<String> fileExtensions = files.stream().map( f -> StringUtils.lowerCase( getFileExtension( f.getName() ) ) )
+        Set<String> fileExtensions = root.getContainedFiles().stream()
+                .map( f -> StringUtils.lowerCase( getFileExtension( f.file.get().getName() ) ) )
                 .collect( Collectors.toSet() );
         List<String> missing = new ArrayList<String>();
         for (String ext : OPTIONAL_VALID_SHAPE_FILE_EXTS) {
             if (!fileExtensions.contains( ext )) {
-                missing.add( root + "." + ext );
+                missing.add( root.groupName.get() + "." + ext );
             }
         }
         if (missing.size() > 0) {
@@ -313,8 +293,9 @@ public class ShapeFileValidator {
      * @param files
      * @return
      */
-    private boolean containsShpFile( String root, List<File> files ) {
-        boolean valid = files.stream().anyMatch( f -> "shp".equalsIgnoreCase( getFileExtension( f.getName() ) ) );
+    private boolean containsShpFile( ShapeFileDescription root ) {
+        boolean valid = root.getContainedFiles().stream()
+                .anyMatch( f -> ShapeFileFormats.SHP.getFileExtension().equalsIgnoreCase( getFileExtension( f.file.get().getName() ) ) );
         if (!valid) {
             reportError( root, root + ".shp isn't provided." );
         }
@@ -324,71 +305,75 @@ public class ShapeFileValidator {
 
     /* *** validate single file *** */
 
-    public boolean validate( File file ) {
-        boolean validRequired = hasValidShapeFileExtension( file );
-        boolean validOptional = hasValidOptionalShapeFileExtension( file );
-        boolean valid = validRequired || validOptional;
-        if (!valid) {
-            handleValidShapeFileExtension( file, validOptional );
-        }
-        return valid;
-    }
-
-
-    private void handleValidShapeFileExtension( File file, boolean validOptional ) {
-        String fileExtension = getFileExtension( file.getName() );
+    private void handleInvalidShapeFileExtension( FileDescription fd, boolean validOptional ) {
+        String fileExtension = getFileExtension( fd.file.get().getName() );
         if (!validOptional) {
-            reportError( file, fileExtension + " is not a valid shape file extension" );
+            reportError( fd, fileExtension + " is not a valid shape file extension" );
         }
         else {
-            reportError( file, fileExtension + " is not a valid shape file extension" );
+            reportError( fd, fileExtension + " is not a valid shape file extension" );
         }
     }
 
 
-    private boolean hasValidRootFileExtension( File file ) {
-        boolean validRequired = hasValidShapeFileExtension( file );
-        boolean validOptional = hasValidOptionalShapeFileExtension( file );
-        boolean validArchive = hasValidArchiveFileExtension( file );
+    private boolean hasValidRootFileExtension( FileDescription fd ) {
+        boolean validRequired = hasValidShapeFileExtension( fd );
+        boolean validOptional = hasValidOptionalShapeFileExtension( fd );
+        boolean validArchive = hasValidArchiveFileExtension( fd );
         boolean valid = validRequired || validOptional || validArchive;
         if (!valid) {
             if (!validArchive) {
-                String fileExtension = getFileExtension( file.getName() );
-                reportError( file, fileExtension + " is not a valid archive file extension" );
+                String fileExtension = internalGetFileExtension( fd );
+                reportError( fd, fileExtension + " is not a valid archive file extension" );
             }
             else {
-                handleValidShapeFileExtension( file, validOptional );
+                handleInvalidShapeFileExtension( fd, validOptional );
             }
         }
         return valid;
     }
 
 
-    private boolean hasValidArchiveFileExtension( File file ) {
-        return hasValidFileExtension( file, VALID_ARCHIV_FILE_EXTS );
+    private boolean hasValidArchiveFileExtension( FileDescription fd ) {
+        return hasValidFileExtension( fd, VALID_ARCHIV_FILE_EXTS );
     }
 
 
-    private boolean hasValidShapeFileExtension( File file ) {
-        return hasValidFileExtension( file, REQUIRED_VALID_SHAPE_FILE_EXTS );
+    private boolean hasValidShapeFileExtension( FileDescription fd ) {
+        return hasValidFileExtension( fd, REQUIRED_VALID_SHAPE_FILE_EXTS );
     }
 
 
-    private boolean hasValidOptionalShapeFileExtension( File file ) {
-        return hasValidFileExtension( file, OPTIONAL_VALID_SHAPE_FILE_EXTS );
+    private boolean hasValidOptionalShapeFileExtension( FileDescription fd ) {
+        return hasValidFileExtension( fd, OPTIONAL_VALID_SHAPE_FILE_EXTS );
     }
 
 
-    private boolean hasValidFileExtension( File file, List<String> validExtensions ) {
-        String fileExtension = getFileExtension( file.getName() );
+    private boolean hasValidFileExtension( FileDescription fd, List<String> validExtensions ) {
+        if(!fd.name.isPresent() && !fd.file.isPresent()) {
+            return !fd.parentFile.isPresent();
+        }
+        String fileExtension = internalGetFileExtension(fd);
         return validExtensions.stream().anyMatch( ext -> ext.equalsIgnoreCase( fileExtension ) );
+    }
+    
+    private String internalGetFileExtension(FileDescription fd) {
+        String fileExtension = null;
+        if (fd.name.isPresent()) {
+            fileExtension = getFileExtension( fd.name.get() );
+        }
+        else if (fd.file.isPresent()) {
+            File file = fd.file.get();
+            fileExtension = getFileExtension( file.getName() );
+        }
+        return fileExtension;
     }
 
 
     /* *** utils *** */
 
     private boolean validateNonExistingCatalogEntry( Function<String,Boolean> predicate ) {
-        MetadataQuery entries = P4Plugin.instance().localCatalog.query( "" );
+        MetadataQuery entries = getLocalCatalog().query( "" );
         return entries.execute().stream().noneMatch( e -> {
             String title = e.getTitle().replace( ".shp", "" );
             boolean contains = predicate.apply( title );
@@ -397,6 +382,19 @@ public class ShapeFileValidator {
             }
             return contains;
         } );
+    }
+
+
+    void setLocalCatalog( LocalCatalog localCatalog ) {
+        this.localCatalog = localCatalog;
+    }
+
+
+    LocalCatalog getLocalCatalog() {
+        if (localCatalog == null) {
+            localCatalog = P4Plugin.instance().localCatalog;
+        }
+        return localCatalog;
     }
 
 
@@ -413,6 +411,26 @@ public class ShapeFileValidator {
 
 
     private static void reportIssue( Object source, int severity, String message ) {
-        EventManager.instance().publish( new ValidationEvent( source, severity, message ) );
+        publish(getEventManager(), new ValidationEvent( source, severity, message ) );
+    }
+
+
+    private static void publish(EventManager eventManager, ValidationEvent validationEvent ) {
+        eventManager.publish( validationEvent );
+    }
+
+    private static EventManager eventManager = null;
+
+
+    static void setEventManager( EventManager aEventManager ) {
+        eventManager = aEventManager;
+    }
+
+
+    static EventManager getEventManager() {
+        if (eventManager == null) {
+            eventManager = EventManager.instance();
+        }
+        return eventManager;
     }
 }

@@ -12,28 +12,31 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
-
-import java.io.File;
+package org.polymap.p4.imports.utils;
 
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.graphics.FontMetrics;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
  *
  */
-public class ShapeImportCellLabelProvider extends AbstractShapeImportCellLabelProvider {
+public class TextMetricHelper {
 
-    @Override
-    public void update( ViewerCell cell ) {
-        handleBackgroundColor( cell );
-        Object elem = cell.getElement();
-        if (elem instanceof String) {
-            cell.setText( String.valueOf( elem) );
-        }
-        else if (elem instanceof File) {
-            cell.setText( ((File)elem).getName() );
-        }
+    public Point getTextExtent(ViewerCell cell, String text) {
+        GC gc = new GC(cell.getControl());
+        Point point = gc.textExtent( text );
+        gc.dispose();
+        return point;
+    }
+    
+    public FontMetrics getFontMetrics(ViewerCell cell) {
+        GC gc = new GC(cell.getControl());
+        FontMetrics fontMetrics = gc.getFontMetrics();
+        gc.dispose();
+        return fontMetrics;
     }
 }

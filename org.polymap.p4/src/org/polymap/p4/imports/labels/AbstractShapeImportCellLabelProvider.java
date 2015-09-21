@@ -12,7 +12,7 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.imports;
+package org.polymap.p4.imports.labels;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -27,17 +27,31 @@ import org.eclipse.swt.widgets.TreeItem;
 public abstract class AbstractShapeImportCellLabelProvider
         extends CellLabelProvider {
 
-    private static final Object CSS_FIRST_ROW = "firstRow";
+    private static final String CSS_FIRST_ROW = "firstRow";
 
 
     protected void handleBackgroundColor( ViewerCell cell ) {
-        ViewerRow row = cell.getViewerRow();
-        TreeItem treeItem = (TreeItem)cell.getViewerRow().getItem();
-        if (treeItem.getParentItem() != null) {
-            ((TreeItem)row.getItem()).setData( RWT.CUSTOM_VARIANT, CSS_FIRST_ROW );
+        String data;
+        if (isCellExpanded(cell)) {
+            data = CSS_FIRST_ROW;
         }
         else {
-            ((TreeItem)row.getItem()).setData( RWT.CUSTOM_VARIANT, null );
+            data = null;
         }
+        setCellData( cell, RWT.CUSTOM_VARIANT, data );
+    }
+
+    protected void setCellData( ViewerCell cell, String key, String data ) {
+        ViewerRow row = cell.getViewerRow();
+        ((TreeItem)row.getItem()).setData( key, data );
+    }
+    
+    protected boolean isCellExpanded(ViewerCell cell) {
+        TreeItem treeItem = getTreeItem( cell );
+        return treeItem.getExpanded();
+    }
+
+    protected TreeItem getTreeItem( ViewerCell cell ) {
+        return (TreeItem)cell.getViewerRow().getItem();
     }
 }
