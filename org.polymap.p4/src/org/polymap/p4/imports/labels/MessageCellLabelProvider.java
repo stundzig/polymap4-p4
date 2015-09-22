@@ -76,11 +76,10 @@ public class MessageCellLabelProvider
                         ev -> ev instanceof ValidationEvent && isEqual( element, ev.getSource() ) );
                 statusEventHandlers.put( element, statusEventHandler );
             }
-            getShapeFileValidator().validate( (FileDescription)element );
-            // TODO: wait for any validation message to set and only if there are no
-            // issues,
-            // set the description text
-            setCellText( cell, getDescription( cell.getElement() ) );
+            boolean valid = getShapeFileValidator().validate( (FileDescription)element );
+            if(valid) {
+                setCellText( cell, getDescription( cell.getElement() ) );
+            }
         }
     }
 
