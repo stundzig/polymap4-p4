@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -146,8 +147,7 @@ public class ShapeFileValidator {
 
     public boolean validateAll( List<FileDescription> files ) {
         boolean valid = true;
-        Set<String> names = files.stream().map( file -> file.groupName.get() ).collect( Collectors.toSet() );
-        valid &= validateNonExistingCatalogEntries( names );
+        valid &= validateNonExistingCatalogEntries( files );
         if (valid) {
             valid &= validateDuplicates( files );
             if (valid) {
@@ -164,9 +164,12 @@ public class ShapeFileValidator {
      * @param keySet
      * @return
      */
-    private boolean validateNonExistingCatalogEntries( Set<String> names ) {
+    private boolean validateNonExistingCatalogEntries( List<FileDescription> files ) {
+        Set<String> names = files.stream().map( file -> file.groupName.get() ).collect( Collectors.toSet() );
         Function<String,Boolean> predicate = ( String title ) -> names.contains( title );
-        return validateNonExistingCatalogEntry( predicate );
+        Function<String,Optional<FileDescription>> getFileDescriptionByGroupName = ( String groupName ) -> files
+                .stream().filter( file -> groupName.equals( file.groupName.get() ) ).findFirst();
+        return validateNonExistingCatalogEntry( predicate, getFileDescriptionByGroupName );
     }
 
 
@@ -194,8 +197,11 @@ public class ShapeFileValidator {
     /* *** validate group of files *** */
 
     private boolean validateNonExistingCatalogEntry( FileDescription root ) {
-        Function<String,Boolean> predicate = ( String title ) -> root.groupName.isPresent() && root.groupName.get().equals( title );
-        return validateNonExistingCatalogEntry( predicate );
+        Function<String,Boolean> predicate = ( String title ) -> root.groupName.isPresent()
+                && root.groupName.get().equals( title );
+        Function<String,Optional<FileDescription>> getFileDescriptionByGroupName = ( String groupName ) -> Optional
+                .of( root );
+        return validateNonExistingCatalogEntry( predicate, getFileDescriptionByGroupName );
     }
 
 
@@ -294,8 +300,12 @@ public class ShapeFileValidator {
      * @return
      */
     private boolean containsShpFile( ShapeFileDescription root ) {
-        boolean valid = root.getContainedFiles().stream()
-                .anyMatch( f -> ShapeFileFormats.SHP.getFileExtension().equalsIgnoreCase( getFileExtension( f.file.get().getName() ) ) );
+        boolean valid = root
+                .getContainedFiles()
+                .stream()
+                .anyMatch(
+                        f -> ShapeFileFormats.SHP.getFileExtension().equalsIgnoreCase(
+                                getFileExtension( f.file.get().getName() ) ) );
         if (!valid) {
             reportError( root, root + ".shp isn't provided." );
         }
@@ -350,14 +360,15 @@ public class ShapeFileValidator {
 
 
     private boolean hasValidFileExtension( FileDescription fd, List<String> validExtensions ) {
-        if(!fd.name.isPresent() && !fd.file.isPresent()) {
+        if (!fd.name.isPresent() && !fd.file.isPresent()) {
             return !fd.parentFile.isPresent();
         }
-        String fileExtension = internalGetFileExtension(fd);
+        String fileExtension = internalGetFileExtension( fd );
         return validExtensions.stream().anyMatch( ext -> ext.equalsIgnoreCase( fileExtension ) );
     }
-    
-    private String internalGetFileExtension(FileDescription fd) {
+
+
+    private String internalGetFileExtension( FileDescription fd ) {
         String fileExtension = null;
         if (fd.name.isPresent()) {
             fileExtension = getFileExtension( fd.name.get() );
@@ -372,14 +383,17 @@ public class ShapeFileValidator {
 
     /* *** utils *** */
 
-    private boolean validateNonExistingCatalogEntry( Function<String,Boolean> predicate ) {
+    private boolean validateNonExistingCatalogEntry( Function<String,Boolean> predicate,
+            Function<String,Optional<FileDescription>> getFileDescription ) {
         MetadataQuery entries = getLocalCatalog().query( "" );
         return entries.execute().stream().noneMatch( e -> {
             String title = e.getTitle().replace( ".shp", "" );
             boolean contains = predicate.apply( title );
-            System.out.println("contains: " + contains + ": " + title);
             if (contains) {
-                reportError( title, e.getTitle() + " is already imported as catalog entry." );
+                Optional<FileDescription> fileDescOpt = getFileDescription.apply( title );
+                if (fileDescOpt.isPresent()) {
+                    reportError( fileDescOpt.get(), e.getTitle() + " is already imported as catalog entry." );
+                }
             }
             return contains;
         } );
@@ -412,11 +426,11 @@ public class ShapeFileValidator {
 
 
     private static void reportIssue( Object source, int severity, String message ) {
-        publish(getEventManager(), new ValidationEvent( source, severity, message ) );
+        publish( getEventManager(), new ValidationEvent( source, severity, message ) );
     }
 
 
-    private static void publish(EventManager eventManager, ValidationEvent validationEvent ) {
+    private static void publish( EventManager eventManager, ValidationEvent validationEvent ) {
         eventManager.publish( validationEvent );
     }
 
