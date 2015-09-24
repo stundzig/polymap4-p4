@@ -80,7 +80,7 @@ public class NewLayerContribution
 
         OperationSupport.instance().execute2( op, true, false, ev2 -> UIThreadExecutor.asyncFast( () -> {
             if (ev2.getResult().isOK()) {
-                PanelPath panelPath = site.getPanel().getSite().getPath();
+                PanelPath panelPath = site.getPanel().site().path();
                 site.getContext().closePanel( panelPath.removeLast( 1 /*2*/ ) );
             }
             else {
