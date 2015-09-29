@@ -64,6 +64,10 @@
             id="org.polymap.p4.project.ProjectInfoPanel">
       </panel>
       <panel
+            class="org.polymap.p4.imports.csv.CSVImportPanel"
+            id="org.polymap.p4.imports.csv.CSVImportPanel">
+      </panel>
+      <panel
             class="org.polymap.p4.data.imports.ImportPanel"
             id="org.polymap.p4.ImportPanel">
       </panel>
