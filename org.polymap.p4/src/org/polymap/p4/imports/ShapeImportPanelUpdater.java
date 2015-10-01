@@ -14,7 +14,6 @@
  */
 package org.polymap.p4.imports;
 
-import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,7 +68,7 @@ public class ShapeImportPanelUpdater
         boolean valid = new ShapeFileValidator().validateAll( files );
         if (valid) {
             List<FileDescription> shps = files.stream().flatMap( file -> file.getContainedFiles().stream() )
-                    .filter( cf -> cf.name.get().toLowerCase().endsWith( "." + ShapeFileFormats.SHP ) )
+                    .filter( cf -> cf.format.isPresent() && cf.format.get() == ShapeFileFormats.SHP )
                     .collect( Collectors.toList() );
             if (shps.size() > 0) {
                 if (selectionListener != null) {
@@ -83,9 +82,12 @@ public class ShapeImportPanelUpdater
                     @Override
                     public void widgetSelected( SelectionEvent ev ) {
                         for (Object shp : shps) {
-                            UIUtils.activateCallback( "importFiles" );
-                            shapeFileImporter.importFiles( (File)shp );
-                            UIUtils.deactivateCallback( "importFiles" );
+                            FileDescription fileDesc = (FileDescription) shp;
+                            if(fileDesc.file.isPresent()) {
+                                UIUtils.activateCallback( "importFiles" );
+                                shapeFileImporter.importFiles( fileDesc.file.get() );
+                                UIUtils.deactivateCallback( "importFiles" );
+                            }
                         }
                     }
                 };
