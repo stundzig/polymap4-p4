@@ -18,12 +18,13 @@ import static org.polymap.rhei.batik.toolkit.md.dp.dp;
 
 import java.io.InputStream;
 
-import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.viewers.ILazyContentProvider;
+
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
@@ -53,289 +54,357 @@ import org.polymap.rap.updownload.upload.Upload;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
-import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import com.google.refine.importing.ImportingJob;
+import com.google.refine.model.Cell;
 import com.google.refine.model.Column;
 import com.google.refine.model.ColumnModel;
+import com.google.refine.model.Row;
 
 /**
  * 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class CSVImportPanel
-        extends DefaultPanel {
+public class CSVImportPanel extends DefaultPanel {
 
-    public static final PanelIdentifier ID   = PanelIdentifier.parse( "csvimport" );
+	public static final PanelIdentifier ID = PanelIdentifier.parse("csvimport");
 
-    private static final IMessages      i18n = Messages.forPrefix( "CSVImportPanel" );
+	private static final IMessages i18n = Messages.forPrefix("CSVImportPanel");
 
-    // todo handle start/stop of this service
-    private RefineService               service;
+	// todo handle start/stop of this service
+	private RefineService service;
 
-    private TableViewer                 viewer;
+	private TableViewer viewer;
 
-    private ImportingJob                importJob;
+	private ImportingJob importJob;
 
-    private FormatAndOptions            formatOptions;
+	private FormatAndOptions formatOptions;
 
+	public CSVImportPanel() {
+		super();
+		ServiceReference<?> serviceReference = P4Plugin.instance().getBundle().getBundleContext()
+				.getServiceReference(RefineService.class.getName());
+		service = (RefineService) P4Plugin.instance().getBundle().getBundleContext().getService(serviceReference);
 
-    public CSVImportPanel() {
-        super();
-        ServiceReference<?> serviceReference = P4Plugin.instance().getBundle().getBundleContext()
-                .getServiceReference( RefineService.class.getName() );
-        service = (RefineService)P4Plugin.instance().getBundle().getBundleContext()
-                .getService( serviceReference );
+	}
 
-    }
+	@Override
+	public boolean wantsToBeShown() {
+		return parentPanel().filter(parent -> parent instanceof ProjectMapPanel).map(parent -> {
+			setTitle();
+			getSite().setPreferredWidth(500);
+			return true;
+		}).orElse(false);
+	}
 
+	private void setTitle() {
+		getSite().setTitle("Import CSV");
+	}
 
-    @Override
-    public boolean wantsToBeShown() {
-        return parentPanel().filter( parent -> parent instanceof ProjectMapPanel ).map( parent -> {
-            setTitle();
-            getSite().setPreferredWidth( 500 );
-            return true;
-        } ).orElse( false );
-    }
+	@Override
+	public void createContents(Composite parent) {
+		setTitle();
 
+		parent.setLayout(FormLayoutFactory.defaults().spacing(dp(16).pix()).create());
+		MdToolkit tk = (MdToolkit) getSite().toolkit();
 
-    private void setTitle() {
-        getSite().setTitle( "Import CSV" );
-    }
+		Composite upload = createUpload(parent);
 
+		FormDataFactory.on(upload).top(0);
 
-    @Override
-    public void createContents( Composite parent ) {
-        setTitle();
+		// IPanelSection tableSection = tk.createPanelSection( parent, "data",
+		// SWT.NONE );
+		Composite table = createTable(parent);
+		FormDataFactory.on(table).fill().top(upload, 5);
 
-        parent.setLayout( FormLayoutFactory.defaults().spacing( dp( 16 ).pix() ).create() );
-        MdToolkit tk = (MdToolkit)getSite().toolkit();
+		// Button importFab = createImportFAB( tk );
+		// MdToast mdToast = tk.createToast( 70, SWT.NONE );
 
-        createUpload( parent );
+		// MdListViewer fileList = tk.createListViewer( parent, SWT.VIRTUAL,
+		// SWT.FULL_SELECTION );
 
-//        IPanelSection tableSection = tk.createPanelSection( parent, "data", SWT.NONE );
-        createTable( parent );
-        // Button importFab = createImportFAB( tk );
-        // MdToast mdToast = tk.createToast( 70, SWT.NONE );
+		// IssueReporter issueReporter = new IssueReporter( mdToast );
+		// List<FileDescription> files = new ArrayList<FileDescription>();
+		// ShapeImportPanelUpdater shapeImportPanelUpdater =
+		// createShapeImportPanelUpdater( importFab, issueReporter,
+		// files, fileList );
 
-        // MdListViewer fileList = tk.createListViewer( parent, SWT.VIRTUAL,
-        // SWT.FULL_SELECTION );
+		// final UploadHelper uploadHelper = new UploadHelper( files,
+		// shapeImportPanelUpdater, issueReporter );
+		// DropTargetAdapter dropTargetAdapter =
+		// uploadHelper.createDropTargetAdapter();
 
-        // IssueReporter issueReporter = new IssueReporter( mdToast );
-        // List<FileDescription> files = new ArrayList<FileDescription>();
-        // ShapeImportPanelUpdater shapeImportPanelUpdater =
-        // createShapeImportPanelUpdater( importFab, issueReporter,
-        // files, fileList );
+		// initFileList( fileList, shapeImportPanelUpdater, issueReporter,
+		// dropTargetAdapter, files );
+	}
+	//
+	// public class MyLabelProvider extends LabelProvider implements
+	// ITableLabelProvider {
+	//
+	// public Image getColumnImage(Object element, int columnIndex) {
+	// return null;
+	// }
+	//
+	// public String getColumnText(Object element, int columnIndex) {
+	// return "Column " + columnIndex + " => " + element.toString();
+	// }
+	// }
 
-        // final UploadHelper uploadHelper = new UploadHelper( files,
-        // shapeImportPanelUpdater, issueReporter );
-        // DropTargetAdapter dropTargetAdapter =
-        // uploadHelper.createDropTargetAdapter();
+	private Composite createTable(Composite parent) {
+		// Composite tableComposite = new Composite(parent, SWT.FILL );
+		// TableColumnLayout tableColumnLayout = new TableColumnLayout();
+		// tableComposite.setLayout( tableColumnLayout );
+		// final Table table = new Table( tableComposite,
+		// SWT.MULTI | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER |
+		// SWT.VIRTUAL );
+		viewer = new TableViewer(parent, SWT.BORDER);
+		// viewer.setContentProvider(new ILazyContentProvider() {
+		//
+		// @Override
+		// public void inputChanged(Viewer viewer, Object oldInput, Object
+		// newInput) {
+		// }
+		//
+		// @Override
+		// public void dispose() {
+		// }
+		//
+		// @Override
+		// public void updateElement(int index) {
+		// viewer.replace(importJob.project.rows.get(index), index);
+		// }
+		// });
+		// viewer.setLabelProvider(new LabelProvider() {
+		// @Override
+		// public String getText(Object element) {
+		// return String.valueOf(((Cell)element).value);
+		// }
+		// });
+		viewer.setContentProvider(ArrayContentProvider.getInstance());
+		// viewer.setContentProvider(new IStructuredContentProvider() {
+		//
+		// @Override
+		// public void inputChanged(Viewer viewer, Object oldInput, Object
+		// newInput) {
+		// System.out.println("inputChanged");
+		// }
+		//
+		// @Override
+		// public void dispose() {
+		// }
+		//
+		// @SuppressWarnings("unchecked")
+		// @Override
+		// public Object[] getElements(Object inputElement) {
+		// System.out.println(inputElement);
+		// Object[] rows = ((List<Row>) inputElement).toArray();
+		// System.out.println(rows.length + " rows");
+		// return rows;
+		// }
+		// });
+		viewer.setUseHashlookup(true);
+		Table table = viewer.getTable();
+		table.setData(RWT.TOOLTIP_MARKUP_ENABLED, Boolean.TRUE);
+		table.setData(RWT.MARKUP_ENABLED, Boolean.TRUE);
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+		// table.
+		// viewer.setLabelProvider(new MyLabelProvider());
 
-        // initFileList( fileList, shapeImportPanelUpdater, issueReporter,
-        // dropTargetAdapter, files );
-    }
+		refreshViewer();
+		return viewer.getTable();
+	}
 
+	@SuppressWarnings("unchecked")
+	private void refreshViewer() {
+		if (viewer != null) {
+			UIThreadExecutor.async(() -> {
+				Table table = viewer.getTable();
+				table.setRedraw(false);
+				for (TableColumn col : table.getColumns()) {
+					col.dispose();
+				}
+				viewer.setItemCount(0);
+				if (importJob == null) {
+					viewer.getTable().setVisible(false);
+				} else {
+					viewer.getTable().setVisible(true);
+					// viewer.setItemCount(importJob.project.rows.size());
+					// add columns
+					ColumnModel columnModel = importJob.project.columnModel;
+					int index = 0;
+					for (Column column : columnModel.columns) {
+						TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
+						TableColumn tableColumn = viewerColumn.getColumn();
+						tableColumn.setText(column.getName());
+						tableColumn.setWidth(50);
+						final int currentIndex = index;
+						viewerColumn.setLabelProvider(new ColumnLabelProvider() {
 
-    private void createTable( Composite parent ) {
-        Composite tableComposite = new Composite(parent, SWT.FILL );
-        TableColumnLayout tableColumnLayout = new TableColumnLayout();
-        tableComposite.setLayout( tableColumnLayout );
-        final Table table = new Table( tableComposite,
-                SWT.MULTI | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER | SWT.VIRTUAL );
-        table.setData( RWT.TOOLTIP_MARKUP_ENABLED, Boolean.TRUE );
-        table.setData( RWT.MARKUP_ENABLED, Boolean.TRUE );
-        table.setHeaderVisible( true );
-        table.setLinesVisible( true );
-        viewer = new TableViewer( table );
-        viewer.setContentProvider( new ILazyContentProvider() {
+							@Override
+							public String getText(Object element) {
+								Row row = (Row)element;
+								Cell cell = row.cells.get(currentIndex);
+								return cell == null || cell.value == null ? "" : cell.value.toString().replace("&", "&amp;");//$NON-NLS-1$
+							}
+						});
+						index++;
+					}
+					// viewer.refresh();
+					viewer.setInput(importJob.project.rows);// createMockData(importJob.project.rows.size(),
+															// columnModel.columns.size()));
+				}
+				// table.setRedraw(true);
+			} , throwable -> throwable.printStackTrace());
+		}
 
-            @Override
-            public void inputChanged( Viewer viewer, Object oldInput, Object newInput ) {
-            }
+	}
+	//
+	// private Object createMockData(int rowCount, int columnCount) {
+	// String[][] rows = new String[rowCount][columnCount];
+	// for (int i = 0; i < rowCount; i++) {
+	// for (int j = 0; j < columnCount; j++) {
+	// rows[i][j] = i + ":" + j;
+	// }
+	// }
+	// return rows;
+	// }
 
+	private Composite createUpload(Composite parent) {
+		// DnD and upload
+		Upload upload = new Upload(parent, SWT.NONE/* , Upload.SHOW_PROGRESS */ );
+		upload.setImage(P4Plugin.images().svgImage("upload.svg", SvgImageRegistryHelper.NORMAL48));
+		upload.setText("");
+		upload.setData(RWT.TOOLTIP_MARKUP_ENABLED, true);
+		upload.setData(/* MarkupValidator.MARKUP_VALIDATION_DISABLED */"org.eclipse.rap.rwt.markupValidationDisabled",
+				false);
+		upload.setToolTipText("<b>Drop</b> files here<br/>or <b>click</b> to open file dialog");
+		upload.setHandler(new IUploadHandler() {
 
-            @Override
-            public void dispose() {
-            }
+			@Override
+			public void uploadStarted(ClientFile clientFile, InputStream in) throws Exception {
+				ImportResponse response = service.importFile(in, clientFile.getName(), clientFile.getType());
+				fileImported(response);
+			}
+		});
 
+		upload.moveAbove(null);
+		//
+		// DropTarget labelDropTarget = new DropTarget( upload, DND.DROP_MOVE );
+		// labelDropTarget.setTransfer( new Transfer[] {
+		// ClientFileTransfer.getInstance() } );
+		// labelDropTarget.addDropListener( dropTargetAdapter );
+		return upload;
+	}
 
-            @Override
-            public void updateElement( int index ) {
-                viewer.replace( importJob.project.rows.get( index ), index );
-            }
-        } );
-        viewer.setUseHashlookup( true );
-        refreshViewer();
-    }
+	private void fileImported(ImportResponse response) {
+		importJob = response.job();
+		formatOptions = response.options();
+		refreshViewer();
+	}
 
-    @SuppressWarnings("unchecked")
-    private void refreshViewer() {
-        if (viewer != null) {
-            UIThreadExecutor.async( () -> {
-                Table table = viewer.getTable();
-                table.setRedraw( false );
-                for (TableColumn col : table.getColumns()) {
-                    col.dispose();
-                }
-                viewer.setItemCount( 0 );
-                if (importJob == null) {
-                    viewer.getTable().setVisible( false );
-                } else {
-                    viewer.getTable().setVisible( true );
-                    viewer.setItemCount( importJob.project.rows.size() );
-                    // add columns
-                    ColumnModel columnModel = importJob.project.columnModel;
-                    for (Column column : columnModel.columns) {
-                        TableColumn tableColumn = new TableColumn( table, SWT.NONE );
-                        tableColumn.setText( column.getName() );
-                    }
-                }
-                table.setRedraw( true );
-                viewer.refresh();
-            } );
-        }
+	//
+	// private MdListViewer initFileList( MdListViewer fileList,
+	// ShapeImportPanelUpdater shapeImportPanelUpdater,
+	// IssueReporter issueReporter, DropTargetAdapter dropTargetAdapter,
+	// List<FileDescription> files ) {
+	//
+	// initFileListProviders( files, fileList, shapeImportPanelUpdater );
+	// // label providers have to be in place here, as otherwise the tileHeight
+	// // wouldn't be
+	// // adjusted and then the custom height is 0, leading to a / by zero in
+	// // getVisibleRowCount
+	// initFileListWithContent( issueReporter, files, fileList,
+	// shapeImportPanelUpdater );
+	//
+	// initOpenListener( fileList );
+	//
+	// enableDropTarget( dropTargetAdapter, fileList );
+	//
+	// ColumnViewerToolTipSupport.enableFor( fileList );
+	//
+	// fileList.getControl().setData( RWT.MARKUP_ENABLED, true );
+	// fileList.getControl().setData(
+	// /* MarkupValidator.MARKUP_VALIDATION_DISABLED
+	// */"org.eclipse.rap.rwt.markupValidationDisabled", false );
+	//
+	// FormDataFactory.on( fileList.getControl() ).fill().bottom( 90, -5 );
+	// return fileList;
+	// }
+	//
+	//
+	// private ShapeImportPanelUpdater createShapeImportPanelUpdater( Button
+	// importFab, IssueReporter issueReporter,
+	// List<FileDescription> files, MdListViewer fileList ) {
+	// ShapeFileImporter shapeFileImporter = new ShapeFileImporter( this );
+	// ShapeImportPanelUpdater shapeImportPanelUpdater = new
+	// ShapeImportPanelUpdater(
+	// files, fileList, importFab,
+	// issueReporter, shapeFileImporter );
+	// return shapeImportPanelUpdater;
+	// }
+	//
 
-    }
+	private void enableDropTarget(DropTargetAdapter dropTargetAdapter, MdListViewer fileList) {
+		DropTarget fileListDropTarget = new DropTarget(fileList.getControl(), DND.DROP_MOVE);
+		fileListDropTarget.setTransfer(new Transfer[] { ClientFileTransfer.getInstance() });
+		fileListDropTarget.addDropListener(dropTargetAdapter);
+	}
 
+	private void initOpenListener(MdListViewer fileList) {
+		fileList.addOpenListener(new IOpenListener() {
 
-    private void createUpload( Composite parent ) {
-        // DnD and upload
-        Upload upload = new Upload( parent, SWT.NONE/* , Upload.SHOW_PROGRESS */ );
-        upload.setImage(
-                P4Plugin.images().svgImage( "upload.svg", SvgImageRegistryHelper.NORMAL48 ) );
-        upload.setText( "" );
-        upload.setData( RWT.TOOLTIP_MARKUP_ENABLED, true );
-        upload.setData(
-                /* MarkupValidator.MARKUP_VALIDATION_DISABLED */"org.eclipse.rap.rwt.markupValidationDisabled",
-                false );
-        upload.setToolTipText( "<b>Drop</b> files here<br/>or <b>click</b> to open file dialog" );
-        upload.setHandler( new IUploadHandler() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public void open(OpenEvent ev) {
+				org.polymap.core.ui.SelectionAdapter.on(ev.getSelection()).forEach((Object elm) -> {
+					fileList.toggleItemExpand(elm);
+				});
+			}
+		});
+	}
 
-            @Override
-            public void uploadStarted( ClientFile clientFile, InputStream in ) throws Exception {
-                ImportResponse response = service.importFile( in, clientFile.getName(),
-                        clientFile.getType() );
-                fileImported( response );
-            }
-        } );
-        FormDataFactory.on( upload ).fill().bottom( 100, -5 ).top( 90 );
-        upload.moveAbove( null );
-        //
-        // DropTarget labelDropTarget = new DropTarget( upload, DND.DROP_MOVE );
-        // labelDropTarget.setTransfer( new Transfer[] {
-        // ClientFileTransfer.getInstance() } );
-        // labelDropTarget.addDropListener( dropTargetAdapter );
-    }
+	//
+	// private void initFileListProviders( List<FileDescription> files,
+	// MdListViewer
+	// fileList,
+	// ShapeImportPanelUpdater shapeImportPanelUpdater ) {
+	// fileList.iconProvider.set( new ShapeImportImageLabelProvider() );
+	// fileList.firstLineLabelProvider.set( new ShapeImportCellLabelProvider()
+	// );
+	// fileList.secondLineLabelProvider.set( new MessageCellLabelProvider() );
+	// fileList.firstSecondaryActionProvider.set( new
+	// ShapeFileDeleteActionProvider(
+	// files, shapeImportPanelUpdater ) );
+	//// fileList.setLabelProvider( new ShapeImportCellLabelProvider() );
+	// }
+	//
+	//
+	// private void initFileListWithContent( IssueReporter issueReporter,
+	// List<FileDescription> files,
+	// MdListViewer fileList, ShapeImportPanelUpdater shapeImportPanelUpdater )
+	// {
+	// fileList.setContentProvider( new ShapeImportTreeContentProvider( files )
+	// );
+	// fileList.setInput( files );
+	// InitFileListHelper initFileListHelper = new InitFileListHelper( files,
+	// shapeImportPanelUpdater, issueReporter );
+	// initFileListHelper.initFileList();
+	// }
+	//
 
-
-    private void fileImported( ImportResponse response ) {
-        importJob = response.job();
-        formatOptions = response.options();
-        refreshViewer();
-    }
-
-
-    //
-    // private MdListViewer initFileList( MdListViewer fileList,
-    // ShapeImportPanelUpdater shapeImportPanelUpdater,
-    // IssueReporter issueReporter, DropTargetAdapter dropTargetAdapter,
-    // List<FileDescription> files ) {
-    //
-    // initFileListProviders( files, fileList, shapeImportPanelUpdater );
-    // // label providers have to be in place here, as otherwise the tileHeight
-    // // wouldn't be
-    // // adjusted and then the custom height is 0, leading to a / by zero in
-    // // getVisibleRowCount
-    // initFileListWithContent( issueReporter, files, fileList,
-    // shapeImportPanelUpdater );
-    //
-    // initOpenListener( fileList );
-    //
-    // enableDropTarget( dropTargetAdapter, fileList );
-    //
-    // ColumnViewerToolTipSupport.enableFor( fileList );
-    //
-    // fileList.getControl().setData( RWT.MARKUP_ENABLED, true );
-    // fileList.getControl().setData(
-    // /* MarkupValidator.MARKUP_VALIDATION_DISABLED
-    // */"org.eclipse.rap.rwt.markupValidationDisabled", false );
-    //
-    // FormDataFactory.on( fileList.getControl() ).fill().bottom( 90, -5 );
-    // return fileList;
-    // }
-    //
-    //
-    // private ShapeImportPanelUpdater createShapeImportPanelUpdater( Button
-    // importFab, IssueReporter issueReporter,
-    // List<FileDescription> files, MdListViewer fileList ) {
-    // ShapeFileImporter shapeFileImporter = new ShapeFileImporter( this );
-    // ShapeImportPanelUpdater shapeImportPanelUpdater = new ShapeImportPanelUpdater(
-    // files, fileList, importFab,
-    // issueReporter, shapeFileImporter );
-    // return shapeImportPanelUpdater;
-    // }
-    //
-
-    private void enableDropTarget( DropTargetAdapter dropTargetAdapter, MdListViewer fileList ) {
-        DropTarget fileListDropTarget = new DropTarget( fileList.getControl(), DND.DROP_MOVE );
-        fileListDropTarget.setTransfer( new Transfer[] { ClientFileTransfer.getInstance() } );
-        fileListDropTarget.addDropListener( dropTargetAdapter );
-    }
-
-
-    private void initOpenListener( MdListViewer fileList ) {
-        fileList.addOpenListener( new IOpenListener() {
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public void open( OpenEvent ev ) {
-                org.polymap.core.ui.SelectionAdapter.on( ev.getSelection() )
-                        .forEach( ( Object elm ) -> {
-                    fileList.toggleItemExpand( elm );
-                } );
-            }
-        } );
-    }
-
-
-    //
-    // private void initFileListProviders( List<FileDescription> files, MdListViewer
-    // fileList,
-    // ShapeImportPanelUpdater shapeImportPanelUpdater ) {
-    // fileList.iconProvider.set( new ShapeImportImageLabelProvider() );
-    // fileList.firstLineLabelProvider.set( new ShapeImportCellLabelProvider() );
-    // fileList.secondLineLabelProvider.set( new MessageCellLabelProvider() );
-    // fileList.firstSecondaryActionProvider.set( new ShapeFileDeleteActionProvider(
-    // files, shapeImportPanelUpdater ) );
-    //// fileList.setLabelProvider( new ShapeImportCellLabelProvider() );
-    // }
-    //
-    //
-    // private void initFileListWithContent( IssueReporter issueReporter,
-    // List<FileDescription> files,
-    // MdListViewer fileList, ShapeImportPanelUpdater shapeImportPanelUpdater ) {
-    // fileList.setContentProvider( new ShapeImportTreeContentProvider( files ) );
-    // fileList.setInput( files );
-    // InitFileListHelper initFileListHelper = new InitFileListHelper( files,
-    // shapeImportPanelUpdater, issueReporter );
-    // initFileListHelper.initFileList();
-    // }
-    //
-
-    private Button createImportFAB( MdToolkit tk ) {
-        Button fab = tk.createFab( /*
-                                    * P4Plugin.instance().imageForName(
-                                    * "resources/icons/png/gray/16/import.png" ),
-                                    * SWT.UP | SWT.RIGHT
-                                    */ );
-        fab.setToolTipText( "Import this uploaded Shapefile" );
-        fab.setVisible( false );
-        fab.moveAbove( null );
-        return fab;
-    }
+	private Button createImportFAB(MdToolkit tk) {
+		Button fab = tk.createFab( /*
+									 * P4Plugin.instance().imageForName(
+									 * "resources/icons/png/gray/16/import.png"
+									 * ), SWT.UP | SWT.RIGHT
+									 */ );
+		fab.setToolTipText("Import this uploaded Shapefile");
+		fab.setVisible(false);
+		fab.moveAbove(null);
+		return fab;
+	}
 }
