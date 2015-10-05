@@ -27,7 +27,7 @@ public interface Importer {
 
     public ImporterSite site();
 
-    public boolean init( ImporterSite site, IProgressMonitor monitor ) throws Exception;
+    public void init( ImporterSite site, IProgressMonitor monitor ) throws Exception;
     
     public void createPrompts( IProgressMonitor monitor ) throws Exception;
     

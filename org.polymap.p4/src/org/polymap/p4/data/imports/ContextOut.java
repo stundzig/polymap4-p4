@@ -19,9 +19,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
- * 
+ * Denotes an outbound element of the context of a given {@link Importer}.  
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */

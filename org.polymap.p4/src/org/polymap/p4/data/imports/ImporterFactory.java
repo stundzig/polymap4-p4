@@ -13,20 +13,32 @@
  */
 package org.polymap.p4.data.imports;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * Denotes an inbound element of the context of a given {@link Importer}.  
+ * 
  *
+ * @see ContextIn
+ * @see ContextOut
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-@Retention( RetentionPolicy.RUNTIME )
-@Target( { ElementType.FIELD } )
-@Documented
-public @interface ContextIn {
+public interface ImporterFactory {
 
+    /**
+     * Checks to current {@link ContextIn} for applicable objects and builds {@link Importer}s
+     * for these ojects.
+     */
+    public void createImporters( ImporterBuilder builder ) throws Exception;
+
+    
+    /**
+     * 
+     */
+    @FunctionalInterface
+    public static interface ImporterBuilder {
+        
+        /**
+         * Creates a new {@link Importer} with the given objects in its {@link ContextIn}.
+         */
+        public void newImporter( Importer importer, Object... contextIn ) throws Exception;
+    }
+    
 }
