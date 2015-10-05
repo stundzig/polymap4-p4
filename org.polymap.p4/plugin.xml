@@ -45,7 +45,7 @@
       </panel>
       <panel
             class="org.polymap.p4.imports.ShapeImportPanel"
-            id="org.polymap.p4.ImportPanel">
+            id="org.polymap.p4.ShapeImportPanel">
       </panel>
       <panel
             class="org.polymap.p4.catalog.CatalogPanel"
@@ -62,6 +62,10 @@
       <panel
             class="org.polymap.p4.project.ProjectInfoPanel"
             id="org.polymap.p4.project.ProjectInfoPanel">
+      </panel>
+      <panel
+            class="org.polymap.p4.data.imports.ImportPanel"
+            id="org.polymap.p4.ImportPanel">
       </panel>
       <panel
             class="org.polymap.p4.imports.csv.CSVImportPanel"
