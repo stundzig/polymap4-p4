@@ -235,8 +235,7 @@ public class MessageCellLabelProvider
         if (element instanceof ShapeFileDescription) {
             List<String> descriptionParts = new ArrayList<String>();
             ShapeFileDescription shapeFileDescription = (ShapeFileDescription)element;
-            shapeFileDescription.format.ifPresent( format -> descriptionParts.add( "<b>description:</b> "
-                    + format.getDescription() ) );
+            shapeFileDescription.format.ifPresent( format -> descriptionParts.add( format.getDescription() ) );
             if (element instanceof ShapeFileRootDescription) {
                 ShapeFileRootDescription shapeFileRootDescription = (ShapeFileRootDescription)element;
                 if (shapeFileRootDescription.featureType.isPresent()) {

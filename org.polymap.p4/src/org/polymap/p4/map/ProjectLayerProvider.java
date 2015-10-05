@@ -110,7 +110,7 @@ public class ProjectLayerProvider
         // make OpenLayers single-tile layer
         return new ImageLayer()
                  .source.put( new ImageWMSSource()
-                         .url.put( ".." + alias )
+                         .url.put( "." + alias )
                          .params.put( new WMSRequestParams()
                                  .version.put( "1.1.1" )  // send "SRS" param
                                  .layers.put( layerName )

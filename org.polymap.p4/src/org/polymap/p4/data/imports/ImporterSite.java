@@ -26,17 +26,15 @@ import org.polymap.core.runtime.config.DefaultPropertyConcern;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 
-import org.polymap.p4.data.imports.ImportDriver.ImporterSiteImpl;
-
 /**
  * 
- * 
- *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public abstract class ImporterSite
         extends Configurable {
 
+    protected Importer                      importer;
+    
     @Concern( FireEvent.class )
     public Config2<ImporterSite,Image>      icon;
 
@@ -47,6 +45,10 @@ public abstract class ImporterSite
     public Config2<ImporterSite,String>     description;
 
     
+    public ImporterSite( Importer importer ) {
+        this.importer = importer;
+    }
+
     public abstract ImportPrompt newPrompt( String id );
 
     public abstract Optional<ImportPrompt> prompt( String id );
@@ -66,7 +68,8 @@ public abstract class ImporterSite
          */
         @Override
         public Object doSet( Object obj, Config prop, Object newValue ) {
-            ImporterSiteImpl importerSite = prop.info().getHostObject();
+            ImporterSite importerSite = prop.info().getHostObject();
+            assert importerSite.importer != null;
             EventManager.instance().syncPublish( new ImporterChangeEvent( importerSite.importer ) );
             return newValue;
         }

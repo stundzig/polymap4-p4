@@ -14,6 +14,8 @@
 package org.polymap.p4.data.imports;
 
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24_OK;
+
 import java.util.Arrays;
 
 import java.io.File;
@@ -34,9 +36,12 @@ import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.ViewerCell;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -57,6 +62,7 @@ import org.polymap.core.ui.SelectionAdapter;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
@@ -99,7 +105,9 @@ public class ImportPanel
     
     // instance *******************************************
     
-    private Context<ImportDriver>       driver;
+    private Context<ImporterContext>    nextContext;
+    
+    private ImporterContext             context;
     
     private boolean                     rootImportPanel;
     
@@ -135,26 +143,13 @@ public class ImportPanel
         }
 
         // driver
-        rootImportPanel = !driver.isPresent();
-        driver.compareAndSet( null, new ImportDriver() {
-            @Override
-            protected void createResultViewer( Composite parent ) {
-                // XXX Auto-generated method stub
-                throw new RuntimeException( "not yet implemented." );
-            }
-            @Override
-            protected void createNextLevelUI( Importer importer ) {
-                getContext().openPanel( site().path(), ImportPanel.ID );
-            }
-        });
+        context = nextContext.isPresent() ? nextContext.get() : new ImporterContext(); 
     }
 
 
     @Override
     public void dispose() {
-        if (rootImportPanel) {
-            driver.set( null );
-        }
+        nextContext.set( context.importer() != null ? context : null );
         EventManager.instance().unsubscribe( this );
     }
 
@@ -181,7 +176,27 @@ public class ImportPanel
         importsList.setContentProvider( new ImportsContentProvider() );
         importsList.firstLineLabelProvider.set( new ImportsLabelProvider().type.put( Type.Summary ) );
         importsList.secondLineLabelProvider.set( new ImportsLabelProvider().type.put( Type.Description ) );
+        importsList.thirdLineLabelProvider.set( new CellLabelProvider() {
+            @Override
+            public void update( ViewerCell cell ) {
+                cell.setText( "Click to make something great!" );
+                cell.setForeground( Display.getCurrent().getSystemColor( SWT.COLOR_GREEN ) );
+            }
+        });
         importsList.iconProvider.set( new ImportsLabelProvider().type.put( Type.Icon ) );
+        importsList.firstSecondaryActionProvider.set( new ActionProvider() {
+            @Override
+            public void update( ViewerCell cell ) {
+                if (cell.getElement() instanceof ImporterContext) {
+                    cell.setImage( P4Plugin.images().svgImage( "check.svg", NORMAL24_OK ) );
+                }
+            }
+            @Override
+            public void perform( MdListViewer viewer, Object element ) {
+                // XXX Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+        });
         importsList.addOpenListener( new IOpenListener() {
             @Override
             public void open( OpenEvent ev ) {
@@ -190,7 +205,7 @@ public class ImportPanel
                 });
             }
         } );
-        importsList.setInput( driver.get() );
+        importsList.setInput( context );
         
         // result viewer
         resultViewer = tk.createComposite( parent );
@@ -229,7 +244,7 @@ public class ImportPanel
         }
 
         UIThreadExecutor.async( () -> {
-            driver.get().addContext( f );
+            context.addContextIn( f );
         });
     }
 

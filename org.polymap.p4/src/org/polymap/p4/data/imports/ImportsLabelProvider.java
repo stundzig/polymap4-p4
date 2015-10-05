@@ -50,54 +50,46 @@ class ImportsLabelProvider
     
     @Override
     public void update( ViewerCell cell ) {
-        if (type.get() == Type.Icon) {
-            if (cell.getElement() == ImportsContentProvider.LOADING) {
+        // loading        
+        if (cell.getElement() == ImportsContentProvider.LOADING) {
+            if (type.get() == Type.Icon) {
                 cell.setImage( BatikPlugin.images().image( "resources/icons/loading24.gif" ) );
             }
-            else if (cell.getElement() instanceof Importer) {
-                importerIcon( cell, (Importer)cell.getElement() );
-            }
-            else {
-                cell.setImage( null );
+            else if (type.get() == Type.Summary) {
+                cell.setText( "Crunching data..." );
             }
         }
-        else if (type.get() == Type.Summary) {
-            if (cell.getElement() instanceof Importer) {
-                importerSummary( cell, (Importer)cell.getElement() );
+
+        // ImporterContext
+        else if (cell.getElement() instanceof ImporterContext) {
+            ImporterContext context = (ImporterContext)cell.getElement();
+            if (type.get() == Type.Summary) {
+                cell.setText( context.site().summary.get() );
             }
-            else if (cell.getElement() instanceof ImportPrompt) {
-                promptSummary( cell, (ImportPrompt)cell.getElement() );
+            else if (type.get() == Type.Description) {
+                cell.setText( context.site().description.get() );
             }
-        }
-        else if (type.get() == Type.Description) {
-            if (cell.getElement() instanceof Importer) {
-                importerDescription( cell, (Importer)cell.getElement() );
-            }
-            else if (cell.getElement() instanceof ImportPrompt) {
-                promptDescription( cell, (ImportPrompt)cell.getElement() );
+            else if (type.get() == Type.Icon) {
+                cell.setImage( context.site().icon.get() );
             }
         }
-    }
-    
-    
-    protected void importerIcon( ViewerCell cell, Importer importer ) {
-        cell.setImage( importer.site().icon.get() );
-    }
-
-    protected void importerSummary( ViewerCell cell, Importer importer ) {
-        cell.setText( importer.site().summary.get() );
-    }
-
-    protected void importerDescription( ViewerCell cell, Importer importer ) {
-        cell.setText( importer.site().description.get() );
-    }
-
-    protected void promptSummary( ViewerCell cell, ImportPrompt prompt ) {
-        cell.setText( prompt.summary.get() );
-    }
-
-    protected void promptDescription( ViewerCell cell, ImportPrompt prompt ) {
-        cell.setText( prompt.description.get() );
+        
+        // ImportPrompt
+        else if (cell.getElement() instanceof ImportPrompt) {
+            ImportPrompt prompt = (ImportPrompt)cell.getElement();
+            if (type.get() == Type.Summary) {
+                cell.setText( prompt.summary.get() );
+            }
+            else if (type.get() == Type.Description) {
+                cell.setText( prompt.description.get() );
+            }
+            else if (type.get() == Type.Icon) {
+                cell.setImage( null );  // reset loading image
+            }
+        }
+        else {
+            throw new RuntimeException( "Unknown element type: " + cell.getElement().getClass().getName() );
+        }
     }
     
 }

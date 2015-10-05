@@ -34,12 +34,12 @@ import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 
-import org.polymap.p4.data.imports.ImportDriver.ContextChangeEvent;
+import org.polymap.p4.data.imports.ImporterContext.ContextChangeEvent;
 import org.polymap.p4.data.imports.ImportPrompt.PromptChangeEvent;
 import org.polymap.p4.data.imports.ImporterSite.ImporterChangeEvent;
 
 /**
- * Provides content of {@link ImportDriver}, {@link Importer} and
+ * Provides content of {@link ImporterContext}, {@link Importer} and
  * {@link ImportPrompt}.
  * <p/>
  * Listens to {@link ContextChangeEvent}, {@link ImporterChangeEvent} and
@@ -58,7 +58,7 @@ class ImportsContentProvider
     
     private TreeViewer                  viewer;
     
-    private ImportDriver                driver;
+    private ImporterContext             context;
 
     private ConcurrentMap<Object,Object[]> cache = new ConcurrentHashMap( 32 );
 
@@ -89,7 +89,7 @@ class ImportsContentProvider
     @Override
     public void inputChanged( @SuppressWarnings("hiding") Viewer viewer, Object oldInput, Object newInput ) {
         this.viewer = (TreeViewer)viewer;
-        this.driver = (ImportDriver)newInput;
+        this.context = (ImporterContext)newInput;
     }
 
 
@@ -104,26 +104,26 @@ class ImportsContentProvider
             return;    
         }
         
-        // ImportDriver
-        if (elm instanceof ImportDriver) {
+        // start: the input
+        if (elm == context) {
             updateChildrenLoading( elm );
             UIJob job = new UIJob( "Progress import" ) {
                 @Override
                 protected void runWithException( IProgressMonitor monitor ) throws Exception {
-                    assert driver == elm;
-                    List<Importer> importers = driver.findAvailableImporters( monitor );
+                    assert context == elm;
+                    List<ImporterContext> importers = context.findAvailable( monitor );
                     updateChildren( elm, importers.toArray(), currentChildCount );
                 }
             };
             job.scheduleWithUIUpdate();
         }
         // Importer
-        else if (elm instanceof Importer) {
+        else if (elm instanceof ImporterContext) {
             updateChildrenLoading( elm );
             UIJob job = new UIJob( "Progress import" ) {
                 @Override
                 protected void runWithException( IProgressMonitor monitor ) throws Exception {
-                    List<ImportPrompt> prompts = driver.prompts( (Importer)elm, monitor );
+                    List<ImportPrompt> prompts = ((ImporterContext)elm).prompts( monitor );
                     updateChildren( elm, prompts.toArray(), currentChildCount );
                 }
             };

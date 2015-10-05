@@ -64,17 +64,12 @@ public class ArchiveFileImporter
 
 
     @Override
-    public boolean init( @SuppressWarnings("hiding") ImporterSite site, IProgressMonitor monitor ) {
+    public void init( @SuppressWarnings("hiding") ImporterSite site, IProgressMonitor monitor ) {
         this.site = site;
 
-        // XXX better check
-        if (file != null && file.getName().endsWith( ".zip" )) {
-            site.icon.set( P4Plugin.images().svgImage( "zip.svg", NORMAL24 ) );
-            site.summary.set( "ZIP archive: " + file.getName() );
-            site.description.set( "A ZIP archive contains other files. Click to import files from within the archive." );
-            return true;
-        }
-        return false;
+        site.icon.set( P4Plugin.images().svgImage( "zip.svg", NORMAL24 ) );
+        site.summary.set( "ZIP archive: " + file.getName() );
+        site.description.set( "A ZIP archive contains other files. Click to import files from within the archive." );
     }
 
     
