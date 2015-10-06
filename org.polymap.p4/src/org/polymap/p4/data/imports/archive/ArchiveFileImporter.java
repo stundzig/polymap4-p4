@@ -23,7 +23,12 @@ import java.io.File;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -80,21 +85,29 @@ public class ArchiveFileImporter
                 .summary.put( "Charset of filenames: **UTF8**" )
                 .description.put( "A ZIP file can use different charsets to encode filenames. If unsure use UTF8." )
                 .extendedUI.put( (prompt,parent) -> {
-                    prompt.ok.set( true );
+                    Button btn = new Button( parent, SWT.CHECK );
+                    btn.setText( "Ja, das ist gut" );
+                    btn.addSelectionListener( new SelectionAdapter() {
+                        @Override
+                        public void widgetSelected( SelectionEvent e ) {
+                            prompt.ok.set( true );
+                        }
+                    });
                     return parent;
                 });
     }
 
 
     @Override
-    public void execute( IProgressMonitor monitor ) throws Exception {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
+    public Composite createResultViewer( Composite parent ) {
+        Label l = new Label( parent, SWT.NONE );
+        l.setText( "In: file: " + file.getName() );
+        return parent;
     }
 
 
     @Override
-    public Composite createResultViewer() {
+    public void execute( IProgressMonitor monitor ) throws Exception {
         // XXX Auto-generated method stub
         throw new RuntimeException( "not yet implemented." );
     }

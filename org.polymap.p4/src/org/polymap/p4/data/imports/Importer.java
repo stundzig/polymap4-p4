@@ -39,6 +39,6 @@ public interface Importer {
      */
     public void execute( IProgressMonitor monitor ) throws Exception;
     
-    public Composite createResultViewer();
+    public Composite createResultViewer( Composite parent );
     
 }

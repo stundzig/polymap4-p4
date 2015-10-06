@@ -14,12 +14,7 @@
  */
 package org.polymap.p4;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-
-import org.polymap.core.ui.FormLayoutFactory;
-import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.toolkit.md.MdAppDesign;
 
@@ -34,14 +29,14 @@ public class P4AppDesign
     private Label               title;
 
     
-    protected Composite fillHeaderArea( Composite parent ) {
-        Composite result = new Composite( parent, SWT.NO_FOCUS | SWT.BORDER );
-        UIUtils.setVariant( result, CSS_HEADER );
-        result.setLayout( FormLayoutFactory.defaults().margins( 0, 0 ).create() );
-        title = UIUtils.setVariant( new Label( result, SWT.NONE ), CSS_HEADER );
-        title.setText( "P4" );
-        return result;
-    }
+//    protected Composite fillHeaderArea( Composite parent ) {
+//        Composite result = new Composite( parent, SWT.NO_FOCUS | SWT.BORDER );
+//        UIUtils.setVariant( result, CSS_HEADER );
+//        result.setLayout( FormLayoutFactory.defaults().margins( 0, 0 ).create() );
+//        title = UIUtils.setVariant( new Label( result, SWT.NONE ), CSS_HEADER );
+//        title.setText( "P4" );
+//        return result;
+//    }
     
     
     public void setAppTitle( String title ) {
