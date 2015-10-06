@@ -129,6 +129,9 @@ class ImportsContentProvider
             };
             job.scheduleWithUIUpdate();
         }
+        else if (elm instanceof ImportPrompt) {
+            // no children
+        }
         else {
             throw new RuntimeException( "Unknown element type: " + elm );
         }

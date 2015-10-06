@@ -30,6 +30,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.ImmutableList;
 
+import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -164,6 +166,16 @@ public class ImporterContext
     }
 
     
+    public void createResultViewer( Composite parent ) {
+        importer.createResultViewer( parent );
+    }
+
+
+    public void createPromptViewer( Composite parent, ImportPrompt prompt ) {
+        prompt.extendedUI.ifPresent( uibuilder -> uibuilder.createContents( prompt, parent ) );
+    }
+
+
     public void execute( IProgressMonitor monitor ) throws Exception {
         importer.execute( monitor );
     } 

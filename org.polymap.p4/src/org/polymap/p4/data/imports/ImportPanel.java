@@ -35,10 +35,9 @@ import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -58,10 +57,12 @@ import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
+import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
@@ -113,7 +114,7 @@ public class ImportPanel
     
     private MdListViewer                importsList;
 
-    private Composite                   resultViewer;
+    private IPanelSection               resultSection;
 
     private File                        tempDir;
 
@@ -176,13 +177,13 @@ public class ImportPanel
         importsList.setContentProvider( new ImportsContentProvider() );
         importsList.firstLineLabelProvider.set( new ImportsLabelProvider().type.put( Type.Summary ) );
         importsList.secondLineLabelProvider.set( new ImportsLabelProvider().type.put( Type.Description ) );
-        importsList.thirdLineLabelProvider.set( new CellLabelProvider() {
-            @Override
-            public void update( ViewerCell cell ) {
-                cell.setText( "Click to make something great!" );
-                cell.setForeground( Display.getCurrent().getSystemColor( SWT.COLOR_GREEN ) );
-            }
-        });
+//        importsList.thirdLineLabelProvider.set( new CellLabelProvider() {
+//            @Override
+//            public void update( ViewerCell cell ) {
+//                cell.setText( "Click to make something great!" );
+//                cell.setForeground( Display.getCurrent().getSystemColor( SWT.COLOR_GREEN ) );
+//            }
+//        });
         importsList.iconProvider.set( new ImportsLabelProvider().type.put( Type.Icon ) );
         importsList.firstSecondaryActionProvider.set( new ActionProvider() {
             @Override
@@ -201,19 +202,33 @@ public class ImportPanel
             @Override
             public void open( OpenEvent ev ) {
                 SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
-                    importsList.toggleItemExpand( elm );
+                    importsList.expandToLevel( elm, 1 );
+
+                    UIUtils.disposeChildren( resultSection.getBody() );
+                    resultSection.getBody().setLayout( new FillLayout() );
+                    //
+                    if (elm instanceof ImporterContext) {
+                        resultSection.setTitle( "Data preview" );
+                        ((ImporterContext)elm).createResultViewer( resultSection.getBody() );
+                    }
+                    //
+                    else if (elm instanceof ImportPrompt) {
+                        resultSection.setTitle( "Prompt" );
+                        context.createPromptViewer( resultSection.getBody(), (ImportPrompt)elm );
+                    }
+                    resultSection.getBody().layout();
                 });
             }
-        } );
+        });
         importsList.setInput( context );
         
         // result viewer
-        resultViewer = tk.createComposite( parent );
+        resultSection = tk.createPanelSection( parent, null, SWT.BORDER );
         
         // layout
         FormDataFactory.on( upload ).fill().bottom( 0, 50 );
         FormDataFactory.on( importsList.getControl() ).fill().top( upload ).bottom( 50 );
-        FormDataFactory.on( resultViewer ).fill().top( importsList.getControl() );
+        FormDataFactory.on( resultSection.getControl() ).fill().top( importsList.getControl() );
         
         //
         EventManager.instance().subscribe( this, ev -> ev instanceof PromptChangeEvent );
