@@ -38,9 +38,11 @@ public abstract class ImporterSite
     @Concern( FireEvent.class )
     public Config2<ImporterSite,Image>      icon;
 
+    /** Short summary of the content of this importer */
     @Concern( FireEvent.class )
     public Config2<ImporterSite,String>     summary;
 
+    /** What do I get from this Importer? */
     @Concern( FireEvent.class )
     public Config2<ImporterSite,String>     description;
 

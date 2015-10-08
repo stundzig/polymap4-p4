@@ -19,6 +19,7 @@ import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 import java.util.List;
 
 import java.io.File;
+import java.nio.charset.Charset;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +38,7 @@ import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
+import org.polymap.p4.data.imports.ImportPrompt.Severity;
 import org.polymap.p4.data.imports.Importer;
 import org.polymap.p4.data.imports.ImporterSite;
 
@@ -61,6 +63,8 @@ public class ArchiveFileImporter
     @ContextOut
     protected List<File>            result;
     
+    protected Charset               charset;                
+    
 
     @Override
     public ImporterSite site() {
@@ -82,24 +86,34 @@ public class ArchiveFileImporter
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         // charset prompt
         site.newPrompt( "charset" )
-                .summary.put( "Charset of filenames: **UTF8**" )
-                .description.put( "A ZIP file can use different charsets to encode filenames. If unsure use UTF8." )
+                .summary.put( "Charset of filenames: UTF8" )
+                .description.put( "The encoding of the filenames. If unsure use UTF8." )
+                .severity.put( Severity.VERIFY )
                 .extendedUI.put( (prompt,parent) -> {
                     Button btn = new Button( parent, SWT.CHECK );
                     btn.setText( "Ja, das ist gut" );
                     btn.addSelectionListener( new SelectionAdapter() {
                         @Override
-                        public void widgetSelected( SelectionEvent e ) {
-                            prompt.ok.set( true );
+                        public void widgetSelected( SelectionEvent ev ) {
+                            prompt.ok.set( btn.getSelection() );
                         }
                     });
                     return parent;
                 });
     }
+    
+    
+    @Override
+    public boolean verify( IProgressMonitor monitor ) {
+        // XXX Auto-generated method stub
+        throw new RuntimeException( "not yet implemented." );        
+    }
 
 
     @Override
     public Composite createResultViewer( Composite parent ) {
+//        org.eclipse.swt.widgets.List list = new org.eclipse.swt.widgets.List( parent, SWT. NONE );
+//        list.add(  );
         Label l = new Label( parent, SWT.NONE );
         l.setText( "In: file: " + file.getName() );
         return parent;

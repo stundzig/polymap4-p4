@@ -23,6 +23,7 @@ import org.polymap.core.runtime.config.Config2;
 import org.polymap.core.runtime.config.Configurable;
 import org.polymap.core.runtime.config.DefaultBoolean;
 import org.polymap.core.runtime.config.DefaultPropertyConcern;
+import org.polymap.core.runtime.config.Mandatory;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 
@@ -34,10 +35,11 @@ public class ImportPrompt
         extends Configurable {
     
     public enum Severity {
-        INFO, VERIFY, ERROR;
+        INFO, VERIFY, MANDATORY;
     }
 
     /** Defaults to {@link Severity#INFO}. */
+    @Mandatory
     @Concern( FireEvent.class )
     public Config2<ImportPrompt,Severity>   severity;
 
@@ -47,6 +49,7 @@ public class ImportPrompt
     @Concern( FireEvent.class )
     public Config2<ImportPrompt,String>     description;
     
+    @Mandatory
     @DefaultBoolean( false )
     @Concern( FireEvent.class )
     public Config2<ImportPrompt,Boolean>    ok;
@@ -54,6 +57,11 @@ public class ImportPrompt
     @Concern( FireEvent.class )
     public Config2<ImportPrompt,PromptUIBuilder> extendedUI;
     
+
+    protected ImportPrompt() {
+        severity.set( Severity.INFO );
+    }
+
 
     /**
      * 
