@@ -39,7 +39,7 @@ public interface Importer {
     public void init( ImporterSite site, IProgressMonitor monitor ) throws Exception;
     
     /**
-     * Creates the prompts of this Importer. This is called once after
+     * Creates the initial prompts of this Importer. This is called once after
      * {@link #init(ImporterSite, IProgressMonitor)}.
      *
      * @param monitor
@@ -48,13 +48,13 @@ public interface Importer {
     public void createPrompts( IProgressMonitor monitor ) throws Exception;
     
     /**
-     * Verifies the context and the state of the prompts. This is called when a
-     * prompt has changed its status. This method should prepare contents of the
-     * {@link #createResultViewer(Composite)}.
+     * Verifies the data/context and the state of the prompts. This is called when a
+     * prompt has changed its status. This method can update the prompts and should
+     * prepare contents of the {@link #createResultViewer(Composite)}.
      *
      * @param monitor
      */
-    public boolean verify( IProgressMonitor monitor );
+    public void verify( IProgressMonitor monitor );
 
     /**
      * If possible this creates a preview of the imported data.

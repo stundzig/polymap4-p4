@@ -123,7 +123,7 @@ class ImportsContentProvider
             return;    
         }
         
-        // start: input == ImporterContext -> next ImporterContext
+        // start: input == ImporterContext -> next ImporterContexts
         if (elm == context) {
             updateChildrenLoading( elm );
             UIJob job = new UIJob( "Progress import" ) {

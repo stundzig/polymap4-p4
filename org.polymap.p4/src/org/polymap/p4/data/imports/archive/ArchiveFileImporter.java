@@ -38,6 +38,7 @@ import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
+import org.polymap.p4.data.imports.ImportTempDir;
 import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.Importer;
 import org.polymap.p4.data.imports.ImporterSite;
@@ -105,18 +106,28 @@ public class ArchiveFileImporter
     
     
     @Override
-    public boolean verify( IProgressMonitor monitor ) {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );        
-    }
+    public void verify( IProgressMonitor monitor ) {
+        try {
+            Thread.sleep( 5000 );
+        }
+        catch (InterruptedException e) {
+        }
+        result = new ArchiveReader()
+                .targetDir.put( ImportTempDir.create() )
+                .run( file, monitor );
+    }    
 
-
+    
     @Override
     public Composite createResultViewer( Composite parent ) {
-//        org.eclipse.swt.widgets.List list = new org.eclipse.swt.widgets.List( parent, SWT. NONE );
-//        list.add(  );
-        Label l = new Label( parent, SWT.NONE );
-        l.setText( "In: file: " + file.getName() );
+        if (result == null) {
+            Label l = new Label( parent, SWT.NONE );
+            l.setText( "Unable to import files from: " + file.getName() );            
+        }
+        else {
+            org.eclipse.swt.widgets.List list = new org.eclipse.swt.widgets.List( parent, SWT. NONE );
+            result.stream().sorted().forEach( f -> list.add( f.getName() ) );
+        }
         return parent;
     }
 
