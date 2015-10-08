@@ -21,6 +21,8 @@ import java.io.File;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ImporterFactory;
 
@@ -43,8 +45,7 @@ public class ArchiveFileImporterFactory
 
     @Override
     public void createImporters( ImporterBuilder builder ) throws Exception {
-        // XXX better check
-        if (file != null && file.getName().endsWith( ".zip" )) {
+        if (file != null && new ArchiveReader().canHandle( file, new NullProgressMonitor() )) {
             builder.newImporter( new ArchiveFileImporter(), file );
         }
         if (files != null) {

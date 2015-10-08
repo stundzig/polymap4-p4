@@ -31,16 +31,27 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.ImmutableList;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
+import org.polymap.core.runtime.SubMonitor;
+import org.polymap.core.runtime.UIJob;
+import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.config.Configurable;
+import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+import org.polymap.core.ui.UIUtils;
 
-import org.polymap.p4.data.imports.ImporterPrompt.Severity;
+import org.polymap.rhei.batik.BatikPlugin;
+
 import org.polymap.p4.data.imports.ImporterFactory.ImporterBuilder;
+import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.archive.ArchiveFileImporterFactory;
 
 /**
@@ -64,7 +75,9 @@ public class ImporterContext
     
     private Map<Class,Object>               contextIn = new HashMap();
     
-    private Map<String,ImporterPrompt>      prompts;
+    private Map<String,ImporterPrompt>      prompts = new HashMap();
+    
+    private UIJob                           verifier;
 
 
     /**
@@ -75,7 +88,7 @@ public class ImporterContext
 
     
     /**
-     * Creates a context for the given importer. The importer gets initialized by
+     * Creates a context for the given {@link Importer}. The importer gets initialized by
      * this ctor.
      * 
      * @throws Exception If {@link Importer#init(ImporterSite, IProgressMonitor)}
@@ -113,8 +126,46 @@ public class ImporterContext
                 return Optional.ofNullable( prompts.get( id ) );
             }
         };
-        importer.init( site, monitor );
+        monitor.beginTask( "Initialize importer", 10 );
+        // init
+        SubMonitor.on( monitor, 1 ).complete( submon -> importer.init( site, submon ) );
         assert importer.site() == site;
+        // create prompts
+        SubMonitor.on( monitor, 1 ).complete( submon -> importer.createPrompts( submon ) );
+        // verify
+        promptChanged( null );
+        //SubMonitor.on( monitor, 8 ).complete( submon -> importer.verify( submon ) );
+        
+        // listen to prompt changes
+        EventManager.instance().subscribe( this, ev -> 
+                ev instanceof ConfigChangeEvent && prompts.containsValue( ev.getSource() ) );
+    }
+    
+    
+    @EventHandler( delay=100 )
+    protected void promptChanged( List<ConfigChangeEvent> evs ) {
+        if (verifier != null) {
+            log.info( "Cancel VERIFIER!" );
+            verifier.cancel();
+            verifier.getThread().interrupt();
+            verifier = null;
+        }
+        verifier = new UIJob( "Progress import" ) {
+            @Override
+            protected void runWithException( IProgressMonitor monitor ) throws Exception {
+                importer.verify( monitor );
+            }
+        };
+        verifier.addJobChangeListener( new JobChangeAdapter() {
+            private UIJob myVerifier = verifier;
+            @Override
+            public void done( IJobChangeEvent ev ) {
+                if (verifier == myVerifier) {
+                    verifier = null;
+                }
+            }
+        });
+        verifier.scheduleWithUIUpdate();
     }
     
     
@@ -163,11 +214,17 @@ public class ImporterContext
     }
 
 
+    /**
+     * Get or initially create prompts.
+     *
+     * @param monitor
+     * @throws Exception
+     */
     public List<ImporterPrompt> prompts( IProgressMonitor monitor ) throws Exception {
-        if (prompts == null) {
-            prompts = new HashMap();
-            importer.createPrompts( monitor );
-        }
+//        if (prompts == null) {
+//            prompts = new HashMap();
+//            importer.createPrompts( monitor );
+//        }
         return ImmutableList.copyOf( prompts.values() );
     }
 
@@ -184,7 +241,27 @@ public class ImporterContext
     
     
     public void createResultViewer( Composite parent ) {
-        importer.createResultViewer( parent );
+        JobChangeAdapter task = new JobChangeAdapter() {
+            @Override
+            public void done( IJobChangeEvent ev ) {
+                if (ev == null || ev.getResult().isOK()) {
+                    UIThreadExecutor.asyncFast( () -> {
+                        UIUtils.disposeChildren( parent );
+                        importer.createResultViewer( parent );
+                        parent.layout( true );
+                    });
+                }
+            }
+        };
+        if (verifier != null) {
+            Label msg = new Label( parent, SWT.NONE );
+            msg.setText( "Crunching data..." );
+            msg.setImage( BatikPlugin.images().image( "resources/icons/loading24.gif" ) );
+            verifier.addJobChangeListenerWithContext( task );
+        }
+        else {
+            task.done( null );
+        }
     }
 
 
