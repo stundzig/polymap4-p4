@@ -69,7 +69,9 @@ public class CatalogPanel
         return parentPanel()
                 .filter( parent -> parent instanceof ProjectMapPanel )
                 .map( parent -> {
-                    getSite().setTitle( "Catalog" );
+                    site().title.set( "" );
+                    site().tooltip.set( "Data catalog" );
+                    site().icon.set( P4Plugin.images().svgImage( "book-open.svg", NORMAL24 ) );
                     getSite().setPreferredWidth( 350 );
                     return true;
                 })

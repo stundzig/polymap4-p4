@@ -14,16 +14,13 @@
 package org.polymap.p4.data.imports;
 
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
-import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24_OK;
 
 import java.util.Arrays;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -40,7 +37,6 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.jface.viewers.ViewerCell;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -49,9 +45,7 @@ import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.client.service.ClientFileUploader;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
 
-import org.polymap.core.CorePlugin;
 import org.polymap.core.runtime.UIThreadExecutor;
-import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
@@ -63,13 +57,11 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
-import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
-import org.polymap.p4.data.imports.ImportPrompt.PromptChangeEvent;
 import org.polymap.p4.data.imports.ImportsLabelProvider.Type;
 import org.polymap.p4.map.ProjectMapPanel;
 import org.polymap.rap.updownload.upload.IUploadHandler;
@@ -91,18 +83,6 @@ public class ImportPanel
 
     private static final IMessages      i18n = Messages.forPrefix( "ImportPanel" );
     
-    private static final File           baseTempDir = new File( CorePlugin.getDataLocation( P4Plugin.instance() ), "importTemp" );
-
-    static {
-        try {
-            baseTempDir.mkdirs();
-            //FileUtils.cleanDirectory( baseTempDir );
-            log.info( "temp dir: " + baseTempDir + " ... XXX: not cleaned!" );
-        }
-        catch (Exception e) {
-            throw new RuntimeException( e );
-        }
-    }
     
     // instance *******************************************
     
@@ -116,7 +96,7 @@ public class ImportPanel
 
     private IPanelSection               resultSection;
 
-    private File                        tempDir;
+    private File                        tempDir = ImportTempDir.create();
 
     
     @Override
@@ -125,6 +105,7 @@ public class ImportPanel
                 .filter( parent -> parent instanceof ProjectMapPanel )
                 .map( parent -> {
                     site().title.set( "" );
+                    site().tooltip.set( "Import new data into the catalog" );
                     site().icon.set( P4Plugin.images().svgImage( "import.svg", NORMAL24 ) );
                     site().preferredWidth.set( 350 );
                     return true;
@@ -135,15 +116,6 @@ public class ImportPanel
     
     @Override
     public void init() {
-        // temp dir
-        try {
-            tempDir = Files.createTempDirectory( baseTempDir.toPath(), null ).toFile();
-        }
-        catch (IOException e) {
-            throw new RuntimeException( e );            
-        }
-
-        // driver
         context = nextContext.isPresent() ? nextContext.get() : new ImporterContext(); 
     }
 
@@ -157,7 +129,8 @@ public class ImportPanel
 
     @Override
     public void createContents( Composite parent ) {
-        parent.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 0, 8 ).create() );
+        // margin left/right: shadow
+        parent.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 3, 8 ).create() );
         MdToolkit tk = (MdToolkit)site().toolkit();
         
         // upload button
@@ -175,29 +148,11 @@ public class ImportPanel
         // imports and prompts
         importsList = tk.createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION );
         importsList.setContentProvider( new ImportsContentProvider() );
-        importsList.firstLineLabelProvider.set( new ImportsLabelProvider().type.put( Type.Summary ) );
-        importsList.secondLineLabelProvider.set( new ImportsLabelProvider().type.put( Type.Description ) );
-//        importsList.thirdLineLabelProvider.set( new CellLabelProvider() {
-//            @Override
-//            public void update( ViewerCell cell ) {
-//                cell.setText( "Click to make something great!" );
-//                cell.setForeground( Display.getCurrent().getSystemColor( SWT.COLOR_GREEN ) );
-//            }
-//        });
-        importsList.iconProvider.set( new ImportsLabelProvider().type.put( Type.Icon ) );
-        importsList.firstSecondaryActionProvider.set( new ActionProvider() {
-            @Override
-            public void update( ViewerCell cell ) {
-                if (cell.getElement() instanceof ImporterContext) {
-                    cell.setImage( P4Plugin.images().svgImage( "check.svg", NORMAL24_OK ) );
-                }
-            }
-            @Override
-            public void perform( MdListViewer viewer, Object element ) {
-                // XXX Auto-generated method stub
-                throw new RuntimeException( "not yet implemented." );
-            }
-        });
+        importsList.firstLineLabelProvider.set( new ImportsLabelProvider( Type.Summary ) );
+        importsList.secondLineLabelProvider.set( new ImportsLabelProvider( Type.Description ) );
+        importsList.iconProvider.set( new ImportsLabelProvider( Type.Icon ) );
+        importsList.firstSecondaryActionProvider.set( new ImportsLabelProvider( Type.StatusIcon ));
+        
         importsList.addOpenListener( new IOpenListener() {
             @Override
             public void open( OpenEvent ev ) {
@@ -212,9 +167,9 @@ public class ImportPanel
                         ((ImporterContext)elm).createResultViewer( resultSection.getBody() );
                     }
                     //
-                    else if (elm instanceof ImportPrompt) {
-                        resultSection.setTitle( "Prompt" );
-                        context.createPromptViewer( resultSection.getBody(), (ImportPrompt)elm );
+                    else if (elm instanceof ImporterPrompt) {
+                        resultSection.setTitle( ((ImporterPrompt)elm).summary.get() );
+                        context.createPromptViewer( resultSection.getBody(), (ImporterPrompt)elm );
                     }
                     resultSection.getBody().layout();
                 });
@@ -223,7 +178,8 @@ public class ImportPanel
         importsList.setInput( context );
         
         // result viewer
-        resultSection = tk.createPanelSection( parent, null, SWT.BORDER );
+        resultSection = tk.createPanelSection( parent, "Data preview", SWT.BORDER );
+        tk.createLabel( resultSection.getBody(), "No data to preview yet. Please upload something above." );
         
         // layout
         FormDataFactory.on( upload ).fill().bottom( 0, 50 );
@@ -231,14 +187,14 @@ public class ImportPanel
         FormDataFactory.on( resultSection.getControl() ).fill().top( importsList.getControl() );
         
         //
-        EventManager.instance().subscribe( this, ev -> ev instanceof PromptChangeEvent );
+//        EventManager.instance().subscribe( this, ev -> ev instanceof PromptChangeEvent );
     }
 
     
-    @EventHandler( display=true )
-    protected void importPromptChanged( PromptChangeEvent ev ) {
-        importsList.update( ev.getSource(), null );
-    }
+//    @EventHandler( display=true )
+//    protected void importPromptChanged( PromptChangeEvent ev ) {
+//        //importsList.update( ev.getSource(), null );
+//    }
     
     
     @Override

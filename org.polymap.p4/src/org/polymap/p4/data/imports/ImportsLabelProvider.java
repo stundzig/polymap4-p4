@@ -13,6 +13,10 @@
  */
 package org.polymap.p4.data.imports;
 
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24_ALERT;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24_ERROR;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24_OK;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,6 +28,10 @@ import org.polymap.core.runtime.config.ConfigurationFactory;
 import org.polymap.core.runtime.config.Mandatory;
 
 import org.polymap.rhei.batik.BatikPlugin;
+import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
+
+import org.polymap.p4.P4Plugin;
+import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 
 /**
  * 
@@ -36,15 +44,16 @@ class ImportsLabelProvider
     private static Log log = LogFactory.getLog( ImportsLabelProvider.class );
 
     public enum Type {
-        Summary, Description, Icon;
+        Summary, Description, Icon, StatusIcon, StatusText;
     }
     
     @Mandatory
     public Config2<ImportsLabelProvider,Type>   type;
     
     
-    protected ImportsLabelProvider() {
+    protected ImportsLabelProvider( Type type ) {
         ConfigurationFactory.inject( this );
+        this.type.set( type );
     }
     
     
@@ -63,28 +72,47 @@ class ImportsLabelProvider
         // ImporterContext
         else if (cell.getElement() instanceof ImporterContext) {
             ImporterContext context = (ImporterContext)cell.getElement();
-            if (type.get() == Type.Summary) {
-                cell.setText( context.site().summary.get() );
-            }
-            else if (type.get() == Type.Description) {
-                cell.setText( context.site().description.get() );
-            }
-            else if (type.get() == Type.Icon) {
-                cell.setImage( context.site().icon.get() );
+            switch (type.get()) {
+                case Summary:       cell.setText( context.site().summary.get() ); break;
+                case Description:   cell.setText( context.site().description.get() ); break;
+                case Icon:          cell.setImage( context.site().icon.get() ); break;
+                case StatusIcon: {
+                    switch (context.maxFailingPromptSeverity()) {
+                        case INFO:      cell.setImage( P4Plugin.images().svgImage( "check.svg", NORMAL24_OK ) ); break;
+                        case MANDATORY: cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", NORMAL24_ALERT ) );  break;
+                        case VERIFY:    cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", NORMAL24_ERROR ) ); break;
+                    }
+                    break;
+                }
+                case StatusText : {
+//                  cell.setText( "Click to make something great!" );
+//                  cell.setForeground( Display.getCurrent().getSystemColor( SWT.COLOR_GREEN ) );
+                }
             }
         }
         
         // ImportPrompt
-        else if (cell.getElement() instanceof ImportPrompt) {
-            ImportPrompt prompt = (ImportPrompt)cell.getElement();
-            if (type.get() == Type.Summary) {
-                cell.setText( prompt.summary.get() );
-            }
-            else if (type.get() == Type.Description) {
-                cell.setText( prompt.description.get() );
-            }
-            else if (type.get() == Type.Icon) {
-                cell.setImage( null );  // reset loading image
+        else if (cell.getElement() instanceof ImporterPrompt) {
+            ImporterPrompt prompt = (ImporterPrompt)cell.getElement();
+            switch (type.get()) {
+                case Summary:       cell.setText( prompt.summary.get() ); break;
+                case Description:   cell.setText( prompt.description.get() ); break;
+                case Icon:          cell.setImage( P4Plugin.images().svgImage( "help.svg", SvgImageRegistryHelper.NORMAL12 ) ); break;
+                case StatusIcon: {
+                    if (prompt.severity.get() == Severity.INFO || prompt.ok.get()) {
+                        cell.setImage( P4Plugin.images().svgImage( "check.svg", NORMAL24_OK ) ); break;
+                    }
+                    else if (prompt.severity.get() == Severity.VERIFY) {
+                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", NORMAL24_ALERT ) ); break;
+                    }
+                    else if (prompt.severity.get() == Severity.MANDATORY) {
+                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", NORMAL24_ERROR ) ); break;
+                    }
+                    break;
+                }
+                case StatusText: {
+                    break;
+                }
             }
         }
         else {

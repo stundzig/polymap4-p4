@@ -43,10 +43,10 @@
             id="org.polymap.batikapp.LayersPanel"
             stackPriority="100">
       </panel>
-      <panel
+      <!--panel
             class="org.polymap.p4.imports.ShapeImportPanel"
             id="org.polymap.p4.ShapeImportPanel">
-      </panel>
+      </panel-->
       <panel
             class="org.polymap.p4.catalog.CatalogPanel"
             id="org.polymap.p4.CatalogPanel">
@@ -60,12 +60,12 @@
             id="org.polymap.p4.project.LayerPanel">
       </panel>
       <panel
-            class="org.polymap.p4.project.ProjectInfoPanel"
-            id="org.polymap.p4.project.ProjectInfoPanel">
-      </panel>
-      <panel
             class="org.polymap.p4.data.imports.ImportPanel"
             id="org.polymap.p4.ImportPanel">
+      </panel>
+      <panel
+            class="org.polymap.p4.project.ProjectInfoPanel"
+            id="org.polymap.p4.project.ProjectInfoPanel">
       </panel>
    </extension>
    <extension

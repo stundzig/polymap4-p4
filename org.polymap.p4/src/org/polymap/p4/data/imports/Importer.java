@@ -65,7 +65,7 @@ public interface Importer {
 
     /**
      * Execute this importer and sent results to next level of import. This method
-     * is called only if all prompts are {@link ImportPrompt#ok}.
+     * is called only if all prompts are {@link ImporterPrompt#ok}.
      * 
      * @param monitor The monitor to report progress to. Frequently check for cancelation.
      */

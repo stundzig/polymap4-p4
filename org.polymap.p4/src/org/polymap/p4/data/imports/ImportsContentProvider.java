@@ -35,15 +35,12 @@ import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.p4.data.imports.ImporterContext.ContextChangeEvent;
-import org.polymap.p4.data.imports.ImportPrompt.PromptChangeEvent;
-import org.polymap.p4.data.imports.ImporterSite.ImporterChangeEvent;
 
 /**
  * Provides content of {@link ImporterContext}, {@link Importer} and
- * {@link ImportPrompt}.
+ * {@link ImporterPrompt}.
  * <p/>
- * Listens to {@link ContextChangeEvent}, {@link ImporterChangeEvent} and
- * {@link PromptChangeEvent} in order to invalidate cache if elements change.
+ * Refreshes the viewer on {@link ContextChangeEvent} and {@link ConfigChangeEvent}.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
@@ -66,16 +63,38 @@ class ImportsContentProvider
     protected ImportsContentProvider() {
         EventManager.instance().subscribe( this, ev -> 
                 ev instanceof ContextChangeEvent || 
-                ev instanceof ImporterChangeEvent || 
-                ev instanceof PromptChangeEvent );
+                ev instanceof ConfigChangeEvent ); 
     }
 
     
-    @EventHandler
+    @EventHandler( display=true )
     protected void contentChanged( EventObject ev ) {
         log.info( "Remove cache for: " + ev.getSource().getClass().getSimpleName() );
-        if (cache.remove( ev.getSource() ) != null) {
-            UIThreadExecutor.async( () -> viewer.refresh( ev.getSource(), true ) );
+        cache.remove( ev.getSource() );
+        
+        // new contextIn (root) or prompt (child) -> structural change 
+        if (ev instanceof ContextChangeEvent) {
+            assert ev.getSource() instanceof ImporterContext;
+            viewer.refresh( ev.getSource(), true );
+        }
+        // labels or icon
+        else if (ev instanceof ConfigChangeEvent) {
+            //  ImporterSite
+            if (ev.getSource() instanceof ImporterSite) {
+                viewer.update( ((ImporterSite)ev.getSource()).context(), null );
+            }
+            // ImporterPrompt
+            else if (ev.getSource() instanceof ImporterPrompt) {
+                ImporterPrompt prompt = (ImporterPrompt)ev.getSource();
+                viewer.update( prompt, null );
+                viewer.update( prompt.context(), null );  // status might have changed 
+            }
+            else {
+                throw new RuntimeException( "Unknown source of ConfigChangeEvent: " + ev.getSource() );
+            }
+        }
+        else {
+            throw new RuntimeException( "Unknown event type: " + ev );
         }
     }
     
@@ -104,33 +123,34 @@ class ImportsContentProvider
             return;    
         }
         
-        // start: the input
+        // start: input == ImporterContext -> next ImporterContext
         if (elm == context) {
             updateChildrenLoading( elm );
             UIJob job = new UIJob( "Progress import" ) {
                 @Override
                 protected void runWithException( IProgressMonitor monitor ) throws Exception {
                     assert context == elm;
-                    List<ImporterContext> importers = context.findAvailable( monitor );
+                    List<ImporterContext> importers = context.findNext( monitor );
                     updateChildren( elm, importers.toArray(), currentChildCount );
                 }
             };
             job.scheduleWithUIUpdate();
         }
-        // Importer
+        // ImporterContext -> ImportPrompts
         else if (elm instanceof ImporterContext) {
             updateChildrenLoading( elm );
             UIJob job = new UIJob( "Progress import" ) {
                 @Override
                 protected void runWithException( IProgressMonitor monitor ) throws Exception {
-                    List<ImportPrompt> prompts = ((ImporterContext)elm).prompts( monitor );
+                    List<ImporterPrompt> prompts = ((ImporterContext)elm).prompts( monitor );
                     updateChildren( elm, prompts.toArray(), currentChildCount );
                 }
             };
             job.scheduleWithUIUpdate();
         }
-        else if (elm instanceof ImportPrompt) {
-            // no children
+        // ImportPrompt
+        else if (elm instanceof ImporterPrompt) {
+            viewer.setChildCount( elm, 0 );
         }
         else {
             throw new RuntimeException( "Unknown element type: " + elm );
@@ -150,7 +170,7 @@ class ImportsContentProvider
     protected void updateChildren( Object elm, Object[] children, int currentChildCount  ) {
         cache.put( elm, children );
         
-        UIThreadExecutor.async( () -> { 
+        UIThreadExecutor.asyncFast( () -> { 
             viewer.setChildCount( elm, children.length );
             if (children.length > 0) {
                 viewer.replace( elm, 0, children[0] );  // replace the LOADING elm
@@ -165,7 +185,7 @@ class ImportsContentProvider
         if (children != null && children.length > 0) {
             viewer.replace( parent, index, children[index] );
 
-            boolean hasChildren = !(children[index] instanceof ImportPrompt);
+            boolean hasChildren = !(children[index] instanceof ImporterPrompt);
             viewer.setHasChildren( children[index], hasChildren );
         }
     }

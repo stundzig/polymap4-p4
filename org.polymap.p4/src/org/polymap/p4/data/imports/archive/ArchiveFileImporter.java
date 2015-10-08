@@ -38,7 +38,7 @@ import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
-import org.polymap.p4.data.imports.ImportPrompt.Severity;
+import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.Importer;
 import org.polymap.p4.data.imports.ImporterSite;
 
@@ -92,6 +92,7 @@ public class ArchiveFileImporter
                 .extendedUI.put( (prompt,parent) -> {
                     Button btn = new Button( parent, SWT.CHECK );
                     btn.setText( "Ja, das ist gut" );
+                    btn.setSelection( prompt.ok.get() );
                     btn.addSelectionListener( new SelectionAdapter() {
                         @Override
                         public void widgetSelected( SelectionEvent ev ) {

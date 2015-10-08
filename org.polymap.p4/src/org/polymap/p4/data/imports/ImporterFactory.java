@@ -24,7 +24,7 @@ public interface ImporterFactory {
 
     /**
      * Checks to current {@link ContextIn} for applicable objects and builds {@link Importer}s
-     * for these ojects.
+     * for those objects.
      */
     public void createImporters( ImporterBuilder builder ) throws Exception;
 

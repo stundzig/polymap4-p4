@@ -17,6 +17,7 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.polymap.core.runtime.config.Configurable;
 import org.polymap.core.runtime.event.EventManager;
 
+import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.ImporterFactory.ImporterBuilder;
 import org.polymap.p4.data.imports.archive.ArchiveFileImporterFactory;
 
@@ -62,7 +64,7 @@ public class ImporterContext
     
     private Map<Class,Object>               contextIn = new HashMap();
     
-    private Map<String,ImportPrompt>        prompts;
+    private Map<String,ImporterPrompt>      prompts;
 
 
     /**
@@ -86,30 +88,34 @@ public class ImporterContext
         this.contextIn = stream( contextIn ).collect( toMap( o -> o.getClass(), o -> o ) );
 
         injectContext( importer );
-        site = new ImporterSite( importer ) {
+        
+        site = new ImporterSite() {
             @Override
-            public ImportPrompt newPrompt( String id ) {
+            public ImporterContext context() {
+                return ImporterContext.this;
+            }
+            @Override
+            public ImporterPrompt newPrompt( String id ) {
                 assert prompts != null : "newPrompt() called before createPrompts()!";
                 assert !prompts.containsKey( id );
-                ImportPrompt result = new ImportPromptImpl();
+                ImporterPrompt result = new ImporterPrompt() {
+                    @Override
+                    public ImporterContext context() {
+                        return ImporterContext.this;
+                    }                    
+                };
                 prompts.put( id, result );
-                EventManager.instance().publish( new ImporterChangeEvent( importer ) );
+                EventManager.instance().publish( new ContextChangeEvent( ImporterContext.this ) );
                 return result;
             }
             @Override
-            public Optional<ImportPrompt> prompt( String id ) {
+            public Optional<ImporterPrompt> prompt( String id ) {
                 return Optional.ofNullable( prompts.get( id ) );
             }
         };
         importer.init( site, monitor );
         assert importer.site() == site;
     }
-    
-    
-//    protected abstract void createNextLevelUI( Importer importer );
-//    
-//    protected abstract void createResultViewer( Composite parent );
-
     
     
     public Importer importer() {
@@ -123,19 +129,19 @@ public class ImporterContext
 
 
     public void addContextIn( Object o ) {
-        Object previous = contextIn.get( o.getClass() );
         contextIn.put( o.getClass(), o );
-        EventManager.instance().syncPublish( new ContextChangeEvent( this, o, previous ) );
+        EventManager.instance().syncPublish( new ContextChangeEvent( this ) );
     }
 
     
     /**
      * List of {@link Importer}s that are able to handle the current context.
+     * 
      * @param monitor 
      * @throws IllegalAccessException 
      * @throws InstantiationException 
      */
-    public List<ImporterContext> findAvailable( IProgressMonitor monitor ) throws Exception {
+    public List<ImporterContext> findNext( IProgressMonitor monitor ) throws Exception {
         monitor.beginTask( "Check importers", factories.length*10 );
         
         List<ImporterContext> result = new ArrayList();
@@ -157,7 +163,7 @@ public class ImporterContext
     }
 
 
-    public List<ImportPrompt> prompts( IProgressMonitor monitor ) throws Exception {
+    public List<ImporterPrompt> prompts( IProgressMonitor monitor ) throws Exception {
         if (prompts == null) {
             prompts = new HashMap();
             importer.createPrompts( monitor );
@@ -166,12 +172,23 @@ public class ImporterContext
     }
 
     
+    protected Severity maxFailingPromptSeverity() {
+        return prompts == null 
+                ? Severity.INFO
+                : prompts.values().stream()
+                        .filter( prompt -> !prompt.ok.get() )
+                        .map( prompt -> prompt.severity.get() )
+                        .max( Comparator.comparing( s -> s.ordinal() ) )
+                        .orElse( Severity.INFO );
+    }
+    
+    
     public void createResultViewer( Composite parent ) {
         importer.createResultViewer( parent );
     }
 
 
-    public void createPromptViewer( Composite parent, ImportPrompt prompt ) {
+    public void createPromptViewer( Composite parent, ImporterPrompt prompt ) {
         prompt.extendedUI.ifPresent( uibuilder -> uibuilder.createContents( prompt, parent ) );
     }
 
@@ -202,31 +219,15 @@ public class ImporterContext
     
     
     /**
-     * 
-     */
-    class ImportPromptImpl
-            extends ImportPrompt {
-    
-        public ImporterContext driver() {
-            return ImporterContext.this;
-        }
-    }
-    
-    
-    /**
-     * 
+     * Fired when {@link ImporterContext#addContextIn(Object)} is called after a file
+     * was uploaded or anything else has been added to the context. Also fired when a
+     * prompt has been added by calling {@link ImporterSite#newPrompt(String)} .
      */
     class ContextChangeEvent
             extends EventObject {
         
-        public Object       newValue;
-
-        public Object       oldValue;
-        
-        protected ContextChangeEvent( ImporterContext source, Object newValue, Object oldValue ) {
+        protected ContextChangeEvent( ImporterContext source ) {
             super( source );
-            this.newValue = newValue;
-            this.oldValue = oldValue;
         }
 
         @Override
