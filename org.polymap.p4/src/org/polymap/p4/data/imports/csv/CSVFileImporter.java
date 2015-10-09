@@ -51,7 +51,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.osgi.framework.ServiceReference;
 import org.polymap.core.data.refine.RefineService;
-import org.polymap.core.data.refine.impl.FormatAndOptions;
+import org.polymap.core.data.refine.impl.CSVFormatAndOptions;
 import org.polymap.core.data.refine.impl.ImportResponse;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
@@ -75,26 +75,26 @@ import com.google.refine.model.Row;
 public class CSVFileImporter
         implements Importer {
 
-    private static Log       log = LogFactory.getLog( CSVFileImporter.class );
+    private static Log          log = LogFactory.getLog( CSVFileImporter.class );
 
-    protected ImporterSite   site;
-
-    @ContextIn
-    protected MdToolkit      tk;
+    protected ImporterSite      site;
 
     @ContextIn
-    protected File           file;
+    protected MdToolkit         tk;
+
+    @ContextIn
+    protected File              file;
 
     @ContextOut
-    protected List<File>     result;
+    protected List<File>        result;
 
-    private RefineService    service;
+    private RefineService       service;
 
     // private TableViewer viewer;
 
-    private ImportingJob     importJob;
+    private ImportingJob        importJob;
 
-    private FormatAndOptions formatOptions;
+    private CSVFormatAndOptions formatOptions;
 
 
     // private Composite tableComposite;
@@ -106,7 +106,8 @@ public class CSVFileImporter
 
 
     @Override
-    public void init( @SuppressWarnings("hiding" ) ImporterSite site, IProgressMonitor monitor) {
+    public void init( @SuppressWarnings("hiding" ) ImporterSite site, IProgressMonitor monitor)
+            throws Exception {
         this.site = site;
 
         site.icon.set( P4Plugin.images().svgImage( "cvs.svg", NORMAL24 ) );
@@ -117,20 +118,11 @@ public class CSVFileImporter
                 .getServiceReference( RefineService.class.getName() );
         service = (RefineService)P4Plugin.instance().getBundle().getBundleContext()
                 .getService( serviceReference );
-        try {
-            ImportResponse response = service.importFile( new FileInputStream( file ),
-                    file.getName(),
-                    MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType( file ) );
-            importJob = response.job();
-            formatOptions = response.options();
-            // throw new RuntimeException("blah");
-        }
-        catch (Exception e) {
-            // MdToast mdToast = .createToast(70, SWT.NONE);
-            // IssueReporter issueReporter = new IssueReporter(mdToast);
-            // issueReporter.showIssue(org.polymap.rhei.batik.toolkit.md.AbstractFeedbackComponent.MessageType.ERROR,
-            // "my message");
-        }
+        
+        ImportResponse<CSVFormatAndOptions> response = service.importFile( file,
+                CSVFormatAndOptions.createDefault() );
+        importJob = response.job();
+        formatOptions = response.options();
     }
 
 
@@ -144,8 +136,13 @@ public class CSVFileImporter
                             Combo combo = new Combo( parent, SWT.SINGLE );
                             List<String> encodings = Lists.newArrayList( Charsets.ISO_8859_1.name(),
                                     Charsets.US_ASCII.name(), Charsets.UTF_8.name(),
-                                    Charsets.UTF_16.name() );
-                            combo.setItems( encodings.toArray(new String[encodings.size()]) );
+                                    Charsets.UTF_16.name(), Charsets.UTF_16BE.name(),
+                                    Charsets.UTF_16LE.name() );
+
+                            // java.nio.charset.Charset.forName( )
+                            combo.setItems( encodings.toArray( new String[encodings.size()] ) );
+                            // combo.add
+
                             combo.addSelectionListener( new SelectionAdapter() {
 
                                 @Override
@@ -287,7 +284,7 @@ public class CSVFileImporter
                         String value = cell == null || cell.value == null ? "" //$NON-NLS-1$
                                 : cell.value.toString().replace( "\n", "<br/>" ).replace( "&",
                                         "&amp;" );
-                        log.info( value );
+                        // log.info( value );
                         return value;
                     }
 
@@ -321,8 +318,8 @@ public class CSVFileImporter
     // return rows;
     // }
     @Override
-    public boolean verify( IProgressMonitor monitor ) {
+    public void verify( IProgressMonitor monitor ) {
         // update the format
-        return false;
+        log.info( "verify" );
     }
 }
