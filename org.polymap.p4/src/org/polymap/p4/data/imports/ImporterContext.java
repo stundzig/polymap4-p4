@@ -53,7 +53,8 @@ import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.p4.data.imports.ImporterFactory.ImporterBuilder;
 import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.archive.ArchiveFileImporterFactory;
-import org.polymap.p4.data.imports.csv.CSVFileImporterFactory;
+import org.polymap.p4.data.imports.refine.csv.CSVFileImporterFactory;
+import org.polymap.p4.data.imports.refine.excel.ExcelFileImporterFactory;
 
 /**
  * Provides the execution context of an {@link Importer}. It handles inbound context
@@ -68,7 +69,7 @@ public class ImporterContext
     private static Log log = LogFactory.getLog( ImporterContext.class );
     
     // XXX make this an extension point
-    private static final Class[]            factories = { ArchiveFileImporterFactory.class, CSVFileImporterFactory.class };
+    private static final Class[]            factories = { ArchiveFileImporterFactory.class, CSVFileImporterFactory.class, ExcelFileImporterFactory.class };
     
     private Importer                        importer;
     
