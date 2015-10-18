@@ -52,6 +52,12 @@ public abstract class ImporterPrompt
     @Concern( ConfigChangeEvent.Fire.class )
     public Config2<ImporterPrompt,String>   description;
 
+    /**
+     * The default/current selection or value as human readable string.
+     */
+    @Concern( ConfigChangeEvent.Fire.class )
+    public Config2<ImporterPrompt,String>   value;
+
     /** 
      * The {@link #extendedUI} of this prompt should set it to 'true' when
      * this prompt is verified and/or has enough info from user to allow the

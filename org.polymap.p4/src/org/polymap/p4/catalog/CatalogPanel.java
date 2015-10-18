@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -33,6 +32,8 @@ import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.catalog.ui.MetadataContentProvider;
 import org.polymap.core.catalog.ui.MetadataDescriptionProvider;
 import org.polymap.core.catalog.ui.MetadataLabelProvider;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
 
 import org.polymap.rhei.batik.BatikPlugin;
@@ -82,9 +83,9 @@ public class CatalogPanel
     @Override
     public void createContents( Composite parent ) {
         getSite().setTitle( "Catalog" );
-        parent.setLayout( new FillLayout() );
+        parent.setLayout( FormLayoutFactory.defaults().create() );
         
-        viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION );
+        viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION, SWT.SINGLE );
         viewer.setContentProvider( new MetadataContentProvider( LocalResolver.instance() ) );
         viewer.firstLineLabelProvider.set( new MetadataLabelProvider() );
         viewer.secondLineLabelProvider.set( new MetadataDescriptionProvider() );
@@ -118,6 +119,9 @@ public class CatalogPanel
         } );
         viewer.firstSecondaryActionProvider.set( new CatalogEntryDeleteActionProvider() );
         viewer.setInput( P4Plugin.instance().localCatalog );
+
+        // fill the entiry space as items are expandable; scrollbar would not adopted otherwise
+        viewer.getTree().setLayoutData( FormDataFactory.filled().create() );
         
 //        viewer.getControl().setLayoutData( new ConstraintData( 
 //                new MinWidthConstraint( 500, 1 ), new MinHeightConstraint( 3000, 1 ) ) );

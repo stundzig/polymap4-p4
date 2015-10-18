@@ -15,6 +15,8 @@ package org.polymap.p4.data.imports;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toMap;
+import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
+import static org.polymap.rhei.batik.toolkit.md.dp.dp;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.collect.ImmutableList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
@@ -42,10 +45,11 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import org.polymap.core.runtime.SubMonitor;
 import org.polymap.core.runtime.UIJob;
-import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.config.Configurable;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.BatikPlugin;
@@ -245,8 +249,9 @@ public class ImporterContext
             @Override
             public void done( IJobChangeEvent ev ) {
                 if (ev == null || ev.getResult().isOK()) {
-                    UIThreadExecutor.asyncFast( () -> {
+                    asyncFast( () -> {
                         UIUtils.disposeChildren( parent );
+                        parent.setLayout( new FillLayout() );
                         importer.createResultViewer( parent );
                         parent.layout( true );
                     });
@@ -254,7 +259,9 @@ public class ImporterContext
             }
         };
         if (verifier != null) {
-            Label msg = new Label( parent, SWT.NONE );
+            parent.setLayout( FormLayoutFactory.defaults().margins( dp( 80 ).pix() ).create() );
+            Label msg = new Label( parent, SWT.CENTER );
+            msg.setLayoutData( FormDataFactory.filled().create() );
             msg.setText( "Crunching data..." );
             msg.setImage( BatikPlugin.images().image( "resources/icons/loading24.gif" ) );
             verifier.addJobChangeListenerWithContext( task );

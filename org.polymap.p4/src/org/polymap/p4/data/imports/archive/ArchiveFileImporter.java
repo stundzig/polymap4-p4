@@ -87,8 +87,9 @@ public class ArchiveFileImporter
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         // charset prompt
         site.newPrompt( "charset" )
-                .summary.put( "Charset of filenames: UTF8" )
+                .summary.put( "Filename encoding" )
                 .description.put( "The encoding of the filenames. If unsure use UTF8." )
+                .value.put( "UTF8" )
                 .severity.put( Severity.VERIFY )
                 .extendedUI.put( (prompt,parent) -> {
                     Button btn = new Button( parent, SWT.CHECK );
@@ -98,6 +99,7 @@ public class ArchiveFileImporter
                         @Override
                         public void widgetSelected( SelectionEvent ev ) {
                             prompt.ok.set( btn.getSelection() );
+                            prompt.value.put( "ISO" );
                         }
                     });
                     return parent;

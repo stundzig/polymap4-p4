@@ -35,6 +35,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
 
@@ -57,6 +58,7 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.SimpleDialog;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
@@ -146,7 +148,7 @@ public class ImportPanel
         labelDropTarget.addDropListener( createDropTargetAdapter() );
 
         // imports and prompts
-        importsList = tk.createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION );
+        importsList = tk.createListViewer( parent, SWT.VIRTUAL, SWT.SINGLE | SWT.FULL_SELECTION );
         importsList.setContentProvider( new ImportsContentProvider() );
         importsList.firstLineLabelProvider.set( new ImportsLabelProvider( Type.Summary ) );
         importsList.secondLineLabelProvider.set( new ImportsLabelProvider( Type.Description ) );
@@ -158,20 +160,14 @@ public class ImportPanel
             public void open( OpenEvent ev ) {
                 SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
                     importsList.expandToLevel( elm, 1 );
-
-                    UIUtils.disposeChildren( resultSection.getBody() );
-                    resultSection.getBody().setLayout( new FillLayout() );
                     //
                     if (elm instanceof ImporterContext) {
-                        resultSection.setTitle( "Data preview" );
-                        ((ImporterContext)elm).createResultViewer( resultSection.getBody() );
+                        createResultViewer( (ImporterContext)elm );
                     }
                     //
                     else if (elm instanceof ImporterPrompt) {
-                        resultSection.setTitle( ((ImporterPrompt)elm).summary.get() );
-                        context.createPromptViewer( resultSection.getBody(), (ImporterPrompt)elm );
+                        createPromptViewer( (ImporterPrompt)elm );
                     }
-                    resultSection.getBody().layout();
                 });
             }
         });
@@ -185,16 +181,37 @@ public class ImportPanel
         FormDataFactory.on( upload ).fill().bottom( 0, 50 );
         FormDataFactory.on( importsList.getControl() ).fill().top( upload ).bottom( 50 );
         FormDataFactory.on( resultSection.getControl() ).fill().top( importsList.getControl() );
-        
-        //
-//        EventManager.instance().subscribe( this, ev -> ev instanceof PromptChangeEvent );
     }
 
+
+    protected void createResultViewer( @SuppressWarnings("hiding") ImporterContext context ) {
+        UIUtils.disposeChildren( resultSection.getBody() );
+        resultSection.getBody().setLayout( new FillLayout() );
+        
+        resultSection.setTitle( "Data preview" );
+        context.createResultViewer( resultSection.getBody() );
+        resultSection.getBody().layout();
+    }
     
-//    @EventHandler( display=true )
-//    protected void importPromptChanged( PromptChangeEvent ev ) {
-//        //importsList.update( ev.getSource(), null );
-//    }
+    
+    protected void createPromptViewer( ImporterPrompt prompt ) {
+        SimpleDialog dialog = site().toolkit().createSimpleDialog( prompt.summary.get() );
+        
+        dialog.setContents( parent -> prompt.extendedUI.ifPresent( builder -> builder.createContents( prompt, parent ) ) );
+        
+        dialog.addAction( new Action( "OK" ) {
+            public void run() {
+                //prompt.extendedUI.get();
+                dialog.close();
+            }
+        });
+        dialog.addAction( new Action( "CANCEL" ) {
+            public void run() {
+                dialog.close( );
+            }
+        });
+        dialog.open();
+    }
     
     
     @Override

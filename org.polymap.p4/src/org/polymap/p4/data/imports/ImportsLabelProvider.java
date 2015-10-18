@@ -95,7 +95,12 @@ class ImportsLabelProvider
         else if (cell.getElement() instanceof ImporterPrompt) {
             ImporterPrompt prompt = (ImporterPrompt)cell.getElement();
             switch (type.get()) {
-                case Summary:       cell.setText( prompt.summary.get() ); break;
+                case Summary: {
+                    StringBuilder text = new StringBuilder( prompt.summary.get() );
+                    prompt.value.ifPresent( v -> text.append( " -- " ).append( v ) );
+                    cell.setText( text.toString() ); 
+                    break;
+                }
                 case Description:   cell.setText( prompt.description.get() ); break;
                 case Icon:          cell.setImage( P4Plugin.images().svgImage( "help.svg", SvgImageRegistryHelper.NORMAL12 ) ); break;
                 case StatusIcon: {

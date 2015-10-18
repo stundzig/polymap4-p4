@@ -18,7 +18,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.jface.action.Action;
 
 import org.polymap.core.project.IMap;
 
@@ -33,6 +37,7 @@ import org.polymap.rhei.batik.dashboard.DashletSite;
 import org.polymap.rhei.batik.dashboard.DefaultDashlet;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+import org.polymap.rhei.batik.toolkit.SimpleDialog;
 
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.map.ProjectMapPanel;
@@ -101,8 +106,25 @@ public class ProjectInfoPanel
 
         @Override
         public void createContents( Composite parent ) {
-            getSite().toolkit().createButton( parent, "Checkbox", SWT.CHECK );
-            getSite().toolkit().createFlowText( parent, "..." );
+            site().toolkit().createButton( parent, "Checkbox", SWT.CHECK );
+            site().toolkit().createFlowText( parent, "..." );
+            
+            site().toolkit().createButton( parent, "Dialog", SWT.PUSH )
+                    .addSelectionListener( new SelectionAdapter() {
+                        @Override
+                        public void widgetSelected( SelectionEvent e ) {
+                            SimpleDialog dialog = site().toolkit().createSimpleDialog( "Titel!" );
+                            dialog.setContents( parent -> {} );
+                            dialog.addAction( new Action( "OK" ) {
+                                @Override
+                                public void run() {
+                                    dialog.close();
+                                }
+                            });
+//                            dialog.setBlockOnOpen( true );
+                            dialog.open();
+                        }
+                    });
         }        
     }
     
