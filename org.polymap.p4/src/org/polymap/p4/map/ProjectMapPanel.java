@@ -36,6 +36,7 @@ import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.StatusDispatcher;
+import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.Context;
@@ -127,6 +128,7 @@ public class ProjectMapPanel
         ((P4AppDesign)BatikApplication.instance().getAppDesign()).setAppTitle( title );
         
         parent.setLayout( new FillLayout() /*FormLayoutFactory.defaults().margins( 0 ).create()*/ );
+        parent.setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
 
         // mapViewer
         try {
