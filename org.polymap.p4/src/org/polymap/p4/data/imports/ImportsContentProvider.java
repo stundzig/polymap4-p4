@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.jface.viewers.ILazyTreeContentProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -33,7 +34,6 @@ import org.polymap.core.runtime.UIJob;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
-
 import org.polymap.p4.data.imports.ImporterContext.ContextChangeEvent;
 
 /**
@@ -58,6 +58,12 @@ class ImportsContentProvider
     private ImporterContext             context;
 
     private ConcurrentMap<Object,Object[]> cache = new ConcurrentHashMap( 32 );
+    
+    /** 
+     * Some content is fetched asynchronously, so we need to defer selection until
+     * such elements are fetched and materialized.
+     */
+    private Object                      deferredSelection;
 
     
     protected ImportsContentProvider() {
@@ -76,6 +82,8 @@ class ImportsContentProvider
         if (ev instanceof ContextChangeEvent) {
             assert ev.getSource() instanceof ImporterContext;
             viewer.refresh( ev.getSource(), true );
+  
+            deferredSelection = ev.getSource();
         }
         // labels or icon
         else if (ev instanceof ConfigChangeEvent) {
@@ -174,6 +182,8 @@ class ImportsContentProvider
             viewer.setChildCount( elm, children.length );
             if (children.length > 0) {
                 viewer.replace( elm, 0, children[0] );  // replace the LOADING elm
+
+                deferredSelection( children[0] );
             }
         }, logErrorMsg( "" ) );
     }
@@ -184,6 +194,8 @@ class ImportsContentProvider
         Object[] children = cache.get( parent );
         if (children != null && children.length > 0) {
             viewer.replace( parent, index, children[index] );
+            
+            deferredSelection( children[index] );
 
             boolean hasChildren = !(children[index] instanceof ImporterPrompt);
             viewer.setHasChildren( children[index], hasChildren );
@@ -191,10 +203,26 @@ class ImportsContentProvider
     }
 
     
+    protected void deferredSelection( Object updatedElement ) {
+        if (deferredSelection != null && deferredSelection == updatedElement) {
+            viewer.setSelection( new StructuredSelection( deferredSelection ), true );
+            deferredSelection = null;
+        }        
+    }
+    
     @Override
-    public Object getParent( Object element ) {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
+    public Object getParent( Object elm ) {
+        // this is necessary for setSelection() to work
+        
+        if (elm == context) {
+            return null;
+        }
+        else if (elm instanceof ImporterContext) {
+            return context;
+        }
+        else {
+            throw new RuntimeException( "Unknown element type: " + elm.getClass().getName() );
+        }
     }
 
 }

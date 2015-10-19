@@ -13,6 +13,7 @@
  */
 package org.polymap.p4.data.imports;
 
+import static org.polymap.core.runtime.UIThreadExecutor.async;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
 import java.util.Arrays;
@@ -36,9 +37,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.IOpenListener;
-import org.eclipse.jface.viewers.OpenEvent;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.rap.rwt.RWT;
@@ -46,7 +44,6 @@ import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.client.service.ClientFileUploader;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
 
-import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
@@ -154,28 +151,30 @@ public class ImportPanel
         importsList.secondLineLabelProvider.set( new ImportsLabelProvider( Type.Description ) );
         importsList.iconProvider.set( new ImportsLabelProvider( Type.Icon ) );
         importsList.firstSecondaryActionProvider.set( new ImportsLabelProvider( Type.StatusIcon ));
-        
-        importsList.addOpenListener( new IOpenListener() {
-            @Override
-            public void open( OpenEvent ev ) {
-                SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
-                    importsList.expandToLevel( elm, 1 );
-                    //
-                    if (elm instanceof ImporterContext) {
-                        createResultViewer( (ImporterContext)elm );
-                    }
-                    //
-                    else if (elm instanceof ImporterPrompt) {
-                        createPromptViewer( (ImporterPrompt)elm );
-                    }
-                });
-            }
+
+        // selection listener recognizes events from UI *and* from ImportsContentProvider
+        importsList.addSelectionChangedListener( ev -> {
+            log.info( "Event: " + ev );
+            SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
+                importsList.expandToLevel( elm, 1 );
+                //
+                if (elm instanceof ImporterContext) {
+                    createResultViewer( (ImporterContext)elm );
+                }
+                //
+                else if (elm instanceof ImporterPrompt) {
+                    createPromptViewer( (ImporterPrompt)elm );
+                }
+            });
         });
+        
+        // ImportsContentProvider selects every ImportContext when it is loaded;
+        // this triggers expansion and resultViewer (see above)
         importsList.setInput( context );
         
         // result viewer
         resultSection = tk.createPanelSection( parent, "Data preview", SWT.BORDER );
-        tk.createLabel( resultSection.getBody(), "No data to preview yet. Please upload something above." );
+        tk.createLabel( resultSection.getBody(), "No data to preview yet.</br>Please drop a file, archive or URL above." );
         
         // layout
         FormDataFactory.on( upload ).fill().bottom( 0, 50 );
@@ -227,11 +226,12 @@ public class ImportPanel
             IOUtils.copy( in, out );
         }
         catch (Exception e) {
-            UIThreadExecutor.async( () -> site().status.set( new Status( IStatus.ERROR, P4Plugin.ID, "Unable to upload file.", e ) ) );
+            async( () -> site().status.set( new Status( IStatus.ERROR, P4Plugin.ID, "Unable to upload file.", e ) ) );
             return;
         }
 
-        UIThreadExecutor.async( () -> {
+        async( () -> {
+            // fires event which triggers UI update in ImportsContentProvider
             context.addContextIn( f );
         });
     }
