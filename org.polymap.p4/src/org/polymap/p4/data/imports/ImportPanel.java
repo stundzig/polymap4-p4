@@ -15,6 +15,7 @@ package org.polymap.p4.data.imports;
 
 import static org.polymap.core.runtime.UIThreadExecutor.async;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.WHITE24;
 
 import java.util.Arrays;
 
@@ -36,6 +37,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.Action;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.rap.rwt.RWT;
@@ -48,6 +50,7 @@ import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
+
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
@@ -102,7 +105,7 @@ public class ImportPanel
                 .map( parent -> {
                     site().title.set( "" );
                     site().tooltip.set( "Import new data into the catalog" );
-                    site().icon.set( P4Plugin.images().svgImage( "import.svg", NORMAL24 ) );
+                    site().icon.set( P4Plugin.images().svgImage( "plus-circle-outline.svg", NORMAL24 ) );
                     site().preferredWidth.set( 350 );
                     return true;
                 } )
@@ -131,7 +134,7 @@ public class ImportPanel
         
         // upload button
         Upload upload = tk.adapt( new Upload( parent, SWT.NONE/* , Upload.SHOW_PROGRESS */), false, false );
-        upload.setImage( P4Plugin.images().svgImage( "file-multiple.svg", NORMAL24 ) );
+        upload.setImage( P4Plugin.images().svgImage( "file-multiple.svg", WHITE24 ) );
         upload.setText( "" );
         upload.setToolTipText( "<b>Drop</b> files here<br/>or <b>click</b> to open file dialog" );
         upload.setHandler( this );
@@ -174,18 +177,15 @@ public class ImportPanel
         tk.createLabel( resultSection.getBody(), "No data to preview yet.</br>Please drop a file, archive or URL above." );
         
         // layout
-        FormDataFactory.on( upload ).fill().bottom( 0, 50 );
+        FormDataFactory.on( upload ).fill().bottom( 0, 40 );
         FormDataFactory.on( importsList.getControl() ).fill().top( upload ).bottom( 50 );
         FormDataFactory.on( resultSection.getControl() ).fill().top( importsList.getControl() );
     }
 
 
     protected void createResultViewer( @SuppressWarnings("hiding") ImporterContext context ) {
-//        resultSection.getBody().setLayout( new FillLayout() );
-        
         resultSection.setTitle( "Data preview" );
         context.updateResultViewer( resultSection.getBody() );
-//        resultSection.getBody().layout();
     }
     
     
