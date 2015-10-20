@@ -13,6 +13,7 @@
  */
 package org.polymap.p4.data.imports;
 
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.polymap.core.runtime.config.Concern;
@@ -83,10 +84,26 @@ public abstract class ImporterPrompt
     /**
      * 
      */
-    @FunctionalInterface
     public static interface PromptUIBuilder {
         
-        public Composite createContents( ImporterPrompt prompt, Composite parent );
+        /**
+         * 
+         *
+         * @param prompt
+         * @param parent The parent with {@link FillLayout} set. Change layout as needed.
+         */
+        public void createContents( ImporterPrompt prompt, Composite parent );
+        
+        
+        /**
+         * Submit changes of the UI to the internal state of the
+         * {@link ImporterPrompt}. This should update {@link ImporterPrompt#ok} and
+         * {@link ImporterPrompt#value} appropriate.
+         *
+         * @param prompt
+         * @throws Exception
+         */
+        public void submit( ImporterPrompt prompt );
         
     }
 

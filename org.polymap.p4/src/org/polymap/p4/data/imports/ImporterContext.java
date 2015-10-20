@@ -83,6 +83,8 @@ public class ImporterContext
     
     private UIJob                           verifier;
 
+    private Composite resultViewerParent;
+
 
     /**
      * Creates a starting context without importer and no context set.
@@ -169,6 +171,9 @@ public class ImporterContext
                 }
             }
         });
+        if (resultViewerParent != null) {
+            asyncFast( () -> updateResultViewer( resultViewerParent ) );
+        }
         verifier.scheduleWithUIUpdate();
     }
     
@@ -244,8 +249,9 @@ public class ImporterContext
     }
     
     
-    public void createResultViewer( Composite parent ) {
-        JobChangeAdapter task = new JobChangeAdapter() {
+    public void updateResultViewer( Composite parent ) {
+        resultViewerParent = parent;
+        JobChangeAdapter updateUI = new JobChangeAdapter() {
             @Override
             public void done( IJobChangeEvent ev ) {
                 if (ev == null || ev.getResult().isOK()) {
@@ -259,20 +265,24 @@ public class ImporterContext
             }
         };
         if (verifier != null) {
+            UIUtils.disposeChildren( parent );
             parent.setLayout( FormLayoutFactory.defaults().margins( dp( 80 ).pix() ).create() );
             Label msg = new Label( parent, SWT.CENTER );
             msg.setLayoutData( FormDataFactory.filled().create() );
             msg.setText( "Crunching data..." );
             msg.setImage( BatikPlugin.images().image( "resources/icons/loading24.gif" ) );
-            verifier.addJobChangeListenerWithContext( task );
+            parent.layout( true );
+            
+            verifier.addJobChangeListenerWithContext( updateUI );
         }
         else {
-            task.done( null );
+            updateUI.done( null );
         }
     }
 
 
     public void createPromptViewer( Composite parent, ImporterPrompt prompt ) {
+        assert parent.getLayout() instanceof FillLayout;
         prompt.extendedUI.ifPresent( uibuilder -> uibuilder.createContents( prompt, parent ) );
     }
 

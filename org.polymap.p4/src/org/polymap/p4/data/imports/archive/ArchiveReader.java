@@ -186,7 +186,7 @@ public class ArchiveReader
         }
         catch (Exception e) {
             if (e instanceof IllegalArgumentException || "MALFORMED".equals( e.getMessage() )) {
-                throw new IOException( "Wrong charset: " + charset );
+                throw new IOException( "Wrong charset: " + charset, e );
             }
             else {
                 throw e;
@@ -198,7 +198,7 @@ public class ArchiveReader
     protected void handleTar( String name, InputStream in ) throws Exception {
         log.info( "    TAR: " + name );
         try (
-            TarArchiveInputStream tar = new TarArchiveInputStream( in )
+            TarArchiveInputStream tar = new TarArchiveInputStream( in, charset.get().name() )
         ){
             ArchiveEntry entry = null;
             while ((entry = tar.getNextEntry()) != null) {

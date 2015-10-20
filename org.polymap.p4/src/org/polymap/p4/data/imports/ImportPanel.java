@@ -33,7 +33,6 @@ import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.Action;
@@ -49,8 +48,6 @@ import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
-import org.polymap.core.ui.UIUtils;
-
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
@@ -184,23 +181,22 @@ public class ImportPanel
 
 
     protected void createResultViewer( @SuppressWarnings("hiding") ImporterContext context ) {
-        UIUtils.disposeChildren( resultSection.getBody() );
-        resultSection.getBody().setLayout( new FillLayout() );
+//        resultSection.getBody().setLayout( new FillLayout() );
         
         resultSection.setTitle( "Data preview" );
-        context.createResultViewer( resultSection.getBody() );
-        resultSection.getBody().layout();
+        context.updateResultViewer( resultSection.getBody() );
+//        resultSection.getBody().layout();
     }
     
     
     protected void createPromptViewer( ImporterPrompt prompt ) {
         SimpleDialog dialog = site().toolkit().createSimpleDialog( prompt.summary.get() );
         
-        dialog.setContents( parent -> prompt.extendedUI.ifPresent( builder -> builder.createContents( prompt, parent ) ) );
+        dialog.setContents( parent -> prompt.context().createPromptViewer( parent, prompt ) );
         
         dialog.addAction( new Action( "OK" ) {
             public void run() {
-                //prompt.extendedUI.get();
+                prompt.extendedUI.get().submit( prompt );
                 dialog.close();
             }
         });
