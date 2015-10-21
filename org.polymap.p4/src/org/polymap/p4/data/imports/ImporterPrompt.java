@@ -59,10 +59,9 @@ public abstract class ImporterPrompt
     @Concern( ConfigChangeEvent.Fire.class )
     public Config2<ImporterPrompt,String>   value;
 
-    /** 
-     * The {@link #extendedUI} of this prompt should set it to 'true' when
-     * this prompt is verified and/or has enough info from user to allow the
-     * importer to run.
+    /**
+     * The {@link #extendedUI} of this prompt should set it 'true' when this prompt
+     * is verified and/or has enough info from user to allow the importer to run.
      */
     @Mandatory
     @DefaultBoolean( false )

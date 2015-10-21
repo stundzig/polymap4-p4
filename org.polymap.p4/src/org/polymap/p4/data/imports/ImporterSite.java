@@ -20,6 +20,8 @@ import org.eclipse.swt.graphics.Image;
 import org.polymap.core.runtime.config.Concern;
 import org.polymap.core.runtime.config.Config2;
 import org.polymap.core.runtime.config.Configurable;
+import org.polymap.core.runtime.config.DefaultBoolean;
+import org.polymap.core.runtime.config.Mandatory;
 
 /**
  * 
@@ -39,7 +41,27 @@ public abstract class ImporterSite
     @Concern( ConfigChangeEvent.Fire.class )
     public Config2<ImporterSite,String>     description;
 
+    /** 
+     * True specifies that this importer actually performs an import. No other
+     * importers are to be checked after this importer.
+     */
+    @Mandatory
+    @DefaultBoolean( true )
+    @Concern( ConfigChangeEvent.Fire.class )
+    public Config2<ImporterSite,Boolean>    terminal;
+
+    /**
+     * Updated by {@link Importer#verify(org.eclipse.core.runtime.IProgressMonitor)}.
+     * Set it 'true' when content is verified and/or has enough info from user to
+     * allow the importer to
+     * {@link Importer#execute(org.eclipse.core.runtime.IProgressMonitor)}.
+     */
+    @Mandatory
+    @DefaultBoolean( false )
+    @Concern( ConfigChangeEvent.Fire.class )
+    public Config2<ImporterPrompt,Boolean>  ok;
     
+
     abstract ImporterContext context();
 
     public abstract ImporterPrompt newPrompt( String id );

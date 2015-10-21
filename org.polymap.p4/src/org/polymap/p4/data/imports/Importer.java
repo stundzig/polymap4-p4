@@ -13,9 +13,12 @@
  */
 package org.polymap.p4.data.imports;
 
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 /**
  * 
@@ -56,16 +59,23 @@ public interface Importer {
      */
     public void verify( IProgressMonitor monitor );
 
+    
     /**
-     * If possible this creates a preview of the imported data.
+     * Creates a preview of the imported data.
+     * <p/>
+     * This method must not calculate result or perform any other long running task.
+     * Verification and calculation should be done by
+     * {@link #verify(IProgressMonitor)}.
      *
-     * @param parent
+     * @param parent The parent of the new controls. Has {@link FillLayout} set.
+     *        Change this as necessary.
+     * @param toolkit The toolkit to use to create new controls.
      */
-    public Composite createResultViewer( Composite parent );
+    public void createResultViewer( Composite parent, IPanelToolkit toolkit );
 
     /**
-     * Execute this importer and sent results to next level of import. This method
-     * is called only if all prompts are {@link ImporterPrompt#ok}.
+     * Collects the results of this importer in {@link ContextOut}. This method
+     * is called only if {@link #verify(IProgressMonitor)} did set status ok.
      * 
      * @param monitor The monitor to report progress to. Frequently check for cancelation.
      */

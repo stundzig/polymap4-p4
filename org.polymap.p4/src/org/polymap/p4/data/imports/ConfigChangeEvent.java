@@ -30,9 +30,13 @@ import org.polymap.core.runtime.event.EventManager;
 public class ConfigChangeEvent
         extends EventObject {
 
-    public ConfigChangeEvent( Object source ) {
+    public String               propName;
+
+
+    public ConfigChangeEvent( Object source, String propName ) {
         super( source );
         assert source instanceof ImporterSite || source instanceof ImporterPrompt;
+        this.propName = propName;
     }
 
     
@@ -51,7 +55,8 @@ public class ConfigChangeEvent
         @Override
         public Object doSet( Object obj, Config prop, Object newValue ) {
             Object source = prop.info().getHostObject();
-            EventManager.instance().syncPublish( new ConfigChangeEvent( source ) );
+            String propName = prop.info().getName();
+            EventManager.instance().syncPublish( new ConfigChangeEvent( source, propName ) );
             return newValue;
         }
     }

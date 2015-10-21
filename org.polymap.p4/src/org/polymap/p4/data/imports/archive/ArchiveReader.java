@@ -96,19 +96,13 @@ public class ArchiveReader
      * @return List of read files.
      * @throws RuntimeException
      */
-    public List<File> run( File f, @SuppressWarnings("hiding") IProgressMonitor monitor ) {
+    public List<File> run( File f, @SuppressWarnings("hiding") IProgressMonitor monitor ) throws Exception {
         this.monitor = monitor;
         try (
             InputStream in = new BufferedInputStream(  new FileInputStream( f ) ); 
         ){
             handle( f.getName(), null, in );
             return results;
-        }
-        catch (RuntimeException e) {
-            throw e;
-        }
-        catch (Exception e) {
-            throw new RuntimeException( e );
         }
     }
 
@@ -186,7 +180,7 @@ public class ArchiveReader
         }
         catch (Exception e) {
             if (e instanceof IllegalArgumentException || "MALFORMED".equals( e.getMessage() )) {
-                throw new IOException( "Wrong charset: " + charset, e );
+                throw new IOException( "Wrong charset: " + charset.get().displayName(), e );
             }
             else {
                 throw e;

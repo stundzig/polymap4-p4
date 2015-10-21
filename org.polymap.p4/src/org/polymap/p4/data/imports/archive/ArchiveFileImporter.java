@@ -30,12 +30,9 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.polymap.rhei.batik.toolkit.md.MdToolkit;
-
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
@@ -62,15 +59,14 @@ public class ArchiveFileImporter
     protected ImporterSite          site;
     
     @ContextIn
-    protected MdToolkit             tk;
-    
-    @ContextIn
     protected File                  file;
     
     @ContextOut
     protected List<File>            result;
     
     protected Charset               filenameCharset = CHARSETS[0];
+    
+    protected Exception             exception;
     
 
     @Override
@@ -86,6 +82,7 @@ public class ArchiveFileImporter
         site.icon.set( P4Plugin.images().svgImage( "zip.svg", NORMAL24 ) );
         site.summary.set( "ZIP archive: " + file.getName() );
         site.description.set( "A ZIP archive contains other files. Click to import files from within the archive." );
+        site.terminal.set( false );
     }
 
     
@@ -128,34 +125,39 @@ public class ArchiveFileImporter
         try {
             // testing long running operation :)
             Thread.sleep( 0 );
+            
+            result = new ArchiveReader()
+                    .targetDir.put( ImportTempDir.create() )
+                    .charset.put( filenameCharset )
+                    .run( file, monitor );
+            
+            exception = null;;
+            site.ok.set( true );
         }
-        catch (InterruptedException e) {
+        catch (Exception e) {
+            exception = e;
+            site.ok.set( false );
         }
-        result = new ArchiveReader()
-                .targetDir.put( ImportTempDir.create() )
-                .charset.put( filenameCharset )
-                .run( file, monitor );
     }    
 
     
     @Override
-    public Composite createResultViewer( Composite parent ) {
+    public void createResultViewer( Composite parent, IPanelToolkit tk ) {
         if (result == null) {
-            Label l = new Label( parent, SWT.NONE );
-            l.setText( "Unable to import files from: " + file.getName() );            
+            tk.createFlowText( parent,
+                    "\nUnable to read the data.\n\n" +
+                    "**Reason**: " + exception.getLocalizedMessage() );            
         }
         else {
-            org.eclipse.swt.widgets.List list = new org.eclipse.swt.widgets.List( parent, SWT. NONE );
+            org.eclipse.swt.widgets.List list = tk.createList( parent, SWT.V_SCROLL, SWT.H_SCROLL );
             result.stream().sorted().forEach( f -> list.add( f.getName() ) );
         }
-        return parent;
     }
 
 
     @Override
     public void execute( IProgressMonitor monitor ) throws Exception {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
+        // everything is done by verify()
     }
     
 }
