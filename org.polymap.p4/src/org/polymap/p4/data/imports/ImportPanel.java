@@ -124,6 +124,7 @@ public class ImportPanel
     
     @Override
     public void init() {
+        site().title.set( "Import" );
         context = nextContext.isPresent() ? nextContext.get() : new ImporterContext(); 
 
         // listen to ok (verified) event from ImporterSite
@@ -208,8 +209,9 @@ public class ImportPanel
         if (upload != null) {
             FormDataFactory.on( upload ).fill().bottom( 0, 40 );
         }
-        FormDataFactory.on( importsList.getControl() ).fill().top( 0, 45 ).bottom( 50 );
-        FormDataFactory.on( resultSection.getControl() ).fill().top( 50, 5 );
+        // width/height specifies that we want scrollbars in the contets
+        FormDataFactory.on( importsList.getControl() ).fill().top( 0, 45 ).bottom( 50 ).width( 100 ).height( 100 );
+        FormDataFactory.on( resultSection.getControl() ).fill().top( 50, 5 ).height( 100 ).width( 100 );
     }
 
 

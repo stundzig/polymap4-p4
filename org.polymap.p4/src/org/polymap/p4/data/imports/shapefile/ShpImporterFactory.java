@@ -15,7 +15,6 @@
 package org.polymap.p4.data.imports.shapefile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import java.io.File;
@@ -44,14 +43,15 @@ public class ShpImporterFactory
     @Override
     public void createImporters( ImporterBuilder builder ) throws Exception {
         if (files != null) {
-            Optional<File> shp = files.stream().filter( f -> f.getName().toLowerCase().endsWith( ".shp" ) ).findAny();
-            if (shp.isPresent()) {
-                String basename = FilenameUtils.getBaseName( shp.get().getName() );
-                List<File> shpFiles = files.stream()
-                        .filter( f -> FilenameUtils.getBaseName( f.getName() ).equals( basename ) )
-                        .collect( Collectors.toList() );
-                
-                builder.newImporter( new ShpImporter(), shp.get(), shpFiles );
+            for (File f : files) {
+                if (f.getName().toLowerCase().endsWith( ".shp" ) ) {
+                    String basename = FilenameUtils.getBaseName( f.getName() );
+                    List<File> shpFiles = files.stream()
+                            .filter( _f -> FilenameUtils.getBaseName( _f.getName() ).equals( basename ) )
+                            .collect( Collectors.toList() );
+
+                    builder.newImporter( new ShpImporter(), f, shpFiles );
+                }
             }
         }
     }

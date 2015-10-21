@@ -5,21 +5,22 @@ Bundle-SymbolicName: org.polymap.p4;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.polymap.p4.P4Plugin
 Bundle-Vendor: polymap.org
-Require-Bundle: org.eclipse.rap.ui;bundle-version="2.3.1",
+Require-Bundle: org.eclipse.osgi.services,
+ org.eclipse.rap.ui;bundle-version="2.3.1",
  org.polymap.core;bundle-version="4.0.0",
  org.polymap.core.data;bundle-version="4.0.0",
  org.polymap.core.data.wms;bundle-version="4.0.0",
+ org.polymap.core.data.shapefile,
  org.polymap.core.mapeditor;bundle-version="4.0.0",
  org.polymap.core.project;bundle-version="4.0.0",
  org.polymap.core.catalog;bundle-version="4.0.0",
  org.polymap.rhei.batik,
+ org.polymap.rhei.form,
  org.polymap.model2,
  org.polymap.model2.store.recordstore,
  org.polymap.rap.updownload;bundle-version="2.0.0",
- org.eclipse.osgi.services,
  org.polymap.service.geoserver;bundle-version="4.0.0";resolution:=optional,
- org.polymap.service.fs;bundle-version="4.0.0";resolution:=optional,
- org.polymap.core.data.shapefile
+ org.polymap.service.fs;bundle-version="4.0.0";resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

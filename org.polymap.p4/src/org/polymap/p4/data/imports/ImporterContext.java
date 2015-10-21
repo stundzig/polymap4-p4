@@ -306,6 +306,7 @@ public class ImporterContext
         importer.execute( monitor );
 
         // collect contextOut
+        contextOut.clear();
         Class cl = importer.getClass();
         while (cl != null) {
             for (Field f : cl.getDeclaredFields()) {

@@ -41,6 +41,8 @@ import org.polymap.p4.data.imports.ImporterContext.ContextChangeEvent;
  * {@link ImporterPrompt}.
  * <p/>
  * Refreshes the viewer on {@link ContextChangeEvent} and {@link ConfigChangeEvent}.
+ * <p/>
+ * Handles selection via {@link #deferredSelection}.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
@@ -66,6 +68,11 @@ class ImportsContentProvider
     private Object                      deferredSelection;
 
     
+    /**
+     * 
+     * 
+     * @param selection The element to be selected when it is loaded, or null.
+     */
     protected ImportsContentProvider() {
         EventManager.instance().subscribe( this, ev -> 
                 ev instanceof ContextChangeEvent || 
@@ -139,6 +146,8 @@ class ImportsContentProvider
                 protected void runWithException( IProgressMonitor monitor ) throws Exception {
                     assert context == elm;
                     List<ImporterContext> importers = context.findNext( monitor );
+                    // always select the first elm, if present
+                    importers.stream().findFirst().ifPresent( imp -> deferredSelection = imp );
                     updateChildren( elm, importers.toArray(), currentChildCount );
                 }
             };

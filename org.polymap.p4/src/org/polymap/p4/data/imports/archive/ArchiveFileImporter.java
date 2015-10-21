@@ -79,9 +79,9 @@ public class ArchiveFileImporter
     public void init( @SuppressWarnings("hiding") ImporterSite site, IProgressMonitor monitor ) {
         this.site = site;
 
-        site.icon.set( P4Plugin.images().svgImage( "zip.svg", NORMAL24 ) );
-        site.summary.set( "ZIP archive: " + file.getName() );
-        site.description.set( "A ZIP archive contains other files. Click to import files from within the archive." );
+        site.icon.set( P4Plugin.images().svgImage( "file-multiple.svg", NORMAL24 ) );
+        site.summary.set( "Archive: " + file.getName() );
+        site.description.set( "A archive file contains other files. Click to import files from within the archive." );
         site.terminal.set( false );
     }
 
