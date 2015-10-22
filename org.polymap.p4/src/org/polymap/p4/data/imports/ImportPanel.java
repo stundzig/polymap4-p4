@@ -14,7 +14,7 @@
 package org.polymap.p4.data.imports;
 
 import static org.polymap.core.runtime.UIThreadExecutor.async;
-//import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
+import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.WHITE24;
 
@@ -128,8 +128,8 @@ public class ImportPanel
         context = nextContext.isPresent() ? nextContext.get() : new ImporterContext(); 
 
         // listen to ok (verified) event from ImporterSite
-//        EventManager.instance().subscribe( this, ifType( ConfigChangeEvent.class, cce -> 
-//                cce.propName.equals( "ok" ) && cce.getSource() instanceof ImporterSite ) );
+        EventManager.instance().subscribe( this, ifType( ConfigChangeEvent.class, cce -> 
+                cce.propName.equals( "ok" ) && cce.getSource() instanceof ImporterSite ) );
     }
 
 
@@ -229,13 +229,11 @@ public class ImportPanel
         if (context.site().ok.get()) {
             MdToolkit tk = (MdToolkit)site().toolkit();
             if (context.site().terminal.get()) {
-                fab = tk.createFab();
-                fab.setImage(P4Plugin.images().svgImage( "check.svg", WHITE24 ));
+                fab = tk.createFab( P4Plugin.images().svgImage( "check.svg", WHITE24 ), SWT.RIGHT );
                 fab.setToolTipText( "Import data" );
             }
             else {
-                fab = tk.createFab();
-                fab.setImage(P4Plugin.images().svgImage( "arrow-right.svg", WHITE24 ));
+                fab = tk.createFab( P4Plugin.images().svgImage( "arrow-right.svg", WHITE24 ), SWT.RIGHT );
                 fab.setToolTipText( "Send data to the next importer" );
             }
             fab.getParent().layout();
