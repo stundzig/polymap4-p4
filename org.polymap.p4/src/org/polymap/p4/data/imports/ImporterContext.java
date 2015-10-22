@@ -15,6 +15,8 @@ package org.polymap.p4.data.imports;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toMap;
+import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
+import static org.polymap.rhei.batik.toolkit.md.dp.dp;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import java.lang.reflect.Field;
 
@@ -32,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.collect.ImmutableList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
@@ -42,19 +46,22 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import org.polymap.core.runtime.SubMonitor;
 import org.polymap.core.runtime.UIJob;
-import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.config.Configurable;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.BatikPlugin;
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import org.polymap.p4.data.imports.ImporterFactory.ImporterBuilder;
 import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.archive.ArchiveFileImporterFactory;
 import org.polymap.p4.data.imports.refine.csv.CSVFileImporterFactory;
 import org.polymap.p4.data.imports.refine.excel.ExcelFileImporterFactory;
+import org.polymap.p4.data.imports.shapefile.ShpImporterFactory;
 
 /**
  * Provides the execution context of an {@link Importer}. It handles inbound context
@@ -69,7 +76,7 @@ public class ImporterContext
     private static Log log = LogFactory.getLog( ImporterContext.class );
     
     // XXX make this an extension point
-    private static final Class[]            factories = { ArchiveFileImporterFactory.class, CSVFileImporterFactory.class, ExcelFileImporterFactory.class };
+    private static final Class[]            factories = { ArchiveFileImporterFactory.class, CSVFileImporterFactory.class, ExcelFileImporterFactory.class, ShpImporterFactory.class  };
     
     private Importer                        importer;
     
@@ -77,9 +84,15 @@ public class ImporterContext
     
     private Map<Class,Object>               contextIn = new HashMap();
     
+    private Map<Class,Object>               contextOut = new HashMap();
+    
     private Map<String,ImporterPrompt>      prompts = new HashMap();
     
     private UIJob                           verifier;
+
+    private Composite                       resultViewerParent;
+
+    private IPanelToolkit                   resultViewerTk;
 
 
     /**
@@ -102,7 +115,7 @@ public class ImporterContext
         this.importer = importer;
         this.contextIn = stream( contextIn ).collect( toMap( o -> o.getClass(), o -> o ) );
 
-        injectContext( importer );
+        injectContextIn( importer, this.contextIn );
         
         site = new ImporterSite() {
             @Override
@@ -146,12 +159,14 @@ public class ImporterContext
     
     @EventHandler( delay=100 )
     protected void promptChanged( List<ConfigChangeEvent> evs ) {
+        // cancel current verifier Job
         if (verifier != null) {
             log.info( "Cancel VERIFIER!" );
             verifier.cancel();
             verifier.getThread().interrupt();
             verifier = null;
         }
+        // new Job
         verifier = new UIJob( "Progress import" ) {
             @Override
             protected void runWithException( IProgressMonitor monitor ) throws Exception {
@@ -167,6 +182,9 @@ public class ImporterContext
                 }
             }
         });
+        if (resultViewerParent != null) {
+            asyncFast( () -> updateResultViewer( resultViewerParent, resultViewerTk ) );
+        }
         verifier.scheduleWithUIUpdate();
     }
     
@@ -181,8 +199,13 @@ public class ImporterContext
     }
 
 
-    public void addContextIn( Object o ) {
-        contextIn.put( o.getClass(), o );
+    /**
+     * For the root ImportContext without an importer this add the given value to
+     * {@link #contextOut} in order to have in handed to factories in
+     * {@link #findNext(IProgressMonitor)}
+     */
+    public void addContextOut( Object o ) {
+        contextOut.put( o.getClass(), o );
         EventManager.instance().syncPublish( new ContextChangeEvent( this ) );
     }
 
@@ -201,7 +224,7 @@ public class ImporterContext
         
         for (Class<ImporterFactory> cl : factories) {
             ImporterFactory factory = cl.newInstance();
-            injectContext( factory );
+            injectContextIn( factory, contextOut );
             SubProgressMonitor submon = new SubProgressMonitor( monitor, 10 );
 
             factory.createImporters( new ImporterBuilder() {
@@ -242,42 +265,74 @@ public class ImporterContext
     }
     
     
-    public void createResultViewer( Composite parent ) {
-        JobChangeAdapter task = new JobChangeAdapter() {
+    public void updateResultViewer( Composite parent, IPanelToolkit tk ) {
+        resultViewerParent = parent;
+        resultViewerTk = tk;
+        JobChangeAdapter updateUI = new JobChangeAdapter() {
             @Override
             public void done( IJobChangeEvent ev ) {
                 if (ev == null || ev.getResult().isOK()) {
-                    UIThreadExecutor.asyncFast( () -> {
+                    asyncFast( () -> {
                         UIUtils.disposeChildren( parent );
-                        importer.createResultViewer( parent );
+                        parent.setLayout( new FillLayout() );
+                        importer.createResultViewer( parent, tk );
                         parent.layout( true );
                     });
                 }
             }
         };
         if (verifier != null) {
-            Label msg = new Label( parent, SWT.NONE );
+            UIUtils.disposeChildren( parent );
+            parent.setLayout( FormLayoutFactory.defaults().margins( dp( 80 ).pix() ).create() );
+            Label msg = new Label( parent, SWT.CENTER );
+            msg.setLayoutData( FormDataFactory.filled().create() );
             msg.setText( "Crunching data..." );
             msg.setImage( BatikPlugin.images().image( "resources/icons/loading24.gif" ) );
-            verifier.addJobChangeListenerWithContext( task );
+            parent.layout( true );
+            
+            verifier.addJobChangeListenerWithContext( updateUI );
         }
         else {
-            task.done( null );
+            updateUI.done( null );
         }
     }
 
 
     public void createPromptViewer( Composite parent, ImporterPrompt prompt ) {
+        assert parent.getLayout() instanceof FillLayout;
         prompt.extendedUI.ifPresent( uibuilder -> uibuilder.createContents( prompt, parent ) );
     }
 
 
     public void execute( IProgressMonitor monitor ) throws Exception {
         importer.execute( monitor );
+
+        // collect contextOut
+        contextOut.clear();
+        Class cl = importer.getClass();
+        while (cl != null) {
+            for (Field f : cl.getDeclaredFields()) {
+                ContextOut a = f.getAnnotation( ContextOut.class );
+                if (a != null) {
+                    try {
+                        f.setAccessible( true );
+                        Object value = f.get( importer );
+                        Object previous = contextOut.put( value.getClass(), value );
+                        if (previous != null) {
+                            throw new IllegalStateException( "ContextOut already contains a value for the given type: " + value + " -- " + previous );
+                        }
+                    }
+                    catch (Exception e) {
+                        throw new RuntimeException( e );
+                    }
+                }
+            }
+            cl = cl.getSuperclass();
+        }
     } 
 
     
-    protected void injectContext( Object obj ) {
+    protected void injectContextIn( Object obj, Map<Class,Object> values ) {
         Class cl = obj.getClass();
         while (cl != null) {
             for (Field f : cl.getDeclaredFields()) {
@@ -285,7 +340,22 @@ public class ImporterContext
                 if (a != null) {
                     try {
                         f.setAccessible( true );
-                        f.set( obj, contextIn.get( f.getType() ) );
+                        Object value = values.get( f.getType() );
+                        
+                        // check direct match first
+                        if (value != null) {
+                            f.set( obj, value );                            
+                        }
+                        // check for assignable types
+                        else {
+                            List<Object> assignable = values.values().stream()
+                                    .filter( v -> f.getType().isAssignableFrom( v.getClass() ) )
+                                    .collect( Collectors.toList() );
+                            assert assignable.size() <= 1 : "...";
+                            if (assignable.size() > 0) {
+                                f.set( obj, assignable.get( 0 ) );
+                            }
+                        }
                     }
                     catch (Exception e) {
                         throw new RuntimeException( e );

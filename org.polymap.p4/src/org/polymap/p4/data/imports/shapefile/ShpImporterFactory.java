@@ -12,16 +12,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.data.imports.archive;
+package org.polymap.p4.data.imports.shapefile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import java.io.File;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ImporterFactory;
@@ -31,13 +31,10 @@ import org.polymap.p4.data.imports.ImporterFactory;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class ArchiveFileImporterFactory
+public class ShpImporterFactory
         implements ImporterFactory {
 
-    private static Log log = LogFactory.getLog( ArchiveFileImporterFactory.class );
-    
-    @ContextIn
-    protected File                  file;
+    private static Log log = LogFactory.getLog( ShpImporterFactory.class );
     
     @ContextIn
     protected List<File>            files;
@@ -45,11 +42,17 @@ public class ArchiveFileImporterFactory
 
     @Override
     public void createImporters( ImporterBuilder builder ) throws Exception {
-        if (file != null && new ArchiveReader().canHandle( file, new NullProgressMonitor() )) {
-            builder.newImporter( new ArchiveFileImporter(), file );
-        }
         if (files != null) {
-            log.info( "List<File> in context is not yet implemented." );
+            for (File f : files) {
+                if (f.getName().toLowerCase().endsWith( ".shp" ) ) {
+                    String basename = FilenameUtils.getBaseName( f.getName() );
+                    List<File> shpFiles = files.stream()
+                            .filter( _f -> FilenameUtils.getBaseName( _f.getName() ).equals( basename ) )
+                            .collect( Collectors.toList() );
+
+                    builder.newImporter( new ShpImporter(), f, shpFiles );
+                }
+            }
         }
     }
     

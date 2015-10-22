@@ -13,9 +13,9 @@
  */
 package org.polymap.p4.data.imports;
 
-import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24_ALERT;
-import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24_ERROR;
-import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24_OK;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.ALERT24;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.ERROR24;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.OK24;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,9 +78,9 @@ class ImportsLabelProvider
                 case Icon:          cell.setImage( context.site().icon.get() ); break;
                 case StatusIcon: {
                     switch (context.maxFailingPromptSeverity()) {
-                        case INFO:      cell.setImage( P4Plugin.images().svgImage( "check.svg", NORMAL24_OK ) ); break;
-                        case MANDATORY: cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", NORMAL24_ALERT ) );  break;
-                        case VERIFY:    cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", NORMAL24_ERROR ) ); break;
+                        case INFO:      cell.setImage( P4Plugin.images().svgImage( "check.svg", OK24 ) ); break;
+                        case MANDATORY: cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ALERT24 ) );  break;
+                        case VERIFY:    cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ERROR24 ) ); break;
                     }
                     break;
                 }
@@ -95,18 +95,23 @@ class ImportsLabelProvider
         else if (cell.getElement() instanceof ImporterPrompt) {
             ImporterPrompt prompt = (ImporterPrompt)cell.getElement();
             switch (type.get()) {
-                case Summary:       cell.setText( prompt.summary.get() ); break;
+                case Summary: {
+                    StringBuilder text = new StringBuilder( prompt.summary.get() );
+                    prompt.value.ifPresent( v -> text.append( " -- " ).append( v ) );
+                    cell.setText( text.toString() ); 
+                    break;
+                }
                 case Description:   cell.setText( prompt.description.get() ); break;
                 case Icon:          cell.setImage( P4Plugin.images().svgImage( "help.svg", SvgImageRegistryHelper.NORMAL12 ) ); break;
                 case StatusIcon: {
                     if (prompt.severity.get() == Severity.INFO || prompt.ok.get()) {
-                        cell.setImage( P4Plugin.images().svgImage( "check.svg", NORMAL24_OK ) ); break;
+                        cell.setImage( P4Plugin.images().svgImage( "check.svg", OK24 ) ); break;
                     }
                     else if (prompt.severity.get() == Severity.VERIFY) {
-                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", NORMAL24_ALERT ) ); break;
+                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ALERT24 ) ); break;
                     }
                     else if (prompt.severity.get() == Severity.MANDATORY) {
-                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", NORMAL24_ERROR ) ); break;
+                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ERROR24 ) ); break;
                     }
                     break;
                 }

@@ -58,6 +58,8 @@ import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
 import org.polymap.p4.data.imports.Importer;
+import org.polymap.p4.data.imports.ImporterPrompt;
+import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
 import org.polymap.p4.data.imports.refine.RefineContentProvider;
@@ -74,76 +76,87 @@ import com.google.refine.model.ColumnModel;
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
  */
-public class CSVFileImporter
-        extends AbstractRefineFileImporter<CSVFormatAndOptions> {
+public class CSVFileImporter extends AbstractRefineFileImporter<CSVFormatAndOptions> {
 
-    private static Log log = LogFactory.getLog( CSVFileImporter.class );
-
+    private static Log log = LogFactory.getLog(CSVFileImporter.class);
 
     @Override
-    public void init( @SuppressWarnings("hiding" ) ImporterSite site, IProgressMonitor monitor)
-            throws Exception {
+    public void init(@SuppressWarnings("hiding") ImporterSite site, IProgressMonitor monitor) throws Exception {
         this.site = site;
 
-        site.icon.set( P4Plugin.images().svgImage( "csv.svg", NORMAL24 ) );
-        site.summary.set( "CSV / TSV / separator based file: " + file.getName() );
+        site.icon.set(P4Plugin.images().svgImage("csv.svg", NORMAL24));
+        site.summary.set("CSV / TSV / separator based file: " + file.getName());
 
-        super.init( site, monitor );
+        super.init(site, monitor);
     }
-
 
     @Override
-    public void createPrompts( IProgressMonitor monitor ) throws Exception {
+    public void createPrompts(IProgressMonitor monitor) throws Exception {
         // charset prompt
-        site.newPrompt( "encoding" ).summary.put( "Zeichensatz der Daten" ).description
-                .put( "Die Daten können bspw. deutsche Umlaute enthalten, die nach dem Hochladen falsch dargestellt werden. Mit dem Ändern des Zeichensatzes kann dies korrigiert werden." ).extendedUI
-                        .put( ( prompt, parent ) -> {
-                            // select box
-                            Combo combo = new Combo( parent, SWT.SINGLE );
-                            List<String> encodings = Lists.newArrayList( Charsets.ISO_8859_1.name(),
-                                    Charsets.US_ASCII.name(), Charsets.UTF_8.name(),
-                                    Charsets.UTF_16.name(), Charsets.UTF_16BE.name(),
-                                    Charsets.UTF_16LE.name() );
+        site.newPrompt("encoding").summary.put("Zeichensatz der Daten").description
+                .put("Die Daten können bspw. deutsche Umlaute enthalten, die nach dem Hochladen falsch dargestellt werden. "
+                        + "Mit dem Ändern des Zeichensatzes kann dies korrigiert werden.").extendedUI
+                                .put(new PromptUIBuilder() {
 
-                            // java.nio.charset.Charset.forName( )
-                            combo.setItems( encodings.toArray( new String[encodings.size()] ) );
-                            // combo.add
+                                    @Override
+                                    public void submit(ImporterPrompt prompt) {
+                                        // TODO Auto-generated method stub
 
-                            combo.addSelectionListener( new SelectionAdapter() {
+                                    }
 
-                                @Override
-                                public void widgetSelected( SelectionEvent e ) {
-                                    Combo c = (Combo)e.getSource();
-                                    String selected = encodings.get( c.getSelectionIndex() );
-                                    formatAndOptions().setEncoding( selected );
-                                    updateOptions();
-                                    prompt.ok.set( true );
-                                }
-                            } );
-                            int index = encodings.indexOf( formatAndOptions().encoding() );
-                            if (index != -1) {
-                                combo.select( index );
-                            }
-                            return parent;
-                        } );
-        site.newPrompt( "headline" ).summary.put( "Kopfzeile" ).description
-                .put( "Welche Zeile enhält die Spaltenüberschriften?" ).extendedUI
-                        .put( ( prompt, parent ) -> {
-                            // TODO use a rhei numberfield here
-                            Text text = new Text( parent, SWT.RIGHT );
-                            text.setText( formatAndOptions().headerLines() );
-                            text.addModifyListener( event -> {
-                                Text t = (Text)event.getSource();
-                                // can throw an exception
-                                int index = Integer.parseInt( t.getText() );
-                                formatAndOptions().setHeaderLines( index );
-                                updateOptions();
-                                prompt.ok.set( true );
-                            } );
-                            return parent;
-                        } );
+                                    @Override
+                                    public void createContents(ImporterPrompt prompt, Composite parent) {
+                                        // select box
+                                        Combo combo = new Combo(parent, SWT.SINGLE);
+                                        List<String> encodings = Lists.newArrayList(Charsets.ISO_8859_1.name(),
+                                                Charsets.US_ASCII.name(), Charsets.UTF_8.name(), Charsets.UTF_16.name(),
+                                                Charsets.UTF_16BE.name(), Charsets.UTF_16LE.name());
+
+                                        // java.nio.charset.Charset.forName( )
+                                        combo.setItems(encodings.toArray(new String[encodings.size()]));
+                                        // combo.add
+
+                                        combo.addSelectionListener(new SelectionAdapter() {
+
+                                            @Override
+                                            public void widgetSelected(SelectionEvent e) {
+                                                Combo c = (Combo) e.getSource();
+                                                String selected = encodings.get(c.getSelectionIndex());
+                                                formatAndOptions().setEncoding(selected);
+                                                updateOptions();
+                                                prompt.ok.set(true);
+                                            }
+                                        });
+                                        int index = encodings.indexOf(formatAndOptions().encoding());
+                                        if (index != -1) {
+                                            combo.select(index);
+                                        }
+                                    }
+                                });
+        site.newPrompt("headline").summary.put("Kopfzeile").description
+                .put("Welche Zeile enhält die Spaltenüberschriften?").extendedUI.put(new PromptUIBuilder() {
+                    @Override
+                    public void createContents(ImporterPrompt prompt, Composite parent) {
+                        // TODO use a rhei numberfield here
+                        Text text = new Text(parent, SWT.RIGHT);
+                        text.setText(formatAndOptions().headerLines());
+                        text.addModifyListener(event -> {
+                            Text t = (Text) event.getSource();
+                            // can throw an exception
+                            int index = Integer.parseInt(t.getText());
+                            formatAndOptions().setHeaderLines(index);
+                            updateOptions();
+                            prompt.ok.set(true);
+                        });
+                    }
+
+                    @Override
+                    public void submit(ImporterPrompt prompt) {
+                        // TODO Auto-generated method stub
+
+                    }
+                });
     }
-
 
     @Override
     protected CSVFormatAndOptions defaultOptions() {

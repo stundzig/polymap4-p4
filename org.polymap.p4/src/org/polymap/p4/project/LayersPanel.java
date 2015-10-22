@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -37,6 +36,8 @@ import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
 import org.polymap.core.project.ui.ProjectNodeContentProvider;
 import org.polymap.core.project.ui.ProjectNodeLabelProvider;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
 
 import org.polymap.rhei.batik.Context;
@@ -109,9 +110,9 @@ public class LayersPanel
 
     @Override
     public void createContents( Composite parent ) {
-        parent.setLayout( new FillLayout() );
+        parent.setLayout( FormLayoutFactory.defaults().create() );
         
-        viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.FULL_SELECTION );
+        viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.SINGLE, SWT.FULL_SELECTION );
         viewer.setContentProvider( new ProjectNodeContentProvider() );
         viewer.firstLineLabelProvider.set( new ProjectNodeLabelProvider() );
         
@@ -161,6 +162,9 @@ public class LayersPanel
         } );
 
         viewer.setInput( map.get() );
+
+        // avoid empty rows and lines
+        viewer.getTree().setLayoutData( FormDataFactory.filled().noBottom().create() );
     }
 
 }

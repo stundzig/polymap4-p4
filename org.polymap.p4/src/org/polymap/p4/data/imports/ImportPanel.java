@@ -13,7 +13,10 @@
  */
 package org.polymap.p4.data.imports;
 
+import static org.polymap.core.runtime.UIThreadExecutor.async;
+//import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.WHITE24;
 
 import java.util.Arrays;
 
@@ -32,31 +35,34 @@ import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.jface.viewers.IOpenListener;
-import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.client.service.ClientFileUploader;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
 
-import org.polymap.core.runtime.UIThreadExecutor;
+import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
-import org.polymap.core.ui.UIUtils;
+import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.SimpleDialog;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
@@ -98,6 +104,8 @@ public class ImportPanel
 
     private File                        tempDir = ImportTempDir.create();
 
+    private Button                      fab;
+
     
     @Override
     public boolean wantsToBeShown() {
@@ -106,7 +114,7 @@ public class ImportPanel
                 .map( parent -> {
                     site().title.set( "" );
                     site().tooltip.set( "Import new data into the catalog" );
-                    site().icon.set( P4Plugin.images().svgImage( "import.svg", NORMAL24 ) );
+                    site().icon.set( P4Plugin.images().svgImage( "plus-circle-outline.svg", NORMAL24 ) );
                     site().preferredWidth.set( 350 );
                     return true;
                 } )
@@ -116,7 +124,12 @@ public class ImportPanel
     
     @Override
     public void init() {
+        site().title.set( "Import" );
         context = nextContext.isPresent() ? nextContext.get() : new ImporterContext(); 
+
+        // listen to ok (verified) event from ImporterSite
+//        EventManager.instance().subscribe( this, ifType( ConfigChangeEvent.class, cce -> 
+//                cce.propName.equals( "ok" ) && cce.getSource() instanceof ImporterSite ) );
     }
 
 
@@ -127,74 +140,142 @@ public class ImportPanel
     }
 
 
+    /**
+     * After a prompt change has trigered verfication in ImporterContext the ok state
+     * of the importer has been set. Select this importer in the list. This triggers
+     * update of the FAB too. 
+     */
+    @EventHandler( display=true )
+    protected void importerOkChanged( ConfigChangeEvent ev ) {
+        importsList.setSelection( new StructuredSelection( ((ImporterSite)ev.getSource()).context() ), true );
+    }
+    
+    
     @Override
     public void createContents( Composite parent ) {
         // margin left/right: shadow
         parent.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 3, 8 ).create() );
         MdToolkit tk = (MdToolkit)site().toolkit();
-        
-        // upload button
-        Upload upload = tk.adapt( new Upload( parent, SWT.NONE/* , Upload.SHOW_PROGRESS */), false, false );
-        upload.setImage( P4Plugin.images().svgImage( "file-multiple.svg", NORMAL24 ) );
-        upload.setText( "" );
-        upload.setToolTipText( "<b>Drop</b> files here<br/>or <b>click</b> to open file dialog" );
-        upload.setHandler( this );
-        upload.moveAbove( null );
 
-        DropTarget labelDropTarget = new DropTarget( upload, DND.DROP_MOVE );
-        labelDropTarget.setTransfer( new Transfer[] { ClientFileTransfer.getInstance() } );
-        labelDropTarget.addDropListener( createDropTargetAdapter() );
+        // upload button
+        Upload upload = null;
+        if (!nextContext.isPresent()) {
+            upload = tk.adapt( new Upload( parent, SWT.NONE/* , Upload.SHOW_PROGRESS */), false, false );
+            upload.setImage( P4Plugin.images().svgImage( "file-multiple.svg", WHITE24 ) );
+            upload.setText( "" );
+            upload.setToolTipText( "<b>Drop</b> files here<br/>or <b>click</b> to open file dialog" );
+            upload.setHandler( this );
+            upload.moveAbove( null );
+
+            DropTarget labelDropTarget = new DropTarget( upload, DND.DROP_MOVE );
+            labelDropTarget.setTransfer( new Transfer[] { ClientFileTransfer.getInstance() } );
+            labelDropTarget.addDropListener( createDropTargetAdapter() );
+        }
 
         // imports and prompts
-        importsList = tk.createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION );
+        importsList = tk.createListViewer( parent, SWT.VIRTUAL, SWT.SINGLE | SWT.FULL_SELECTION );
         importsList.setContentProvider( new ImportsContentProvider() );
         importsList.firstLineLabelProvider.set( new ImportsLabelProvider( Type.Summary ) );
         importsList.secondLineLabelProvider.set( new ImportsLabelProvider( Type.Description ) );
         importsList.iconProvider.set( new ImportsLabelProvider( Type.Icon ) );
         importsList.firstSecondaryActionProvider.set( new ImportsLabelProvider( Type.StatusIcon ));
-        
-        importsList.addOpenListener( new IOpenListener() {
-            @Override
-            public void open( OpenEvent ev ) {
-                SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
-                    importsList.expandToLevel( elm, 1 );
 
-                    UIUtils.disposeChildren( resultSection.getBody() );
-                    resultSection.getBody().setLayout( new FillLayout() );
-                    //
-                    if (elm instanceof ImporterContext) {
-                        resultSection.setTitle( "Data preview" );
-                        ((ImporterContext)elm).createResultViewer( resultSection.getBody() );
-                    }
-                    //
-                    else if (elm instanceof ImporterPrompt) {
-                        resultSection.setTitle( ((ImporterPrompt)elm).summary.get() );
-                        context.createPromptViewer( resultSection.getBody(), (ImporterPrompt)elm );
-                    }
-                    resultSection.getBody().layout();
-                });
-            }
+        // selection listener recognizes events from UI *and* from ImportsContentProvider
+        importsList.addSelectionChangedListener( ev -> {
+            log.info( "Event: " + ev );
+            SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
+                importsList.expandToLevel( elm, 1 );
+                //
+                if (elm instanceof ImporterContext) {
+                    createResultViewer( (ImporterContext)elm );
+                    updateFab( (ImporterContext)elm );
+                }
+                //
+                else if (elm instanceof ImporterPrompt) {
+                    createPromptViewer( (ImporterPrompt)elm );
+                }
+            });
         });
+        
+        // ImportsContentProvider selects every ImportContext when it is loaded;
+        // this triggers expansion and resultViewer (see above)
         importsList.setInput( context );
         
         // result viewer
         resultSection = tk.createPanelSection( parent, "Data preview", SWT.BORDER );
-        tk.createLabel( resultSection.getBody(), "No data to preview yet. Please upload something above." );
+        tk.createFlowText( resultSection.getBody(), "No data to preview yet.  \nPlease drop a file, archive or URL above." );
         
         // layout
-        FormDataFactory.on( upload ).fill().bottom( 0, 50 );
-        FormDataFactory.on( importsList.getControl() ).fill().top( upload ).bottom( 50 );
-        FormDataFactory.on( resultSection.getControl() ).fill().top( importsList.getControl() );
+        if (upload != null) {
+            FormDataFactory.on( upload ).fill().bottom( 0, 40 );
+        }
+        // width/height specifies that we want scrollbars in the contets
+        FormDataFactory.on( importsList.getControl() ).fill().top( 0, 45 ).bottom( 50 ).width( 100 ).height( 100 );
+        FormDataFactory.on( resultSection.getControl() ).fill().top( 50, 5 ).height( 100 ).width( 100 );
+    }
+
+
+    protected void createResultViewer( @SuppressWarnings("hiding") ImporterContext context ) {
+        resultSection.setTitle( "Data preview" );
+        context.updateResultViewer( resultSection.getBody(), site().toolkit() );
+    }
+    
+    
+    protected void updateFab( @SuppressWarnings("hiding") ImporterContext context ) {
+        if (fab != null) {
+            fab.dispose();
+        }
         
-        //
-//        EventManager.instance().subscribe( this, ev -> ev instanceof PromptChangeEvent );
+        if (context.site().ok.get()) {
+            MdToolkit tk = (MdToolkit)site().toolkit();
+            if (context.site().terminal.get()) {
+                fab = tk.createFab();
+                fab.setImage(P4Plugin.images().svgImage( "check.svg", WHITE24 ));
+                fab.setToolTipText( "Import data" );
+            }
+            else {
+                fab = tk.createFab();
+                fab.setImage(P4Plugin.images().svgImage( "arrow-right.svg", WHITE24 ));
+                fab.setToolTipText( "Send data to the next importer" );
+            }
+            fab.getParent().layout();
+            
+            fab.addSelectionListener( new org.eclipse.swt.events.SelectionAdapter() {
+                @Override
+                public void widgetSelected( SelectionEvent ev ) {
+                    try {
+                        context.execute( new NullProgressMonitor() );
+                        
+                        nextContext.set( context );
+                        getContext().openPanel( site().path(), ImportPanel.ID );
+                    }
+                    catch (Exception e) {
+                        StatusDispatcher.handleError( "Importer did not execute successfully.", e );
+                    }
+                }
+            });
+        }
     }
 
     
-//    @EventHandler( display=true )
-//    protected void importPromptChanged( PromptChangeEvent ev ) {
-//        //importsList.update( ev.getSource(), null );
-//    }
+    protected void createPromptViewer( ImporterPrompt prompt ) {
+        SimpleDialog dialog = site().toolkit().createSimpleDialog( prompt.summary.get() );
+        
+        dialog.setContents( parent -> prompt.context().createPromptViewer( parent, prompt ) );
+        
+        dialog.addAction( new Action( "OK" ) {
+            public void run() {
+                prompt.extendedUI.get().submit( prompt );
+                dialog.close();
+            }
+        });
+        dialog.addAction( new Action( "CANCEL" ) {
+            public void run() {
+                dialog.close( );
+            }
+        });
+        dialog.open();
+    }
     
     
     @Override
@@ -210,12 +291,13 @@ public class ImportPanel
             IOUtils.copy( in, out );
         }
         catch (Exception e) {
-            UIThreadExecutor.async( () -> site().status.set( new Status( IStatus.ERROR, P4Plugin.ID, "Unable to upload file.", e ) ) );
+            async( () -> site().status.set( new Status( IStatus.ERROR, P4Plugin.ID, "Unable to upload file.", e ) ) );
             return;
         }
 
-        UIThreadExecutor.async( () -> {
-            context.addContextIn( f );
+        async( () -> {
+            // fires event which triggers UI update in ImportsContentProvider
+            context.addContextOut( f );
         });
     }
 

@@ -23,13 +23,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.polymap.core.data.refine.impl.ExcelFormatAndOptions;
-import org.polymap.core.ui.FormDataFactory;
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.data.imports.ImporterPrompt;
+import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
@@ -61,26 +62,35 @@ public class ExcelFileImporter
         if (formatAndOptions().sheetRecords().size() == 1) {
             site.newPrompt( "headline" ).summary.put( "Kopfzeile" ).description
                     .put( "Welche Zeile enhält die Spaltenüberschriften?" ).extendedUI
-                            .put( ( prompt, parent ) -> {
-                                // TODO use a rhei numberfield here
-                                Text text = new Text( parent, SWT.RIGHT );
-                                text.setText( formatAndOptions().headerLines() );
-                                text.addModifyListener( event -> {
-                                    Text t = (Text)event.getSource();
-                                    // can throw an exception
-                                    int index = Integer.parseInt( t.getText() );
-                                    formatAndOptions().setHeaderLines( index );
-                                    updateOptions();
-                                    prompt.ok.set( true );
-                                } );
-                                return parent;
-                            } );
+                            .put( new PromptUIBuilder() {
+                                
+                                @Override
+                                public void submit(ImporterPrompt prompt) {
+                                    // TODO Auto-generated method stub
+                                    
+                                }
+                                
+                                @Override
+                                public void createContents(ImporterPrompt prompt, Composite parent) {
+                                 // TODO use a rhei numberfield here
+                                    Text text = new Text( parent, SWT.RIGHT );
+                                    text.setText( formatAndOptions().headerLines() );
+                                    text.addModifyListener( event -> {
+                                        Text t = (Text)event.getSource();
+                                        // can throw an exception
+                                        int index = Integer.parseInt( t.getText() );
+                                        formatAndOptions().setHeaderLines( index );
+                                        updateOptions();
+                                        prompt.ok.set( true );
+                                    } );
+                                }
+                            });
         }
     }
 
 
     @Override
-    public Composite createResultViewer( Composite parent ) {
+    public void createResultViewer( Composite parent, IPanelToolkit tk ) {
         if (formatAndOptions().sheetRecords().size() > 1) {
             // select the correct sheet
 //            Label label = new Label( parent, SWT.LEFT );
@@ -99,10 +109,9 @@ public class ExcelFileImporter
                     log.error( "open in new importer panel, similar to the archive importer" );
                 }
             } );
-            return parent;
         }
         else {
-            return super.createResultViewer( parent );
+            super.createResultViewer( parent, tk );
         }
     }
 

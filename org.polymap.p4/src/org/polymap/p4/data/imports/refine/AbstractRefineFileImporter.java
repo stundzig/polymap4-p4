@@ -60,6 +60,7 @@ import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
 import org.polymap.p4.data.imports.Importer;
 import org.polymap.p4.data.imports.ImporterSite;
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import com.google.common.base.Charsets;
@@ -130,7 +131,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
 
 
     @Override
-    public Composite createResultViewer( Composite parent ) {
+    public void createResultViewer( Composite parent, IPanelToolkit toolkit ) {
         Composite tableComposite = new Composite( parent, SWT.FILL );
         if (importJob != null) {
             log.info( "creating new table" );
@@ -290,7 +291,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
             // tableComposite.layout(true);
             // table.setRedraw(true);
         }
-        return tableComposite;
+        //return tableComposite;
     }
 
     //

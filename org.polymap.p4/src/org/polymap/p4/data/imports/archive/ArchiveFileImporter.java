@@ -14,6 +14,7 @@
  */
 package org.polymap.p4.data.imports.archive;
 
+import static java.nio.charset.Charset.forName;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
 import java.util.List;
@@ -29,16 +30,15 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.polymap.rhei.batik.toolkit.md.MdToolkit;
-
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
 import org.polymap.p4.data.imports.ImportTempDir;
+import org.polymap.p4.data.imports.ImporterPrompt;
+import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.Importer;
 import org.polymap.p4.data.imports.ImporterSite;
@@ -52,11 +52,11 @@ public class ArchiveFileImporter
         implements Importer {
 
     private static Log log = LogFactory.getLog( ArchiveFileImporter.class );
+
+    /** Allowed charsets. */
+    public static final Charset[]   CHARSETS = {forName( "UTF-8" ), forName( "ISO-8859-1" ), forName( "IBM437" )};
     
     protected ImporterSite          site;
-    
-    @ContextIn
-    protected MdToolkit             tk;
     
     @ContextIn
     protected File                  file;
@@ -64,7 +64,9 @@ public class ArchiveFileImporter
     @ContextOut
     protected List<File>            result;
     
-    protected Charset               charset;                
+    protected Charset               filenameCharset = CHARSETS[0];
+    
+    protected Exception             exception;
     
 
     @Override
@@ -77,9 +79,10 @@ public class ArchiveFileImporter
     public void init( @SuppressWarnings("hiding") ImporterSite site, IProgressMonitor monitor ) {
         this.site = site;
 
-        site.icon.set( P4Plugin.images().svgImage( "zip.svg", NORMAL24 ) );
-        site.summary.set( "ZIP archive: " + file.getName() );
-        site.description.set( "A ZIP archive contains other files. Click to import files from within the archive." );
+        site.icon.set( P4Plugin.images().svgImage( "file-multiple.svg", NORMAL24 ) );
+        site.summary.set( "Archive: " + file.getName() );
+        site.description.set( "A archive file contains other files. Click to import files from within the archive." );
+        site.terminal.set( false );
     }
 
     
@@ -87,20 +90,32 @@ public class ArchiveFileImporter
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         // charset prompt
         site.newPrompt( "charset" )
-                .summary.put( "Charset of filenames: UTF8" )
+                .summary.put( "Filename encoding" )
                 .description.put( "The encoding of the filenames. If unsure use UTF8." )
+                .value.put( "UTF8" )
                 .severity.put( Severity.VERIFY )
-                .extendedUI.put( (prompt,parent) -> {
-                    Button btn = new Button( parent, SWT.CHECK );
-                    btn.setText( "Ja, das ist gut" );
-                    btn.setSelection( prompt.ok.get() );
-                    btn.addSelectionListener( new SelectionAdapter() {
-                        @Override
-                        public void widgetSelected( SelectionEvent ev ) {
-                            prompt.ok.set( btn.getSelection() );
+                .extendedUI.put( new PromptUIBuilder() {
+                    private Charset charset = null;
+                    @Override
+                    public void submit( ImporterPrompt prompt ) {
+                        filenameCharset = charset;
+                        prompt.ok.set( true );
+                        prompt.value.put( charset.displayName() );                        
+                    }
+                    @Override
+                    public void createContents( ImporterPrompt prompt, Composite parent ) {
+                        for (Charset cs : CHARSETS) {
+                            Button btn = new Button( parent, SWT.RADIO );
+                            btn.setText( cs.displayName() );
+                            btn.setSelection( cs == filenameCharset );
+                            btn.addSelectionListener( new SelectionAdapter() {
+                                @Override
+                                public void widgetSelected( SelectionEvent ev ) {
+                                    charset = cs;
+                                }
+                            });
                         }
-                    });
-                    return parent;
+                    }
                 });
     }
     
@@ -108,34 +123,41 @@ public class ArchiveFileImporter
     @Override
     public void verify( IProgressMonitor monitor ) {
         try {
-            Thread.sleep( 5000 );
+            // testing long running operation :)
+            Thread.sleep( 0 );
+            
+            result = new ArchiveReader()
+                    .targetDir.put( ImportTempDir.create() )
+                    .charset.put( filenameCharset )
+                    .run( file, monitor );
+            
+            exception = null;;
+            site.ok.set( true );
         }
-        catch (InterruptedException e) {
+        catch (Exception e) {
+            exception = e;
+            site.ok.set( false );
         }
-        result = new ArchiveReader()
-                .targetDir.put( ImportTempDir.create() )
-                .run( file, monitor );
     }    
 
     
     @Override
-    public Composite createResultViewer( Composite parent ) {
+    public void createResultViewer( Composite parent, IPanelToolkit tk ) {
         if (result == null) {
-            Label l = new Label( parent, SWT.NONE );
-            l.setText( "Unable to import files from: " + file.getName() );            
+            tk.createFlowText( parent,
+                    "\nUnable to read the data.\n\n" +
+                    "**Reason**: " + exception.getLocalizedMessage() );            
         }
         else {
-            org.eclipse.swt.widgets.List list = new org.eclipse.swt.widgets.List( parent, SWT. NONE );
+            org.eclipse.swt.widgets.List list = tk.createList( parent, SWT.V_SCROLL, SWT.H_SCROLL );
             result.stream().sorted().forEach( f -> list.add( f.getName() ) );
         }
-        return parent;
     }
 
 
     @Override
     public void execute( IProgressMonitor monitor ) throws Exception {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
+        // everything is done by verify()
     }
     
 }
