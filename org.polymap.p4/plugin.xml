@@ -67,10 +67,6 @@
             class="org.polymap.p4.project.ProjectInfoPanel"
             id="org.polymap.p4.project.ProjectInfoPanel">
       </panel>
-      <panel
-            class="org.polymap.p4.data.imports.ImportPanel"
-            id="org.polymap.p4.ImportPanel">
-      </panel>
    </extension>
    <extension
          point="org.polymap.service.fs.contentProviders">
