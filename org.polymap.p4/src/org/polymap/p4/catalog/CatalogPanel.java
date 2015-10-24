@@ -118,7 +118,7 @@ public class CatalogPanel
             }
         } );
         viewer.firstSecondaryActionProvider.set( new CatalogEntryDeleteActionProvider() );
-        viewer.setInput( P4Plugin.instance().localCatalog );
+        viewer.setInput( P4Plugin.localCatalog() );
 
         // fill the entiry space as items are expandable; scrollbar would not adopted otherwise
         viewer.getTree().setLayoutData( FormDataFactory.filled().create() );

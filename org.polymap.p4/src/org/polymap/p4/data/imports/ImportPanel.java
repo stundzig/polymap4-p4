@@ -19,6 +19,7 @@ import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.WHITE24;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -42,6 +43,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
@@ -50,6 +52,8 @@ import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.client.service.ClientFileUploader;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
 
+import org.polymap.core.runtime.SubMonitor;
+import org.polymap.core.runtime.UIJob;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.i18n.IMessages;
@@ -69,6 +73,7 @@ import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ImportsLabelProvider.Type;
+import org.polymap.p4.data.imports.features.LocalFeaturesImporter;
 import org.polymap.p4.map.ProjectMapPanel;
 import org.polymap.rap.updownload.upload.IUploadHandler;
 import org.polymap.rap.updownload.upload.Upload;
@@ -210,7 +215,7 @@ public class ImportPanel
             FormDataFactory.on( upload ).fill().bottom( 0, 40 );
         }
         // width/height specifies that we want scrollbars in the contets
-        FormDataFactory.on( importsList.getControl() ).fill().top( 0, 45 ).bottom( 50 ).width( 100 ).height( 100 );
+        FormDataFactory.on( importsList.getControl() ).fill().top( 0, 45 ).bottom( 50, -10 ).width( 100 ).height( 100 );
         FormDataFactory.on( resultSection.getControl() ).fill().top( 50, 5 ).height( 100 ).width( 100 );
     }
 
@@ -242,10 +247,12 @@ public class ImportPanel
                 @Override
                 public void widgetSelected( SelectionEvent ev ) {
                     try {
-                        context.execute( new NullProgressMonitor() );
-                        
-                        nextContext.set( context );
-                        getContext().openPanel( site().path(), ImportPanel.ID );
+                        if (context.site().terminal.get()) {
+                            executeTerminalContext( context );
+                        }
+                        else {
+                            executeNonTerminalContext( context );
+                        }
                     }
                     catch (Exception e) {
                         StatusDispatcher.handleError( "Importer did not execute successfully.", e );
@@ -255,6 +262,37 @@ public class ImportPanel
         }
     }
 
+    
+    /**
+     * Executes the given context and open next panel.
+     */
+    protected void executeNonTerminalContext( @SuppressWarnings("hiding") ImporterContext context ) throws Exception {
+        context.execute( new NullProgressMonitor() );
+        
+        nextContext.set( context );
+        getContext().openPanel( site().path(), ImportPanel.ID );        
+    }
+    
+    
+    /**
+     * 
+     */
+    protected void executeTerminalContext( @SuppressWarnings("hiding") ImporterContext context ) throws Exception {
+        UIJob job = new UIJob( "Import features" ) {
+            @Override
+            protected void runWithException( IProgressMonitor monitor ) throws Exception {
+                monitor.beginTask( getName(), 10 );
+                Map<Class,Object> contextOut = context.execute( SubMonitor.on( monitor, 3 ) );
+
+                LocalFeaturesImporter lfi = new LocalFeaturesImporter();
+                context.injectContextIn( lfi, contextOut );
+                lfi.execute( SubMonitor.on( monitor, 3 ) );
+            }
+        };
+        //job.setUser( true );
+        job.schedule();
+    }
+    
     
     protected void createPromptViewer( ImporterPrompt prompt ) {
         SimpleDialog dialog = site().toolkit().createSimpleDialog( prompt.summary.get() );

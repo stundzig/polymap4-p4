@@ -59,7 +59,7 @@ public class ShapeImportOperation
         
         try (
             ExceptionCollector<?> excs = Streams.exceptions();
-            Updater update = P4Plugin.instance().localCatalog.prepareUpdate();
+            Updater update = P4Plugin.localCatalog().prepareUpdate();
         ){
             // filter basename, copy files to dataDir
             Arrays.stream( shpFile.get().getParentFile().listFiles() )

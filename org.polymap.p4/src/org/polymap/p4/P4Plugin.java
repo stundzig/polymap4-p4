@@ -63,15 +63,6 @@ public class P4Plugin
 
     private static P4Plugin         instance;
 
-//    private static String[]         IMAGE_CONTAINING_PLUGINS = new String[] { 
-//            "org.polymap.p4", 
-//            "org.polymap.rhei.batik",
-//            "org.polymap.core.mapeditor", 
-//            "org.polymap.core.project", 
-//            "org.polymap.core.catalog",
-//            "org.polymap.core.data", 
-//            "org.polymap.core" };
-
 
     public static P4Plugin instance() {
         return instance;
@@ -84,14 +75,22 @@ public class P4Plugin
         return instance().images;
     }
     
+    public static LocalCatalog localCatalog() {
+        return instance().localCatalog;
+    }
+    
+    public static LocalResolver localResolver() {
+        return instance().localResolver;
+    }
+    
     
     // instance *******************************************
 
     public SvgImageRegistryHelper   images = new SvgImageRegistryHelper( this );
 
-    public LocalCatalog             localCatalog;
+    private LocalCatalog            localCatalog;
 
-    public LocalResolver            localResolver;
+    private LocalResolver           localResolver;
 
     private ServiceTracker          httpServiceTracker;
 

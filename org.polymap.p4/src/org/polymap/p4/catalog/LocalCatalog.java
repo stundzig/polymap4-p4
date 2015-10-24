@@ -16,11 +16,18 @@ package org.polymap.p4.catalog;
 
 import java.io.File;
 
+import org.geotools.data.DataAccess;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.polymap.core.CorePlugin;
+import org.polymap.core.catalog.IMetadata;
 import org.polymap.core.catalog.local.LocalMetadataCatalog;
+import org.polymap.core.catalog.resolve.IResolvableInfo;
+import org.polymap.core.data.rs.catalog.RServiceResolver;
 import org.polymap.core.data.wms.catalog.WmsServiceResolver;
 
 import org.polymap.model2.store.recordstore.RecordStoreAdapter;
@@ -36,7 +43,11 @@ public class LocalCatalog
         extends LocalMetadataCatalog {
 
     private static Log log = LogFactory.getLog( LocalCatalog.class );
-    
+
+    private static final File       LOCAL_FEATURES_STORE_DIR = new File( CorePlugin.getDataLocation( P4Plugin.instance() ), "features" );
+
+    private static final String     LOCAL_FEATURES_STORE_ID = "_local_features_store_";
+
     
     public LocalCatalog() throws Exception {
         super( new RecordStoreAdapter( new LuceneRecordStore( 
@@ -45,14 +56,36 @@ public class LocalCatalog
     }
 
     
+    /**
+     * Returns the one and only 'local' store for features in this P4 instance.
+     */
+    public DataAccess localFeaturesStore() {
+        try {
+            IMetadata metadata = entry( LOCAL_FEATURES_STORE_ID ).get();
+            IResolvableInfo info = P4Plugin.localResolver().resolve( metadata, new NullProgressMonitor() );
+            return info.getServiceInfo().createService( new NullProgressMonitor() );
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e );
+        }
+    }
+    
+    
     protected void createEntries() throws Exception {
         // check empty
         if (query( "" ).execute().size() == 0) {
-            // create fake entries
+            // create standard entries
             try (Updater update = prepareUpdate()) {
+                LOCAL_FEATURES_STORE_DIR.mkdirs();
+                update.newEntry( metadata -> {
+                    metadata.setIdentifier( LOCAL_FEATURES_STORE_ID );
+                    metadata.setTitle( "Project database" );
+                    metadata.setDescription( "The local database of this project" );
+                    metadata.setConnectionParams( RServiceResolver.createParams( LOCAL_FEATURES_STORE_DIR ) );
+                });
                 update.newEntry( metadata -> {
                     metadata.setTitle( "OSM WMS" );
-                    metadata.setDescription( "Standardeintrag" );
+                    metadata.setDescription( "OpenStreetMap data served by terrestris.de" );
                     metadata.setConnectionParams( WmsServiceResolver.createParams( "http://ows.terrestris.de/osm/service/" ) );
                 });
                 update.newEntry( metadata -> {
@@ -74,7 +107,7 @@ public class LocalCatalog
     /**
      * 
      */
-    public void deleteEntry(String identifier) throws Exception {
+    public void deleteEntry( String identifier ) throws Exception {
         try (Updater update = prepareUpdate()) {
             update.removeEntry( identifier );
             update.commit();

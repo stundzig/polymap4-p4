@@ -14,6 +14,7 @@
  */
 package org.polymap.p4.project;
 
+import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
 import static org.polymap.rhei.batik.contribution.ContributionSiteFilters.panelType;
 
 import org.apache.commons.logging.Log;
@@ -23,7 +24,6 @@ import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.project.IMap;
 import org.polymap.core.project.operations.NewLayerOperation;
-import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.Context;
@@ -68,7 +68,7 @@ public class NewLayerContribution
     
     @Override
     protected void execute( IContributionSite site ) throws Exception {
-        String resId = P4Plugin.instance().localResolver.resourceIdentifier( res.get() );
+        String resId = P4Plugin.localResolver().resourceIdentifier( res.get() );
         
         TxProvider<UnitOfWork>.Tx tx = uowProvider.get().newTx( site.getPanel() );
         
@@ -78,7 +78,7 @@ public class NewLayerContribution
                 .label.put( res.get().getName() )
                 .resourceIdentifier.put( resId );
 
-        OperationSupport.instance().execute2( op, true, false, ev2 -> UIThreadExecutor.asyncFast( () -> {
+        OperationSupport.instance().execute2( op, true, false, ev2 -> asyncFast( () -> {
             if (ev2.getResult().isOK()) {
                 PanelPath panelPath = site.getPanel().site().path();
                 site.getContext().closePanel( panelPath.removeLast( 1 /*2*/ ) );

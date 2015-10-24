@@ -59,6 +59,7 @@ import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.p4.data.imports.ImporterFactory.ImporterBuilder;
 import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.archive.ArchiveFileImporterFactory;
+import org.polymap.p4.data.imports.features.LocalFeaturesImporterFactory;
 import org.polymap.p4.data.imports.shapefile.ShpImporterFactory;
 
 /**
@@ -74,7 +75,10 @@ public class ImporterContext
     private static Log log = LogFactory.getLog( ImporterContext.class );
     
     // XXX make this an extension point
-    private static final Class[]            factories = { ArchiveFileImporterFactory.class, ShpImporterFactory.class };
+    private static final Class[]            factories = { 
+            ArchiveFileImporterFactory.class, 
+            ShpImporterFactory.class, 
+            LocalFeaturesImporterFactory.class };
     
     private Importer                        importer;
     
@@ -302,7 +306,7 @@ public class ImporterContext
     }
 
 
-    public void execute( IProgressMonitor monitor ) throws Exception {
+    public Map<Class,Object> execute( IProgressMonitor monitor ) throws Exception {
         importer.execute( monitor );
 
         // collect contextOut
@@ -327,6 +331,7 @@ public class ImporterContext
             }
             cl = cl.getSuperclass();
         }
+        return contextOut;
     } 
 
     

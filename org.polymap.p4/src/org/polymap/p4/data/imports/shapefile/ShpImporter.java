@@ -54,20 +54,20 @@ public class ShpImporter
     
     private static final ShapefileDataStoreFactory dsFactory = new ShapefileDataStoreFactory();
     
-    private ImporterSite            site;
+    private ImporterSite                site;
 
     @ContextIn
-    protected List<File>            files;
+    protected List<File>                files;
 
     @ContextIn
-    protected File                  shp;
-
-    private Exception               exception;
-
-    private ShapefileDataStore      ds;
+    protected File                      shp;
 
     @ContextOut
-    private ContentFeatureCollection features;
+    private ContentFeatureCollection    features;
+
+    private Exception                   exception;
+
+    private ShapefileDataStore          ds;
 
     
     @Override
@@ -135,8 +135,7 @@ public class ShpImporter
 
     @Override
     public void execute( IProgressMonitor monitor ) throws Exception {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
+        // everything done in verify()
     }
     
 }
