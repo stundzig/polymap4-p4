@@ -50,10 +50,6 @@ public class NewLayerContribution
     
     @Mandatory
     @Scope(P4Plugin.Scope)
-    private Context<ProjectUowProvider> uowProvider;
-
-    @Mandatory
-    @Scope(P4Plugin.Scope)
     private Context<IMap>               map;
     
     @Mandatory
@@ -70,10 +66,8 @@ public class NewLayerContribution
     protected void execute( IContributionSite site ) throws Exception {
         String resId = P4Plugin.localResolver().resourceIdentifier( res.get() );
         
-        TxProvider<UnitOfWork>.Tx tx = uowProvider.get().newTx( site.getPanel() );
-        
         NewLayerOperation op = new NewLayerOperation()
-                .tx.put( tx )
+                .uow.put( ProjectRepository.unitOfWork().newUnitOfWork() )
                 .map.put( map.get() )
                 .label.put( res.get().getName() )
                 .resourceIdentifier.put( resId );

@@ -56,10 +56,12 @@ public class LocalResolver
 
     private static Log log = LogFactory.getLog( LocalResolver.class );
 
-    public static final IMetadataResourceResolver[]   resolvers = { 
-            new WmsServiceResolver(), new ShapefileServiceResolver(), new RServiceResolver() };
+    public static final IMetadataResourceResolver[] resolvers = { 
+            new WmsServiceResolver(), 
+            new ShapefileServiceResolver(), 
+            new RServiceResolver() };
     
-    public static final String                  ID_DELIMITER = "|";
+    public static final String                      ID_DELIMITER = "|";
     
     public static LocalResolver instance() {
         return P4Plugin.localResolver();

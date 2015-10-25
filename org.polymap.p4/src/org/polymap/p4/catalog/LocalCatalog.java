@@ -59,10 +59,36 @@ public class LocalCatalog
     /**
      * Returns the one and only 'local' store for features in this P4 instance.
      */
+    public IMetadata localFeaturesStoreEntry() {
+        try {
+            return entry( LOCAL_FEATURES_STORE_ID ).get();
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e );
+        }
+    }
+    
+    
+    /**
+     * Returns the one and only 'local' store for features in this P4 instance.
+     */
+    public IResolvableInfo localFeaturesStoreInfo() {
+        try {
+            IMetadata metadata = localFeaturesStoreEntry();
+            return P4Plugin.localResolver().resolve( metadata, new NullProgressMonitor() );
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e );
+        }
+    }
+    
+    
+    /**
+     * Returns the one and only 'local' store for features in this P4 instance.
+     */
     public DataAccess localFeaturesStore() {
         try {
-            IMetadata metadata = entry( LOCAL_FEATURES_STORE_ID ).get();
-            IResolvableInfo info = P4Plugin.localResolver().resolve( metadata, new NullProgressMonitor() );
+            IResolvableInfo info = localFeaturesStoreInfo();
             return info.getServiceInfo().createService( new NullProgressMonitor() );
         }
         catch (Exception e) {

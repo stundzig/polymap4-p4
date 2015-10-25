@@ -36,6 +36,7 @@ import org.polymap.p4.data.imports.ImporterSite;
 /**
  * Imports features to the {@link LocalCatalog#localFeaturesStore()}.
  *
+ * @deprecated Dropped in favour of {@link ImportFeaturesOperation}.
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class LocalFeaturesImporter

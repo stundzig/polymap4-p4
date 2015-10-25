@@ -101,5 +101,12 @@
             name="Workbench">
       </contentProvider>
    </extension>
+   <extension
+         point="org.polymap.core.operation.concerns">
+      <concern
+            class="org.polymap.p4.project.AddLayerForImportedFeaturesConcern"
+            id="org.polymap.p4.AddLayerForImportedFeaturesConcern">
+      </concern>
+   </extension>
 
 </plugin>

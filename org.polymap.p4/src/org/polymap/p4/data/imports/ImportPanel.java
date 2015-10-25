@@ -19,7 +19,6 @@ import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.WHITE24;
 
 import java.util.Arrays;
-import java.util.Map;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,7 +42,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
@@ -52,8 +50,7 @@ import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.client.service.ClientFileUploader;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
 
-import org.polymap.core.runtime.SubMonitor;
-import org.polymap.core.runtime.UIJob;
+import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.i18n.IMessages;
@@ -65,15 +62,15 @@ import org.polymap.core.ui.StatusDispatcher;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.SimpleDialog;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
-
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ImportsLabelProvider.Type;
-import org.polymap.p4.data.imports.features.LocalFeaturesImporter;
+import org.polymap.p4.data.imports.features.ImportFeaturesOperation;
 import org.polymap.p4.map.ProjectMapPanel;
 import org.polymap.rap.updownload.upload.IUploadHandler;
 import org.polymap.rap.updownload.upload.Upload;
@@ -278,20 +275,16 @@ public class ImportPanel
      * 
      */
     protected void executeTerminalContext( @SuppressWarnings("hiding") ImporterContext context ) throws Exception {
-        UIJob job = new UIJob( "Import features" ) {
-            @Override
-            protected void runWithException( IProgressMonitor monitor ) throws Exception {
-                monitor.beginTask( getName(), 10 );
-                Map<Class,Object> contextOut = context.execute( SubMonitor.on( monitor, 3 ) );
-
-                LocalFeaturesImporter lfi = new LocalFeaturesImporter();
-                context.injectContextIn( lfi, contextOut );
-                lfi.execute( SubMonitor.on( monitor, 3 ) );
-            }
-        };
-        //job.setUser( true );
-        job.schedule();
+        ImportFeaturesOperation op = new ImportFeaturesOperation( context );
+        getContext().propagate( op );
+        OperationSupport.instance().execute3( op, true, false, () -> async( () -> {
+            // close panel
+            // XXX assuming that ImportPanel is child of root
+            getContext().openPanel( PanelPath.ROOT, new PanelIdentifier( "start" ) );
+        }));
     }
+    
+    
     
     
     protected void createPromptViewer( ImporterPrompt prompt ) {

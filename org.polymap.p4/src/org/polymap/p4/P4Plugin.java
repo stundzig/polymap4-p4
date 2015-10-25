@@ -40,7 +40,6 @@ import org.polymap.rhei.batik.contribution.ContributionManager;
 
 import org.polymap.service.geoserver.GeoServerServlet;
 
-import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.catalog.LocalCatalog;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
@@ -114,8 +113,7 @@ public class P4Plugin
 
                 httpService.ifPresent( service -> {
                     // fake/test GeoServer
-                        UnitOfWork uow = ProjectRepository.instance.get().newUnitOfWork();
-                        IMap map = uow.entity( IMap.class, "root" );
+                        IMap map = ProjectRepository.newUnitOfWork().entity( IMap.class, "root" );
                         try {
                             service.registerServlet( "/wms", new GeoServerServlet() {
                                 @Override
@@ -150,8 +148,6 @@ public class P4Plugin
         httpServiceTracker.open();
 
         ContributionManager.addStaticSupplier( ( ) -> new NewLayerContribution() );
-        // ContributionManager.addStaticSupplier( () -> new TestProjectContribution()
-        // );
     }
 
 

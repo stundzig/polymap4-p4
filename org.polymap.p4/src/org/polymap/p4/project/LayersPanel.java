@@ -48,10 +48,6 @@ import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.toolkit.md.CheckboxActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
-import org.polymap.rhei.batik.tx.TxProvider;
-import org.polymap.rhei.batik.tx.TxProvider.Propagation;
-
-import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.map.ProjectMapPanel;
 
@@ -67,12 +63,6 @@ public class LayersPanel
 
     public static final PanelIdentifier ID = PanelIdentifier.parse( "layers" );
 
-    @Mandatory
-    @Scope(P4Plugin.Scope)
-    private Context<ProjectUowProvider> uowProvider;
-    
-    private TxProvider<UnitOfWork>.Tx   uow;
-    
     @Mandatory
     @Scope(P4Plugin.Scope)
     protected Context<IMap>             map;
@@ -103,7 +93,6 @@ public class LayersPanel
 
     @Override
     public void init() {
-        uow = uowProvider.get().newTx( this ).start( Propagation.MANDATORY );
         mapViewer = ((ProjectMapPanel)parentPanel().get()).mapViewer;
     }
 
@@ -149,7 +138,6 @@ public class LayersPanel
                 mapViewer.setVisible( (ILayer)elm, isSelected( elm ) );
             }
         });
-        viewer.secondSecondaryActionProvider.set( new LayerDeleteActionProvider());
         
         viewer.addOpenListener( new IOpenListener() {
             @Override

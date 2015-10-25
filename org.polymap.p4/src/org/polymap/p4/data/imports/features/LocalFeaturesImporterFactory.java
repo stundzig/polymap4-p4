@@ -22,6 +22,7 @@ import org.polymap.p4.data.imports.ImporterFactory;
 /**
  * 
  *
+ * @deprecated Dropped in favour of {@link ImportFeaturesOperation}.
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class LocalFeaturesImporterFactory

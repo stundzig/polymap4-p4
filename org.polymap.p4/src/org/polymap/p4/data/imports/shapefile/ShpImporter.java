@@ -24,7 +24,8 @@ import java.io.Serializable;
 import org.geotools.data.Query;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
-import org.geotools.data.store.ContentFeatureCollection;
+import org.geotools.feature.FeatureCollection;
+import org.opengis.feature.simple.SimpleFeatureType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,7 +64,7 @@ public class ShpImporter
     protected File                      shp;
 
     @ContextOut
-    private ContentFeatureCollection    features;
+    private FeatureCollection           features;
 
     private Exception                   exception;
 
@@ -125,9 +126,10 @@ public class ShpImporter
                     "**Reason**: " + exception.getMessage() );            
         }
         else {
-            log.info( "Features: " + features.size() + " : " + features.getSchema().getTypeName() );
+            SimpleFeatureType schema = (SimpleFeatureType)features.getSchema();
+            log.info( "Features: " + features.size() + " : " + schema.getTypeName() );
             //tk.createFlowText( parent, "Features: *" + features.size() + "*" );
-            ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, features.getSchema() );
+            ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, schema );
             table.setContent( features );
         }
     }
