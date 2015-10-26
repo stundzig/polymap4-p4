@@ -35,86 +35,85 @@ import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
  */
-public class ExcelFileImporter
-        extends AbstractRefineFileImporter<ExcelFormatAndOptions> {
+public class ExcelFileImporter extends AbstractRefineFileImporter<ExcelFormatAndOptions> {
 
-    private static Log log = LogFactory.getLog( ExcelFileImporter.class );
-
+    private static Log log = LogFactory.getLog(ExcelFileImporter.class);
 
     @Override
-    public void init( @SuppressWarnings("hiding" ) ImporterSite site, IProgressMonitor monitor)
-            throws Exception {
+    public void init(@SuppressWarnings("hiding") ImporterSite site, IProgressMonitor monitor) throws Exception {
         this.site = site;
 
-        site.icon.set( P4Plugin.images().svgImage( "xls.svg", NORMAL24 ) );
-        site.summary.set( "Excel file: " + file.getName() );
+        site.icon.set(P4Plugin.images().svgImage("xls.svg", NORMAL24));
+        site.summary.set("Excel file: " + file.getName());
         // site.description.set("Description");
 
-        super.init( site, monitor );
-        formatAndOptions().setSheets( 0 );
+        super.init(site, monitor);
+        formatAndOptions().setSheets(0);
         updateOptions();
     }
 
-
     @Override
-    public void createPrompts( IProgressMonitor monitor ) throws Exception {
+    public void createPrompts(IProgressMonitor monitor) throws Exception {
         // charset prompt
         if (formatAndOptions().sheetRecords().size() == 1) {
-            site.newPrompt( "headline" ).summary.put( "Kopfzeile" ).description
-                    .put( "Welche Zeile enhält die Spaltenüberschriften?" ).extendedUI
-                            .put( new PromptUIBuilder() {
-                                
-                                @Override
-                                public void submit(ImporterPrompt prompt) {
-                                    // TODO Auto-generated method stub
-                                    
-                                }
-                                
-                                @Override
-                                public void createContents(ImporterPrompt prompt, Composite parent) {
-                                 // TODO use a rhei numberfield here
-                                    Text text = new Text( parent, SWT.RIGHT );
-                                    text.setText( formatAndOptions().headerLines() );
-                                    text.addModifyListener( event -> {
-                                        Text t = (Text)event.getSource();
-                                        // can throw an exception
-                                        int index = Integer.parseInt( t.getText() );
-                                        formatAndOptions().setHeaderLines( index );
-                                        updateOptions();
-                                        prompt.ok.set( true );
-                                    } );
-                                }
+            site.newPrompt("headline").summary.put("Kopfzeile").description
+                    .put("Welche Zeile enhält die Spaltenüberschriften?").extendedUI.put(new PromptUIBuilder() {
+
+                        private int index;
+
+                        @Override
+                        public void createContents(ImporterPrompt prompt, Composite parent) {
+                            // TODO use a rhei numberfield here
+                            Text text =  new Text(parent, SWT.RIGHT);
+                            text.setText(formatAndOptions().headerLines());
+                            text.addModifyListener(event -> {
+                                Text t = (Text) event.getSource();
+                                // can throw an exception
+                                index = Integer.parseInt(t.getText());
                             });
+                            // initial value
+                            index = Integer.parseInt(text.getText());
+                        }
+
+                        @Override
+                        public void submit(ImporterPrompt prompt) {
+                            formatAndOptions().setHeaderLines(index);
+                            updateOptions();
+                            prompt.ok.set(true);
+                            prompt.value.set(String.valueOf(index));
+                        }
+                    });
         }
     }
-
 
     @Override
-    public void createResultViewer( Composite parent, IPanelToolkit tk ) {
+    public void createResultViewer(Composite parent, IPanelToolkit tk) {
         if (formatAndOptions().sheetRecords().size() > 1) {
             // select the correct sheet
-//            Label label = new Label( parent, SWT.LEFT );
-//            label.setText( "Das Excel Dokument enthält mehrere Arbeitsblätter. Bitte wählen Sie die Arbeitsblätter die sie importieren möchten." );
-//            FormDataFactory.on( label );
-            org.eclipse.swt.widgets.List list = new org.eclipse.swt.widgets.List( parent,
-                    SWT.SINGLE );
-            
-//            FormDataFactory.on( list ).fill().top( label, 5 ).bottom( 90, -5 ).height( 50 ).width( 300 );
-            formatAndOptions().sheetRecords().forEach( record -> list.add( record.name + ": " + record.rows + " zeilen" ) );
-            list.addSelectionListener( new SelectionAdapter() {
+            // Label label = new Label( parent, SWT.LEFT );
+            // label.setText( "Das Excel Dokument enthält mehrere
+            // Arbeitsblätter. Bitte wählen Sie die Arbeitsblätter die sie
+            // importieren möchten." );
+            // FormDataFactory.on( label );
+            org.eclipse.swt.widgets.List list = new org.eclipse.swt.widgets.List(parent, SWT.SINGLE);
+
+            // FormDataFactory.on( list ).fill().top( label, 5 ).bottom( 90, -5
+            // ).height( 50 ).width( 300 );
+            formatAndOptions().sheetRecords().forEach(record -> list.add(record.name + ": " + record.rows + " zeilen"));
+            list.addSelectionListener(new SelectionAdapter() {
 
                 @Override
-                public void widgetSelected( SelectionEvent e ) {
-                    // TODO open the sheet in a new importer window, copy also the base file on the second selection to avoid side effects
-                    log.error( "open in new importer panel, similar to the archive importer" );
+                public void widgetSelected(SelectionEvent e) {
+                    // TODO open the sheet in a new importer window, copy also
+                    // the base file on the second selection to avoid side
+                    // effects
+                    log.error("open in new importer panel, similar to the archive importer");
                 }
-            } );
-        }
-        else {
-            super.createResultViewer( parent, tk );
+            });
+        } else {
+            super.createResultViewer(parent, tk);
         }
     }
-
 
     @Override
     protected ExcelFormatAndOptions defaultOptions() {

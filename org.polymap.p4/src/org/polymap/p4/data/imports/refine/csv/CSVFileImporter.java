@@ -16,62 +16,26 @@ package org.polymap.p4.data.imports.refine.csv;
 
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
-import java.io.File;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnPixelData;
-import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.rap.rwt.RWT;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.osgi.framework.ServiceReference;
-import org.polymap.core.data.refine.RefineService;
 import org.polymap.core.data.refine.impl.CSVFormatAndOptions;
-import org.polymap.core.data.refine.impl.ImportResponse;
 import org.polymap.p4.P4Plugin;
-import org.polymap.p4.data.imports.ContextIn;
-import org.polymap.p4.data.imports.ContextOut;
-import org.polymap.p4.data.imports.Importer;
 import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
-import org.polymap.p4.data.imports.refine.RefineContentProvider;
-import org.polymap.p4.data.imports.refine.RefineRow;
-import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import com.google.refine.importing.ImportingJob;
-import com.google.refine.model.Cell;
-import com.google.refine.model.Column;
-import com.google.refine.model.ColumnModel;
 
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
@@ -86,6 +50,7 @@ public class CSVFileImporter extends AbstractRefineFileImporter<CSVFormatAndOpti
 
         site.icon.set(P4Plugin.images().svgImage("csv.svg", NORMAL24));
         site.summary.set("CSV / TSV / separator based file: " + file.getName());
+        site.description.set("");
 
         super.init(site, monitor);
     }
@@ -98,12 +63,16 @@ public class CSVFileImporter extends AbstractRefineFileImporter<CSVFormatAndOpti
                         + "Mit dem Ändern des Zeichensatzes kann dies korrigiert werden.").extendedUI
                                 .put(new PromptUIBuilder() {
 
+                                    private String encoding;
+
                                     @Override
                                     public void submit(ImporterPrompt prompt) {
-                                        // TODO Auto-generated method stub
-
+                                        formatAndOptions().setEncoding(encoding);
+                                        updateOptions();
+                                        prompt.ok.set(true);
+                                        prompt.value.set(encoding);
                                     }
-
+                                 
                                     @Override
                                     public void createContents(ImporterPrompt prompt, Composite parent) {
                                         // select box
@@ -121,13 +90,11 @@ public class CSVFileImporter extends AbstractRefineFileImporter<CSVFormatAndOpti
                                             @Override
                                             public void widgetSelected(SelectionEvent e) {
                                                 Combo c = (Combo) e.getSource();
-                                                String selected = encodings.get(c.getSelectionIndex());
-                                                formatAndOptions().setEncoding(selected);
-                                                updateOptions();
-                                                prompt.ok.set(true);
+                                                encoding = encodings.get(c.getSelectionIndex());
                                             }
                                         });
-                                        int index = encodings.indexOf(formatAndOptions().encoding());
+                                        encoding = formatAndOptions().encoding();
+                                        int index = encodings.indexOf(encoding);
                                         if (index != -1) {
                                             combo.select(index);
                                         }
@@ -135,6 +102,9 @@ public class CSVFileImporter extends AbstractRefineFileImporter<CSVFormatAndOpti
                                 });
         site.newPrompt("headline").summary.put("Kopfzeile").description
                 .put("Welche Zeile enhält die Spaltenüberschriften?").extendedUI.put(new PromptUIBuilder() {
+                    
+                    private int index;
+
                     @Override
                     public void createContents(ImporterPrompt prompt, Composite parent) {
                         // TODO use a rhei numberfield here
@@ -143,17 +113,18 @@ public class CSVFileImporter extends AbstractRefineFileImporter<CSVFormatAndOpti
                         text.addModifyListener(event -> {
                             Text t = (Text) event.getSource();
                             // can throw an exception
-                            int index = Integer.parseInt(t.getText());
-                            formatAndOptions().setHeaderLines(index);
-                            updateOptions();
-                            prompt.ok.set(true);
+                            index = Integer.parseInt(t.getText());
                         });
+                        // initial value
+                        index = Integer.parseInt(text.getText());
                     }
 
                     @Override
                     public void submit(ImporterPrompt prompt) {
-                        // TODO Auto-generated method stub
-
+                        formatAndOptions().setHeaderLines(index);
+                        updateOptions();
+                        prompt.ok.set(true);
+                        prompt.value.set(String.valueOf(index));
                     }
                 });
     }

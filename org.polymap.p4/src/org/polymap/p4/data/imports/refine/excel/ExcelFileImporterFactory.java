@@ -30,41 +30,38 @@ import com.google.common.collect.Sets;
  * 
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
  */
-public class ExcelFileImporterFactory
-        implements ImporterFactory {
+public class ExcelFileImporterFactory implements ImporterFactory {
 
-    private static Log log = LogFactory.getLog( ExcelFileImporterFactory.class );
-    
-    public final static Set<String> supportedTypes = Sets.newHashSet(".xls", ".xlsx"); 
-    		
+    private static Log log = LogFactory.getLog(ExcelFileImporterFactory.class);
+
+    public final static Set<String> supportedTypes = Sets.newHashSet(".xls", ".xlsx");
+
     @ContextIn
-    protected File                  file;
-    
+    protected File file;
+
     @ContextIn
-    protected List<File>            files;
-    
+    protected List<File> files;
 
     @Override
-    public void createImporters( ImporterBuilder builder ) throws Exception {
+    public void createImporters(ImporterBuilder builder) throws Exception {
         if (isSupported(file)) {
-            builder.newImporter( new ExcelFileImporter(), file );
+            builder.newImporter(new ExcelFileImporter(), file);
         }
         if (files != null) {
-            throw new RuntimeException( "List<File> in context is not yet implemented." );
+            throw new RuntimeException("List<File> in context is not yet implemented.");
         }
     }
 
+    private boolean isSupported(File file) {
+        if (file == null) {
+            return false;
+        }
+        for (String type : supportedTypes) {
+            if (file.getName().toLowerCase().endsWith(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	private boolean isSupported(File file) {
-		if (file == null) {
-			return false;
-		}
-		for (String type : supportedTypes) {
-			if (file.getName().toLowerCase().endsWith( type )) {
-				return true;
-			}
-		}
-		return false;
-	}
-    
 }
