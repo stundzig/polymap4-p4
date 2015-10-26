@@ -52,7 +52,7 @@ public class ShapeFetchOperation
     public IStatus execute( IProgressMonitor monitor, IAdaptable info ) throws ExecutionException {
         try {
             files = Arrays.asList(getDataDir().listFiles());
-            MetadataQuery entries = P4Plugin.instance().localCatalog.query( "" );
+            MetadataQuery entries = P4Plugin.localCatalog().query( "" );
             List<String> fileNames =  entries.execute().stream().map( e -> e.getTitle().replace( ".shp", "" )).collect( Collectors.toList() );
             files = files.stream().filter( file -> !fileNames.contains( FilenameUtils.getBaseName( file.getName() ))).collect( Collectors.toList() );
             return Status.OK_STATUS;

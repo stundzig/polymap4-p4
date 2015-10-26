@@ -304,7 +304,7 @@ public class ImporterContext
     }
 
 
-    public void execute( IProgressMonitor monitor ) throws Exception {
+    public Map<Class,Object> execute( IProgressMonitor monitor ) throws Exception {
         importer.execute( monitor );
 
         // collect contextOut
@@ -317,7 +317,7 @@ public class ImporterContext
                     try {
                         f.setAccessible( true );
                         Object value = f.get( importer );
-                        Object previous = contextOut.put( value.getClass(), value );
+                        Object previous = contextOut.put( f.getType(), value );
                         if (previous != null) {
                             throw new IllegalStateException( "ContextOut already contains a value for the given type: " + value + " -- " + previous );
                         }
@@ -329,6 +329,7 @@ public class ImporterContext
             }
             cl = cl.getSuperclass();
         }
+        return contextOut;
     } 
 
     

@@ -18,11 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.store.ContentFeatureCollection;
@@ -31,6 +26,21 @@ import org.geotools.data.wms.WebMapServer;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.google.common.base.Joiner;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.polymap.core.catalog.IMetadata;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.data.util.Geometries;
@@ -40,6 +50,19 @@ import org.polymap.core.mapeditor.OlLayerProvider;
 import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.UIJob;
 import org.polymap.core.runtime.UIThreadExecutor;
+
+import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.DefaultPanel;
+import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.Scope;
+import org.polymap.rhei.batik.contribution.ContributionManager;
+import org.polymap.rhei.batik.dashboard.Dashboard;
+import org.polymap.rhei.batik.dashboard.DashletSite;
+import org.polymap.rhei.batik.dashboard.DefaultDashlet;
+import org.polymap.rhei.batik.toolkit.MinHeightConstraint;
+import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
+import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+
 import org.polymap.p4.P4Plugin;
 import org.polymap.rap.openlayers.base.OlFeature;
 import org.polymap.rap.openlayers.control.MousePositionControl;
@@ -63,24 +86,6 @@ import org.polymap.rap.openlayers.style.Style;
 import org.polymap.rap.openlayers.types.Attribution;
 import org.polymap.rap.openlayers.types.Color;
 import org.polymap.rap.openlayers.types.Coordinate;
-import org.polymap.rhei.batik.Context;
-import org.polymap.rhei.batik.DefaultPanel;
-import org.polymap.rhei.batik.PanelIdentifier;
-import org.polymap.rhei.batik.Scope;
-import org.polymap.rhei.batik.contribution.ContributionManager;
-import org.polymap.rhei.batik.dashboard.Dashboard;
-import org.polymap.rhei.batik.dashboard.DashletSite;
-import org.polymap.rhei.batik.dashboard.DefaultDashlet;
-import org.polymap.rhei.batik.toolkit.MinHeightConstraint;
-import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
-import org.polymap.rhei.batik.toolkit.PriorityConstraint;
-
-import com.google.common.base.Joiner;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * 

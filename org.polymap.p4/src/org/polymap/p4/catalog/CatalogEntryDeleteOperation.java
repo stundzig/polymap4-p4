@@ -21,10 +21,11 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.runtime.config.Config2;
 import org.polymap.core.runtime.config.ConfigurationFactory;
 import org.polymap.core.runtime.config.Mandatory;
-import org.polymap.core.ui.UIUtils;
+
 import org.polymap.p4.P4Plugin;
 
 
@@ -47,7 +48,7 @@ public class CatalogEntryDeleteOperation extends AbstractOperation implements IU
     public IStatus execute( IProgressMonitor monitor, IAdaptable info ) throws ExecutionException {
         try {
             if(identifier.isPresent()) {
-                P4Plugin.instance().localCatalog.deleteEntry(identifier.get());
+                P4Plugin.localCatalog().deleteEntry( identifier.get() );
                 return Status.OK_STATUS;
             } else {
                 return new Status(IStatus.ERROR, P4Plugin.ID, "No entry to delete given.");

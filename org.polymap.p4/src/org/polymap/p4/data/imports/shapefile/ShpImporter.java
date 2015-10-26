@@ -24,7 +24,8 @@ import java.io.Serializable;
 import org.geotools.data.Query;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
-import org.geotools.data.store.ContentFeatureCollection;
+import org.geotools.feature.FeatureCollection;
+import org.opengis.feature.simple.SimpleFeatureType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,20 +55,20 @@ public class ShpImporter
     
     private static final ShapefileDataStoreFactory dsFactory = new ShapefileDataStoreFactory();
     
-    private ImporterSite            site;
+    private ImporterSite                site;
 
     @ContextIn
-    protected List<File>            files;
+    protected List<File>                files;
 
     @ContextIn
-    protected File                  shp;
-
-    private Exception               exception;
-
-    private ShapefileDataStore      ds;
+    protected File                      shp;
 
     @ContextOut
-    private ContentFeatureCollection features;
+    private FeatureCollection           features;
+
+    private Exception                   exception;
+
+    private ShapefileDataStore          ds;
 
     
     @Override
@@ -125,9 +126,10 @@ public class ShpImporter
                     "**Reason**: " + exception.getMessage() );            
         }
         else {
-            log.info( "Features: " + features.size() + " : " + features.getSchema().getTypeName() );
+            SimpleFeatureType schema = (SimpleFeatureType)features.getSchema();
+            log.info( "Features: " + features.size() + " : " + schema.getTypeName() );
             //tk.createFlowText( parent, "Features: *" + features.size() + "*" );
-            ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, features.getSchema() );
+            ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, schema );
             table.setContent( features );
         }
     }
@@ -135,8 +137,7 @@ public class ShpImporter
 
     @Override
     public void execute( IProgressMonitor monitor ) throws Exception {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
+        // everything done in verify()
     }
     
 }

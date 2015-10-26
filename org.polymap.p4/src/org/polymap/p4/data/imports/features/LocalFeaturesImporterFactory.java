@@ -12,18 +12,31 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.data.imports;
+package org.polymap.p4.data.imports.features;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.geotools.feature.FeatureCollection;
 
+import org.polymap.p4.data.imports.ContextIn;
+import org.polymap.p4.data.imports.ImporterFactory;
 
 /**
  * 
  *
+ * @deprecated Dropped in favour of {@link ImportFeaturesOperation}.
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public abstract class ImportResultViewer {
+public class LocalFeaturesImporterFactory
+        implements ImporterFactory {
 
-    private static Log log = LogFactory.getLog( ImportResultViewer.class );
+    @ContextIn
+    private FeatureCollection       features;
+
+    
+    @Override
+    public void createImporters( ImporterBuilder builder ) throws Exception {
+        if (features != null) {
+            builder.newImporter( new LocalFeaturesImporter(), features );
+        }
+    }
+
 }

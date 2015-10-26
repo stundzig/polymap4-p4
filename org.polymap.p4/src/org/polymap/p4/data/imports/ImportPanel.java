@@ -50,6 +50,7 @@ import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.client.service.ClientFileUploader;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
 
+import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.i18n.IMessages;
@@ -61,14 +62,15 @@ import org.polymap.core.ui.StatusDispatcher;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.SimpleDialog;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
-
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ImportsLabelProvider.Type;
+import org.polymap.p4.data.imports.features.ImportFeaturesOperation;
 import org.polymap.p4.map.ProjectMapPanel;
 import org.polymap.rap.updownload.upload.IUploadHandler;
 import org.polymap.rap.updownload.upload.Upload;
@@ -210,7 +212,7 @@ public class ImportPanel
             FormDataFactory.on( upload ).fill().bottom( 0, 40 );
         }
         // width/height specifies that we want scrollbars in the contets
-        FormDataFactory.on( importsList.getControl() ).fill().top( 0, 45 ).bottom( 50 ).width( 100 ).height( 100 );
+        FormDataFactory.on( importsList.getControl() ).fill().top( 0, 45 ).bottom( 50, -10 ).width( 100 ).height( 100 );
         FormDataFactory.on( resultSection.getControl() ).fill().top( 50, 5 ).height( 100 ).width( 100 );
     }
 
@@ -242,10 +244,12 @@ public class ImportPanel
                 @Override
                 public void widgetSelected( SelectionEvent ev ) {
                     try {
-                        context.execute( new NullProgressMonitor() );
-                        
-                        nextContext.set( context );
-                        getContext().openPanel( site().path(), ImportPanel.ID );
+                        if (context.site().terminal.get()) {
+                            executeTerminalContext( context );
+                        }
+                        else {
+                            executeNonTerminalContext( context );
+                        }
                     }
                     catch (Exception e) {
                         StatusDispatcher.handleError( "Importer did not execute successfully.", e );
@@ -255,6 +259,33 @@ public class ImportPanel
         }
     }
 
+    
+    /**
+     * Executes the given context and open next panel.
+     */
+    protected void executeNonTerminalContext( @SuppressWarnings("hiding") ImporterContext context ) throws Exception {
+        context.execute( new NullProgressMonitor() );
+        
+        nextContext.set( context );
+        getContext().openPanel( site().path(), ImportPanel.ID );        
+    }
+    
+    
+    /**
+     * 
+     */
+    protected void executeTerminalContext( @SuppressWarnings("hiding") ImporterContext context ) throws Exception {
+        ImportFeaturesOperation op = new ImportFeaturesOperation( context );
+        getContext().propagate( op );
+        OperationSupport.instance().execute3( op, true, false, () -> async( () -> {
+            // close panel
+            // XXX assuming that ImportPanel is child of root
+            getContext().openPanel( PanelPath.ROOT, new PanelIdentifier( "start" ) );
+        }));
+    }
+    
+    
+    
     
     protected void createPromptViewer( ImporterPrompt prompt ) {
         SimpleDialog dialog = site().toolkit().createSimpleDialog( prompt.summary.get() );

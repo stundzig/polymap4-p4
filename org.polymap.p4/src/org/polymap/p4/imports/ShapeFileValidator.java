@@ -392,7 +392,7 @@ public class ShapeFileValidator {
 
     LocalCatalog getLocalCatalog() {
         if (localCatalog == null) {
-            localCatalog = P4Plugin.instance().localCatalog;
+            localCatalog = P4Plugin.localCatalog();
         }
         return localCatalog;
     }

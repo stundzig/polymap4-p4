@@ -22,6 +22,9 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.polymap.core.catalog.IMetadata;
@@ -30,6 +33,7 @@ import org.polymap.core.catalog.resolve.IResolvableInfo;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.catalog.resolve.IServiceInfo;
 import org.polymap.core.data.pipeline.DataSourceDescription;
+import org.polymap.core.data.rs.catalog.RServiceResolver;
 import org.polymap.core.data.shapefile.catalog.ShapefileServiceResolver;
 import org.polymap.core.data.wms.catalog.WmsServiceResolver;
 import org.polymap.core.project.ILayer;
@@ -52,18 +56,30 @@ public class LocalResolver
 
     private static Log log = LogFactory.getLog( LocalResolver.class );
 
-    public static IMetadataResourceResolver[]   resolvers = { new WmsServiceResolver(), new ShapefileServiceResolver() };
+    public static final IMetadataResourceResolver[] resolvers = { 
+            new WmsServiceResolver(), 
+            new ShapefileServiceResolver(), 
+            new RServiceResolver() };
     
-    public static final String                  ID_DELIMITER = "|";
+    public static final String                      ID_DELIMITER = "|";
     
     public static LocalResolver instance() {
-        return P4Plugin.instance().localResolver;
+        return P4Plugin.localResolver();
     }
     
     
     // instance *******************************************
     
     private LocalCatalog            localCatalog;
+    
+    /**
+     * Cache {@link IResolvableInfo} instances in order to have just one underlying
+     * service instances (WMS, Shape, RDataStore, etc.) per JVM.
+     */
+    private Cache<IMetadata,IResolvableInfo>   resolved = CacheBuilder.newBuilder()
+            .initialCapacity( 128 )
+            .concurrencyLevel( 2 )
+            .softValues().build();
     
     
     public LocalResolver( LocalCatalog localCatalog ) {
@@ -105,20 +121,27 @@ public class LocalResolver
     
     @Override
     public boolean canResolve( IMetadata metadata ) {
-        return Arrays.stream( resolvers )
-                .filter( resolver -> resolver.canResolve( metadata ) )
-                .findFirst().isPresent();
+        if (resolved.getIfPresent( metadata ) != null) {
+            return true;
+        }
+        else {
+            return Arrays.stream( resolvers )
+                    .filter( resolver -> resolver.canResolve( metadata ) )
+                    .findFirst().isPresent();
+        }
     }
 
     
     @Override
     public IResolvableInfo resolve( IMetadata metadata, IProgressMonitor monitor ) throws Exception {
-        for (int i=0; i<resolvers.length; i++) {
-            if (resolvers[i].canResolve( metadata ) ) {
-                return resolvers[i].resolve( metadata, monitor );
-            }            
-        }
-        return null;
+        return resolved.get( metadata, () -> {
+            for (int i=0; i<resolvers.length; i++) {
+                if (resolvers[i].canResolve( metadata ) ) {
+                    return resolvers[i].resolve( metadata, monitor );
+                }            
+            }
+            return (IResolvableInfo)null;
+        });
     }
 
     @Override

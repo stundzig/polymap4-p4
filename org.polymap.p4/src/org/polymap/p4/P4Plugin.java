@@ -40,7 +40,6 @@ import org.polymap.rhei.batik.contribution.ContributionManager;
 
 import org.polymap.service.geoserver.GeoServerServlet;
 
-import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.catalog.LocalCatalog;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
@@ -63,15 +62,6 @@ public class P4Plugin
 
     private static P4Plugin         instance;
 
-//    private static String[]         IMAGE_CONTAINING_PLUGINS = new String[] { 
-//            "org.polymap.p4", 
-//            "org.polymap.rhei.batik",
-//            "org.polymap.core.mapeditor", 
-//            "org.polymap.core.project", 
-//            "org.polymap.core.catalog",
-//            "org.polymap.core.data", 
-//            "org.polymap.core" };
-
 
     public static P4Plugin instance() {
         return instance;
@@ -84,14 +74,22 @@ public class P4Plugin
         return instance().images;
     }
     
+    public static LocalCatalog localCatalog() {
+        return instance().localCatalog;
+    }
+    
+    public static LocalResolver localResolver() {
+        return instance().localResolver;
+    }
+    
     
     // instance *******************************************
 
     public SvgImageRegistryHelper   images = new SvgImageRegistryHelper( this );
 
-    public LocalCatalog             localCatalog;
+    private LocalCatalog            localCatalog;
 
-    public LocalResolver            localResolver;
+    private LocalResolver           localResolver;
 
     private ServiceTracker          httpServiceTracker;
 
@@ -115,8 +113,7 @@ public class P4Plugin
 
                 httpService.ifPresent( service -> {
                     // fake/test GeoServer
-                        UnitOfWork uow = ProjectRepository.instance.get().newUnitOfWork();
-                        IMap map = uow.entity( IMap.class, "root" );
+                        IMap map = ProjectRepository.newUnitOfWork().entity( IMap.class, "root" );
                         try {
                             service.registerServlet( "/wms", new GeoServerServlet() {
                                 @Override
@@ -151,8 +148,6 @@ public class P4Plugin
         httpServiceTracker.open();
 
         ContributionManager.addStaticSupplier( ( ) -> new NewLayerContribution() );
-        // ContributionManager.addStaticSupplier( () -> new TestProjectContribution()
-        // );
     }
 
 
