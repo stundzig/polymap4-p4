@@ -26,15 +26,14 @@ import org.polymap.core.project.IMap;
 import org.polymap.core.project.operations.NewLayerOperation;
 import org.polymap.core.ui.StatusDispatcher;
 
+import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.Mandatory;
 import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.DefaultContribution;
 import org.polymap.rhei.batik.contribution.IContributionSite;
-import org.polymap.rhei.batik.tx.TxProvider;
 
-import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.ResourceInfoPanel;
 
@@ -74,8 +73,11 @@ public class NewLayerContribution
 
         OperationSupport.instance().execute2( op, true, false, ev2 -> asyncFast( () -> {
             if (ev2.getResult().isOK()) {
-                PanelPath panelPath = site.getPanel().site().path();
-                site.getContext().closePanel( panelPath.removeLast( 1 /*2*/ ) );
+                PanelPath parentPath = site.getPanelSite().path().removeLast( 1 );
+                BatikApplication.instance().getContext().closePanel( parentPath );
+
+//                // close panel and parent, assuming that projct map is root
+//                site.getContext().openPanel( PanelPath.ROOT, new PanelIdentifier( "start" ) );
             }
             else {
                 StatusDispatcher.handleError( "Unable to create new layer.", ev2.getResult().getException() );

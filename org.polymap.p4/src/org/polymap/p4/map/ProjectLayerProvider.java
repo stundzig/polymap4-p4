@@ -14,11 +14,13 @@
  */
 package org.polymap.p4.map;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -53,7 +55,10 @@ public class ProjectLayerProvider
 
     private String                                      alias;
     
-    private Map<String,BlockingReference2<Pipeline>>    pipelines = new ConcurrentHashMap();
+    private Cache<String,BlockingReference2<Pipeline>>  pipelines = CacheBuilder.newBuilder()
+            .initialCapacity( 32 )
+            .concurrencyLevel( 2 )
+            .build();
     
     
     public ProjectLayerProvider() {
@@ -67,7 +72,7 @@ public class ProjectLayerProvider
                 }
                 @Override
                 protected Pipeline createPipeline( String layerName ) {
-                    return pipelines.get( layerName ).waitAndGet();
+                    return pipelines.getIfPresent( layerName ).waitAndGet();
                 }
             }, null, null );
         }
@@ -79,25 +84,31 @@ public class ProjectLayerProvider
     
     protected String createPipeline( ILayer layer ) {
         String layerName = layer.label.get();
-        assert !pipelines.containsKey( layerName );
-        BlockingReference2<Pipeline> emptyRef = new BlockingReference2();
-        pipelines.put( layerName, emptyRef );
+        try {
+            pipelines.get( layerName, () -> {
+                BlockingReference2<Pipeline> emptyRef = new BlockingReference2();
 
-        new UIJob( layerName ) {
-            @Override
-            protected void runWithException( IProgressMonitor monitor ) throws Exception {
-                // resolve service
-                DataSourceDescription dsd = LocalResolver.instance().connectLayer( layer, monitor )
-                        .orElseThrow( () -> new RuntimeException( "No data source for layer: " + layer ) );
+                new UIJob( layerName ) {
+                    @Override
+                    protected void runWithException( IProgressMonitor monitor ) throws Exception {
+                        // resolve service
+                        DataSourceDescription dsd = LocalResolver.instance().connectLayer( layer, monitor )
+                                .orElseThrow( () -> new RuntimeException( "No data source for layer: " + layer ) );
+                        
+                        // create pipeline for it
+                        Pipeline pipeline = P4PipelineIncubator.forLayer( layer )
+                                .newPipeline( EncodedImageProducer.class, dsd, null );
+                        assert pipeline != null && pipeline.length() > 0 : "Unable to build pipeline for: " + dsd;
+                        emptyRef.set( pipeline );
+                    }
+                }.schedule();
                 
-                // create pipeline for it
-                Pipeline pipeline = P4PipelineIncubator.forLayer( layer )
-                        .newPipeline( EncodedImageProducer.class, dsd, null );
-                assert pipeline != null && pipeline.length() > 0 : "Unable to build pipeline for: " + dsd;
-                emptyRef.set( pipeline );
-            }
-        }.schedule();
-        
+                return emptyRef;            
+            });
+        }
+        catch (ExecutionException e) {
+            throw new RuntimeException( e );
+        }
         return layerName;
     }
 

@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.project;
+package org.polymap.p4.data.imports.features;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,11 +41,12 @@ import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.Mandatory;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.toolkit.SimpleDialog;
 
 import org.polymap.p4.P4Plugin;
-import org.polymap.p4.data.imports.features.ImportFeaturesOperation;
+import org.polymap.p4.project.ProjectRepository;
 
 /**
  * 
@@ -78,9 +79,11 @@ public class AddLayerForImportedFeaturesConcern
 
         private Text                    input;
 
+        @Mandatory
         @Scope(P4Plugin.Scope)
         protected Context<IMap>         map;
 
+        
         public AddLayerOperationConcern( ImportFeaturesOperation op, OperationInfo info ) {
             this.delegate = op;
             this.info = info;

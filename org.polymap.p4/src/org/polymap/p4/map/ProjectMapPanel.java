@@ -14,9 +14,6 @@
  */
 package org.polymap.p4.map;
 
-import java.util.List;
-
-import java.beans.PropertyChangeEvent;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -30,8 +27,6 @@ import org.polymap.core.data.util.Geometries;
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
-import org.polymap.core.runtime.event.EventHandler;
-import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.UIUtils;
 
@@ -42,6 +37,8 @@ import org.polymap.rhei.batik.Memento;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.ContributionManager;
+
+import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4AppDesign;
 import org.polymap.p4.P4Plugin;
@@ -63,6 +60,11 @@ public class ProjectMapPanel
     
     private static final IMessages      i18n = Messages.forPrefix( "ProjectPanel" );
 
+    /**
+     * The map of this P4 instance. This instance belongs to
+     * {@link ProjectRepository#unitOfWork()}. Don't forget to load a local copy for
+     * an nested {@link UnitOfWork} if you are going to modify anything.
+     */
     @Scope(P4Plugin.Scope)
     protected Context<IMap>             map;
 
@@ -72,9 +74,6 @@ public class ProjectMapPanel
     @Override
     public void init() {
         map.compareAndSet( null, ProjectRepository.unitOfWork().entity( IMap.class, "root" ) );
-
-        EventManager.instance().subscribe( this, ev -> 
-                ev instanceof PropertyChangeEvent && ev.getSource() == map.get() );
     }
 
     
@@ -91,14 +90,6 @@ public class ProjectMapPanel
     }
 
 
-    @EventHandler(delay=100,display=true)
-    protected void onEntityChange( List<PropertyChangeEvent> evs ) {
-        log.info( "evs: " + evs.size() );
-        evs.forEach( ev -> log.info( "    ev=" + ev ) );
-        //mapViewer.refresh();
-    }
-    
-    
     @Override
     public void createContents( Composite parent ) {
         // title and layout
@@ -114,6 +105,7 @@ public class ProjectMapPanel
         // mapViewer
         try {
             mapViewer = new MapViewer( parent );
+            // triggers {@link MapViewer#refresh()} on {@link ProjectNodeCommittedEvent} 
             mapViewer.contentProvider.set( new ProjectContentProvider() );
             mapViewer.layerProvider.set( new ProjectLayerProvider() );
             

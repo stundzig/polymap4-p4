@@ -14,16 +14,24 @@
  */
 package org.polymap.p4.map;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.project.IMap;
+import org.polymap.core.project.ProjectNode.ProjectNodeCommittedEvent;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 
 /**
  * Provides the content of an {@link IMap}.
+ * <p/>
+ * Triggers {@link MapViewer#refresh()} on {@link ProjectNodeCommittedEvent}. 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
@@ -34,20 +42,41 @@ public class ProjectContentProvider
     
     private IMap                map;
 
+    private MapViewer           viewer;
+
+    
     @Override
-    public void inputChanged( Viewer viewer, Object oldInput, Object newInput ) {
+    public void inputChanged( @SuppressWarnings("hiding") Viewer viewer, Object oldInput, Object newInput ) {
         this.map = (IMap)newInput;
+        this.viewer = (MapViewer)viewer;
+        
+        EventManager.instance().subscribe( this, ev -> 
+                ev instanceof ProjectNodeCommittedEvent &&
+                ev.getSource() instanceof IMap &&
+                ((IMap)ev.getSource()).id() == map.id() );
+                // XXX check if structural change or just label changed
     }
 
+    
+    @EventHandler( display=true, delay=100 )
+    protected void mapLayersChanged( List<ProjectNodeCommittedEvent> evs ) {
+        log.info( "mapLayersChanged: " + evs );
+        viewer.refresh();
+    }
+    
+    
     @Override
     public Object[] getElements( Object inputElement ) {
         log.info( "Layers: " + map.layers );
         return map.layers.toArray();
     }
 
+    
     @Override
     public void dispose() {
+        log.info( "..." );
         this.map = null;
+        EventManager.instance().unsubscribe( this );
     }
     
 }

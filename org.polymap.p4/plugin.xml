@@ -104,7 +104,7 @@
    <extension
          point="org.polymap.core.operation.concerns">
       <concern
-            class="org.polymap.p4.project.AddLayerForImportedFeaturesConcern"
+            class="org.polymap.p4.data.imports.features.AddLayerForImportedFeaturesConcern"
             id="org.polymap.p4.AddLayerForImportedFeaturesConcern">
       </concern>
    </extension>
