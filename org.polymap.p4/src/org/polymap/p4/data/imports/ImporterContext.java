@@ -59,6 +59,9 @@ import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.p4.data.imports.ImporterFactory.ImporterBuilder;
 import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.archive.ArchiveFileImporterFactory;
+import org.polymap.p4.data.imports.features.LocalFeaturesImporterFactory;
+import org.polymap.p4.data.imports.refine.csv.CSVFileImporterFactory;
+import org.polymap.p4.data.imports.refine.excel.ExcelFileImporterFactory;
 import org.polymap.p4.data.imports.shapefile.ShpImporterFactory;
 
 /**
@@ -74,9 +77,7 @@ public class ImporterContext
     private static Log log = LogFactory.getLog( ImporterContext.class );
     
     // XXX make this an extension point
-    private static final Class[]            factories = { 
-            ArchiveFileImporterFactory.class, 
-            ShpImporterFactory.class };
+    private static final Class[]            factories = { ArchiveFileImporterFactory.class, CSVFileImporterFactory.class, ExcelFileImporterFactory.class, ShpImporterFactory.class  };
     
     private Importer                        importer;
     
