@@ -42,22 +42,21 @@ public class ExcelFileImporterFactory implements ImporterFactory {
     @ContextIn
     protected List<File> files;
 
+
     @Override
-    public void createImporters(ImporterBuilder builder) throws Exception {
-        if (isSupported(file)) {
-            builder.newImporter(new ExcelFileImporter(), file);
-        }
-        if (files != null) {
-            throw new RuntimeException("List<File> in context is not yet implemented.");
+    public void createImporters( ImporterBuilder builder ) throws Exception {
+        if (isSupported( file )) {
+            builder.newImporter( new ExcelFileImporter(), file );
         }
     }
 
-    private boolean isSupported(File file) {
+
+    private boolean isSupported( File file ) {
         if (file == null) {
             return false;
         }
         for (String type : supportedTypes) {
-            if (file.getName().toLowerCase().endsWith(type)) {
+            if (file.getName().toLowerCase().endsWith( type )) {
                 return true;
             }
         }

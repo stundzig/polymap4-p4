@@ -46,11 +46,8 @@ public class CSVFileImporterFactory
 
     @Override
     public void createImporters( ImporterBuilder builder ) throws Exception {
-        if (isSupported(file)) {
+        if (isSupported( file )) {
             builder.newImporter( new CSVFileImporter(), file );
-        }
-        if (files != null) {
-            throw new RuntimeException( "List<File> in context is not yet implemented." );
         }
     }
 
