@@ -106,8 +106,8 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions> imp
 
     @Override
     public void execute(IProgressMonitor monitor) throws Exception {
-        throw new UnsupportedOperationException();
-
+        // create all params for contextOut
+        // all is done in verify
     }
 
     @Override
@@ -116,10 +116,6 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions> imp
             tk.createFlowText(parent, "\nUnable to read the data.\n\n" + "**Reason**: " + exception.getMessage());
         } else {
             SimpleFeatureType schema = (SimpleFeatureType) features.getSchema();
-            // log.info( "Features: " + features.size() + " : " +
-            // schema.getTypeName() );
-            // tk.createFlowText( parent, "Features: *" + features.size() + "*"
-            // );
             ShpFeatureTableViewer table = new ShpFeatureTableViewer(parent, schema);
             table.setContent(features);
         }
