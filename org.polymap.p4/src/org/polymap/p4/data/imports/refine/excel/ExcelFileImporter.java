@@ -16,7 +16,6 @@ package org.polymap.p4.data.imports.refine.excel;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
@@ -27,14 +26,15 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.geotools.feature.DefaultFeatureCollection;
-import org.geotools.feature.FeatureCollection;
 import org.polymap.core.data.refine.impl.ExcelFormatAndOptions;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
-import org.polymap.p4.data.imports.refine.HeadlineSelectorPromptUiBuilder;
+import org.polymap.p4.data.imports.refine.IgnoreLinesAfterHeadlinePromptUiBuilder;
+import org.polymap.p4.data.imports.refine.IgnoreLinesBeforeHeadlinePromptUiBuilder;
+import org.polymap.p4.data.imports.refine.NumberOfHeadlinesPromptUiBuilder;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import com.google.common.io.Files;
@@ -79,9 +79,15 @@ public class ExcelFileImporter
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         // charset prompt
         if (sheetIn.index() != -1 || formatAndOptions().sheetRecords().size() == 1) {
-            site.newPrompt( "headline" ).summary.put( "Kopfzeile" ).description
-                    .put( "Welche Zeile enhält die Spaltenüberschriften?" ).extendedUI
-                            .put( new HeadlineSelectorPromptUiBuilder( this ) );
+            site.newPrompt( "ignoreBeforeHeadline" ).summary.put( "Ignorieren bis zur Kopfzeile" ).description
+            .put( "Wieviele Zeilen befinden sich über den Spaltenüberschriften?" ).extendedUI
+                    .put( new IgnoreLinesBeforeHeadlinePromptUiBuilder( this ) );
+            site.newPrompt( "headline" ).summary.put( "Kopfzeilen" ).description
+                    .put( "Wieviele Zeilen enhalten die Spaltenüberschriften?" ).extendedUI
+                            .put( new NumberOfHeadlinesPromptUiBuilder( this ) );
+            site.newPrompt( "ignoreAfterHeadline" ).summary.put( "Überflüssige Datenzeilen" ).description
+            .put( "Wieviele Zeilen können nach der Spaltenüberschrift ignoriert werden?" ).extendedUI
+                    .put( new IgnoreLinesAfterHeadlinePromptUiBuilder( this ) );
         }
     }
 

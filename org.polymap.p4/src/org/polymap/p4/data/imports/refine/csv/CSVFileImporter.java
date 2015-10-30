@@ -25,14 +25,15 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
 import org.polymap.core.data.refine.impl.CSVFormatAndOptions;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
-import org.polymap.p4.data.imports.refine.HeadlineSelectorPromptUiBuilder;
+import org.polymap.p4.data.imports.refine.IgnoreLinesAfterHeadlinePromptUiBuilder;
+import org.polymap.p4.data.imports.refine.IgnoreLinesBeforeHeadlinePromptUiBuilder;
+import org.polymap.p4.data.imports.refine.NumberOfHeadlinesPromptUiBuilder;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -61,6 +62,16 @@ public class CSVFileImporter
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         // charset prompt
+        site.newPrompt( "ignoreBeforeHeadline" ).summary.put( "Ignorieren bis zur Kopfzeile" ).description
+                .put( "Wieviele Zeilen befinden sich über den Spaltenüberschriften?" ).extendedUI
+                        .put( new IgnoreLinesBeforeHeadlinePromptUiBuilder( this ) );
+        site.newPrompt( "headline" ).summary.put( "Kopfzeilen" ).description
+                .put( "Wieviele Zeilen enhalten die Spaltenüberschriften?" ).extendedUI
+                        .put( new NumberOfHeadlinesPromptUiBuilder( this ) );
+        site.newPrompt( "ignoreAfterHeadline" ).summary.put( "Überflüssige Datenzeilen" ).description
+                .put( "Wieviele Zeilen können nach der Spaltenüberschrift ignoriert werden?" ).extendedUI
+                        .put( new IgnoreLinesAfterHeadlinePromptUiBuilder( this ) );
+
         site.newPrompt( "encoding" ).summary.put( "Zeichensatz der Daten" ).description
                 .put( "Die Daten können bspw. deutsche Umlaute enthalten, die nach dem Hochladen falsch dargestellt werden. "
                         + "Mit dem Ändern des Zeichensatzes kann dies korrigiert werden." ).extendedUI
@@ -105,9 +116,7 @@ public class CSVFileImporter
                                         }
                                     }
                                 } );
-        site.newPrompt( "headline" ).summary.put( "Kopfzeile" ).description
-                .put( "Welche Zeile enhält die Spaltenüberschriften?" ).extendedUI
-                        .put( new HeadlineSelectorPromptUiBuilder( this ) );
+
     }
 
 
