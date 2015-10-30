@@ -38,15 +38,20 @@ public class ExcelFileImporterFactory implements ImporterFactory {
 
     @ContextIn
     protected File file;
+//
+//    @ContextIn
+//    protected List<File> files;
 
     @ContextIn
-    protected List<File> files;
-
+    protected Sheet sheet;
 
     @Override
     public void createImporters( ImporterBuilder builder ) throws Exception {
-        if (isSupported( file )) {
-            builder.newImporter( new ExcelFileImporter(), file );
+        if (isSupported( file ) || sheet != null) {
+            if (sheet == null) {
+                sheet = new Sheet( file, -1, null );
+            }
+            builder.newImporter( new ExcelFileImporter(), sheet, sheet.file() );
         }
     }
 
