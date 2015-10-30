@@ -33,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -86,11 +87,11 @@ public class ImporterContext
     
     private ImporterSite                    site;
     
-    private Map<Class,Object>               contextIn = new HashMap();
+    private Map<Class,Object>               contextIn = Maps.newHashMap();
     
-    private Map<Class,Object>               contextOut = new HashMap();
+    private Map<Class,Object>               contextOut = Maps.newHashMap();
     
-    private Map<String,ImporterPrompt>      prompts = new HashMap();
+    private Map<String,ImporterPrompt>      prompts = Maps.newLinkedHashMap();
     
     private UIJob                           verifier;
 
