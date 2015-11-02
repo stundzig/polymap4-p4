@@ -13,10 +13,14 @@
  */
 package org.polymap.p4.data.imports.refine;
 
+import java.util.List;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
-import org.polymap.core.data.refine.impl.LineBasedFormatAndOptions;
+import org.polymap.core.data.refine.impl.FormatAndOptions;
 import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 
@@ -25,15 +29,15 @@ import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
  * 
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
  */
-public abstract class NumberfieldBasedPromptUiBuilder
+public abstract class ComboBasedPromptUiBuilder
         implements PromptUIBuilder {
 
-    protected int                                                             value;
+    protected String                                                 value;
 
-    protected AbstractRefineFileImporter<? extends LineBasedFormatAndOptions> importer;
+    protected AbstractRefineFileImporter<? extends FormatAndOptions> importer;
 
 
-    public NumberfieldBasedPromptUiBuilder( AbstractRefineFileImporter<? extends LineBasedFormatAndOptions> importer ) {
+    public ComboBasedPromptUiBuilder( AbstractRefineFileImporter<? extends FormatAndOptions> importer ) {
         this.importer = importer;
     }
 
@@ -41,30 +45,41 @@ public abstract class NumberfieldBasedPromptUiBuilder
     @Override
     public void createContents( ImporterPrompt prompt, Composite parent ) {
         // TODO use a rhei numberfield here
-        Text text = new Text( parent, SWT.RIGHT | SWT.BORDER );
+        Combo combo = new Combo( parent, SWT.SINGLE );
+        List<String> allValues = allValues();
+        combo.setItems( allValues.toArray( new String[allValues.size()] ) );
+        combo.addSelectionListener( new SelectionAdapter() {
 
-        text.setText( String.valueOf( initialValue() ) );
-        text.addModifyListener( event -> {
-            Text t = (Text)event.getSource();
-            // can throw an exception
-            value = Integer.parseInt( t.getText() );
+            @Override
+            public void widgetSelected( SelectionEvent e ) {
+                Combo c = (Combo)e.getSource();
+                value = allValues.get( c.getSelectionIndex() );
+            }
         } );
-        // initial value
-        value = Integer.parseInt( text.getText() );
-        prompt.value.set( text.getText() );
+        value = initialValue();
+        int index = allValues.indexOf( value );
+        if (index != -1) {
+            combo.select( index );
+        }
+        prompt.value.set( value );
     }
-
-
-    protected abstract int initialValue();
-    
-    protected abstract void onSubmit(ImporterPrompt prompt);
 
 
     @Override
     public void submit( ImporterPrompt prompt ) {
-        onSubmit(prompt);
+        onSubmit( prompt );
         importer.updateOptions();
         prompt.ok.set( true );
         prompt.value.set( String.valueOf( value ) );
     }
+
+
+    protected abstract String initialValue();
+
+
+    protected abstract List<String> allValues();
+
+
+    protected abstract void onSubmit( ImporterPrompt prompt );
+
 }

@@ -30,11 +30,10 @@ import org.polymap.core.data.refine.impl.ExcelFormatAndOptions;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
+import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
-import org.polymap.p4.data.imports.refine.IgnoreLinesAfterHeadlinePromptUiBuilder;
-import org.polymap.p4.data.imports.refine.IgnoreLinesBeforeHeadlinePromptUiBuilder;
-import org.polymap.p4.data.imports.refine.NumberOfHeadlinesPromptUiBuilder;
+import org.polymap.p4.data.imports.refine.NumberfieldBasedPromptUiBuilder;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import com.google.common.io.Files;
@@ -77,17 +76,55 @@ public class ExcelFileImporter
 
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
-        // charset prompt
         if (sheetIn.index() != -1 || formatAndOptions().sheetRecords().size() == 1) {
             site.newPrompt( "ignoreBeforeHeadline" ).summary.put( "Ignorieren bis zur Kopfzeile" ).description
-            .put( "Wieviele Zeilen befinden sich über den Spaltenüberschriften?" ).extendedUI
-                    .put( new IgnoreLinesBeforeHeadlinePromptUiBuilder( this ) );
+                    .put( "Wieviele Zeilen befinden sich über den Spaltenüberschriften?" ).value
+                            .put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) ).extendedUI
+                                    .put( new NumberfieldBasedPromptUiBuilder( this) {
+
+                                        @Override
+                                        public void onSubmit( ImporterPrompt prompt ) {
+                                            formatAndOptions().setIgnoreLines( value );
+                                        }
+
+
+                                        @Override
+                                        protected int initialValue() {
+                                            return Math.max( 0, formatAndOptions().ignoreLines() );
+                                        }
+                                    } );
             site.newPrompt( "headline" ).summary.put( "Kopfzeilen" ).description
-                    .put( "Wieviele Zeilen enhalten die Spaltenüberschriften?" ).extendedUI
-                            .put( new NumberOfHeadlinesPromptUiBuilder( this ) );
+                    .put( "Wieviele Zeilen enhalten die Spaltenüberschriften?" ).value
+                            .put( String.valueOf( formatAndOptions().headerLines() ) ).extendedUI
+                                    .put( new NumberfieldBasedPromptUiBuilder( this) {
+
+                                        @Override
+                                        public void onSubmit( ImporterPrompt prompt ) {
+                                            formatAndOptions().setHeaderLines( value );
+                                        }
+
+
+                                        @Override
+                                        protected int initialValue() {
+                                            return formatAndOptions().headerLines( );
+                                        }
+                                    } );
             site.newPrompt( "ignoreAfterHeadline" ).summary.put( "Überflüssige Datenzeilen" ).description
-            .put( "Wieviele Zeilen können nach der Spaltenüberschrift ignoriert werden?" ).extendedUI
-                    .put( new IgnoreLinesAfterHeadlinePromptUiBuilder( this ) );
+                    .put( "Wieviele Zeilen können nach der Spaltenüberschrift ignoriert werden?" ).value
+                            .put( String.valueOf( formatAndOptions().skipDataLines() ) ).extendedUI
+                                    .put( new NumberfieldBasedPromptUiBuilder( this) {
+
+                                        @Override
+                                        public void onSubmit( ImporterPrompt prompt ) {
+                                            formatAndOptions().setSkipDataLines( value );
+                                        }
+
+
+                                        @Override
+                                        protected int initialValue() {
+                                            return formatAndOptions().skipDataLines( );
+                                        }
+                                    } );
         }
     }
 
@@ -111,7 +148,8 @@ public class ExcelFileImporter
     @Override
     public void verify( IProgressMonitor monitor ) {
         if (sheetIn.index() != -1 || formatAndOptions().sheetRecords().size() == 1) {
-            // verify and create feature collection only, if its a *single sheet* file
+            // verify and create feature collection only, if its a *single sheet*
+            // file
             super.verify( monitor );
         }
         else {
