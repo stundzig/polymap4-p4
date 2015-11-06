@@ -98,9 +98,11 @@ public class ArchiveFileImporter
                     private Charset charset = null;
                     @Override
                     public void submit( ImporterPrompt prompt ) {
-                        filenameCharset = charset;
+                        if(charset != null) {
+                            filenameCharset = charset;
+                        }
                         prompt.ok.set( true );
-                        prompt.value.put( charset.displayName() );                        
+                        prompt.value.put( filenameCharset.displayName() );                        
                     }
                     @Override
                     public void createContents( ImporterPrompt prompt, Composite parent ) {
@@ -123,9 +125,6 @@ public class ArchiveFileImporter
     @Override
     public void verify( IProgressMonitor monitor ) {
         try {
-            // testing long running operation :)
-            Thread.sleep( 0 );
-            
             result = new ArchiveReader()
                     .targetDir.put( ImportTempDir.create() )
                     .charset.put( filenameCharset )
