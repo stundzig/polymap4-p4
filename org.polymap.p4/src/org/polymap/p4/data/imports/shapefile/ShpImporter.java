@@ -106,9 +106,8 @@ public class ShpImporter
             ds.setCharset( charsetPrompt.selection() );
             
             Query query = new Query();
-            query.setMaxFeatures( 10 );
+            //query.setMaxFeatures( 10 );
             features = ds.getFeatureSource().getFeatures( query );
-            features.accepts( f -> log.info( "Feature: " + f ), null );
 
             site.ok.set( true );
             exception = null;
@@ -127,7 +126,7 @@ public class ShpImporter
         }
         else {
             SimpleFeatureType schema = (SimpleFeatureType)features.getSchema();
-            log.info( "Features: " + features.size() + " : " + schema.getTypeName() );
+            //log.info( "Features: " + features.size() + " : " + schema.getTypeName() );
             // tk.createFlowText( parent, "Features: *" + features.size() + "*" );
             ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, schema );
             table.setContent( features );

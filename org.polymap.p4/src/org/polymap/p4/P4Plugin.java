@@ -34,10 +34,11 @@ import org.polymap.core.data.pipeline.Pipeline;
 import org.polymap.core.data.pipeline.PipelineProcessor;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
+import org.polymap.core.ui.StatusDispatcher;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.contribution.ContributionManager;
-
+import org.polymap.rhei.batik.toolkit.BatikStatusAdapter;
 import org.polymap.service.geoserver.GeoServerServlet;
 
 import org.polymap.p4.catalog.LocalCatalog;
@@ -99,9 +100,14 @@ public class P4Plugin
     public void start( BundleContext context ) throws Exception {
         super.start( context );
         instance = this;
+        
         log.info( "Bundle state: " + getStateLocation() );
         log.info( "Bundle data: " + CorePlugin.getDataLocation( instance() ) );
 
+        // Handling errors in the UI
+        StatusDispatcher.registerAdapter( new StatusDispatcher.LogAdapter() );
+        StatusDispatcher.registerAdapter( new BatikStatusAdapter() );
+        
         localCatalog = new LocalCatalog();
         localResolver = new LocalResolver( localCatalog );
 
