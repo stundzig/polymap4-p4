@@ -62,7 +62,6 @@ import org.polymap.p4.data.imports.archive.ArchiveFileImporterFactory;
 import org.polymap.p4.data.imports.refine.csv.CSVFileImporterFactory;
 import org.polymap.p4.data.imports.refine.excel.ExcelFileImporterFactory;
 import org.polymap.p4.data.imports.shapefile.ShpImporterFactory;
-import org.polymap.p4.data.imports.wms.WmsImporterFactory;
 
 /**
  * Provides the execution context of an {@link Importer}. It handles inbound context
@@ -82,7 +81,7 @@ public class ImporterContext
             CSVFileImporterFactory.class, 
             ExcelFileImporterFactory.class, 
             ShpImporterFactory.class,
-            WmsImporterFactory.class };
+            /*WmsImporterFactory.class*/ };
     
     private Importer                        importer;
     
