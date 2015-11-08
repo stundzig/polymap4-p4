@@ -65,29 +65,30 @@ public class CharsetPrompt {
                 .description.put( "The encoding of the feature content. If unsure use ISO-8859-1." )
                 .value.put( selection.name() )
                 .severity.put( Severity.VERIFY ).extendedUI.put( new FilteredListPromptUIBuilder() {
+                    
                     @Override
                     public void submit( ImporterPrompt prompt ) {
                         prompt.ok.set( true );
                         prompt.value.put( selection.displayName() );
                     }
-
+                    
                     @Override
                     protected String[] listItems() {
                         Set<String> charsetCodes = Charset.availableCharsets().keySet();
                         return charsetCodes.toArray( new String[charsetCodes.size()] );
                     }
-
+                    
                     @Override
                     protected String initiallySelectedItem() {
                         return selection.displayName();
                     }
-
+                    
                     @Override
                     protected void handleSelection( String selectedCharset ) {
                         selection = Charset.forName( selectedCharset );
                         assert selection != null;
                     }
-                } );
+                });
     }
 
     

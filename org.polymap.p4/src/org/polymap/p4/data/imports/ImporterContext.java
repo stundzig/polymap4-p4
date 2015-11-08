@@ -21,7 +21,6 @@ import static org.polymap.rhei.batik.toolkit.md.dp.dp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EventObject;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,6 +62,7 @@ import org.polymap.p4.data.imports.archive.ArchiveFileImporterFactory;
 import org.polymap.p4.data.imports.refine.csv.CSVFileImporterFactory;
 import org.polymap.p4.data.imports.refine.excel.ExcelFileImporterFactory;
 import org.polymap.p4.data.imports.shapefile.ShpImporterFactory;
+import org.polymap.p4.data.imports.wms.WmsImporterFactory;
 
 /**
  * Provides the execution context of an {@link Importer}. It handles inbound context
@@ -81,7 +81,8 @@ public class ImporterContext
             ArchiveFileImporterFactory.class, 
             CSVFileImporterFactory.class, 
             ExcelFileImporterFactory.class, 
-            ShpImporterFactory.class  };
+            ShpImporterFactory.class,
+            WmsImporterFactory.class };
     
     private Importer                        importer;
     
@@ -259,14 +260,13 @@ public class ImporterContext
     }
 
     
-    protected Severity maxFailingPromptSeverity() {
+    protected Optional<Severity> maxNotOkPromptSeverity() {
         return prompts == null 
-                ? Severity.INFO
+                ? Optional.empty()
                 : prompts.values().stream()
                         .filter( prompt -> !prompt.ok.get() )
                         .map( prompt -> prompt.severity.get() )
-                        .max( Comparator.comparing( s -> s.ordinal() ) )
-                        .orElse( Severity.INFO );
+                        .max( Comparator.comparing( s -> s.ordinal() ) );
     }
     
     
@@ -303,9 +303,9 @@ public class ImporterContext
     }
 
 
-    public void createPromptViewer( Composite parent, ImporterPrompt prompt ) {
+    public void createPromptViewer( Composite parent, ImporterPrompt prompt, IPanelToolkit tk  ) {
         assert parent.getLayout() instanceof FillLayout;
-        prompt.extendedUI.ifPresent( uibuilder -> uibuilder.createContents( prompt, parent ) );
+        prompt.extendedUI.ifPresent( uibuilder -> uibuilder.createContents( prompt, parent, tk ) );
     }
 
 

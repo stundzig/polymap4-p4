@@ -105,7 +105,7 @@ public class ArchiveFileImporter
                         prompt.value.put( filenameCharset.displayName() );                        
                     }
                     @Override
-                    public void createContents( ImporterPrompt prompt, Composite parent ) {
+                    public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
                         for (Charset cs : CHARSETS) {
                             Button btn = new Button( parent, SWT.RADIO );
                             btn.setText( cs.displayName() );

@@ -31,6 +31,8 @@ import org.eclipse.swt.widgets.Text;
 
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+
 import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 
@@ -50,7 +52,7 @@ public abstract class FilteredListPromptUIBuilder
 
     
     @Override
-    public void createContents( ImporterPrompt prompt, Composite parent ) {
+    public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
         parent.setLayout( FormLayoutFactory.defaults().spacing( 0 ).create() );
         
         Label label = on( new Label( parent, SWT.NONE ) )

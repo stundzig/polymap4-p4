@@ -77,11 +77,14 @@ class ImportsLabelProvider
                 case Description:   cell.setText( context.site().description.get() ); break;
                 case Icon:          cell.setImage( context.site().icon.get() ); break;
                 case StatusIcon: {
-                    switch (context.maxFailingPromptSeverity()) {
-                        case INFO:      cell.setImage( P4Plugin.images().svgImage( "check.svg", OK24 ) ); break;
-                        case MANDATORY: cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ALERT24 ) );  break;
-                        case VERIFY:    cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ERROR24 ) ); break;
-                    }
+                    cell.setImage( null );
+                    context.maxNotOkPromptSeverity().ifPresent( severity -> {
+                        switch (severity) {
+                           // case INFO:      cell.setImage( P4Plugin.images().svgImage( "check.svg", OK24 ) ); break;
+                            case VERIFY:    cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ALERT24 ) );  break;
+                            case MANDATORY: cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ERROR24 ) ); break;
+                        }
+                    });
                     break;
                 }
                 case StatusText : {
@@ -104,14 +107,17 @@ class ImportsLabelProvider
                 case Description:   cell.setText( prompt.description.get() ); break;
                 case Icon:          cell.setImage( P4Plugin.images().svgImage( "help.svg", SvgImageRegistryHelper.NORMAL12 ) ); break;
                 case StatusIcon: {
-                    if (prompt.severity.get() == Severity.INFO || prompt.ok.get()) {
-                        cell.setImage( P4Plugin.images().svgImage( "check.svg", OK24 ) ); break;
+                    if (prompt.ok.get()) {
+                        cell.setImage( P4Plugin.images().svgImage( "check.svg", OK24 ) );
+                    }
+                    else if (prompt.severity.get() == Severity.INFO) {
+                        cell.setImage( null );
                     }
                     else if (prompt.severity.get() == Severity.VERIFY) {
-                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ALERT24 ) ); break;
+                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ALERT24 ) );
                     }
                     else if (prompt.severity.get() == Severity.MANDATORY) {
-                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ERROR24 ) ); break;
+                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ERROR24 ) );
                     }
                     break;
                 }

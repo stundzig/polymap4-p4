@@ -22,6 +22,8 @@ import org.polymap.core.runtime.config.Configurable;
 import org.polymap.core.runtime.config.DefaultBoolean;
 import org.polymap.core.runtime.config.Mandatory;
 
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+
 /**
  * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
@@ -90,8 +92,9 @@ public abstract class ImporterPrompt
          *
          * @param prompt
          * @param parent The parent with {@link FillLayout} set. Change layout as needed.
+         * @param tk The toolkit to create prompt UI control with.
          */
-        public void createContents( ImporterPrompt prompt, Composite parent );
+        public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk  );
         
         
         /**

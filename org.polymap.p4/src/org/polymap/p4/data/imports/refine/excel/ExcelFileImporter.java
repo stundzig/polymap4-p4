@@ -62,7 +62,7 @@ public class ExcelFileImporter extends AbstractRefineFileImporter<ExcelFormatAnd
                         private int index;
 
                         @Override
-                        public void createContents(ImporterPrompt prompt, Composite parent) {
+                        public void createContents(ImporterPrompt prompt, Composite parent, IPanelToolkit tk) {
                             // TODO use a rhei numberfield here
                             Text text =  new Text(parent, SWT.RIGHT);
                             text.setText(formatAndOptions().headerLines());

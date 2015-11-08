@@ -106,7 +106,7 @@ public class ShpImporter
             ds.setCharset( charsetPrompt.selection() );
             
             Query query = new Query();
-            //query.setMaxFeatures( 10 );
+            query.setMaxFeatures( 100 );
             features = ds.getFeatureSource().getFeatures( query );
 
             site.ok.set( true );
@@ -136,7 +136,8 @@ public class ShpImporter
 
     @Override
     public void execute( IProgressMonitor monitor ) throws Exception {
-        // everything done in verify()
+        // no maxResults restriction
+        features = ds.getFeatureSource().getFeatures();
     }
 
 }

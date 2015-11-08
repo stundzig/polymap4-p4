@@ -290,7 +290,7 @@ public class ImportPanel
     protected void createPromptViewer( ImporterPrompt prompt ) {
         SimpleDialog dialog = site().toolkit().createSimpleDialog( prompt.summary.get() );
         
-        dialog.setContents( parent -> prompt.context().createPromptViewer( parent, prompt ) );
+        dialog.setContents( parent -> prompt.context().createPromptViewer( parent, prompt, site().toolkit() ) );
         
         dialog.addAction( new Action( "OK" ) {
             public void run() {
