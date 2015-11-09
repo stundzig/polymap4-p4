@@ -32,11 +32,28 @@ public abstract class ImporterPrompt
         extends Configurable {
     
     public enum Severity {
-        INFO, VERIFY, MANDATORY;
+        /**
+         * No action required, just an info. No special visual representation
+         * currently.
+         */
+        INFO,
+        /**
+         * User should verify. No special visual representation currently.
+         */
+        VERIFY,
+        /**
+         * User action required because user MUST input something or given value is
+         * invalid. A required prompt blocks the import if it is not
+         * {@link ImporterPrompt#ok}. In this case prompt and importer are visually
+         * highlighted.
+         */
+        REQUIRED;
     }
 
-    /** 
-     * The severity of this prompt. Defaults to {@link Severity#INFO}. 
+    /**
+     * The severity of this prompt. Defaults to {@link Severity#INFO}. Should be
+     * {@link Severity#REQUIRED} if user MUST input something or given value is
+     * invalid.
      */
     @Mandatory
     @Concern( ConfigChangeEvent.Fire.class )
@@ -63,7 +80,8 @@ public abstract class ImporterPrompt
 
     /**
      * The {@link #extendedUI} of this prompt should set it 'true' when this prompt
-     * is verified and/or has enough info from user to allow the importer to run.
+     * has been changed and the importer is allowed to verify/execute. Set to false
+     * only if the user input is invalid.
      */
     @Mandatory
     @DefaultBoolean( false )

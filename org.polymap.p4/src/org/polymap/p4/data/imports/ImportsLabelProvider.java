@@ -13,7 +13,6 @@
  */
 package org.polymap.p4.data.imports;
 
-import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.ALERT24;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.ERROR24;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.OK24;
 
@@ -28,8 +27,6 @@ import org.polymap.core.runtime.config.ConfigurationFactory;
 import org.polymap.core.runtime.config.Mandatory;
 
 import org.polymap.rhei.batik.BatikPlugin;
-import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
-
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 
@@ -78,13 +75,20 @@ class ImportsLabelProvider
                 case Icon:          cell.setImage( context.site().icon.get() ); break;
                 case StatusIcon: {
                     cell.setImage( null );
-                    context.maxNotOkPromptSeverity().ifPresent( severity -> {
-                        switch (severity) {
-                           // case INFO:      cell.setImage( P4Plugin.images().svgImage( "check.svg", OK24 ) ); break;
-                            case VERIFY:    cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ALERT24 ) );  break;
-                            case MANDATORY: cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ERROR24 ) ); break;
-                        }
-                    });
+                    // ok
+                    if (context.site().ok.get()) {
+                        //cell.setImage( P4Plugin.images().svgImage( "check.svg", OK24 ) );                        
+                    }
+                    // not ok
+                    else {
+                        context.maxNotOkPromptSeverity().ifPresent( severity -> {
+                            switch (severity) {
+                                case INFO:      cell.setImage( null /*P4Plugin.images().svgImage( "check.svg", OK24 )*/ ); break;
+                                case VERIFY:    cell.setImage( null /*P4Plugin.images().svgImage( "alert-circle.svg", ALERT24 )*/ );  break;
+                                case REQUIRED: cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ERROR24 ) ); break;
+                            }
+                        });
+                    }
                     break;
                 }
                 case StatusText : {
@@ -105,19 +109,22 @@ class ImportsLabelProvider
                     break;
                 }
                 case Description:   cell.setText( prompt.description.get() ); break;
-                case Icon:          cell.setImage( P4Plugin.images().svgImage( "help.svg", SvgImageRegistryHelper.NORMAL12 ) ); break;
+                case Icon:          cell.setImage( null /*P4Plugin.images().svgImage( "help.svg", SvgImageRegistryHelper.NORMAL12 )*/ ); break;
                 case StatusIcon: {
                     if (prompt.ok.get()) {
                         cell.setImage( P4Plugin.images().svgImage( "check.svg", OK24 ) );
                     }
-                    else if (prompt.severity.get() == Severity.INFO) {
-                        cell.setImage( null );
-                    }
-                    else if (prompt.severity.get() == Severity.VERIFY) {
-                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ALERT24 ) );
-                    }
-                    else if (prompt.severity.get() == Severity.MANDATORY) {
+//                    else if (prompt.severity.get() == Severity.INFO ) {
+//                        cell.setImage( null );
+//                    }
+//                    else if (prompt.severity.get() == Severity.VERIFY ) {
+//                        cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ALERT24 ) );
+//                    }
+                    else if (prompt.severity.get() == Severity.REQUIRED ) {
                         cell.setImage( P4Plugin.images().svgImage( "alert-circle.svg", ERROR24 ) );
+                    }
+                    else {
+                        cell.setImage( null );
                     }
                     break;
                 }

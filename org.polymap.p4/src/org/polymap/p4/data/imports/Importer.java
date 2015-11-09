@@ -48,18 +48,18 @@ public interface Importer {
      * @param monitor
      * @throws Exception
      */
-    public void createPrompts( IProgressMonitor monitor ) throws Exception;
+    public void createPrompts( IProgressMonitor monitor ) throws Exception;    
     
     /**
      * Verifies the data/context and the state of the prompts. This is called when a
-     * prompt has changed its status. This method can update the prompts and should
-     * prepare contents of the {@link #createResultViewer(Composite)}.
+     * prompt has changed its status. This method may update the prompts, should set
+     * {@link ImporterSite#ok} and prepare contents of the
+     * {@link #createResultViewer(Composite)}.
      *
      * @param monitor
      */
     public void verify( IProgressMonitor monitor );
 
-    
     /**
      * Creates a preview of the imported data.
      * <p/>
@@ -67,8 +67,8 @@ public interface Importer {
      * Verification and calculation should be done by
      * {@link #verify(IProgressMonitor)}.
      *
-     * @param parent The parent of the new controls. Has {@link FillLayout} set.
-     *        Change this as necessary.
+     * @param parent The parent of the new controls. Has vertical {@link FillLayout}
+     *        set. Change this as necessary.
      * @param toolkit The toolkit to use to create new controls.
      */
     public void createResultViewer( Composite parent, IPanelToolkit toolkit );

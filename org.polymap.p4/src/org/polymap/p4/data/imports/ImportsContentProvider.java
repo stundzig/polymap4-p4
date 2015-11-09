@@ -13,6 +13,7 @@
  */
 package org.polymap.p4.data.imports;
 
+import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
 import static org.polymap.core.runtime.UIThreadExecutor.logErrorMsg;
 
 import java.util.EventObject;
@@ -31,10 +32,11 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.polymap.core.runtime.UIJob;
-import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+
 import org.polymap.p4.data.imports.ImporterContext.ContextChangeEvent;
+import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 
 /**
  * Provides content of {@link ImporterContext}, {@link Importer} and
@@ -90,7 +92,7 @@ class ImportsContentProvider
             assert ev.getSource() instanceof ImporterContext;
             viewer.refresh( ev.getSource(), true );
   
-            deferredSelection = ev.getSource();
+            //deferredSelection = ev.getSource();
         }
         // labels or icon
         else if (ev instanceof ConfigChangeEvent) {
@@ -145,10 +147,18 @@ class ImportsContentProvider
                 @Override
                 protected void runWithException( IProgressMonitor monitor ) throws Exception {
                     assert context == elm;
-                    List<ImporterContext> importers = context.findNext( monitor );
-                    // always select the first elm, if present
-                    importers.stream().findFirst().ifPresent( imp -> deferredSelection = imp );
-                    updateChildren( elm, importers.toArray(), currentChildCount );
+                    ImporterContext[] importers = context.findNext( monitor ).toArray( new ImporterContext[0] );
+                    
+                    // select the first elm, if present
+                    if (importers.length > 0) {
+                        // don't expand WMS (and importers without prompts or everything ok)
+                        importers[0].maxNotOkPromptSeverity().ifPresent( severity -> {
+                            if (severity.ordinal() > Severity.INFO.ordinal()) {
+                                deferredSelection = importers[0];
+                            }
+                        });
+                    }
+                    updateChildren( elm, importers, currentChildCount );
                 }
             };
             job.scheduleWithUIUpdate();
@@ -177,7 +187,7 @@ class ImportsContentProvider
 
     protected void updateChildrenLoading( Object elm ) {
         cache.put( elm, CACHE_LOADING );
-        UIThreadExecutor.asyncFast( () -> viewer.setChildCount( elm, 1 ) );
+        asyncFast( () -> viewer.setChildCount( elm, 1 ) );
     }
 
 
@@ -187,7 +197,7 @@ class ImportsContentProvider
     protected void updateChildren( Object elm, Object[] children, int currentChildCount  ) {
         cache.put( elm, children );
         
-        UIThreadExecutor.asyncFast( () -> { 
+        asyncFast( () -> { 
             viewer.setChildCount( elm, children.length );
             if (children.length > 0) {
                 viewer.replace( elm, 0, children[0] );  // replace the LOADING elm

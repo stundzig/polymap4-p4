@@ -64,7 +64,7 @@ public class ArchiveFileImporter
     @ContextOut
     protected List<File>            result;
     
-    protected Charset               filenameCharset = CHARSETS[0];
+    protected Charset               filenameCharset = CHARSETS[2];
     
     protected Exception             exception;
     
@@ -91,8 +91,8 @@ public class ArchiveFileImporter
         // charset prompt
         site.newPrompt( "charset" )
                 .summary.put( "Filename encoding" )
-                .description.put( "The encoding of the filenames. If unsure use UTF8." )
-                .value.put( "UTF8" )
+                .description.put( "The encoding of the filenames." )
+                .value.put( filenameCharset.displayName() )
                 .severity.put( Severity.VERIFY )
                 .extendedUI.put( new PromptUIBuilder() {
                     private Charset charset = null;

@@ -62,6 +62,7 @@ import org.polymap.p4.data.imports.archive.ArchiveFileImporterFactory;
 import org.polymap.p4.data.imports.refine.csv.CSVFileImporterFactory;
 import org.polymap.p4.data.imports.refine.excel.ExcelFileImporterFactory;
 import org.polymap.p4.data.imports.shapefile.ShpImporterFactory;
+import org.polymap.p4.data.imports.wms.WmsImporterFactory;
 
 /**
  * Provides the execution context of an {@link Importer}. It handles inbound context
@@ -81,7 +82,7 @@ public class ImporterContext
             CSVFileImporterFactory.class, 
             ExcelFileImporterFactory.class, 
             ShpImporterFactory.class,
-            /*WmsImporterFactory.class*/ };
+            WmsImporterFactory.class };
     
     private Importer                        importer;
     
@@ -162,6 +163,9 @@ public class ImporterContext
     }
     
     
+    /**
+     * One of my prompts has been changed.
+     */
     @EventHandler( delay=100 )
     protected void promptChanged( List<ConfigChangeEvent> evs ) {
         // cancel current verifier Job
@@ -278,7 +282,7 @@ public class ImporterContext
                 if (ev == null || ev.getResult().isOK()) {
                     asyncFast( () -> {
                         UIUtils.disposeChildren( parent );
-                        parent.setLayout( new FillLayout() );
+                        parent.setLayout( new FillLayout( SWT.VERTICAL ) );
                         importer.createResultViewer( parent, tk );
                         parent.layout( true );
                     });

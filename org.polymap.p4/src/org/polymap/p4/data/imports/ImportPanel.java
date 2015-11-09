@@ -15,6 +15,7 @@ package org.polymap.p4.data.imports;
 
 import static org.polymap.core.runtime.UIThreadExecutor.async;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
+import static org.polymap.core.ui.FormDataFactory.on;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.WHITE24;
 
@@ -54,7 +55,6 @@ import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.i18n.IMessages;
-import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
 import org.polymap.core.ui.StatusDispatcher;
@@ -67,6 +67,7 @@ import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.SimpleDialog;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
+
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ImportsLabelProvider.Type;
@@ -129,9 +130,10 @@ public class ImportPanel
         site().title.set( "Import" );
         context = nextContext.isPresent() ? nextContext.get() : new ImporterContext(); 
 
-        // listen to ok (verified) event from ImporterSite
+        // listen to ok (to execute) event from ImporterSite
         EventManager.instance().subscribe( this, ifType( ConfigChangeEvent.class, cce -> 
-                cce.propName.equals( "ok" ) && cce.getSource() instanceof ImporterSite ) );
+                cce.propName.equals( "ok" ) &&
+                cce.getSource() instanceof ImporterSite ) );
     }
 
 
@@ -143,8 +145,8 @@ public class ImportPanel
 
 
     /**
-     * After a prompt change has trigered verfication in ImporterContext the ok state
-     * of the importer has been set. Select this importer in the list. This triggers
+     * After a prompt change has triggered verification in ImporterContext, the ok state
+     * of the importer has been set -> select this importer in the list. This triggers
      * update of the FAB too. 
      */
     @EventHandler( display=true )
@@ -184,13 +186,13 @@ public class ImportPanel
 
         // selection listener recognizes events from UI *and* from ImportsContentProvider
         importsList.addSelectionChangedListener( ev -> {
-            log.info( "Event: " + ev );
             SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
-                importsList.expandToLevel( elm, 1 );
                 //
                 if (elm instanceof ImporterContext) {
                     createResultViewer( (ImporterContext)elm );
                     updateFab( (ImporterContext)elm );
+
+                    importsList.expandToLevel( elm, 1 );
                 }
                 //
                 else if (elm instanceof ImporterPrompt) {
@@ -205,15 +207,17 @@ public class ImportPanel
         
         // result viewer
         resultSection = tk.createPanelSection( parent, "Data preview", SWT.BORDER );
-        tk.createFlowText( resultSection.getBody(), "No data to preview yet.  \nPlease drop a file, archive or URL above." );
+        tk.createFlowText( resultSection.getBody(), "No data to preview yet.  \n" +
+                "Please drop a file or zip/tar/tgz archive above.  \n" +
+                "Or choose one of the other importers.");
         
         // layout
         if (upload != null) {
-            FormDataFactory.on( upload ).fill().bottom( 0, 40 );
+            on( upload ).fill().bottom( 0, 40 );
         }
         // width/height specifies that we want scrollbars in the contets
-        FormDataFactory.on( importsList.getControl() ).fill().top( 0, 45 ).bottom( 50, -10 ).width( 100 ).height( 100 );
-        FormDataFactory.on( resultSection.getControl() ).fill().top( 50, 5 ).height( 100 ).width( 100 );
+        on( importsList.getControl() ).fill().top( 0, 45 ).bottom( 50, -10 ).width( 100 ).height( 100 );
+        on( resultSection.getControl() ).fill().top( 50, 5 ).height( 100 ).width( 100 );
     }
 
 
