@@ -20,11 +20,15 @@ import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.WHITE24;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import org.geotools.feature.FeatureCollection;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -43,6 +47,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
@@ -51,6 +57,7 @@ import org.eclipse.rap.rwt.client.ClientFile;
 import org.eclipse.rap.rwt.client.service.ClientFileUploader;
 import org.eclipse.rap.rwt.dnd.ClientFileTransfer;
 
+import org.polymap.core.operation.DefaultOperation;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -279,13 +286,28 @@ public class ImportPanel
      * 
      */
     protected void executeTerminalContext( @SuppressWarnings("hiding") ImporterContext context ) throws Exception {
-        ImportFeaturesOperation op = new ImportFeaturesOperation( context );
-        getContext().propagate( op );
-        OperationSupport.instance().execute3( op, true, false, () -> async( () -> {
-            // close panel
-            // XXX assuming that ImportPanel is child of root
-            getContext().openPanel( PanelPath.ROOT, new PanelIdentifier( "start" ) );
-        }));
+        // execute
+        Map<Class,Object> contextOut = new HashMap();
+        DefaultOperation executeOp = new DefaultOperation( "" ) {
+            @Override
+            protected IStatus doExecute( IProgressMonitor monitor, IAdaptable info ) throws Exception {
+                contextOut.putAll( context.execute( monitor ) );
+                return Status.OK_STATUS;
+            }
+        };
+        OperationSupport.instance().execute( executeOp, false, false );
+        
+        // copy features
+        FeatureCollection features = (FeatureCollection)contextOut.get( FeatureCollection.class );
+        if (features != null) {
+            ImportFeaturesOperation op = new ImportFeaturesOperation( context, features );
+            getContext().propagate( op );
+            OperationSupport.instance().execute( op, false, false );
+        }
+        
+        // close panel
+        // XXX assuming that ImportPanel is child of root
+        getContext().openPanel( PanelPath.ROOT, new PanelIdentifier( "start" ) );
     }
     
     

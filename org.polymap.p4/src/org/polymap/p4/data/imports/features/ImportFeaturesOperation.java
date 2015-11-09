@@ -14,8 +14,6 @@
  */
 package org.polymap.p4.data.imports.features;
 
-import java.util.Map;
-
 import org.geotools.data.DataAccess;
 import org.geotools.data.FeatureStore;
 import org.geotools.feature.FeatureCollection;
@@ -33,8 +31,6 @@ import org.polymap.core.catalog.resolve.IResolvableInfo;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.data.rs.catalog.RServiceInfo;
 import org.polymap.core.operation.DefaultOperation;
-import org.polymap.core.runtime.SubMonitor;
-
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ImporterContext;
 
@@ -53,10 +49,14 @@ public class ImportFeaturesOperation
 
     private FeatureStore            fs;
 
+    private FeatureCollection       features;
+
     
-    public ImportFeaturesOperation( ImporterContext context ) {
+    public ImportFeaturesOperation( ImporterContext context, FeatureCollection features  ) {
         super( "Import features" );
         this.context = context;
+        this.features = features;
+        assert features != null : "No FeatureCollection in @ContextOut";
     }
 
     
@@ -78,19 +78,7 @@ public class ImportFeaturesOperation
     
     @Override
     protected IStatus doExecute( IProgressMonitor monitor, IAdaptable info ) throws Exception {
-        monitor.beginTask( getLabel(), 10 );
-        
-        // execute previous importer
-        SubMonitor submon = SubMonitor.on( monitor, 3 );
-        Map<Class,Object> contextOut = context.execute( submon );
-        submon.done();
-
-        // add features
-        submon = SubMonitor.on( monitor, 10 );
-        submon.beginTask( "Adding features", 100 );
-
-        FeatureCollection features = (FeatureCollection)contextOut.get( FeatureCollection.class );
-        assert features != null : "No FeatureCollection in @ContextOut";
+        monitor.beginTask( getLabel(), 100 );
         
         DataAccess ds = P4Plugin.localCatalog().localFeaturesStore();        
         // XXX transaction that spans createSchema() and addFeatures()!?
@@ -98,7 +86,7 @@ public class ImportFeaturesOperation
         
         fs = (FeatureStore)ds.getFeatureSource( features.getSchema().getName() );
         fs.addFeatures( features );
-        submon.done();
+        monitor.done();
 
 //        DefaultTransaction tx = new DefaultTransaction();
 //        try {
