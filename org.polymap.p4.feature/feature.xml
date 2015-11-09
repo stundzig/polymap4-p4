@@ -17,14 +17,6 @@
       [Enter License Description here.]
    </license>
 
-   <includes
-         id="org.eclipse.rap.feature"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.rap.equinox.target.feature"
-         version="0.0.0"/>
-
    <plugin
          id="org.polymap.p4"
          download-size="0"
