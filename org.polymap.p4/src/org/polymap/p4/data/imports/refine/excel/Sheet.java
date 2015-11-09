@@ -23,9 +23,9 @@ import java.io.File;
  */
 public class Sheet {
 
-    private final int  index;
+    private final int    index;
 
-    private final File file;
+    private final File   file;
 
     private final String name;
 
@@ -40,7 +40,8 @@ public class Sheet {
     public File file() {
         return file;
     }
-    
+
+
     public int index() {
         return index;
     }

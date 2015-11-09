@@ -18,33 +18,25 @@ import static java.util.stream.Collectors.toMap;
 import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
 import static org.polymap.rhei.batik.toolkit.md.dp.dp;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EventObject;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import java.lang.reflect.Field;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.polymap.core.runtime.SubMonitor;
 import org.polymap.core.runtime.UIJob;
 import org.polymap.core.runtime.config.Configurable;
@@ -53,16 +45,18 @@ import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.UIUtils;
-
-import org.polymap.rhei.batik.BatikPlugin;
-import org.polymap.rhei.batik.toolkit.IPanelToolkit;
-
+import org.polymap.p4.Messages;
 import org.polymap.p4.data.imports.ImporterFactory.ImporterBuilder;
 import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.archive.ArchiveFileImporterFactory;
 import org.polymap.p4.data.imports.refine.csv.CSVFileImporterFactory;
 import org.polymap.p4.data.imports.refine.excel.ExcelFileImporterFactory;
 import org.polymap.p4.data.imports.shapefile.ShpImporterFactory;
+import org.polymap.rhei.batik.BatikPlugin;
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
 /**
  * Provides the execution context of an {@link Importer}. It handles inbound context
@@ -128,6 +122,10 @@ public class ImporterContext
                 return ImporterContext.this;
             }
             @Override
+            /**
+             * Creates a new prompt with specified id and add's also a default description and summary with key
+             * importer.prompt.*id*.summary and .description . 
+             */
             public ImporterPrompt newPrompt( String id ) {
                 assert prompts != null : "newPrompt() called before createPrompts()!";
                 assert !prompts.containsKey( id );
@@ -137,6 +135,8 @@ public class ImporterContext
                         return ImporterContext.this;
                     }                    
                 };
+                result.summary.put(Messages.get("importer.prompt." + id + ".summary"));
+                result.description.put(Messages.get("importer.prompt." + id + ".description"));
                 prompts.put( id, result );
                 EventManager.instance().publish( new ContextChangeEvent( ImporterContext.this ) );
                 return result;

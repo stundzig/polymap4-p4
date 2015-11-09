@@ -47,7 +47,7 @@ public abstract class ComboBasedPromptUiBuilder
         // TODO use a rhei numberfield here
         Combo combo = new Combo( parent, SWT.SINGLE );
         List<String> allValues = allValues();
-        combo.setItems( allValues.toArray( new String[allValues.size()] ) );
+        combo.setItems( allValues.stream().toArray( String[]::new ) );
         combo.addSelectionListener( new SelectionAdapter() {
 
             @Override

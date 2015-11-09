@@ -15,28 +15,39 @@ package org.polymap.p4.data.imports.refine.excel;
 
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
+import java.awt.FlowLayout;
 import java.io.File;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.polymap.core.data.refine.impl.ExcelFormatAndOptions;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
 import org.polymap.p4.data.imports.ImporterPrompt;
+import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
 import org.polymap.p4.data.imports.refine.NumberfieldBasedPromptUiBuilder;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import com.google.common.io.Files;
+import com.google.refine.model.Column;
+import com.google.refine.model.ColumnModel;
 
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
@@ -63,12 +74,13 @@ public class ExcelFileImporter
 
         site.icon.set( P4Plugin.images().svgImage( "xls.svg", NORMAL24 ) );
         if (sheetIn.index() != -1) {
-            site.summary.set( "Excel file: " + file.getName() + " [" + sheetIn.name() + "]" );
+
+            site.summary.set( Messages.get( "importer.excel.summary.sheet", file.getName(), sheetIn.name() ) );
         }
         else {
-            site.summary.set( "Excel file: " + file.getName() );
+            site.summary.set( Messages.get( "importer.excel.summary", file.getName() ) );
         }
-        // site.description.set("Description");
+        site.description.set( Messages.get( "importer.excel.description" ) );
 
         super.init( site, monitor );
     }
@@ -77,54 +89,53 @@ public class ExcelFileImporter
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         if (sheetIn.index() != -1 || formatAndOptions().sheetRecords().size() == 1) {
-            site.newPrompt( "ignoreBeforeHeadline" ).summary.put( "Ignorieren bis zur Kopfzeile" ).description
-                    .put( "Wieviele Zeilen befinden sich über den Spaltenüberschriften?" ).value
-                            .put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) ).extendedUI
-                                    .put( new NumberfieldBasedPromptUiBuilder( this) {
+            site.newPrompt( "ignoreBeforeHeadline" ).value
+                    .put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) ).extendedUI
+                            .put( new NumberfieldBasedPromptUiBuilder( this) {
 
-                                        @Override
-                                        public void onSubmit( ImporterPrompt prompt ) {
-                                            formatAndOptions().setIgnoreLines( value );
-                                        }
-
-
-                                        @Override
-                                        protected int initialValue() {
-                                            return Math.max( 0, formatAndOptions().ignoreLines() );
-                                        }
-                                    } );
-            site.newPrompt( "headline" ).summary.put( "Kopfzeilen" ).description
-                    .put( "Wieviele Zeilen enhalten die Spaltenüberschriften?" ).value
-                            .put( String.valueOf( formatAndOptions().headerLines() ) ).extendedUI
-                                    .put( new NumberfieldBasedPromptUiBuilder( this) {
-
-                                        @Override
-                                        public void onSubmit( ImporterPrompt prompt ) {
-                                            formatAndOptions().setHeaderLines( value );
-                                        }
+                                @Override
+                                public void onSubmit( ImporterPrompt prompt ) {
+                                    formatAndOptions().setIgnoreLines( value );
+                                }
 
 
-                                        @Override
-                                        protected int initialValue() {
-                                            return formatAndOptions().headerLines( );
-                                        }
-                                    } );
-            site.newPrompt( "ignoreAfterHeadline" ).summary.put( "Überflüssige Datenzeilen" ).description
-                    .put( "Wieviele Zeilen können nach der Spaltenüberschrift ignoriert werden?" ).value
-                            .put( String.valueOf( formatAndOptions().skipDataLines() ) ).extendedUI
-                                    .put( new NumberfieldBasedPromptUiBuilder( this) {
+                                @Override
+                                protected int initialValue() {
+                                    return Math.max( 0, formatAndOptions().ignoreLines() );
+                                }
+                            } );
+            site.newPrompt( "headlines" ).value
+                    .put( String.valueOf( formatAndOptions().headerLines() ) ).extendedUI
+                            .put( new NumberfieldBasedPromptUiBuilder( this) {
 
-                                        @Override
-                                        public void onSubmit( ImporterPrompt prompt ) {
-                                            formatAndOptions().setSkipDataLines( value );
-                                        }
+                                @Override
+                                public void onSubmit( ImporterPrompt prompt ) {
+                                    formatAndOptions().setHeaderLines( value );
+                                }
 
 
-                                        @Override
-                                        protected int initialValue() {
-                                            return formatAndOptions().skipDataLines( );
-                                        }
-                                    } );
+                                @Override
+                                protected int initialValue() {
+                                    return formatAndOptions().headerLines( );
+                                }
+                            } );
+            site.newPrompt( "ignoreAfterHeadline" ).value
+                    .put( String.valueOf( formatAndOptions().skipDataLines() ) ).extendedUI
+                            .put( new NumberfieldBasedPromptUiBuilder( this) {
+
+                                @Override
+                                public void onSubmit( ImporterPrompt prompt ) {
+                                    formatAndOptions().setSkipDataLines( value );
+                                }
+
+
+                                @Override
+                                protected int initialValue() {
+                                    return formatAndOptions().skipDataLines( );
+                                }
+                            } );
+            site.newPrompt( "coordinates" ).value.put( latitudeColumn() + "/" + longitudeColumn() ).extendedUI
+                    .put( coordinatesPromptUiBuilder() );
         }
     }
 
@@ -163,17 +174,16 @@ public class ExcelFileImporter
     public void createResultViewer( Composite parent, IPanelToolkit tk ) {
         if (sheetIn.index() == -1 && formatAndOptions().sheetRecords().size() > 1) {
             // select the correct sheet
-            // Label label = new Label( parent, SWT.LEFT );
-            // label.setText( "Das Excel Dokument enthält mehrere
-            // Arbeitsblätter. Bitte wählen Sie die Arbeitsblätter die sie
-            // importieren möchten." );
-            // FormDataFactory.on( label );
-            org.eclipse.swt.widgets.List list = new org.eclipse.swt.widgets.List( parent, SWT.SINGLE );
+            parent.setLayout( new FormLayout() );
 
-            // FormDataFactory.on( list ).fill().top( label, 5 ).bottom( 90, -5
-            // ).height( 50 ).width( 300 );
+            Label label = tk.createLabel( parent, Messages.get( "importer.excel.sheets" ), SWT.LEFT );
+            FormDataFactory.on( label );
+
+            org.eclipse.swt.widgets.List list = tk.createList( parent, SWT.SINGLE );
+            FormDataFactory.on( list ).fill().top( label, 5 );
+
             formatAndOptions().sheetRecords()
-                    .forEach( record -> list.add( record.name + ": " + record.rows + " zeilen" ) );
+                    .forEach( record -> list.add( Messages.get( "importer.excel.sheet", record.name, record.rows ) ) );
             if (selectedSheet != -1) {
                 list.select( selectedSheet );
             }
@@ -181,12 +191,7 @@ public class ExcelFileImporter
 
                 @Override
                 public void widgetSelected( SelectionEvent e ) {
-                    // TODO open the sheet in a new importer window, copy also
-                    // the base file on the second selection to avoid side
-                    // effects
                     selectedSheet = list.getSelectionIndex();
-                    log.error( "open in new importer panel, similar to the archive importer" );
-                    // selectedSheet = e.
                     site.ok.set( true );
                 }
             } );

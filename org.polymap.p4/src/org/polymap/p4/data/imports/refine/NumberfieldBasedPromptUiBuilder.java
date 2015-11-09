@@ -17,6 +17,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.polymap.core.data.refine.impl.LineBasedFormatAndOptions;
+import org.polymap.core.ui.FormDataFactory;
 import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 
@@ -56,13 +57,14 @@ public abstract class NumberfieldBasedPromptUiBuilder
 
 
     protected abstract int initialValue();
-    
-    protected abstract void onSubmit(ImporterPrompt prompt);
+
+
+    protected abstract void onSubmit( ImporterPrompt prompt );
 
 
     @Override
     public void submit( ImporterPrompt prompt ) {
-        onSubmit(prompt);
+        onSubmit( prompt );
         importer.updateOptions();
         prompt.ok.set( true );
         prompt.value.set( String.valueOf( value ) );

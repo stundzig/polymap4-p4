@@ -14,36 +14,52 @@
 package org.polymap.p4.data.imports.refine;
 
 import java.io.File;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.geotools.data.DataUtilities;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.osgi.framework.ServiceReference;
 import org.polymap.core.data.refine.RefineService;
 import org.polymap.core.data.refine.impl.FormatAndOptions;
 import org.polymap.core.data.refine.impl.ImportResponse;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
 import org.polymap.p4.data.imports.Importer;
+import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterSite;
+import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.imports.shapefile.ShpFeatureTableViewer;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
-import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.refine.importing.ImportingJob;
 import com.google.refine.model.Cell;
 import com.google.refine.model.Column;
 import com.google.refine.model.ColumnModel;
 import com.google.refine.model.Row;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
@@ -51,27 +67,38 @@ import com.google.refine.model.Row;
 public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
         implements Importer {
 
-    private static Log          log = LogFactory.getLog( AbstractRefineFileImporter.class );
+    // all known synonyms for longitude in lower case in all languages
+    // TODO: this should be part of a *longitude synonym registry* in the user
+    // settings too, to better support frequent uploads
+    // each user selected columnname for longitude and latitude should be saved in
+    // this user settings
+    private static final Set<String> LONGITUDES = Sets.newHashSet( "geo_longitude", "lon", "longitude", "geo_x", "x" );
 
-    protected ImporterSite      site;
+    // all known synonyms for latitude in lower case in all languages
+    private static final Set<String> LATITUDES  = Sets.newHashSet( "geo_latitude", "lat", "latitude", "geo_y", "y" );
+
+    private static Log               log        = LogFactory.getLog( AbstractRefineFileImporter.class );
+
+    protected ImporterSite           site;
 
     @ContextIn
-    protected MdToolkit         tk;
-
-    @ContextIn
-    protected File              file;
+    protected File                   file;
 
     @SuppressWarnings("rawtypes")
     @ContextOut
-    protected FeatureCollection features;
+    protected FeatureCollection      features;
 
-    private RefineService       service;
+    private RefineService            service;
 
-    private ImportingJob        importJob;
+    private ImportingJob             importJob;
 
-    private T                   formatAndOptions;
+    private T                        formatAndOptions;
 
-    private Exception           exception;
+    private Exception                exception;
+
+    private String                   longitudeColumn;
+
+    private String                   latitudeColumn;
 
 
     // private Composite tableComposite;
@@ -108,12 +135,18 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     @Override
     public void createResultViewer( Composite parent, IPanelToolkit toolkit ) {
         if (exception != null) {
-            tk.createFlowText( parent, "\nUnable to read the data.\n\n" + "**Reason**: " + exception.getMessage() );
+            toolkit.createFlowText( parent,
+                    "\nUnable to read the data.\n\n" + "**Reason**: " + exception.getMessage() );
         }
         else {
+            parent.setLayout( new FormLayout() );
+            Label label = toolkit.createLabel( parent, Messages.get( "importer.refine.rows", features.size() ) );
+            FormDataFactory.on( label );
+
             SimpleFeatureType schema = (SimpleFeatureType)features.getSchema();
             ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, schema );
             table.setContent( features );
+            FormDataFactory.on( table.getControl() ).fill().top( label, 5 );
         }
     }
 
@@ -132,19 +165,32 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
         try {
             ColumnModel columnModel = importJob.project.columnModel;
             StringBuffer typeSpec = new StringBuffer();
-            for (Column column : columnModel.columns) {
-                if (!StringUtils.isBlank( typeSpec )) {
-                    typeSpec.append( "," );
-                }
-                typeSpec.append( column.getName().replaceAll( ":", "_" ) ).append( ":String" );
+            SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
+            builder.setName( layerName() );
+            // TODO the CRS should be a separate prompt
+            builder.setCRS( DefaultGeographicCRS.WGS84 );
+            // add the default GEOM
+            builder.setDefaultGeometry( "theGeom" );
+            builder.add( "theGeom", Point.class );
+            
+            
+            for (RefineColumn column : columnsWithTypes()) {
+                builder.add( column.name(), column.type());
+//                if (!StringUtils.isBlank( typeSpec )) {
+//                    typeSpec.append( "," );
+//                }
+//                typeSpec.append( column.getName().replaceAll( ":", "_" ) ).append( ":String" );
             }
-            final SimpleFeatureType TYPE = DataUtilities.createType( layerName(), typeSpec.toString() );
+//            final SimpleFeatureType TYPE = DataUtilities.createType( layerName(), typeSpec.toString() );
+            final SimpleFeatureType TYPE = builder.buildFeatureType();
             final SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder( TYPE );
             features = new DefaultFeatureCollection( null, TYPE );
             for (Row row : importJob.project.rows) {
+                // TODO add geom
+                featureBuilder.add( null );
                 for (Cell cell : row.cells) {
-                    featureBuilder.add( cell == null || cell.value == null ? "" //$NON-NLS-1$
-                            : cell.value.toString() );
+                    //log.info( "cell with type " + (cell != null && cell.value != null ? cell.value.getClass() : "null"));
+                    featureBuilder.add( cell == null ? null : cell.value );
                 }
                 ((DefaultFeatureCollection)features).add( featureBuilder.buildFeature( null ) );
             }
@@ -155,6 +201,30 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
             site.ok.set( false );
             exception = e;
         }
+    }
+
+
+    private List<RefineColumn> columnsWithTypes() {
+        List<RefineColumn> result = Lists.newArrayList();
+        for (Column column : importJob.project.columnModel.columns) {
+            result.add(new RefineColumn(column.getName()));
+        }
+        // check all cells for its types and set the column type also to this type
+        // String is the default in all cases
+        for (Row row : importJob.project.rows) {
+            int i = 0;
+            for (Cell cell : row.cells) {
+                if (cell != null && cell.value != null) {
+                    Class currentType = cell.value.getClass();
+                    RefineColumn column = result.get( i );
+                    if (column.type() == null || !(column.type().isAssignableFrom( String.class))) {
+                        column.setType( currentType );
+                    } 
+                }
+                i++;
+            }
+        }
+        return result;
     }
 
 
@@ -170,5 +240,131 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
 
     protected T formatAndOptions() {
         return formatAndOptions;
+    }
+
+
+    protected String[] columnNames() {
+        return importJob.project.columnModel.columns.stream().map( column -> column.getName() )
+                .toArray( String[]::new );
+    }
+
+
+    protected PromptUIBuilder coordinatesPromptUiBuilder() {
+        return new PromptUIBuilder() {
+
+            private String latValue;
+
+            private String lonValue;
+
+
+            @Override
+            public void createContents( ImporterPrompt prompt, Composite parent ) {
+                parent.setLayout( new FormLayout() );
+                // 2 lists with all columns to select and a label in
+                // front
+                Label lonLabel = new Label( parent, SWT.RIGHT );
+                lonLabel.setText( Messages.get( "importer.refine.lon.label" ) );
+                FormDataFactory.on( lonLabel );
+
+                Combo lonValues = new Combo( parent, SWT.DROP_DOWN );
+                lonValues.setItems( columnNames() );
+                FormDataFactory.on( lonValues ).fill().left( lonLabel, 5 );
+                lonValues.addSelectionListener( new SelectionAdapter() {
+
+                    @Override
+                    public void widgetSelected( SelectionEvent e ) {
+                        Combo c = (Combo)e.getSource();
+                        lonValue = c.getItem( c.getSelectionIndex() );
+                    }
+                } );
+                lonValue = longitudeColumn();
+                if (!StringUtils.isBlank( lonValue )) {
+                    for (int i = 0; i < lonValues.getItems().length; i++) {
+                        if (lonValues.getItem( i ).equals( lonValue )) {
+                            lonValues.select( i );
+                        }
+                    }
+                }
+
+                Label latLabel = new Label( parent, SWT.RIGHT );
+                lonLabel.setText( Messages.get( "importer.refine.lat.label" ) );
+                FormDataFactory.on( latLabel ).top( lonLabel, 5 );
+
+                Combo latValues = new Combo( parent, SWT.DROP_DOWN );
+                latValues.setItems( columnNames() );
+                FormDataFactory.on( latValues ).fill().left( latLabel, 5 ).top( lonValues );
+
+                latValues.addSelectionListener( new SelectionAdapter() {
+
+                    @Override
+                    public void widgetSelected( SelectionEvent e ) {
+                        Combo c = (Combo)e.getSource();
+                        latValue = c.getItem( c.getSelectionIndex() );
+                    }
+                } );
+                latValue = latitudeColumn();
+                if (!StringUtils.isBlank( latValue )) {
+                    for (int i = 0; i < latValues.getItems().length; i++) {
+                        if (latValues.getItem( i ).equals( latValue )) {
+                            latValues.select( i );
+                        }
+                    }
+                }
+            }
+
+
+            @Override
+            public void submit( ImporterPrompt prompt ) {
+                setLatitudeColumn( latValue );
+                setLongitudeColumn( lonValue );
+            }
+        };
+    }
+
+
+    protected String longitudeColumn() {
+        if (longitudeColumn == null) {
+            // try to find one
+            for (Column column : importJob.project.columnModel.columns) {
+                String name = column.getName();
+                if (LONGITUDES.contains( name.toLowerCase() )) {
+                    longitudeColumn = name;
+                    break;
+                }
+            }
+        }
+        return longitudeColumn;
+    }
+
+
+    protected void setLongitudeColumn( String lonValue ) {
+        // TODO make this persistent in the user settings
+        if (!LONGITUDES.contains( lonValue )) {
+            LONGITUDES.add( lonValue );
+        }
+        longitudeColumn = lonValue;
+    }
+
+
+    protected String latitudeColumn() {
+        if (latitudeColumn == null) {
+            // try to find one
+            for (Column column : importJob.project.columnModel.columns) {
+                String name = column.getName();
+                if (LATITUDES.contains( name.toLowerCase() )) {
+                    latitudeColumn = name;
+                    break;
+                }
+            }
+        }
+        return latitudeColumn;
+    }
+
+
+    protected void setLatitudeColumn( String latValue ) {
+        if (!LATITUDES.contains( latValue )) {
+            LATITUDES.add( latValue );
+        }
+        latitudeColumn = latValue;
     }
 }
