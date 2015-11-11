@@ -73,7 +73,7 @@
 					<dependency>
 						<groupId>org.polymap</groupId>
 						<artifactId>org.polymap.rhei.batik</artifactId>
-						<version>1.0.0-SNAPSHOT</version>
+						<version>4.0.0-SNAPSHOT</version>
 					</dependency>
 					<dependency>
 						<groupId>org.eclipse.swt</groupId>
