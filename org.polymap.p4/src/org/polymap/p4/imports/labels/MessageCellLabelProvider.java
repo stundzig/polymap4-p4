@@ -14,6 +14,7 @@
  */
 package org.polymap.p4.imports.labels;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,10 +76,10 @@ public class MessageCellLabelProvider
                         ev -> ev instanceof ValidationEvent && isEqual( element, ev.getSource() ) );
                 statusEventHandlers.put( element, statusEventHandler );
             }
-            getShapeFileValidator().validate( (FileDescription)element );
-            // TODO: wait for any validation message to set and only if there are no issues, 
-            // set the description text
-            setCellText( cell, getDescription( cell.getElement() ) );
+            boolean valid = getShapeFileValidator().validate( (FileDescription)element );
+            if(valid) {
+                setCellText( cell, getDescription( cell.getElement() ) );
+            }
         }
     }
 
@@ -175,9 +176,6 @@ public class MessageCellLabelProvider
                 setCellText( cell, message );
             }
         }
-        else {
-            setCellText( cell, getDescription( cell.getElement() ) );
-        }
     }
 
 
@@ -196,8 +194,8 @@ public class MessageCellLabelProvider
 
 
     private Point getTextExtent( TextMetricHelper textMetricHelper, ViewerCell cell, String text ) {
-        if(text == null) {
-            return new Point(0, 0);
+        if (text == null) {
+            return new Point( 0, 0 );
         }
         return textMetricHelper.getTextExtent( cell, text );
     }
@@ -232,14 +230,14 @@ public class MessageCellLabelProvider
      * @return
      */
     private String getDescription( Object element ) {
+        List<String> descriptionParts = new ArrayList<String>();
         if (element instanceof ShapeFileDescription) {
-            List<String> descriptionParts = new ArrayList<String>();
             ShapeFileDescription shapeFileDescription = (ShapeFileDescription)element;
             shapeFileDescription.format.ifPresent( format -> descriptionParts.add( format.getDescription() ) );
             if (element instanceof ShapeFileRootDescription) {
                 ShapeFileRootDescription shapeFileRootDescription = (ShapeFileRootDescription)element;
                 if (shapeFileRootDescription.featureType.isPresent()) {
-                    descriptionParts.add( "<b>feature type:</b> " + shapeFileRootDescription.featureType.get() );
+                    descriptionParts.add( "<b>feature type:</b> " + shapeFileRootDescription.featureType.get().getName().getLocalPart() );
                 }
                 if (shapeFileRootDescription.featureCount.isPresent()) {
                     descriptionParts.add( "<b>feature count:</b> " + shapeFileRootDescription.featureCount.get() );
@@ -268,25 +266,31 @@ public class MessageCellLabelProvider
             }
             return Joiner.on( ", " ).join( descriptionParts );
         }
-        return null;
+        else if (element instanceof FileDescription) {
+            FileDescription fileDescription = (FileDescription)element;
+            fileDescription.format.ifPresent( format -> descriptionParts.add( "<b>description:</b> "
+                    + format.getDescription() ) );
+        }
+        return Joiner.on( ", " ).join( descriptionParts );
     }
 
 
     private String getSizeStr( long bytes ) {
+        DecimalFormat f = new DecimalFormat( "##.000" );
         String size = null;
         if (bytes != -1) {
-            if (bytes < 1024L) {
+            if (bytes > 1024L) {
                 double kilobytes = (bytes / 1024L);
-                if (kilobytes < 1024L) {
+                if (kilobytes > 1024L) {
                     double megabytes = (kilobytes / 1024L);
-                    size = megabytes + " MB";
+                    size = f.format( megabytes ) + " MB";
                 }
                 else {
-                    size = kilobytes + " KB";
+                    size = f.format( kilobytes ) + " KB";
                 }
             }
             else {
-                size = bytes + " B";
+                size = f.format( bytes ) + " B";
             }
         }
         return size;

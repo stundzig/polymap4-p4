@@ -15,6 +15,7 @@
 package org.polymap.p4.imports.formats;
 
 import org.geotools.data.shapefile.shp.ShapeType;
+import org.opengis.feature.type.FeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.polymap.core.runtime.config.Config2;
 
@@ -27,7 +28,7 @@ public class ShapeFileDescription extends FileDescription {
 
     public static class ShapeFileRootDescription extends ShapeFileDescription {
         public Config2<ShapeFileRootDescription, Integer> featureCount;
-        public Config2<ShapeFileRootDescription, String> featureType;
+        public Config2<ShapeFileRootDescription, FeatureType> featureType;
     }
     
     public static class ShpFileDescription extends ShapeFileDescription {

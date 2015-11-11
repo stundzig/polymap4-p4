@@ -15,12 +15,12 @@
 package org.polymap.p4.imports;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IStatus;
 import org.junit.Assert;
@@ -81,21 +81,22 @@ public class ShapeFileValidatorTest {
         int expectedSeverity = IStatus.ERROR;
         assertValidationEvent( eventManager, expectedMessage, expectedSeverity, fd );
     }
-    
+
+
     @Test
     public void testAlreadyExistingCatalogEntry() {
         FileDescription group = new FileDescription().groupName.put( "test" );
 
-        EventManager eventManager = executeTest( group, false );
+        EventManager eventManager = executeTest( group, false, "test" );
 
         String expectedMessage = "test is already imported as catalog entry.";
         int expectedSeverity = IStatus.ERROR;
         assertValidationEvent( eventManager, expectedMessage, expectedSeverity, group );
     }
 
-    
-    private void assertValidationEvent( EventManager eventManager, String expectedMessage,
-            int expectedSeverity, FileDescription fd ) {
+
+    private void assertValidationEvent( EventManager eventManager, String expectedMessage, int expectedSeverity,
+            FileDescription fd ) {
         Mockito.verify( eventManager ).publish( captor.capture() );
 
         Assert.assertEquals( expectedMessage, captor.getValue().getMessage() );
@@ -120,41 +121,50 @@ public class ShapeFileValidatorTest {
     }
 
 
-    private void mockExistingCatalogEntries( LocalCatalog localCatalog, MetadataQuery metadataQuery, String[] existingCatalogEntries  ) {
+    private void mockExistingCatalogEntries( LocalCatalog localCatalog, MetadataQuery metadataQuery,
+            String[] existingCatalogEntries ) {
         Mockito.when( localCatalog.query( "" ) ).thenReturn( metadataQuery );
         ResultSet resultSet = new ResultSet() {
 
             @Override
             public Iterator<IMetadata> iterator() {
-                Arrays.asList( existingCatalogEntries).stream().map( existingCatalogEntry -> new IMetadata() {
+                return Arrays.asList( existingCatalogEntries ).stream()
+                        .map( existingCatalogEntry -> createMetadata( existingCatalogEntry ) ).collect( Collectors.toList() ).iterator();
+            }
+
+
+            private IMetadata createMetadata( String existingCatalogEntry ) {
+                return new IMetadata() {
 
                     @Override
                     public String getIdentifier() {
                         return existingCatalogEntry;
                     }
 
+
                     @Override
                     public String getTitle() {
                         return existingCatalogEntry;
                     }
+
 
                     @Override
                     public String getDescription() {
                         return null;
                     }
 
+
                     @Override
                     public Set<String> getKeywords() {
                         return Collections.emptySet();
                     }
 
+
                     @Override
                     public Map<String,String> getConnectionParams() {
                         return Collections.emptyMap();
                     }
-                    
-                });
-                return new ArrayList<IMetadata>().iterator();
+                };
             }
 
 
