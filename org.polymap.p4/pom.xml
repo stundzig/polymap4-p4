@@ -38,8 +38,8 @@
 								<property name="test_classpath" refid="maven.test.classpath" />
 								<property name="plugin_classpath" refid="maven.plugin.classpath" />
 								
-								<property name="svg-input" value="resources/icons/svg" />
-								<property name="png-output" value="resources/icons2" />
+								<property name="svg-input" value="${project.build.directory}/resources/icons/svg" />
+								<property name="png-output" value="${project.build.directory}/resources/icons2" />
 
 								<path id="svg.maven.classpath">
 									<path refid="maven.runtime.classpath" />
