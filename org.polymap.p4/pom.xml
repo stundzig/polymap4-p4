@@ -23,6 +23,70 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<id>svg2png</id>
+						<phase>process-classes</phase>
+						<configuration>
+							<target>
+								<property name="compile_classpath" refid="maven.compile.classpath" />
+								<property name="runtime_classpath" refid="maven.runtime.classpath" />
+								<property name="test_classpath" refid="maven.test.classpath" />
+								<property name="plugin_classpath" refid="maven.plugin.classpath" />
+								
+								<property name="svg-input" value="resources/icons/svg" />
+								<property name="png-output" value="resources/icons2" />
+
+								<path id="svg.maven.classpath">
+									<path refid="maven.runtime.classpath" />
+									<path refid="maven.plugin.classpath" />
+								</path>
+
+								<taskdef name="svg2Png"
+									classname="org.polymap.rhei.batik.engine.svg.Svg2PngTask"
+									classpathref="svg.maven.classpath" />
+
+								<svg2Png svgPath="${svg-input}" pngPath="${png-output}"
+									scale="20, 24">
+									<imageConfig name="white" rgb="#000000">
+										<replaceConfig sourceRGB="#000000" targetRGB="#ffffff" />
+									</imageConfig>
+									<imageConfig name="normal" rgb="#000000">
+										<replaceConfig sourceRGB="#000000" targetRGB="#b0b0b0" />
+									</imageConfig>
+									<imageConfig name="hover" rgb="#000000">
+										<replaceConfig sourceRGB="#000000" targetRGB="#808080" />
+									</imageConfig>
+								</svg2Png>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.polymap</groupId>
+						<artifactId>org.polymap.rhei.batik</artifactId>
+						<version>1.0.0-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.swt</groupId>
+						<artifactId>org.eclipse.swt.gtk.linux.x86</artifactId>
+						<version>4.3</version>
+					</dependency>
+					<dependency>
+						<groupId>com.google.guava</groupId>
+						<artifactId>guava</artifactId>
+						<version>18.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 		</plugins>
 	</build>
 </project>
