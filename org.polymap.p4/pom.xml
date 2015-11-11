@@ -30,7 +30,7 @@
 				<executions>
 					<execution>
 						<id>svg2png</id>
-						<phase>process-classes</phase>
+						<phase>prepare-package</phase>
 						<configuration>
 							<target>
 								<property name="compile_classpath" refid="maven.compile.classpath" />
