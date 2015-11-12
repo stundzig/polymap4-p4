@@ -1,7 +1,6 @@
 /*
- * polymap.org 
- * Copyright (C) @year@ individual contributors as indicated by the @authors tag. 
- * All rights reserved.
+ * polymap.org Copyright (C) @year@ individual contributors as indicated by
+ * the @authors tag. All rights reserved.
  * 
  * This is free software; you can redistribute it and/or modify it under the terms of
  * the GNU Lesser General Public License as published by the Free Software
@@ -16,6 +15,7 @@ package org.polymap.p4.data.imports.refine;
 
 import java.io.File;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,28 +62,31 @@ import com.google.refine.model.Row;
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
  */
-public abstract class AbstractRefineFileImporter<T extends FormatAndOptions> implements Importer {
+public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
+        implements Importer {
 
-    private static Log log = LogFactory.getLog(AbstractRefineFileImporter.class);
+    private static Log          log = LogFactory.getLog( AbstractRefineFileImporter.class );
 
-    protected ImporterSite site;
-
-    @ContextIn
-    protected MdToolkit tk;
+    protected ImporterSite      site;
 
     @ContextIn
-    protected File file;
+    protected MdToolkit         tk;
 
+    @ContextIn
+    protected File              file;
+
+    @SuppressWarnings("rawtypes")
     @ContextOut
     protected FeatureCollection features;
 
-    private RefineService service;
+    private RefineService       service;
 
-    private ImportingJob importJob;
+    private ImportingJob        importJob;
 
-    private T formatAndOptions;
+    private T                   formatAndOptions;
 
-    private Exception exception;
+    private Exception           exception;
+
 
     // private Composite tableComposite;
 
@@ -92,72 +95,92 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions> imp
         return site;
     }
 
+
     @Override
-    public void init(@SuppressWarnings("hiding") ImporterSite site, IProgressMonitor monitor) throws Exception {
+    public void init( @SuppressWarnings("hiding" ) ImporterSite site, IProgressMonitor monitor) throws Exception {
         this.site = site;
 
         ServiceReference<?> serviceReference = P4Plugin.instance().getBundle().getBundleContext()
-                .getServiceReference(RefineService.class.getName());
-        service = (RefineService) P4Plugin.instance().getBundle().getBundleContext().getService(serviceReference);
-        site.terminal.set(true);
+                .getServiceReference( RefineService.class.getName() );
+        service = (RefineService)P4Plugin.instance().getBundle().getBundleContext().getService( serviceReference );
+
+        prepare();
     }
+
 
     protected abstract T defaultOptions();
 
-    @Override
-    public void execute(IProgressMonitor monitor) throws Exception {
-        // create all params for contextOut
-        // all is done in verify
-    }
 
     @Override
-    public void createResultViewer(Composite parent, IPanelToolkit toolkit) {
+    public void execute( IProgressMonitor monitor ) throws Exception {
+        // create all params for contextOut
+        // all is done in verify
+        log.info( "execute" );
+    }
+
+
+    @Override
+    public void createResultViewer( Composite parent, IPanelToolkit toolkit ) {
         if (exception != null) {
-            tk.createFlowText(parent, "\nUnable to read the data.\n\n" + "**Reason**: " + exception.getMessage());
-        } else {
-            SimpleFeatureType schema = (SimpleFeatureType) features.getSchema();
-            ShpFeatureTableViewer table = new ShpFeatureTableViewer(parent, schema);
-            table.setContent(features);
+            tk.createFlowText( parent, "\nUnable to read the data.\n\n" + "**Reason**: " + exception.getMessage() );
+        }
+        else {
+            SimpleFeatureType schema = (SimpleFeatureType)features.getSchema();
+            ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, schema );
+            table.setContent( features );
         }
     }
 
+
+    protected void prepare() throws Exception {
+        ImportResponse<T> response = service.importFile( file, defaultOptions() );
+        importJob = response.job();
+        formatAndOptions = response.options();
+    }
+
+
     @Override
-    public void verify(IProgressMonitor monitor) {
+    public void verify( IProgressMonitor monitor ) {
+        log.info( "verify" );
+        site.terminal.set( true );
         try {
-            if (importJob == null) {
-                ImportResponse<T> response = service.importFile(file, defaultOptions());
-                importJob = response.job();
-                formatAndOptions = response.options();
-            }
             ColumnModel columnModel = importJob.project.columnModel;
             StringBuffer typeSpec = new StringBuffer();
             for (Column column : columnModel.columns) {
-                if (!StringUtils.isBlank(typeSpec)) {
-                    typeSpec.append(",");
+                if (!StringUtils.isBlank( typeSpec )) {
+                    typeSpec.append( "," );
                 }
-                typeSpec.append(column.getName().replaceAll(":", "_")).append(":String");
+                typeSpec.append( column.getName().replaceAll( ":", "_" ) ).append( ":String" );
             }
-            final SimpleFeatureType TYPE = DataUtilities.createType(file.getName(), typeSpec.toString());
-            final SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(TYPE);
-            features = new DefaultFeatureCollection(null, TYPE);
+            final SimpleFeatureType TYPE = DataUtilities.createType( layerName(), typeSpec.toString() );
+            final SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder( TYPE );
+            features = new DefaultFeatureCollection( null, TYPE );
             for (Row row : importJob.project.rows) {
                 for (Cell cell : row.cells) {
-                    featureBuilder.add(cell == null || cell.value == null ? "" //$NON-NLS-1$
-                            : cell.value.toString());
+                    featureBuilder.add( cell == null || cell.value == null ? "" //$NON-NLS-1$
+                            : cell.value.toString() );
                 }
-                ((DefaultFeatureCollection) features).add(featureBuilder.buildFeature(null));
+                ((DefaultFeatureCollection)features).add( featureBuilder.buildFeature( null ) );
             }
-            site.ok.set(true);
+            site.ok.set( true );
             exception = null;
-        } catch (Exception e) {
-            site.ok.set(false);
+        }
+        catch (Exception e) {
+            site.ok.set( false );
             exception = e;
         }
     }
 
-    protected void updateOptions() {
-        service.updateOptions(importJob, formatAndOptions);
+
+    protected String layerName() {
+        return FilenameUtils.getBaseName( file.getName() );
     }
+
+
+    protected void updateOptions() {
+        service.updateOptions( importJob, formatAndOptions );
+    }
+
 
     protected T formatAndOptions() {
         return formatAndOptions;

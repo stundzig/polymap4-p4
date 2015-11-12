@@ -1,7 +1,6 @@
 /*
- * polymap.org 
- * Copyright (C) @year@ individual contributors as indicated by the @authors tag. 
- * All rights reserved.
+ * polymap.org Copyright (C) @year@ individual contributors as indicated by
+ * the @authors tag. All rights reserved.
  * 
  * This is free software; you can redistribute it and/or modify it under the terms of
  * the GNU Lesser General Public License as published by the Free Software
@@ -39,6 +38,7 @@ import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
+import org.polymap.p4.data.imports.refine.HeadlineSelectorPromptUiBuilder;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -67,11 +67,10 @@ public class CSVFileImporter
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         // charset prompt
-        site.newPrompt( "encoding" )
-                .summary.put( "Zeichensatz der Daten" )
-                .description.put( "Die Daten können bspw. deutsche Umlaute enthalten, die nach dem Hochladen falsch dargestellt werden. "
-                        + "Mit dem Ändern des Zeichensatzes kann dies korrigiert werden." )
-                .extendedUI.put( new PromptUIBuilder() {
+        site.newPrompt( "encoding" ).summary.put( "Zeichensatz der Daten" ).description
+                .put( "Die Daten können bspw. deutsche Umlaute enthalten, die nach dem Hochladen falsch dargestellt werden. "
+                        + "Mit dem Ändern des Zeichensatzes kann dies korrigiert werden." ).extendedUI
+                                .put( new PromptUIBuilder() {
 
                     private String encoding;
 
@@ -111,37 +110,13 @@ public class CSVFileImporter
                     }
                 } );
         
-        site.newPrompt( "headline" )
-                .summary.put( "Kopfzeile" )
-                .description.put( "Welche Zeile enhält die Spaltenüberschriften?" ).extendedUI.put( new PromptUIBuilder() {
-
-            private int index;
-
-            @Override
-            public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
-                // TODO use a rhei numberfield here
-                Text text = new Text( parent, SWT.RIGHT );
-                text.setText( formatAndOptions().headerLines() );
-                text.addModifyListener( event -> {
-                    Text t = (Text)event.getSource();
-                    // can throw an exception
-                    index = Integer.parseInt( t.getText() );
-                } );
-                // initial value
-                index = Integer.parseInt( text.getText() );
-            }
-
-            @Override
-            public void submit( ImporterPrompt prompt ) {
-                formatAndOptions().setHeaderLines( index );
-                updateOptions();
-                prompt.ok.set( true );
-                prompt.value.set( String.valueOf( index ) );
-            }
-        });
+        site.newPrompt( "headline" ).summary.put( "Kopfzeile" ).description
+                .put( "Welche Zeile enhält die Spaltenüberschriften?" ).extendedUI
+                        .put( new HeadlineSelectorPromptUiBuilder( this ) );
     }
 
 
+    @Override
     protected CSVFormatAndOptions defaultOptions() {
         return CSVFormatAndOptions.createDefault();
     }
