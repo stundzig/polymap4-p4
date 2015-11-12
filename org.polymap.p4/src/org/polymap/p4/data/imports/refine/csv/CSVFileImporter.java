@@ -27,18 +27,15 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
-
 import org.polymap.core.data.refine.impl.CSVFormatAndOptions;
-
-import org.polymap.rhei.batik.toolkit.IPanelToolkit;
-
+import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
-import org.polymap.p4.data.imports.refine.HeadlineSelectorPromptUiBuilder;
+import org.polymap.p4.data.imports.refine.ComboBasedPromptUiBuilder;
+import org.polymap.p4.data.imports.refine.NumberfieldBasedPromptUiBuilder;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -53,12 +50,12 @@ public class CSVFileImporter
 
 
     @Override
-    public void init( @SuppressWarnings("hiding") ImporterSite site, IProgressMonitor monitor ) throws Exception {
+    public void init( @SuppressWarnings("hiding" ) ImporterSite site, IProgressMonitor monitor) throws Exception {
         this.site = site;
 
         site.icon.set( P4Plugin.images().svgImage( "csv.svg", NORMAL24 ) );
-        site.summary.set( "CSV / TSV / separator based file: " + file.getName() );
-        site.description.set( "" );
+        site.summary.set( Messages.get( "importer.csv.summary", file.getName() ) );
+        site.description.set( Messages.get( "importer.csv.description" ) );
 
         super.init( site, monitor );
     }
@@ -66,53 +63,117 @@ public class CSVFileImporter
 
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
-        // charset prompt
-        site.newPrompt( "encoding" ).summary.put( "Zeichensatz der Daten" ).description
-                .put( "Die Daten können bspw. deutsche Umlaute enthalten, die nach dem Hochladen falsch dargestellt werden. "
-                        + "Mit dem Ändern des Zeichensatzes kann dies korrigiert werden." ).extendedUI
-                                .put( new PromptUIBuilder() {
-
-                    private String encoding;
-
-                    @Override
-                    public void submit( ImporterPrompt prompt ) {
-                        formatAndOptions().setEncoding( encoding );
-                        updateOptions();
-                        prompt.ok.set( true );
-                        prompt.value.set( encoding );
-                    }
-                    
-                    @Override
-                    public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
-                        // select box
-                        Combo combo = new Combo( parent, SWT.SINGLE );
-                        List<String> encodings = Lists.newArrayList( Charsets.ISO_8859_1.name(),
-                                Charsets.US_ASCII.name(), Charsets.UTF_8.name(), Charsets.UTF_16.name(),
-                                Charsets.UTF_16BE.name(), Charsets.UTF_16LE.name() );
-
-                        // java.nio.charset.Charset.forName( )
-                        combo.setItems( encodings.toArray( new String[encodings.size()] ) );
-                        // combo.add
-
-                        combo.addSelectionListener( new SelectionAdapter() {
+        site.newPrompt( "ignoreBeforeHeadline" ).value
+                .put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) ).extendedUI
+                        .put( new NumberfieldBasedPromptUiBuilder( this) {
 
                             @Override
-                            public void widgetSelected( SelectionEvent e ) {
-                                Combo c = (Combo)e.getSource();
-                                encoding = encodings.get( c.getSelectionIndex() );
+                            public void onSubmit( ImporterPrompt prompt ) {
+                                formatAndOptions().setIgnoreLines( value );
+                            }
+
+
+                            @Override
+                            protected int initialValue() {
+                                return Math.max( 0, formatAndOptions().ignoreLines() );
                             }
                         } );
-                        encoding = formatAndOptions().encoding();
-                        int index = encodings.indexOf( encoding );
-                        if (index != -1) {
-                            combo.select( index );
-                        }
-                    }
-                } );
-        
-        site.newPrompt( "headline" ).summary.put( "Kopfzeile" ).description
-                .put( "Welche Zeile enhält die Spaltenüberschriften?" ).extendedUI
-                        .put( new HeadlineSelectorPromptUiBuilder( this ) );
+        site.newPrompt( "headlines" ).value
+                .put( String.valueOf( formatAndOptions().headerLines() ) ).extendedUI
+                        .put( new NumberfieldBasedPromptUiBuilder( this) {
+
+                            @Override
+                            public void onSubmit( ImporterPrompt prompt ) {
+                                formatAndOptions().setHeaderLines( value );
+                            }
+
+
+                            @Override
+                            protected int initialValue() {
+                                return formatAndOptions().headerLines( );
+                            }
+                        } );
+        site.newPrompt( "ignoreAfterHeadline" ).value
+                .put( String.valueOf( formatAndOptions().skipDataLines() ) ).extendedUI
+                        .put( new NumberfieldBasedPromptUiBuilder( this) {
+
+                            @Override
+                            public void onSubmit( ImporterPrompt prompt ) {
+                                formatAndOptions().setSkipDataLines( value );
+                            }
+
+
+                            @Override
+                            protected int initialValue() {
+                                return formatAndOptions().skipDataLines( );
+                            }
+                        } );
+        site.newPrompt( "separator" ).value
+                .put( formatAndOptions().separator() ).extendedUI
+                        .put( new ComboBasedPromptUiBuilder( this) {
+
+                            @Override
+                            protected String initialValue() {
+                                return formatAndOptions().separator();
+                            }
+
+
+                            @Override
+                            protected List<String> allValues() {
+                                return Lists.newArrayList( ",", "|", ";", "\\t", " " );
+                            }
+
+
+                            @Override
+                            protected void onSubmit( ImporterPrompt prompt ) {
+                                formatAndOptions().setSeparator( value );
+                            }
+                        } );
+        site.newPrompt( "quoteCharacter" ).value
+                .put( formatAndOptions().quoteCharacter() ).extendedUI
+                        .put( new ComboBasedPromptUiBuilder( this) {
+
+                            @Override
+                            protected String initialValue() {
+                                return formatAndOptions().quoteCharacter();
+                            }
+
+
+                            @Override
+                            protected List<String> allValues() {
+                                return Lists.newArrayList( "\"", "'" );
+                            }
+
+
+                            @Override
+                            protected void onSubmit( ImporterPrompt prompt ) {
+                                formatAndOptions().setQuoteCharacter( value );
+                            }
+                        } );
+        site.newPrompt( "encoding" ).value
+                .put( formatAndOptions().encoding() ).extendedUI
+                        .put( new ComboBasedPromptUiBuilder( this) {
+
+                            @Override
+                            protected String initialValue() {
+                                return formatAndOptions().encoding();
+                            }
+
+
+                            @Override
+                            protected List<String> allValues() {
+                                return Lists.newArrayList( Charsets.ISO_8859_1.name(),
+                                        Charsets.US_ASCII.name(), Charsets.UTF_8.name(),
+                                        Charsets.UTF_16.name(),
+                                        Charsets.UTF_16BE.name(), Charsets.UTF_16LE.name() );
+                            }
+
+
+                            @Override
+                            protected void onSubmit( ImporterPrompt prompt ) {
+                                formatAndOptions().setEncoding( value );
+                            }
+                        } );
     }
 
 

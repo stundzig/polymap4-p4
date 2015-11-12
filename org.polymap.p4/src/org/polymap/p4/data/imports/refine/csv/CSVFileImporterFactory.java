@@ -1,7 +1,6 @@
 /*
- * polymap.org 
- * Copyright (C) @year@ individual contributors as indicated by the @authors tag. 
- * All rights reserved.
+ * polymap.org Copyright (C) @year@ individual contributors as indicated by
+ * the @authors tag. All rights reserved.
  * 
  * This is free software; you can redistribute it and/or modify it under the terms of
  * the GNU Lesser General Public License as published by the Free Software
@@ -33,16 +32,16 @@ import com.google.common.collect.Sets;
 public class CSVFileImporterFactory
         implements ImporterFactory {
 
-    private static Log log = LogFactory.getLog( CSVFileImporterFactory.class );
-    
-    public final static Set<String> supportedTypes = Sets.newHashSet(".csv", ".tsv"); 
-    		
+    private static Log              log            = LogFactory.getLog( CSVFileImporterFactory.class );
+
+    public final static Set<String> supportedTypes = Sets.newHashSet( ".csv", ".tsv" );
+
     @ContextIn
     protected File                  file;
-    
+
     @ContextIn
     protected List<File>            files;
-    
+
 
     @Override
     public void createImporters( ImporterBuilder builder ) throws Exception {
@@ -52,16 +51,16 @@ public class CSVFileImporterFactory
     }
 
 
-	private boolean isSupported(File file) {
-		if (file == null) {
-			return false;
-		}
-		for (String type : supportedTypes) {
-			if (file.getName().toLowerCase().endsWith( type )) {
-				return true;
-			}
-		}
-		return false;
-	}
-    
+    private boolean isSupported( File file ) {
+        if (file == null) {
+            return false;
+        }
+        for (String type : supportedTypes) {
+            if (file.getName().toLowerCase().endsWith( type )) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

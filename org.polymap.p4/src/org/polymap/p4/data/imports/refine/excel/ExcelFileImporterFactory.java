@@ -1,7 +1,6 @@
 /*
- * polymap.org 
- * Copyright (C) @year@ individual contributors as indicated by the @authors tag. 
- * All rights reserved.
+ * polymap.org Copyright (C) @year@ individual contributors as indicated by
+ * the @authors tag. All rights reserved.
  * 
  * This is free software; you can redistribute it and/or modify it under the terms of
  * the GNU Lesser General Public License as published by the Free Software
@@ -30,20 +29,21 @@ import com.google.common.collect.Sets;
  * 
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
  */
-public class ExcelFileImporterFactory implements ImporterFactory {
+public class ExcelFileImporterFactory
+        implements ImporterFactory {
 
-    private static Log log = LogFactory.getLog(ExcelFileImporterFactory.class);
+    private static Log              log            = LogFactory.getLog( ExcelFileImporterFactory.class );
 
-    public final static Set<String> supportedTypes = Sets.newHashSet(".xls", ".xlsx");
-
-    @ContextIn
-    protected File file;
-//
-//    @ContextIn
-//    protected List<File> files;
+    public final static Set<String> supportedTypes = Sets.newHashSet( ".xls", ".xlsx" );
 
     @ContextIn
-    protected Sheet sheet;
+    protected File                  file;
+    //
+    // @ContextIn
+    // protected List<File> files;
+
+    @ContextIn
+    protected Sheet                 sheet;
 
     @Override
     public void createImporters( ImporterBuilder builder ) throws Exception {
