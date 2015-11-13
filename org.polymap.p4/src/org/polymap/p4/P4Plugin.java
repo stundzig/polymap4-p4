@@ -60,7 +60,9 @@ public class P4Plugin
 
     /** The globale {@link Context} scope for the {@link P4Plugin}. */
     public static final String      Scope = "org.polymap.p4";
-
+    
+    public static final String      TOOLBAR_ICON_CONFIG = SvgImageRegistryHelper.WHITE24;
+    
     private static P4Plugin         instance;
 
 

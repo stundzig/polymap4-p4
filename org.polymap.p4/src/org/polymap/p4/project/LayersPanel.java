@@ -48,6 +48,7 @@ import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.toolkit.md.CheckboxActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
+
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.map.ProjectMapPanel;
 
@@ -82,7 +83,7 @@ public class LayersPanel
         return parentPanel()
                 .filter( parent -> parent instanceof ProjectMapPanel )
                 .map( parent -> {
-                    getSite().setIcon( P4Plugin.images().svgImage( "layers.svg", NORMAL24 ) );
+                    getSite().setIcon( P4Plugin.images().svgImage( "layers.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
                     getSite().setTitle( "" );
                     getSite().setPreferredWidth( 200 );
                     return true;

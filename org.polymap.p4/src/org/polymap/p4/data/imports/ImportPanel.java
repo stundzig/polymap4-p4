@@ -16,7 +16,6 @@ package org.polymap.p4.data.imports;
 import static org.polymap.core.runtime.UIThreadExecutor.async;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
-import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.WHITE24;
 
 import java.util.Arrays;
@@ -124,7 +123,7 @@ public class ImportPanel
                 .map( parent -> {
                     site().title.set( "" );
                     site().tooltip.set( "Import new data into the catalog" );
-                    site().icon.set( P4Plugin.images().svgImage( "plus-circle-outline.svg", NORMAL24 ) );
+                    site().icon.set( P4Plugin.images().svgImage( "plus-circle-outline.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
                     site().preferredWidth.set( 350 );
                     return true;
                 } )
