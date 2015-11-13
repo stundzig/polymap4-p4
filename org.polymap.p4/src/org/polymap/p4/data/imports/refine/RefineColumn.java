@@ -18,7 +18,7 @@ public class RefineColumn {
 
 
     public Class type() {
-        return type;
+        return type != null ? type : String.class;
     }
 
 
