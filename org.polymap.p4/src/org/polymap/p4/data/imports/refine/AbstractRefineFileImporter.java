@@ -14,6 +14,7 @@
 package org.polymap.p4.data.imports.refine;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +35,7 @@ import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.osgi.framework.ServiceReference;
 import org.polymap.core.data.refine.RefineService;
@@ -171,24 +173,29 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
             // add the default GEOM
             builder.setDefaultGeometry( "theGeom" );
             builder.add( "theGeom", Point.class );
-            
-            
+
             for (RefineColumn column : columnsWithTypes()) {
-                builder.add( column.name(), column.type());
-//                if (!StringUtils.isBlank( typeSpec )) {
-//                    typeSpec.append( "," );
-//                }
-//                typeSpec.append( column.getName().replaceAll( ":", "_" ) ).append( ":String" );
+                builder.add( column.name(), column.type() );
+                // if (!StringUtils.isBlank( typeSpec )) {
+                // typeSpec.append( "," );
+                // }
+                // typeSpec.append( column.getName().replaceAll( ":", "_" ) ).append(
+                // ":String" );
             }
-//            final SimpleFeatureType TYPE = DataUtilities.createType( layerName(), typeSpec.toString() );
+            // final SimpleFeatureType TYPE = DataUtilities.createType( layerName(),
+            // typeSpec.toString() );
             final SimpleFeatureType TYPE = builder.buildFeatureType();
             final SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder( TYPE );
             features = new DefaultFeatureCollection( null, TYPE );
-            for (Row row : importJob.project.rows) {
+            // TODO FeatureTable show always latest created on top
+            List<Row> reverseRows = Lists.newArrayList(importJob.project.rows);
+            Collections.reverse( reverseRows );
+            for (Row row : reverseRows) {
                 // TODO add geom
                 featureBuilder.add( null );
                 for (Cell cell : row.cells) {
-                    //log.info( "cell with type " + (cell != null && cell.value != null ? cell.value.getClass() : "null"));
+                    // log.info( "cell with type " + (cell != null && cell.value !=
+                    // null ? cell.value.getClass() : "null"));
                     featureBuilder.add( cell == null ? null : cell.value );
                 }
                 ((DefaultFeatureCollection)features).add( featureBuilder.buildFeature( null ) );
@@ -198,6 +205,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
         }
         catch (Exception e) {
             site.ok.set( false );
+            e.printStackTrace();
             exception = e;
         }
     }
@@ -206,7 +214,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     private List<RefineColumn> columnsWithTypes() {
         List<RefineColumn> result = Lists.newArrayList();
         for (Column column : importJob.project.columnModel.columns) {
-            result.add(new RefineColumn(column.getName()));
+            result.add( new RefineColumn( column.getName() ) );
         }
         // check all cells for its types and set the column type also to this type
         // String is the default in all cases
@@ -216,9 +224,9 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                 if (cell != null && cell.value != null) {
                     Class currentType = cell.value.getClass();
                     RefineColumn column = result.get( i );
-                    if (column.type() == null || !(column.type().isAssignableFrom( String.class))) {
+                    if (column.type() == null || !(column.type().isAssignableFrom( String.class ))) {
                         column.setType( currentType );
-                    } 
+                    }
                 }
                 i++;
             }
@@ -232,12 +240,12 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     }
 
 
-    protected void updateOptions() {
+    public void updateOptions() {
         service.updateOptions( importJob, formatAndOptions );
     }
 
 
-    protected T formatAndOptions() {
+    public T formatAndOptions() {
         return formatAndOptions;
     }
 

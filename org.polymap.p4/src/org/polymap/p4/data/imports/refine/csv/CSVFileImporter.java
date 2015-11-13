@@ -15,23 +15,25 @@ package org.polymap.p4.data.imports.refine.csv;
 
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.ParsePosition;
 import java.util.List;
+import java.util.Locale;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
 import org.polymap.core.data.refine.impl.CSVFormatAndOptions;
+import org.polymap.core.runtime.Polymap;
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ImporterPrompt;
-import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
 import org.polymap.p4.data.imports.refine.ComboBasedPromptUiBuilder;
@@ -39,6 +41,7 @@ import org.polymap.p4.data.imports.refine.NumberfieldBasedPromptUiBuilder;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import com.google.common.collect.TreeMultimap;
 
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
@@ -174,11 +177,92 @@ public class CSVFileImporter
                                 formatAndOptions().setEncoding( value );
                             }
                         } );
+        site.newPrompt( "numberFormat" ).value
+                .put( formatAndOptions().numberFormat() ).extendedUI
+                        .put( new NumberFormatPromptUiBuilder( this, Polymap.getSessionLocale() ) );
     }
 
 
     @Override
     protected CSVFormatAndOptions defaultOptions() {
         return CSVFormatAndOptions.createDefault();
+    }
+
+
+    @Override
+    protected void prepare() throws Exception {
+        super.prepare();
+        formatAndOptions().setNumberLocale( Polymap.getSessionLocale() );
+        formatAndOptions().setNumberFormat(
+                ((DecimalFormat)DecimalFormat.getInstance( Polymap.getSessionLocale() )).toLocalizedPattern() );
+        formatAndOptions().enableGuessCellValueTypes();
+        this.updateOptions();
+    }
+
+
+    public static void main( String[] args ) throws ParseException {
+        // Locale[] locales = NumberFormat.getAvailableLocales();
+        // double myNumber = -1234.56;
+        // NumberFormat form;
+        // for (int j = 0; j < 4; ++j) {
+        System.out.println( "FORMAT" );
+        TreeMultimap<String,String> formats = TreeMultimap.create();
+        for (Locale locale : DecimalFormat.getAvailableLocales()) {
+            if (locale.getCountry().length() != 0) {
+                continue; // Skip language-only locales
+            }
+            if (!StringUtils.isBlank( locale.getDisplayName( Locale.ENGLISH ) )) {
+                formats.put( ((DecimalFormat)NumberFormat.getInstance( locale )).toLocalizedPattern(),
+                        locale.getDisplayName( Locale.ENGLISH ) );
+            }
+            // System.out.print( locales[i].getDisplayName() );
+            // switch (j) {
+            // case 0:
+            // form = NumberFormat.getInstance( locales[i] );
+            // break;
+            // case 1:
+            // form = NumberFormat.getIntegerInstance( locales[i] );
+            // break;
+            // case 2:
+            // form = NumberFormat.getCurrencyInstance( locales[i] );
+            // break;
+            // default:
+            // form = NumberFormat.getPercentInstance( locales[i] );
+            // break;
+            // }
+            // if (form instanceof DecimalFormat) {
+            // System.out.print( ": " + ((DecimalFormat)form).toPattern() );
+            // }
+            // System.out.print( " -> " + form.format( myNumber ) );
+            //
+            // System.out.println( " -> " + form.parse( form.format( myNumber ) )
+            // );
+
+        }
+        formats.asMap().forEach( ( key, values ) -> System.out.println( key + ": " + values ) );
+
+        System.out.println( new DecimalFormat( "#,##0.###" ).parse( "1,234.56" ) );
+        ParsePosition p = new ParsePosition( 0 );
+        String value = "31.102,00";
+        System.out.println( DecimalFormat.getInstance( Locale.GERMANY ).parse( value, p ) );
+        System.out.println( value.length() + " <> " + p.getIndex() + ": " + p.getErrorIndex() );
+
+        // System.out.println( new DecimalFormat( "#.##0,###" ).parse( "1,234.56" )
+        // );
+        
+
+        // String strange = "#.##0,###";
+        DecimalFormat weirdFormatter = (DecimalFormat)DecimalFormat.getInstance(Locale.GERMANY);
+        // weirdFormatter.applyPattern( strange );
+//        weirdFormatter.setDecimalFormatSymbols( unusualSymbols );
+//        weirdFormatter.setGroupingSize( 3 );
+        p = new ParsePosition( 0 );
+        Number number = weirdFormatter.parse( value, p );
+        System.out.println( number );
+        System.out.println( weirdFormatter.format( number ) );
+        
+        System.out.println( number.toString().length() + "<>" + value.length()
+                + " <> " + p.getIndex() + ": " + p.getErrorIndex() );
+
     }
 }
