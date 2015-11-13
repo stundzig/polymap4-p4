@@ -63,7 +63,6 @@ public class CSVFileImporter
         super.init( site, monitor );
     }
 
-
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         site.newPrompt( "ignoreBeforeHeadline" ).value
