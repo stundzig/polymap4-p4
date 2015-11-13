@@ -30,7 +30,6 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
-import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.contribution.ContributionManager;
 import org.polymap.rhei.batik.dashboard.Dashboard;
 import org.polymap.rhei.batik.dashboard.DashletSite;
@@ -69,7 +68,7 @@ public class ProjectInfoPanel
                 .map( parent -> {
                     site().title.set( "" );
                     site().tooltip.set( "Project settings" );
-                    site().icon.set( P4Plugin.images().svgImage( "settings.svg", SvgImageRegistryHelper.NORMAL24 ) );
+                    site().icon.set( P4Plugin.images().svgImage( "settings.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
                     getSite().setPreferredWidth( 200 );
                     return true;
                 })

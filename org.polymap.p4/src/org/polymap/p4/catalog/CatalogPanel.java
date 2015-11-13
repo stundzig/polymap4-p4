@@ -72,7 +72,7 @@ public class CatalogPanel
                 .map( parent -> {
                     site().title.set( "" );
                     site().tooltip.set( "Data catalog" );
-                    site().icon.set( P4Plugin.images().svgImage( "book-open.svg", NORMAL24 ) );
+                    site().icon.set( P4Plugin.images().svgImage( "book-open.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
                     getSite().setPreferredWidth( 350 );
                     return true;
                 })

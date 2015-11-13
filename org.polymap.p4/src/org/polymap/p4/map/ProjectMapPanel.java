@@ -14,20 +14,27 @@
  */
 package org.polymap.p4.map;
 
+import static org.polymap.core.ui.FormDataFactory.on;
+
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 
 import org.polymap.core.data.util.Geometries;
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.i18n.IMessages;
+import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.BatikApplication;
@@ -99,9 +106,24 @@ public class ProjectMapPanel
 
         ((P4AppDesign)BatikApplication.instance().getAppDesign()).setAppTitle( title );
         
-        parent.setLayout( new FillLayout() /*FormLayoutFactory.defaults().margins( 0 ).create()*/ );
         parent.setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
+        parent.setLayout( FormLayoutFactory.defaults().margins( 0 ).create() );
 
+        // toolbar test
+        ToolBar tb = on( new ToolBar( parent, SWT.RIGHT ) ).fill().noLeft().noTop().control();
+        tb.moveAbove( null ); 
+        
+        ToolItem item1 = new ToolItem( tb, SWT.CHECK );
+        item1.setText( "PUSH" );
+        item1.setImage( P4Plugin.images().svgImage( "settings.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+        item1.setToolTipText( "Do it!" );
+        item1.addSelectionListener( new SelectionAdapter() {
+            @Override
+            public void widgetSelected( SelectionEvent ev ) {
+                item1.setText( item1.getText() + "!" );
+            }
+        });
+        
         // mapViewer
         try {
             mapViewer = new MapViewer( parent );
@@ -117,6 +139,7 @@ public class ProjectMapPanel
             mapViewer.addMapControl( new ScaleLineControl() );
             
             mapViewer.setInput( map.get() );
+            on( mapViewer.getControl() ).fill().bottom( tb );
             
             // restore state
             Memento memento = getSite().getMemento();
