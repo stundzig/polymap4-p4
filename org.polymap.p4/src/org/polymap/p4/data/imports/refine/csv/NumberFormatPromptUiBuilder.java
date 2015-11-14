@@ -13,6 +13,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.polymap.core.runtime.Polymap;
 import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
@@ -70,6 +71,7 @@ public class NumberFormatPromptUiBuilder
 
     @Override
     public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
+        System.out.println( "create contents" );
         org.eclipse.swt.widgets.List list = tk.createList( parent, SWT.SINGLE );
         List<LocalizedFormat> allValues = allValues();
         list.setItems( allValues.stream().map( lf -> lf.toString() ).toArray( String[]::new ) );
@@ -91,8 +93,8 @@ public class NumberFormatPromptUiBuilder
 
     @Override
     public void submit( ImporterPrompt prompt ) {
-        importer.formatAndOptions().setNumberLocale( value.values.iterator().next() );
-        importer.formatAndOptions().setNumberFormat( value.key );
+//        importer.formatAndOptions().setNumberLocale( value.values.iterator().next() );
+//        importer.formatAndOptions().setNumberFormat( value.key );
         importer.updateOptions();
         prompt.ok.set( true );
         prompt.value.set( value.key );
@@ -100,7 +102,7 @@ public class NumberFormatPromptUiBuilder
 
 
     private LocalizedFormat initialValue() {
-        Locale initialLocale = importer.formatAndOptions().numberLocale();
+        Locale initialLocale = Polymap.getSessionLocale();
         for (LocalizedFormat format : allValues()) {
             if (format.values.contains( initialLocale )) {
                 return format;

@@ -176,8 +176,8 @@ public class CSVFileImporter
                                 formatAndOptions().setEncoding( value );
                             }
                         } );
-        site.newPrompt( "numberFormat" ).value
-                .put( formatAndOptions().numberFormat() ).extendedUI
+        site.newPrompt( "dataTypes" ).value
+                .put( "TODO: 12 Spalten, 3 Text 9 Zahl"  ).extendedUI
                         .put( new NumberFormatPromptUiBuilder( this, Polymap.getSessionLocale() ) );
     }
 
@@ -191,11 +191,11 @@ public class CSVFileImporter
     @Override
     protected void prepare() throws Exception {
         super.prepare();
-        formatAndOptions().setNumberLocale( Polymap.getSessionLocale() );
-        formatAndOptions().setNumberFormat(
-                ((DecimalFormat)DecimalFormat.getInstance( Polymap.getSessionLocale() )).toLocalizedPattern() );
-        formatAndOptions().enableGuessCellValueTypes();
-        this.updateOptions();
+//        formatAndOptions().setNumberLocale( Polymap.getSessionLocale() );
+//        formatAndOptions().setNumberFormat(
+//                ((DecimalFormat)DecimalFormat.getInstance( Polymap.getSessionLocale() )).toLocalizedPattern() );
+//        formatAndOptions().enableGuessCellValueTypes();
+//        this.updateOptions();
     }
 
 
