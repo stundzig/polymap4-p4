@@ -108,5 +108,17 @@
             id="org.polymap.p4.AddLayerForImportedFeaturesConcern">
       </concern>
    </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.eclipse.ui.ide.workbench"
+            name="Polymap4 Product">
+         <property
+               name="appName"
+               value="Polymap4 Product">
+         </property>
+      </product>
+   </extension>
 
 </plugin>
