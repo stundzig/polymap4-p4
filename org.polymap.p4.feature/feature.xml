@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.polymap.p4.feature"
-      label="P4 Feature"
+      label="P4"
       version="1.0.0.qualifier"
       provider-name="polymap.org">
 
