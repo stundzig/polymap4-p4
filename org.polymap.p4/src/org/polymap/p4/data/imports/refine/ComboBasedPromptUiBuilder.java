@@ -18,9 +18,11 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.polymap.core.data.refine.impl.FormatAndOptions;
+import org.polymap.core.ui.FormDataFactory;
 import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
@@ -45,16 +47,17 @@ public abstract class ComboBasedPromptUiBuilder
 
     @Override
     public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
-        // TODO use a rhei numberfield here
-        Combo combo = new Combo( parent, SWT.SINGLE );
+        parent.setLayout( new FormLayout() );
+        org.eclipse.swt.widgets.List combo = tk.createList( parent, SWT.SINGLE );
+        FormDataFactory.on( combo ).left( 0 ).top( 5 ).width( 100 );
+
         List<String> allValues = allValues();
         combo.setItems( allValues.stream().toArray( String[]::new ) );
         combo.addSelectionListener( new SelectionAdapter() {
 
             @Override
             public void widgetSelected( SelectionEvent e ) {
-                Combo c = (Combo)e.getSource();
-                value = allValues.get( c.getSelectionIndex() );
+                value = allValues.get( combo.getSelectionIndex() );
             }
         } );
         value = initialValue();

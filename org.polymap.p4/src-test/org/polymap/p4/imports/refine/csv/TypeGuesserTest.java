@@ -87,5 +87,12 @@ public class TypeGuesserTest {
             formats.put( ((DecimalFormat)NumberFormat.getInstance( locale )).toLocalizedPattern(), locale );
         }
         formats.asMap().forEach( (key, value) -> System.out.println(key + ": " + value) );
+        long start = System.currentTimeMillis();
+        int count = 0;
+        for (int i = 0; i< (1000000); i++) {
+            TypeGuesser.guess( "83,456,456.45-" );
+            count++;
+        }
+        System.out.println( "Needed " + (System.currentTimeMillis() - start) + "ms for " + count );
     }
 }

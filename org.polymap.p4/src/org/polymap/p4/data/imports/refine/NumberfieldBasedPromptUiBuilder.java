@@ -14,10 +14,12 @@
 package org.polymap.p4.data.imports.refine;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.polymap.core.data.refine.impl.LineBasedFormatAndOptions;
 import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
@@ -42,10 +44,11 @@ public abstract class NumberfieldBasedPromptUiBuilder
 
     @Override
     public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
-        // TODO use a rhei numberfield here
-        Text text = new Text( parent, SWT.RIGHT | SWT.BORDER );
-
-        text.setText( String.valueOf( initialValue() ) );
+        parent.setLayout( new FormLayout() );
+        // TODO add numbervalidator here
+        Text text = tk.createText( parent, String.valueOf( initialValue() ), SWT.RIGHT | SWT.BORDER );
+        FormDataFactory.on( text ).left( 0 ).top( 5 ).width( 100 );
+        
         text.addModifyListener( event -> {
             Text t = (Text)event.getSource();
             // can throw an exception

@@ -46,6 +46,7 @@ public class TypeGuesser {
         if (value == null || value.trim().length() == 0) {
             return null;
         }
+        value = value.trim();
         // does it contain only allowed number characters?
         if (allowedChars.matcher( value ).matches()) {
             // postcode 03453 should be text
