@@ -19,7 +19,7 @@
 				<artifactId>tycho-compiler-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>org/polymap/p4/fs//**/*.java</exclude>
+						<exclude>org/polymap/p4/fs/**/*.java</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
