@@ -15,11 +15,9 @@ package org.polymap.p4.data.imports.refine.excel;
 
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
-import java.awt.FlowLayout;
 import java.io.File;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,8 +25,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.geotools.feature.DefaultFeatureCollection;
@@ -39,15 +35,12 @@ import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ContextOut;
 import org.polymap.p4.data.imports.ImporterPrompt;
-import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
 import org.polymap.p4.data.imports.refine.NumberfieldBasedPromptUiBuilder;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import com.google.common.io.Files;
-import com.google.refine.model.Column;
-import com.google.refine.model.ColumnModel;
 
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>

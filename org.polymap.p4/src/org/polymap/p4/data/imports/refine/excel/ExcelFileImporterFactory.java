@@ -14,11 +14,8 @@
 package org.polymap.p4.data.imports.refine.excel;
 
 import java.io.File;
-import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.polymap.p4.data.imports.ContextIn;
 import org.polymap.p4.data.imports.ImporterFactory;
 
@@ -31,8 +28,6 @@ import com.google.common.collect.Sets;
  */
 public class ExcelFileImporterFactory
         implements ImporterFactory {
-
-    private static Log              log            = LogFactory.getLog( ExcelFileImporterFactory.class );
 
     public final static Set<String> supportedTypes = Sets.newHashSet( ".xls", ".xlsx" );
 
