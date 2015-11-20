@@ -49,7 +49,7 @@ public abstract class ComboBasedPromptUiBuilder
     public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
         parent.setLayout( new FormLayout() );
         org.eclipse.swt.widgets.List combo = tk.createList( parent, SWT.SINGLE );
-        FormDataFactory.on( combo ).left( 0 ).top( 5 ).width( 100 );
+        FormDataFactory.on( combo ).left( 0 ).top( 5 ).width( 350 );
 
         List<String> allValues = allValues();
         combo.setItems( allValues.stream().toArray( String[]::new ) );
@@ -72,7 +72,7 @@ public abstract class ComboBasedPromptUiBuilder
     @Override
     public void submit( ImporterPrompt prompt ) {
         onSubmit( prompt );
-        importer.updateOptions();
+        importer.triggerUpdateOptions();
         prompt.ok.set( true );
         prompt.value.set( String.valueOf( value ) );
     }

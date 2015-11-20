@@ -3,20 +3,19 @@ package org.polymap.p4.imports.refine.csv;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.util.Locale;
-import java.util.Set;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.translate.UnicodeEscaper;
 import org.junit.Test;
 import org.polymap.p4.data.imports.refine.csv.Type;
 import org.polymap.p4.data.imports.refine.csv.TypeGuesser;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 
 public class TypeGuesserTest {
 
@@ -74,25 +73,41 @@ public class TypeGuesserTest {
     }
 
 
-    public static void main( String[] args ) throws ParseException {
-        NumberFormat nf = NumberFormat.getInstance();
-        // nf.setMaximumIntegerDigits( 3 );
-        System.out.println( nf.parse( "123E3" ) );
-
-        ListMultimap<String, Locale> formats = ArrayListMultimap.create();
-        for (Locale locale : DecimalFormat.getAvailableLocales()) {
-            if (locale.getCountry().length() != 0) {
-                continue; // Skip sub-language locales
-            }
-            formats.put( ((DecimalFormat)NumberFormat.getInstance( locale )).toLocalizedPattern(), locale );
-        }
-        formats.asMap().forEach( (key, value) -> System.out.println(key + ": " + value) );
-        long start = System.currentTimeMillis();
-        int count = 0;
-        for (int i = 0; i< (1000000); i++) {
-            TypeGuesser.guess( "83,456,456.45-" );
-            count++;
-        }
-        System.out.println( "Needed " + (System.currentTimeMillis() - start) + "ms for " + count );
+    public static void main( String[] args ) throws ParseException, UnsupportedEncodingException {
+//        NumberFormat nf = NumberFormat.getInstance();
+//        // nf.setMaximumIntegerDigits( 3 );
+//        System.out.println( nf.parse( "123E3" ) );
+//
+//        ListMultimap<String, Locale> formats = ArrayListMultimap.create();
+//        for (Locale locale : DecimalFormat.getAvailableLocales()) {
+//            if (locale.getCountry().length() != 0) {
+//                continue; // Skip sub-language locales
+//            }
+//            formats.put( ((DecimalFormat)NumberFormat.getInstance( locale )).toLocalizedPattern(), locale );
+//        }
+//        formats.asMap().forEach( (key, value) -> System.out.println(key + ": " + value) );
+//        long start = System.currentTimeMillis();
+//        int count = 0;
+//        for (int i = 0; i< (1000000); i++) {
+//            TypeGuesser.guess( "83,456,456.45-" );
+//            count++;
+//        }
+//        System.out.println( "Needed " + (System.currentTimeMillis() - start) + "ms for " + count );
+        
+//        String s1 = new String( "aö" );
+//        for (byte b : s1.getBytes()) {
+//            System.out.println( UnicodeEscaper.hex( b ));
+//        }
+//        Pattern asciiOnly = Pattern.compile("\\p{ASCII}*");
+//        List<String> strings = Lists.newArrayList( "aö", "abc", "a.b.c", "abc\n", "ö" );
+//        strings.forEach( str ->  System.out.println( str + " matches? " + asciiOnly.matcher( str ).matches() ));
+        
+        
+        String str = "öäü";
+        byte[] b = str.getBytes("utf-8");
+        
+        String str2 = new String(b, "utf-8");
+        System.out.println( str2 );
+        
     }
 }

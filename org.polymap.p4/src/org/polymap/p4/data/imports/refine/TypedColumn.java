@@ -34,4 +34,8 @@ public class TypedColumn {
         
     }
 
+    @Override
+    public String toString() {
+        return name + ": " + (type != null ? type.getSimpleName() : "unknown"); 
+    }
 }

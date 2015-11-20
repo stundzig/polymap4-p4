@@ -202,25 +202,25 @@ public class ExcelFileImporter
 
 
     @Override
-    protected void prepare() throws Exception {
+    protected void prepare(IProgressMonitor monitor) throws Exception {
         // during super.prepare() the file is moved to another location, so make copy
         // here, to support multiworksheet for initial loads
         if (sheetIn.index() == -1) {
             copyOfOriginalFile = new File( Files.createTempDir(), FilenameUtils.getName( file.getName() ) );
             Files.copy( file, copyOfOriginalFile );
         }
-        super.prepare();
+        super.prepare(monitor);
         // autoselect the first sheet, if only one exists
         if (formatAndOptions().sheetRecords().size() == 1) {
             formatAndOptions().setSheet( 0 );
-            updateOptions();
+            triggerUpdateOptions();
         }
         else {
             // if more the one sheets exists, and we are in the *subimporter*, select
             // this one
             if (sheetIn.index() != -1) {
                 formatAndOptions().setSheet( sheetIn.index() );
-                updateOptions();
+                triggerUpdateOptions();
             }
         }
     }

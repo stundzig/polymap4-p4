@@ -15,26 +15,41 @@ package org.polymap.p4.data.imports.refine.csv;
 
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.text.ParsePosition;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.ToolTip;
 import org.polymap.core.data.refine.impl.CSVFormatAndOptions;
 import org.polymap.core.runtime.Polymap;
+import org.polymap.core.ui.FormDataFactory;
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ImporterPrompt;
+import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
+import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.ImporterSite;
 import org.polymap.p4.data.imports.refine.AbstractRefineFileImporter;
 import org.polymap.p4.data.imports.refine.ComboBasedPromptUiBuilder;
@@ -43,11 +58,9 @@ import org.polymap.p4.data.imports.refine.RefineCell;
 import org.polymap.p4.data.imports.refine.RefineRow;
 import org.polymap.p4.data.imports.refine.TypedColumn;
 import org.polymap.p4.data.imports.refine.TypedContent;
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import com.google.common.collect.TreeMultimap;
-import com.google.refine.importing.ImportingJob;
 import com.google.refine.model.Cell;
 import com.google.refine.model.Column;
 import com.google.refine.model.Row;
@@ -58,9 +71,15 @@ import com.google.refine.model.Row;
 public class CSVFileImporter
         extends AbstractRefineFileImporter<CSVFormatAndOptions> {
 
-    private static Log   log = LogFactory.getLog( CSVFileImporter.class );
+    private static final Log      log                       = LogFactory.getLog( CSVFileImporter.class );
 
-    private TypedContent csvTypedContent;
+    private static final Pattern  ASCIIONLY                 = Pattern.compile( "\\p{ASCII}*" );
+
+    private TypedContent          csvTypedContent;
+
+    private List<String>          potentialEncodingProblems = null;
+
+    private GuessedQuoteCharacter guessedQuoteCharacter     = null;
 
 
     @Override
@@ -72,6 +91,23 @@ public class CSVFileImporter
         site.description.set( Messages.get( "importer.csv.description" ) );
 
         super.init( site, monitor );
+    }
+
+
+    @Override
+    protected void prepare( IProgressMonitor monitor ) throws Exception {
+        super.prepare( monitor );
+        // formatAndOptions().setProcessQuotes(false);
+        // formatAndOptions().setQuoteCharacter( "\0" );
+        // updateOptions( monitor );
+        // TODO guess find the quote characters
+        //typedContent();
+        GuessedQuoteCharacter guessed = guessedQuoteCharacter();
+        if (!guessed.quoteCharacter().equals( formatAndOptions().quoteCharacter())) {
+            formatAndOptions().setQuoteCharacter( guessed.quoteCharacter() );
+            updateOptions( monitor );
+        }
+        
     }
 
 
@@ -149,49 +185,28 @@ public class CSVFileImporter
 
                             @Override
                             protected String initialValue() {
+                                // TODO guess the quote character
                                 return formatAndOptions().quoteCharacter();
                             }
 
 
                             @Override
                             protected List<String> allValues() {
-                                return Lists.newArrayList( "\"", "'" );
+                                return Lists.newArrayList( "", "\"", "'" );
                             }
 
 
                             @Override
                             protected void onSubmit( ImporterPrompt prompt ) {
                                 formatAndOptions().setQuoteCharacter( value );
+                                // formatAndOptions().setProcessQuotes(
+                                // !StringUtils.isBlank( value ) );
                             }
                         } );
         site.newPrompt( "encoding" ).value
                 .put( formatAndOptions().encoding() ).extendedUI
-                        .put( new ComboBasedPromptUiBuilder( this) {
-
-                            @Override
-                            protected String initialValue() {
-                                return formatAndOptions().encoding();
-                            }
-
-
-                            @Override
-                            protected List<String> allValues() {
-                                return Lists.newArrayList( Charsets.ISO_8859_1.name(),
-                                        Charsets.US_ASCII.name(), Charsets.UTF_8.name(),
-                                        Charsets.UTF_16.name(),
-                                        Charsets.UTF_16BE.name(), Charsets.UTF_16LE.name() );
-                            }
-
-
-                            @Override
-                            protected void onSubmit( ImporterPrompt prompt ) {
-                                formatAndOptions().setEncoding( value );
-                            }
-                        } );
-        // site.newPrompt( "dataTypes" ).value
-        // .put( "TODO: 12 Spalten, 3 Text 9 Zahl" ).extendedUI
-        // .put( new NumberFormatPromptUiBuilder( this, Polymap.getSessionLocale() )
-        // );
+                        .put( encodingPromptUiBuilder() ).severity
+                                .set( Severity.REQUIRED );
         site.newPrompt( "coordinates" ).value.put( coordinatesPromptLabel() ).extendedUI
                 .put( coordinatesPromptUiBuilder() );
     }
@@ -203,18 +218,6 @@ public class CSVFileImporter
     }
 
 
-    //
-    //
-    // @Override
-    // protected void prepare() throws Exception {
-    // super.prepare();
-    // // formatAndOptions().setNumberLocale( Polymap.getSessionLocale() );
-    // // formatAndOptions().setNumberFormat(
-    // // ((DecimalFormat)DecimalFormat.getInstance( Polymap.getSessionLocale()
-    // // )).toLocalizedPattern() );
-    // // formatAndOptions().enableGuessCellValueTypes();
-    // // this.updateOptions();
-    // }
     @Override
     public void execute( IProgressMonitor monitor ) throws Exception {
         csvTypedContent = null;
@@ -226,6 +229,15 @@ public class CSVFileImporter
     public void verify( IProgressMonitor monitor ) {
         csvTypedContent = null;
         super.verify( monitor );
+    }
+
+
+    @Override
+    protected void updateOptions( IProgressMonitor monitor ) {
+        csvTypedContent = null;
+        potentialEncodingProblems = null;
+
+        super.updateOptions( monitor );
     }
 
 
@@ -245,7 +257,7 @@ public class CSVFileImporter
                 rows.add( row );
                 for (Cell cell : originalRow.cells) {
                     TypedColumn column = columnsWithType.get( i );
-                    if (cell == null || cell.value == null
+                    if (cell == null || cell.value == null || cell.value.toString().trim().equals( "" )
                             || (column.type() != null && column.type().isAssignableFrom( String.class ))) {
                         // seems to be empty or a string was found in the same column
                         // earlier
@@ -273,11 +285,13 @@ public class CSVFileImporter
                                 // default to string
                                 column.setType( String.class );
                                 row.add( new RefineCell( cell ) );
-                                log.error( "error in parsing " + cell.value.toString(), e );
+                                throw new RuntimeException( e );
                             }
                         }
                         else {
                             // defaults to string
+                            log.info( "Setting string in column " + column.name() + " because of '"
+                                    + cell.value.toString() + "'" );
                             column.setType( String.class );
                             row.add( new RefineCell( cell ) );
                         }
@@ -290,75 +304,140 @@ public class CSVFileImporter
         }
         return csvTypedContent;
     }
-    //
-    //
-    // public static void main( String[] args ) throws ParseException {
-    // // Locale[] locales = NumberFormat.getAvailableLocales();
-    // // double myNumber = -1234.56;
-    // // NumberFormat form;
-    // // for (int j = 0; j < 4; ++j) {
-    // System.out.println( "FORMAT" );
-    // TreeMultimap<String,String> formats = TreeMultimap.create();
-    // for (Locale locale : DecimalFormat.getAvailableLocales()) {
-    // if (locale.getCountry().length() != 0) {
-    // continue; // Skip language-only locales
-    // }
-    // if (!StringUtils.isBlank( locale.getDisplayName( Locale.ENGLISH ) )) {
-    // formats.put( ((DecimalFormat)NumberFormat.getInstance( locale
-    // )).toLocalizedPattern(),
-    // locale.getDisplayName( Locale.ENGLISH ) );
-    // }
-    // // System.out.print( locales[i].getDisplayName() );
-    // // switch (j) {
-    // // case 0:
-    // // form = NumberFormat.getInstance( locales[i] );
-    // // break;
-    // // case 1:
-    // // form = NumberFormat.getIntegerInstance( locales[i] );
-    // // break;
-    // // case 2:
-    // // form = NumberFormat.getCurrencyInstance( locales[i] );
-    // // break;
-    // // default:
-    // // form = NumberFormat.getPercentInstance( locales[i] );
-    // // break;
-    // // }
-    // // if (form instanceof DecimalFormat) {
-    // // System.out.print( ": " + ((DecimalFormat)form).toPattern() );
-    // // }
-    // // System.out.print( " -> " + form.format( myNumber ) );
-    // //
-    // // System.out.println( " -> " + form.parse( form.format( myNumber ) )
-    // // );
-    //
-    // }
-    // formats.asMap().forEach( ( key, values ) -> System.out.println( key + ": " +
-    // values ) );
-    //
-    // System.out.println( new DecimalFormat( "#,##0.###" ).parse( "1,234.56" ) );
-    // ParsePosition p = new ParsePosition( 0 );
-    // String value = "31.102,00";
-    // System.out.println( DecimalFormat.getInstance( Locale.GERMANY ).parse( value,
-    // p ) );
-    // System.out.println( value.length() + " <> " + p.getIndex() + ": " +
-    // p.getErrorIndex() );
-    //
-    // // System.out.println( new DecimalFormat( "#.##0,###" ).parse( "1,234.56" )
-    // // );
-    //
-    // // String strange = "#.##0,###";
-    // DecimalFormat weirdFormatter = (DecimalFormat)DecimalFormat.getInstance(
-    // Locale.GERMANY );
-    // // weirdFormatter.applyPattern( strange );
-    // // weirdFormatter.setDecimalFormatSymbols( unusualSymbols );
-    // // weirdFormatter.setGroupingSize( 3 );
-    // p = new ParsePosition( 0 );
-    // Number number = weirdFormatter.parse( value, p );
-    // System.out.println( number );
-    // System.out.println( weirdFormatter.format( number ) );
-    //
-    // System.out.println( number.toString().length() + "<>" + value.length()
-    // + " <> " + p.getIndex() + ": " + p.getErrorIndex() );
-    //
-    // }
+
+
+    private PromptUIBuilder encodingPromptUiBuilder() {
+        return new PromptUIBuilder() {
+
+            private String encoding;
+
+
+            @Override
+            public void submit( ImporterPrompt prompt ) {
+                formatAndOptions().setEncoding( encoding );
+                triggerUpdateOptions();
+                prompt.ok.set( true );
+                prompt.value.set( encoding );
+            }
+
+
+            @Override
+            public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
+                parent.setLayout( new FormLayout() );
+
+                Combo combo = new Combo( parent, SWT.SINGLE );
+                TableViewer viewer = null;
+                if (potentialEncodingProblems() != null && !potentialEncodingProblems().isEmpty()) {
+                    viewer = new TableViewer( parent, SWT.H_SCROLL |
+                            SWT.V_SCROLL );
+                    // create preview table
+                    ColumnViewerToolTipSupport.enableFor( viewer );
+                    TableLayout layout = new TableLayout();
+                    viewer.getTable().setLayout( layout );
+                    viewer.getTable().setHeaderVisible( true );
+                    viewer.getTable().setLinesVisible( true );
+
+                    layout.addColumnData( new ColumnPixelData( 350 ) );
+                    TableViewerColumn viewerColumn = new TableViewerColumn( viewer, SWT.H_SCROLL );
+                    viewerColumn.getColumn().setText( Messages.get( "importer.prompt.encoding.before" ) );
+                    viewerColumn.setLabelProvider( new ColumnLabelProvider() {
+
+                        @Override
+                        public String getToolTipText( Object element ) {
+                            return super.getText( element );
+                        }
+                    } );
+
+                    viewer.setContentProvider( ArrayContentProvider.getInstance() );
+                    viewer.setInput( potentialEncodingProblems() );
+
+                    FormDataFactory.on( viewer.getTable() ).left( 0 ).top( combo, 15 ).width( 700 ).height( 400 );
+                }
+
+                final TableViewer finalViewer = viewer;
+                List<String> allValues = allValues();
+                combo.setItems( allValues.stream().toArray( String[]::new ) );
+                combo.addSelectionListener( new SelectionAdapter() {
+
+                    @Override
+                    public void widgetSelected( SelectionEvent e ) {
+                        encoding = allValues.get( combo.getSelectionIndex() );
+                        if (finalViewer != null) {
+                            finalViewer.refresh();
+                        }
+                    }
+                } );
+                encoding = initialValue();
+                int index = allValues.indexOf( encoding );
+                if (index != -1) {
+                    combo.select( index );
+                }
+                prompt.value.set( encoding );
+                FormDataFactory.on( combo ).left( 0 ).top( 5 ).width( 250 );
+
+            }
+
+
+            protected String initialValue() {
+                return formatAndOptions().encoding();
+            }
+
+
+            protected List<String> allValues() {
+                return Lists.newArrayList( StandardCharsets.ISO_8859_1.name(),
+                        StandardCharsets.US_ASCII.name(), StandardCharsets.UTF_8.name(),
+                        StandardCharsets.UTF_16.name(),
+                        StandardCharsets.UTF_16BE.name(), StandardCharsets.UTF_16LE.name() );
+            }
+
+        };
+    }
+
+
+    protected List<String> potentialEncodingProblems() {
+        if (potentialEncodingProblems == null) {
+            potentialEncodingProblems = Lists.newArrayList();
+
+            for (Row originalRow : originalRows()) {
+                for (Cell cell : originalRow.cells) {
+                    // check also for umlauts
+                    if (cell != null && cell.value != null && potentialEncodingProblems.size() < 20
+                            && !ASCIIONLY.matcher( cell.value.toString() ).matches()) {
+                        potentialEncodingProblems.add( cell.value.toString() );
+                    }
+                }
+            }
+        }
+        return potentialEncodingProblems;
+    }
+
+
+    protected GuessedQuoteCharacter guessedQuoteCharacter() {
+        if (guessedQuoteCharacter == null) {
+            guessedQuoteCharacter = new GuessedQuoteCharacter();
+            int maxChecks = 1000;
+            int i = 0;
+            for (Row originalRow : originalRows()) {
+                for (Cell cell : originalRow.cells) {
+                    // check also for umlauts
+                    if (cell != null && cell.value != null && i < maxChecks) {
+                        String str = cell.value.toString().trim();
+                        if (!StringUtils.isBlank( str )) {
+                            i++;
+                            if (str.startsWith( "\"" ) && str.endsWith( "\"" )) {
+                                guessedQuoteCharacter.increaseDouble();
+                            }
+                            else if (str.startsWith( "'" ) && str.endsWith( "'" )) {
+                                guessedQuoteCharacter.increaseSingle();
+                            }
+                            else {
+                                guessedQuoteCharacter.increaseNo();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return guessedQuoteCharacter;
+    }
 }

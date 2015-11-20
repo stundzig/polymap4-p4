@@ -74,21 +74,22 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
      * GeometryFactory will be used to create the geometry attribute of each feature
      * (a Point object for the location)
      */
-    private final static GeometryFactory GEOMETRYFACTORY = JTSFactoryFinder.getGeometryFactory( null );
+    private final static GeometryFactory GEOMETRYFACTORY     = JTSFactoryFinder.getGeometryFactory( null );
 
     // all known synonyms for longitude in lower case in all languages
     // TODO: this should be part of a *longitude synonym registry* in the user
     // settings too, to better support frequent uploads
     // each user selected columnname for longitude and latitude should be saved in
     // this user settings
-    private static final Set<String>     LONGITUDES      = Sets.newHashSet( "geo_longitude", "lon", "longitude",
-                                                                 "geo_x", "x" );
+    private static final Set<String>     LONGITUDES          = Sets.newHashSet( "geo_longitude", "lon", "longitude",
+            "geo_x", "x" );
 
     // all known synonyms for latitude in lower case in all languages
-    private static final Set<String>     LATITUDES       = Sets.newHashSet( "geo_latitude", "lat", "latitude", "geo_y",
-                                                                 "y" );
+    private static final Set<String>     LATITUDES           = Sets.newHashSet( "geo_latitude", "lat", "latitude",
+            "geo_y",
+            "y" );
 
-    private static Log                   log             = LogFactory.getLog( AbstractRefineFileImporter.class );
+    private static Log                   log                 = LogFactory.getLog( AbstractRefineFileImporter.class );
 
     protected ImporterSite               site;
 
@@ -115,6 +116,8 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
 
     private Project                      project;
 
+    private boolean                      shouldUpdateOptions = false;
+
 
     // private Composite tableComposite;
 
@@ -132,7 +135,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                 .getServiceReference( RefineService.class.getName() );
         service = (RefineService)P4Plugin.instance().getBundle().getBundleContext().getService( serviceReference );
 
-        prepare();
+        prepare( monitor );
     }
 
 
@@ -143,12 +146,12 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     public void execute( IProgressMonitor monitor ) throws Exception {
 
         // create all params for contextOut
-        log.info( "execute" );
         // use the typed column from the preview and cancel the import create a
-        project = service.createProject( importJob, formatAndOptions );
+        project = service.createProject( importJob, formatAndOptions, monitor );
         // reset it
         typedContent = null;
         log.info( "project has rows: " + project.rows.size() );
+        // TODO MONITOR for the features
         features = createFeatures();
     }
 
@@ -164,6 +167,17 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
         Collections.reverse( rows );
         int latitudeColumnIndex = content.columnIndex( latitudeColumn() );
         int longitudeColumnIndex = content.columnIndex( longitudeColumn() );
+        // coordinate columns selected, but final file parsing contains crappy data,
+        // so the columns or only String
+        if (latitudeColumnIndex != -1 && longitudeColumnIndex != -1
+                && (!Number.class.isAssignableFrom( content.columns().get( latitudeColumnIndex ).type() )
+                        || !Number.class.isAssignableFrom( content.columns().get( longitudeColumnIndex ).type() ))) {
+            // TODO error message to the user
+            log.error( "skipping coordinate creation" );
+            latitudeColumnIndex = -1;
+            longitudeColumnIndex = -1;
+        }
+
         int count = 0;
         for (RefineRow row : rows) {
             if (latitudeColumnIndex != -1 && longitudeColumnIndex != -1) {
@@ -221,8 +235,8 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     }
 
 
-    protected void prepare() throws Exception {
-        ImportResponse<T> response = service.importFile( file, defaultOptions() );
+    protected void prepare( IProgressMonitor monitor ) throws Exception {
+        ImportResponse<T> response = service.importFile( file, defaultOptions(), monitor );
         importJob = response.job();
         formatAndOptions = response.options();
     }
@@ -231,7 +245,11 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     @Override
     public void verify( IProgressMonitor monitor ) {
         log.info( "verify" );
-        typedContent = null;
+//        typedContent = null;
+        if (shouldUpdateOptions) {
+            updateOptions( monitor );
+            shouldUpdateOptions = false;
+        }
         site.terminal.set( true );
         try {
             features = createFeatures();
@@ -348,8 +366,9 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     }
 
 
-    public void updateOptions() {
-        service.updateOptions( importJob, formatAndOptions );
+    protected void updateOptions( IProgressMonitor monitor ) {
+        typedContent = null;
+        service.updateOptions( importJob, formatAndOptions, monitor );
     }
 
 
@@ -375,57 +394,65 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
             @Override
             public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
                 parent.setLayout( new FormLayout() );
-                // 2 lists with all columns to select and a label in
-                // front
-                Label lonLabel = new Label( parent, SWT.RIGHT );
-                lonLabel.setText( Messages.get( "importer.refine.lon.label" ) );
+                //
+                String[] columnNames = numberColumnNames();
+                if (columnNames.length == 0) {
+                    FormDataFactory.on( tk.createLabel( parent, Messages.get( "importer.prompt.coordinates.nocolumns" ),
+                            SWT.LEFT ) ).left( 0 ).top( 5 ).width( 300 );
+                }
+                else {
+                    // 2 lists with all columns to select and a label in
+                    // front
+                    Label lonLabel = new Label( parent, SWT.RIGHT );
+                    lonLabel.setText( Messages.get( "importer.refine.lon.label" ) );
 
-                Combo lonValues = new Combo( parent, SWT.DROP_DOWN );
-                lonValues.setItems( numberColumnNames() );
-                lonValues.addSelectionListener( new SelectionAdapter() {
+                    Combo lonValues = new Combo( parent, SWT.DROP_DOWN );
+                    lonValues.setItems( columnNames );
+                    lonValues.addSelectionListener( new SelectionAdapter() {
 
-                    @Override
-                    public void widgetSelected( SelectionEvent e ) {
-                        Combo c = (Combo)e.getSource();
-                        lonValue = c.getItem( c.getSelectionIndex() );
-                    }
-                } );
-                lonValue = longitudeColumn();
-                if (!StringUtils.isBlank( lonValue )) {
-                    for (int i = 0; i < lonValues.getItems().length; i++) {
-                        if (lonValues.getItem( i ).equals( lonValue )) {
-                            lonValues.select( i );
+                        @Override
+                        public void widgetSelected( SelectionEvent e ) {
+                            Combo c = (Combo)e.getSource();
+                            lonValue = c.getItem( c.getSelectionIndex() );
+                        }
+                    } );
+                    lonValue = longitudeColumn();
+                    if (!StringUtils.isBlank( lonValue )) {
+                        for (int i = 0; i < lonValues.getItems().length; i++) {
+                            if (lonValues.getItem( i ).equals( lonValue )) {
+                                lonValues.select( i );
+                            }
                         }
                     }
-                }
 
-                Label latLabel = new Label( parent, SWT.RIGHT );
-                latLabel.setText( Messages.get( "importer.refine.lat.label" ) );
+                    Label latLabel = new Label( parent, SWT.RIGHT );
+                    latLabel.setText( Messages.get( "importer.refine.lat.label" ) );
 
-                Combo latValues = new Combo( parent, SWT.DROP_DOWN );
-                latValues.setItems( numberColumnNames() );
+                    Combo latValues = new Combo( parent, SWT.DROP_DOWN );
+                    latValues.setItems( columnNames );
 
-                latValues.addSelectionListener( new SelectionAdapter() {
+                    latValues.addSelectionListener( new SelectionAdapter() {
 
-                    @Override
-                    public void widgetSelected( SelectionEvent e ) {
-                        Combo c = (Combo)e.getSource();
-                        latValue = c.getItem( c.getSelectionIndex() );
-                    }
-                } );
-                latValue = latitudeColumn();
-                if (!StringUtils.isBlank( latValue )) {
-                    for (int i = 0; i < latValues.getItems().length; i++) {
-                        if (latValues.getItem( i ).equals( latValue )) {
-                            latValues.select( i );
+                        @Override
+                        public void widgetSelected( SelectionEvent e ) {
+                            Combo c = (Combo)e.getSource();
+                            latValue = c.getItem( c.getSelectionIndex() );
+                        }
+                    } );
+                    latValue = latitudeColumn();
+                    if (!StringUtils.isBlank( latValue )) {
+                        for (int i = 0; i < latValues.getItems().length; i++) {
+                            if (latValues.getItem( i ).equals( latValue )) {
+                                latValues.select( i );
+                            }
                         }
                     }
-                }
 
-                FormDataFactory.on( latLabel ).left( 0 ).top( 12 ).width( 100 );
-                FormDataFactory.on( latValues ).left( latLabel, 5 ).top( 5 ).width( 350 );
-                FormDataFactory.on( lonLabel ).top( latValues, 12 ).width( 100 );
-                FormDataFactory.on( lonValues ).left( lonLabel, 5 ).top( latValues, 5 ).width( 350 ).bottom( 95 );
+                    FormDataFactory.on( latLabel ).left( 0 ).top( 12 ).width( 100 );
+                    FormDataFactory.on( latValues ).left( latLabel, 5 ).top( 5 ).width( 350 );
+                    FormDataFactory.on( lonLabel ).top( latValues, 12 ).width( 100 );
+                    FormDataFactory.on( lonValues ).left( lonLabel, 5 ).top( latValues, 5 ).width( 350 ).bottom( 95 );
+                }
             }
 
 
@@ -491,5 +518,10 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
         String lat = latitudeColumn();
         String lon = longitudeColumn();
         return lat != null && lon != null ? (lat != null ? lat : "") + "/" + (lon != null ? lon : "") : "";
+    }
+
+
+    public void triggerUpdateOptions() {
+        shouldUpdateOptions = true;
     }
 }

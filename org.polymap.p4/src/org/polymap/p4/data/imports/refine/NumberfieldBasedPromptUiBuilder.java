@@ -47,7 +47,7 @@ public abstract class NumberfieldBasedPromptUiBuilder
         parent.setLayout( new FormLayout() );
         // TODO add numbervalidator here
         Text text = tk.createText( parent, String.valueOf( initialValue() ), SWT.RIGHT | SWT.BORDER );
-        FormDataFactory.on( text ).left( 0 ).top( 5 ).width( 100 );
+        FormDataFactory.on( text ).left( 0 ).top( 5 ).width( 350 );
         
         text.addModifyListener( event -> {
             Text t = (Text)event.getSource();
@@ -69,7 +69,7 @@ public abstract class NumberfieldBasedPromptUiBuilder
     @Override
     public void submit( ImporterPrompt prompt ) {
         onSubmit( prompt );
-        importer.updateOptions();
+        importer.triggerUpdateOptions();
         prompt.ok.set( true );
         prompt.value.set( String.valueOf( value ) );
     }
