@@ -86,13 +86,14 @@ public class LayersFeatureTableContribution
 
                 // FeatureSource?
                 if (pipeline != null && pipeline.length() > 0) {
-                    log.info( "Feature pipeline created for: " + layer.label.get() );
-                    MdActionItem item = new MdActionItem( group );
-                    item.text.put( StringUtils.abbreviate( layer.label.get(), 10 ) );
-                    item.tooltip.put( "Attributes table: " + layer.label.get() );
-                    item.icon.put( P4Plugin.images().svgImage( "table.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
-                    item.action.put( ev -> {
-                        createTableView( layer, pipeline, site );                        
+                    UIThreadExecutor.async( () -> {
+                        MdActionItem item = new MdActionItem( group );
+                        item.text.put( StringUtils.abbreviate( layer.label.get(), 10 ) );
+                        item.tooltip.put( "Attributes table: " + layer.label.get() );
+                        item.icon.put( P4Plugin.images().svgImage( "table.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+                        item.action.put( ev -> {
+                            createTableView( layer, pipeline, site );                        
+                        });
                     });
                 }
             }
