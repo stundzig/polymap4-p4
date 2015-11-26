@@ -73,7 +73,7 @@ public class NewLayerContribution
 
         OperationSupport.instance().execute2( op, true, false, ev2 -> asyncFast( () -> {
             if (ev2.getResult().isOK()) {
-                PanelPath parentPath = site.getPanelSite().path().removeLast( 1 );
+                PanelPath parentPath = site.panelSite().path().removeLast( 1 );
                 BatikApplication.instance().getContext().closePanel( parentPath );
 
 //                // close panel and parent, assuming that projct map is root

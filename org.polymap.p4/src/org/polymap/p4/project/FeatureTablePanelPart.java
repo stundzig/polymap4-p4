@@ -12,9 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.featuretable;
+package org.polymap.p4.project;
 
-import org.opengis.feature.type.FeatureType;
+import org.geotools.feature.FeatureCollection;
 import org.opengis.feature.type.PropertyDescriptor;
 
 import org.apache.commons.logging.Log;
@@ -37,13 +37,17 @@ public class FeatureTablePanelPart {
 
     private static Log log = LogFactory.getLog( FeatureTablePanelPart.class );
 
-    FeatureTableViewer          viewer;
+    private FeatureTableViewer          viewer;
+    
+    private FeatureCollection           features;
     
     
-    public FeatureTablePanelPart( Composite parent, FeatureType schema ) {
+    public FeatureTablePanelPart( Composite parent, FeatureCollection features ) {
+        this.features = features;
+        
         viewer = new FeatureTableViewer( parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION );
         
-        for (PropertyDescriptor prop : schema.getDescriptors()) {
+        for (PropertyDescriptor prop : features.getSchema().getDescriptors()) {
             if (Geometry.class.isAssignableFrom( prop.getType().getBinding() )) {
                 // skip Geometry
             }
@@ -52,6 +56,7 @@ public class FeatureTablePanelPart {
             }
         }
 
+        viewer.setContent( features );
     }
     
 }

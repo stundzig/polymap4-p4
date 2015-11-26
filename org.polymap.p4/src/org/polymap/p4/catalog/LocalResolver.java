@@ -70,13 +70,13 @@ public class LocalResolver
     
     // instance *******************************************
     
-    private LocalCatalog            localCatalog;
+    private LocalCatalog                    localCatalog;
     
     /**
      * Cache {@link IResolvableInfo} instances in order to have just one underlying
      * service instances (WMS, Shape, RDataStore, etc.) per JVM.
      */
-    private Cache<IMetadata,IResolvableInfo>   resolved = CacheBuilder.newBuilder()
+    private Cache<IMetadata,IResolvableInfo> resolved = CacheBuilder.newBuilder()
             .initialCapacity( 128 )
             .concurrencyLevel( 2 )
             .softValues().build();
@@ -95,6 +95,16 @@ public class LocalResolver
     }
     
     
+    /**
+     * {@link DataSourceDescription} for the given layer with potentially cached
+     * service instance.
+     *
+     * @param layer
+     * @param monitor
+     * @return Newly created {@link DataSourceDescription} with potentially cached
+     *         service instance.
+     * @throws Exception
+     */
     public Optional<DataSourceDescription> connectLayer( ILayer layer, IProgressMonitor monitor ) throws Exception {
         StringTokenizer tokens = new StringTokenizer( layer.resourceIdentifier.get(), ID_DELIMITER );
         String metadataId = tokens.nextToken();
@@ -132,6 +142,15 @@ public class LocalResolver
     }
 
     
+    /**
+     * Resolves info for the given metadata and caches the result.
+     * <p>
+     * This usually <b>blocks</b> execution until backend service is available and/or connected.
+     * 
+     * @param metadata
+     * @param monitor
+     * @return Created or cached info instance.
+     */
     @Override
     public IResolvableInfo resolve( IMetadata metadata, IProgressMonitor monitor ) throws Exception {
         return resolved.get( metadata, () -> {
