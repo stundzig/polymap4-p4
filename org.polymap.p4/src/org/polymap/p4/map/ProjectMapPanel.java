@@ -16,6 +16,8 @@ package org.polymap.p4.map;
 
 import static org.polymap.core.ui.FormDataFactory.on;
 
+import java.util.function.Consumer;
+
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -23,12 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
-
 import org.polymap.core.data.util.Geometries;
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.project.ILayer;
@@ -44,6 +41,8 @@ import org.polymap.rhei.batik.Memento;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.ContributionManager;
+import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
+import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.Messages;
@@ -76,6 +75,8 @@ public class ProjectMapPanel
     protected Context<IMap>             map;
 
     public MapViewer<ILayer>            mapViewer;
+
+    private Composite                   tableParent;
     
     
     @Override
@@ -107,22 +108,17 @@ public class ProjectMapPanel
         ((P4AppDesign)BatikApplication.instance().getAppDesign()).setAppTitle( title );
         
         parent.setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
-        parent.setLayout( FormLayoutFactory.defaults().margins( 0 ).create() );
-
-        // toolbar test
-        ToolBar tb = on( new ToolBar( parent, SWT.RIGHT ) ).fill().noLeft().noTop().control();
-        tb.moveAbove( null ); 
+        parent.setLayout( FormLayoutFactory.defaults().margins( 0 ).spacing( 0 ).create() );
         
-        ToolItem item1 = new ToolItem( tb, SWT.CHECK );
-        item1.setText( "PUSH" );
-        item1.setImage( P4Plugin.images().svgImage( "settings.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
-        item1.setToolTipText( "Do it!" );
-        item1.addSelectionListener( new SelectionAdapter() {
-            @Override
-            public void widgetSelected( SelectionEvent ev ) {
-                item1.setText( item1.getText() + "!" );
-            }
-        });
+        // buttom toolbar
+        MdToolbar2 tb2 = ((MdToolkit)site().toolkit()).createToolbar( parent );
+        on( tb2.getControl() ).fill().noTop();
+        
+        ContributionManager.instance().contributeToolbar( this, tb2 );
+        
+        // table area
+        tableParent = on( site().toolkit().createComposite( parent, SWT.NONE ) )
+                .fill().bottom( tb2.getControl() ).noTop().height( 10 ).control();
         
         // mapViewer
         try {
@@ -139,7 +135,8 @@ public class ProjectMapPanel
             mapViewer.addMapControl( new ScaleLineControl() );
             
             mapViewer.setInput( map.get() );
-            on( mapViewer.getControl() ).fill().bottom( tb );
+            on( mapViewer.getControl() ).fill().bottom( tableParent );
+            mapViewer.getControl().moveBelow( null );
             
             // restore state
             Memento memento = getSite().getMemento();
@@ -156,4 +153,18 @@ public class ProjectMapPanel
         ContributionManager.instance().contributeFab( this );
     }
 
+    
+    /**
+     * 
+     *
+     * @param creator
+     */
+    public void addButtomView( Consumer<Composite> creator ) {
+        on( tableParent ).height( 200 );
+        
+        UIUtils.disposeChildren( tableParent );
+        creator.accept( tableParent );
+        tableParent.getParent().layout();
+    }
+    
 }

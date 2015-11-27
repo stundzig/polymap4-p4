@@ -70,7 +70,7 @@ public class LayersPanel
     
     /** Set before opening {@link LayerInfoPanel}. */
     @Scope(P4Plugin.Scope)
-    protected Context<ILayer>           layer;
+    protected Context<ILayer>           selected;
     
     private MdListViewer                viewer;
     
@@ -144,7 +144,7 @@ public class LayersPanel
             @Override
             public void open( OpenEvent ev ) {
                 SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
-                    layer.set( (ILayer)elm );
+                    selected.set( (ILayer)elm );
                     getContext().openPanel( getSite().getPath(), LayerInfoPanel.ID );                        
                 });
             }

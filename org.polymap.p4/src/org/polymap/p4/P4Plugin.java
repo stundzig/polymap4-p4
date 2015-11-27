@@ -35,15 +35,18 @@ import org.polymap.core.data.pipeline.PipelineProcessor;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
 import org.polymap.core.ui.StatusDispatcher;
+
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.contribution.ContributionManager;
 import org.polymap.rhei.batik.toolkit.BatikStatusAdapter;
+
 import org.polymap.service.geoserver.GeoServerServlet;
 
 import org.polymap.p4.catalog.LocalCatalog;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
+import org.polymap.p4.project.LayersFeatureTableContribution;
 import org.polymap.p4.project.NewLayerContribution;
 import org.polymap.p4.project.ProjectRepository;
 
@@ -155,7 +158,10 @@ public class P4Plugin
         };
         httpServiceTracker.open();
 
-        ContributionManager.addStaticSupplier( ( ) -> new NewLayerContribution() );
+        // static UI contributions
+        // XXX make this an extension point
+        ContributionManager.addStaticSupplier( () -> new NewLayerContribution() );
+        ContributionManager.addStaticSupplier( () -> new LayersFeatureTableContribution() );
     }
 
 
