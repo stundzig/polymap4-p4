@@ -123,7 +123,7 @@ public class ImportPanel
                 .map( parent -> {
                     site().title.set( "" );
                     site().tooltip.set( "Import new data into the catalog" );
-                    site().icon.set( P4Plugin.images().svgImage( "plus-circle-outline.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+                    site().icon.set( P4Plugin.images().svgImage( "plus-circle-outline.svg", P4Plugin.HEADER_ICON_CONFIG ) );
                     site().preferredWidth.set( 350 );
                     return true;
                 } )

@@ -68,7 +68,7 @@ public class ProjectInfoPanel
                 .map( parent -> {
                     site().title.set( "" );
                     site().tooltip.set( "Project settings" );
-                    site().icon.set( P4Plugin.images().svgImage( "settings.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+                    site().icon.set( P4Plugin.images().svgImage( "settings.svg", P4Plugin.HEADER_ICON_CONFIG ) );
                     getSite().setPreferredWidth( 200 );
                     return true;
                 })

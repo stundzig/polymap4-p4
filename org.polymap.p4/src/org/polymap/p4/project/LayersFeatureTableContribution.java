@@ -37,8 +37,8 @@ import org.polymap.rhei.batik.Mandatory;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.IContributionFactory;
 import org.polymap.rhei.batik.contribution.IContributionSite;
-import org.polymap.rhei.batik.toolkit.md.MdActionItem;
 import org.polymap.rhei.batik.toolkit.md.MdItemContainer;
+import org.polymap.rhei.batik.toolkit.md.MdRadioItem;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 
 import org.polymap.p4.P4Plugin;
@@ -87,12 +87,17 @@ public class LayersFeatureTableContribution
                 // FeatureSource?
                 if (pipeline != null && pipeline.length() > 0) {
                     UIThreadExecutor.async( () -> {
-                        MdActionItem item = new MdActionItem( group );
+                        MdRadioItem item = new MdRadioItem( group );
                         item.text.put( StringUtils.abbreviate( layer.label.get(), 10 ) );
                         item.tooltip.put( "Attributes table: " + layer.label.get() );
                         item.icon.put( P4Plugin.images().svgImage( "table.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
-                        item.action.put( ev -> {
+                        item.onSelected.put( ev -> {
                             createTableView( layer, pipeline, site );                        
+                        });
+                        item.onUnselected.put( ev -> {
+                            ((ProjectMapPanel)site.panel()).addButtomView( parent -> {
+                                // empty
+                            });
                         });
                     });
                 }

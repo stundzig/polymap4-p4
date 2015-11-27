@@ -83,7 +83,7 @@ public class LayersPanel
         return parentPanel()
                 .filter( parent -> parent instanceof ProjectMapPanel )
                 .map( parent -> {
-                    getSite().setIcon( P4Plugin.images().svgImage( "layers.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+                    getSite().setIcon( P4Plugin.images().svgImage( "layers.svg", P4Plugin.HEADER_ICON_CONFIG ) );
                     getSite().setTitle( "" );
                     getSite().setPreferredWidth( 200 );
                     return true;

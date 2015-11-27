@@ -108,17 +108,18 @@ public class ProjectMapPanel
         ((P4AppDesign)BatikApplication.instance().getAppDesign()).setAppTitle( title );
         
         parent.setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
-        parent.setLayout( FormLayoutFactory.defaults().margins( 0 ).spacing( 0 ).create() );
+        parent.setLayout( FormLayoutFactory.defaults().margins( 0 ).spacing( 5 ).create() );
         
         // buttom toolbar
         MdToolbar2 tb2 = ((MdToolkit)site().toolkit()).createToolbar( parent );
         on( tb2.getControl() ).fill().noTop();
+        tb2.getControl().moveAbove( null );
         
         ContributionManager.instance().contributeToolbar( this, tb2 );
         
         // table area
         tableParent = on( site().toolkit().createComposite( parent, SWT.NONE ) )
-                .fill().bottom( tb2.getControl() ).noTop().height( 10 ).control();
+                .fill().bottom( tb2.getControl() ).noTop().height( 5 ).control();
         
         // mapViewer
         try {
@@ -155,7 +156,7 @@ public class ProjectMapPanel
 
     
     /**
-     * 
+     * Simple/experimental way to add bottom view to this panel.
      *
      * @param creator
      */
