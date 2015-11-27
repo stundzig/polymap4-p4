@@ -47,12 +47,17 @@ public abstract class NumberfieldBasedPromptUiBuilder
         parent.setLayout( new FormLayout() );
         // TODO add numbervalidator here
         Text text = tk.createText( parent, String.valueOf( initialValue() ), SWT.RIGHT | SWT.BORDER );
-        FormDataFactory.on( text ).left( 0 ).top( 5 ).width( 350 );
-        
+        FormDataFactory.on( text ).left( 1 ).top( 5 ).width( 350 );
+
         text.addModifyListener( event -> {
             Text t = (Text)event.getSource();
             // can throw an exception
-            value = Integer.parseInt( t.getText() );
+            try {
+                value = Integer.parseInt( t.getText() );
+            }
+            catch (Exception e) {
+                // do nothing
+            }
         } );
         // initial value
         value = Integer.parseInt( text.getText() );

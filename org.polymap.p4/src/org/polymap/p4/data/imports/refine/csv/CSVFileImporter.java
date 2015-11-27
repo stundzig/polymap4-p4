@@ -325,7 +325,7 @@ public class CSVFileImporter
             public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
                 parent.setLayout( new FormLayout() );
 
-                Combo combo = new Combo( parent, SWT.SINGLE );
+                Combo combo = new Combo( parent, SWT.SINGLE | SWT.BORDER );
                 TableViewer viewer = null;
                 if (potentialEncodingProblems() != null && !potentialEncodingProblems().isEmpty()) {
                     viewer = new TableViewer( parent, SWT.H_SCROLL |
@@ -337,9 +337,9 @@ public class CSVFileImporter
                     viewer.getTable().setHeaderVisible( true );
                     viewer.getTable().setLinesVisible( true );
 
-                    layout.addColumnData( new ColumnPixelData( 350 ) );
+                    layout.addColumnData( new ColumnPixelData( 700 ) );
                     TableViewerColumn viewerColumn = new TableViewerColumn( viewer, SWT.H_SCROLL );
-                    viewerColumn.getColumn().setText( Messages.get( "importer.prompt.encoding.before" ) );
+                    viewerColumn.getColumn().setText( Messages.get( "importer.prompt.encoding.samples" ) );
                     viewerColumn.setLabelProvider( new ColumnLabelProvider() {
 
                         @Override
@@ -351,7 +351,7 @@ public class CSVFileImporter
                     viewer.setContentProvider( ArrayContentProvider.getInstance() );
                     viewer.setInput( potentialEncodingProblems() );
 
-                    FormDataFactory.on( viewer.getTable() ).left( 0 ).top( combo, 15 ).width( 700 ).height( 400 );
+                    FormDataFactory.on( viewer.getTable() ).left( 1 ).top( combo, 15 ).width( 700 ).height( 400 );
                 }
 
                 final TableViewer finalViewer = viewer;
@@ -373,8 +373,7 @@ public class CSVFileImporter
                     combo.select( index );
                 }
                 prompt.value.set( encoding );
-                FormDataFactory.on( combo ).left( 0 ).top( 5 ).width( 250 );
-
+                FormDataFactory.on( combo ).left( 1 ).top( 5 ).width( 250 );
             }
 
 

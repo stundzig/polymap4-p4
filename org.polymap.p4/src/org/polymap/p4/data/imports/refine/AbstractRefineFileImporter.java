@@ -398,12 +398,12 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                 String[] columnNames = numberColumnNames();
                 if (columnNames.length == 0) {
                     FormDataFactory.on( tk.createLabel( parent, Messages.get( "importer.prompt.coordinates.nocolumns" ),
-                            SWT.LEFT ) ).left( 0 ).top( 5 ).width( 300 );
+                            SWT.LEFT ) ).left( 1 ).top( 5 ).width( 500 );
                 }
                 else {
                     // 2 lists with all columns to select and a label in
                     // front
-                    Label lonLabel = new Label( parent, SWT.RIGHT );
+                    Label lonLabel = new Label( parent, SWT.LEFT );
                     lonLabel.setText( Messages.get( "importer.refine.lon.label" ) );
 
                     Combo lonValues = new Combo( parent, SWT.DROP_DOWN );
@@ -425,7 +425,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                         }
                     }
 
-                    Label latLabel = new Label( parent, SWT.RIGHT );
+                    Label latLabel = new Label( parent, SWT.LEFT );
                     latLabel.setText( Messages.get( "importer.refine.lat.label" ) );
 
                     Combo latValues = new Combo( parent, SWT.DROP_DOWN );
@@ -448,10 +448,10 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                         }
                     }
 
-                    FormDataFactory.on( latLabel ).left( 0 ).top( 12 ).width( 100 );
-                    FormDataFactory.on( latValues ).left( latLabel, 5 ).top( 5 ).width( 350 );
-                    FormDataFactory.on( lonLabel ).top( latValues, 12 ).width( 100 );
-                    FormDataFactory.on( lonValues ).left( lonLabel, 5 ).top( latValues, 5 ).width( 350 ).bottom( 95 );
+                    FormDataFactory.on( latLabel ).left( 1 ).top( 5 ).width( 500 );
+                    FormDataFactory.on( latValues ).left( 1 ).top( latLabel, 5 ).width( 500 );
+                    FormDataFactory.on( lonLabel ).left( 1 ).top( latValues, 15 ).width( 500 );
+                    FormDataFactory.on( lonValues ).left( 1 ).top( lonLabel, 5 ).width( 500 ).bottom( 95 );
                 }
             }
 
