@@ -103,7 +103,7 @@ public class LayersFeatureTableContribution
                 }
             }
         };
-        job.schedule();  // UI callback?        
+        job.scheduleWithUIUpdate();  // UI callback?        
     }
     
     
@@ -123,7 +123,7 @@ public class LayersFeatureTableContribution
                     
                     UIThreadExecutor.async( () -> {
                         UIUtils.disposeChildren( parent );
-                        new FeatureTablePanelPart( parent, features );
+                        new FeatureTable( parent, features, site.toolkit() );
                         parent.layout();
                     });        
                 }
