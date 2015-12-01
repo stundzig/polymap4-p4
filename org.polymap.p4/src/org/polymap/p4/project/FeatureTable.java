@@ -65,7 +65,7 @@ public class FeatureTable {
 
     private Text                        searchText;
 
-    private Button searchBtn;
+    private Button                      searchBtn;
     
     
     public FeatureTable( Composite parent, FeatureCollection features, IPanelToolkit tk ) {
@@ -78,7 +78,34 @@ public class FeatureTable {
         topbar.setLayout( FormLayoutFactory.defaults().spacing( 3 ).create() );
     
         // seach
-        searchText = on( tk.createText( topbar, null, SWT.BORDER ) ).fill().right( 50 ).control();
+        createTextSearch( topbar );
+        on( searchBtn ).fill().noLeft().control();
+        on( searchText ).fill().right( searchBtn );
+
+        // table viewer
+        createTableViewer( parent );
+        on( viewer.getTable() ).fill().top( topbar );
+    }
+    
+    
+    protected void createTableViewer( Composite parent ) {
+        viewer = new FeatureTableViewer( parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION );
+        
+        for (PropertyDescriptor prop : features.getSchema().getDescriptors()) {
+            if (Geometry.class.isAssignableFrom( prop.getType().getBinding() )) {
+                // skip Geometry
+            }
+            else {
+                viewer.addColumn( new DefaultFeatureTableColumn( prop ) );
+            }
+        }
+
+        viewer.setContent( features );        
+    }
+    
+    
+    protected void createTextSearch( Composite topbar ) {
+        searchText = tk.createText( topbar, null, SWT.BORDER );
         searchText.setToolTipText( "Beginning of a text to search for. At least 2 characters." );
         searchText.forceFocus();
         searchText.addModifyListener( new ModifyListener() {
@@ -96,7 +123,7 @@ public class FeatureTable {
             }
         });
 
-        searchBtn = on( tk.createButton( topbar, null, SWT.PUSH ) ).fill().left( searchText ).noRight().control();
+        searchBtn = tk.createButton( topbar, null, SWT.PUSH );
         searchBtn.setToolTipText( "Start search" );
         searchBtn.setImage( P4Plugin.images().svgImage( "magnify.svg", SvgImageRegistryHelper.WHITE24 ) );
         searchBtn.addSelectionListener( new SelectionAdapter() {
@@ -105,21 +132,6 @@ public class FeatureTable {
                 search();
             }
         });
-        
-        // table viewer
-        viewer = new FeatureTableViewer( parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION );
-        on( viewer.getTable() ).fill().top( topbar );
-        
-        for (PropertyDescriptor prop : features.getSchema().getDescriptors()) {
-            if (Geometry.class.isAssignableFrom( prop.getType().getBinding() )) {
-                // skip Geometry
-            }
-            else {
-                viewer.addColumn( new DefaultFeatureTableColumn( prop ) );
-            }
-        }
-
-        viewer.setContent( features );
     }
     
     
