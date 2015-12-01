@@ -21,6 +21,8 @@ import static org.polymap.rhei.batik.toolkit.md.dp.dp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EventObject;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,7 +34,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -56,6 +57,7 @@ import org.polymap.core.ui.UIUtils;
 import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
+import org.polymap.p4.Messages;
 import org.polymap.p4.data.imports.ImporterFactory.ImporterBuilder;
 import org.polymap.p4.data.imports.ImporterPrompt.Severity;
 import org.polymap.p4.data.imports.archive.ArchiveFileImporterFactory;
@@ -88,11 +90,12 @@ public class ImporterContext
     
     private ImporterSite                    site;
     
-    private Map<Class,Object>               contextIn = Maps.newHashMap();
+    private Map<Class,Object>               contextIn = new HashMap();
     
-    private Map<Class,Object>               contextOut = Maps.newHashMap();
+    private Map<Class,Object>               contextOut = new HashMap();
     
-    private Map<String,ImporterPrompt>      prompts = Maps.newLinkedHashMap();
+    /** Ordered prompts of the importer. Keep insert order. */
+    private Map<String,ImporterPrompt>      prompts = new LinkedHashMap();
     
     private UIJob                           verifier;
 
@@ -129,6 +132,10 @@ public class ImporterContext
                 return ImporterContext.this;
             }
             @Override
+            /**
+             * Creates a new prompt with specified id and add's also a default description and summary with key
+             * importer.prompt.*id*.summary and .description . 
+             */
             public ImporterPrompt newPrompt( String id ) {
                 assert prompts != null : "newPrompt() called before createPrompts()!";
                 assert !prompts.containsKey( id );
@@ -138,6 +145,8 @@ public class ImporterContext
                         return ImporterContext.this;
                     }                    
                 };
+                result.summary.put(Messages.get("importer.prompt." + id + ".summary"));
+                result.description.put(Messages.get("importer.prompt." + id + ".description"));
                 prompts.put( id, result );
                 EventManager.instance().publish( new ContextChangeEvent( ImporterContext.this ) );
                 return result;
