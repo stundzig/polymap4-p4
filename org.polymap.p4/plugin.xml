@@ -47,10 +47,6 @@
             id="org.polymap.batikapp.LayersPanel"
             stackPriority="100">
       </panel>
-      <!--panel
-            class="org.polymap.p4.imports.ShapeImportPanel"
-            id="org.polymap.p4.ShapeImportPanel">
-      </panel-->
       <panel
             class="org.polymap.p4.catalog.CatalogPanel"
             id="org.polymap.p4.CatalogPanel">
