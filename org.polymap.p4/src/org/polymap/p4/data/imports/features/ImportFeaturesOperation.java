@@ -17,6 +17,7 @@ package org.polymap.p4.data.imports.features;
 import org.geotools.data.DataAccess;
 import org.geotools.data.FeatureStore;
 import org.geotools.feature.FeatureCollection;
+import org.opengis.feature.type.FeatureType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,11 +81,19 @@ public class ImportFeaturesOperation
     protected IStatus doExecute( IProgressMonitor monitor, IAdaptable info ) throws Exception {
         monitor.beginTask( getLabel(), 100 );
         
+        FeatureType schema = features.getSchema();
+
+        // XXX check namespace, remove when fixed
+        if (schema.getName().getNamespaceURI() != null) {
+            // XXX remove when fixed
+            throw new RuntimeException( "RDataStore does not handle namespace properly: " + schema.getName() );
+        }
+        
         DataAccess ds = P4Plugin.localCatalog().localFeaturesStore();        
         // XXX transaction that spans createSchema() and addFeatures()!?
-        ds.createSchema( features.getSchema() );
+        ds.createSchema( schema );
         
-        fs = (FeatureStore)ds.getFeatureSource( features.getSchema().getName() );
+        fs = (FeatureStore)ds.getFeatureSource( schema.getName() );
         fs.addFeatures( features );
         monitor.done();
 

@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.NameImpl;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTSFactoryFinder;
@@ -266,7 +267,8 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
 
     private SimpleFeatureType buildFeatureType( List<TypedColumn> columns ) {
         SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
-        builder.setName( layerName() );
+        // no namespace for imported features
+        builder.setName( new NameImpl( layerName() ) );
         // TODO the CRS should be a separate prompt
         builder.setCRS( DefaultGeographicCRS.WGS84 );
         // add the default GEOM
