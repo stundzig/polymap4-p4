@@ -18,23 +18,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.geotools.data.shapefile.ShapefileDataStore;
-import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.data.store.ContentFeatureCollection;
-import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.data.wms.WebMapServer;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.opengis.feature.simple.SimpleFeature;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.google.common.base.Joiner;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -68,8 +56,6 @@ import org.polymap.rap.openlayers.base.OlFeature;
 import org.polymap.rap.openlayers.control.MousePositionControl;
 import org.polymap.rap.openlayers.control.ScaleLineControl;
 import org.polymap.rap.openlayers.format.GeoJSONFormat;
-import org.polymap.rap.openlayers.geom.LinearRingGeometry;
-import org.polymap.rap.openlayers.geom.PointGeometry;
 import org.polymap.rap.openlayers.geom.PolygonGeometry;
 import org.polymap.rap.openlayers.layer.ImageLayer;
 import org.polymap.rap.openlayers.layer.Layer;
@@ -199,69 +185,75 @@ public class ResourceInfoPanel
                         .findFirst().get();
                 bounds = wms.getInfo( layer ).getBounds().transform( Geometries.crs( "EPSG:3857" ), false );
             }
-            else if (service instanceof ShapefileDataStore) {
-                // TODO: this is just a dummy implementation
-                ShapefileDataStore sfds = (ShapefileDataStore)service;
-                ContentFeatureSource featureSource = sfds.getFeatureSource();
-                
-                ContentFeatureCollection features = featureSource.getFeatures();
-
-                VectorSource vectorSource = new VectorSource()
-                    .format.put( new GeoJSONFormat() )
-                    .attributions.put( Arrays.asList( new Attribution( Joiner.on( ", " ).join( sfds.getNames() ) ) ) );
-                
-
-                SimpleFeatureIterator featureIterator = features.features();
-                while(featureIterator.hasNext()) {
-                    SimpleFeature simpleFeature = featureIterator.next();
-                    if(simpleFeature.getDefaultGeometry() instanceof Geometry) {
-                        Geometry geometry = (Geometry) simpleFeature.getDefaultGeometry();
-                        List<Coordinate> coords = Arrays.asList(geometry.getCoordinates()).stream().map(  c -> new Coordinate( c.x, c.y ) )
-                                .collect( Collectors.toList() );
-                        OlFeature feature = new OlFeature();
-                        feature.name.set( featureSource.getName().toString() );
-                        if (geometry instanceof Polygon) {
-                            feature.geometry.set( new PolygonGeometry( coords ) );
-                        }
-                        else if (geometry instanceof Point) {
-                            feature.geometry.set( new PointGeometry( coords.get( 0 ) ) );
-                        }
-                        else if (geometry instanceof LinearRing) {
-                            feature.geometry.set( new LinearRingGeometry( coords ) );
-                        }
-//                        else if (geometry instanceof MultiLineString) {
-//                            feature.geometry.set( new MultilineStringGeometry( coords ) );
+            
+//          // TODO: review
+//            else if (service instanceof ShapefileDataStore) {
+//                // TODO: this is just a dummy implementation
+//                ShapefileDataStore sfds = (ShapefileDataStore)service;
+//                ContentFeatureSource featureSource = sfds.getFeatureSource();
+//                
+//                ContentFeatureCollection features = featureSource.getFeatures();
+//
+//                VectorSource vectorSource = new VectorSource()
+//                    .format.put( new GeoJSONFormat() )
+//                    .attributions.put( Arrays.asList( new Attribution( Joiner.on( ", " ).join( sfds.getNames() ) ) ) );
+//                
+//
+//                SimpleFeatureIterator featureIterator = features.features();
+//                while (featureIterator.hasNext()) {
+//                    SimpleFeature simpleFeature = featureIterator.next();
+//                    if (simpleFeature.getDefaultGeometry() instanceof Geometry) {
+//                        Geometry geometry = (Geometry)simpleFeature.getDefaultGeometry();
+//                        
+//                        List<Coordinate> coords = Arrays.asList( geometry.getCoordinates() ).stream()
+//                                .map( c -> new Coordinate( c.x, c.y ) )
+//                                .collect( Collectors.toList() );
+//                        
+//                        OlFeature feature = new OlFeature();
+//                        
+//                        feature.name.set( featureSource.getName().toString() );
+//                        if (geometry instanceof Polygon) {
+//                            feature.geometry.set( new PolygonGeometry( coords ) );
 //                        }
-                        else {
-                            feature.geometry.set( new PolygonGeometry( coords ) );
-                        }
-                        for (Object att : simpleFeature.getAttributes()) {
-                            // feature.setAttribute( String.valueOf(att), att );
-                            System.out.println( att );
-                        }
-                        for (org.opengis.feature.Property prop : simpleFeature.getProperties()) {
-                            System.out.println( prop );
-                        }
-                        
-                        vectorSource.addFeature( feature );
-                    }
-                }
-                
-                //org.json.simple.parser.ContentHandler cannot be found by org.polymap.core.data_4.0.0.qualifier
-//              FeatureJSON fjson = new FeatureJSON();
-//              StringWriter writer = new StringWriter();
-//                fjson.writeFeature(features.features().next(), writer);
-//                String json = writer.toString();
-                
-                data = new VectorLayer()
-                        .style.put( new Style()
-                        .fill.put( new FillStyle().color.put( new Color( 0, 0, 255, 0.1f ) ) )
-                        .stroke.put( new StrokeStyle().color.put( new Color( "red" ) ).width.put( 10f ) ) )
-                        .source.put( vectorSource );
-
-                bounds = featureSource.getBounds().transform( Geometries.crs( "EPSG:3857" ), false );;
-                
-            }
+//                        else if (geometry instanceof Point) {
+//                            feature.geometry.set( new PointGeometry( coords.get( 0 ) ) );
+//                        }
+//                        else if (geometry instanceof LinearRing) {
+//                            feature.geometry.set( new LinearRingGeometry( coords ) );
+//                        }
+//                        //                        else if (geometry instanceof MultiLineString) {
+////                            feature.geometry.set( new MultilineStringGeometry( coords ) );
+////                        }
+//                        else {
+//                            feature.geometry.set( new PolygonGeometry( coords ) );
+//                        }
+//                        for (Object att : simpleFeature.getAttributes()) {
+//                            // feature.setAttribute( String.valueOf(att), att );
+//                            System.out.println( att );
+//                        }
+//                        for (org.opengis.feature.Property prop : simpleFeature.getProperties()) {
+//                            System.out.println( prop );
+//                        }
+//                        
+//                        vectorSource.addFeature( feature );
+//                    }
+//                }
+//                
+//                //org.json.simple.parser.ContentHandler cannot be found by org.polymap.core.data_4.0.0.qualifier
+////              FeatureJSON fjson = new FeatureJSON();
+////              StringWriter writer = new StringWriter();
+////                fjson.writeFeature(features.features().next(), writer);
+////                String json = writer.toString();
+//                
+//                data = new VectorLayer()
+//                        .style.put( new Style()
+//                        .fill.put( new FillStyle().color.put( new Color( 0, 0, 255, 0.1f ) ) )
+//                        .stroke.put( new StrokeStyle().color.put( new Color( "red" ) ).width.put( 10f ) ) )
+//                        .source.put( vectorSource );
+//
+//                bounds = featureSource.getBounds().transform( Geometries.crs( "EPSG:3857" ), false );;
+//                
+//            }
             else {
                 throw new RuntimeException( "Unhandled service type: " + service );
             }
