@@ -85,7 +85,6 @@ public class ImportFeaturesOperation
 
         // XXX check namespace, remove when fixed
         if (schema.getName().getNamespaceURI() != null) {
-            // XXX remove when fixed
             throw new RuntimeException( "RDataStore does not handle namespace properly: " + schema.getName() );
         }
         

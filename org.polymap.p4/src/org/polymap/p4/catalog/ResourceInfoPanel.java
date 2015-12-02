@@ -255,7 +255,7 @@ public class ResourceInfoPanel
 //                
 //            }
             else {
-                throw new RuntimeException( "Unhandled service type: " + service );
+                log.info( "No map for service: " + service );
             }
             
             // fence geometry layer
