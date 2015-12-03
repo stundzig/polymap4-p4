@@ -110,7 +110,7 @@ public class ResourceInfoPanel
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
         dashboard.addDashlet( new BasicInfoDashlet() );
         dashboard.addDashlet( new MetadataDashlet() );
-        dashboard.addDashlet( new MapDashlet() );
+        //dashboard.addDashlet( new MapDashlet() );
         dashboard.createContents( parent );
 
         ContributionManager.instance().contributeFab( this );

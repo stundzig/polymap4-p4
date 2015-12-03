@@ -34,6 +34,8 @@ import org.polymap.core.data.pipeline.Pipeline;
 import org.polymap.core.data.pipeline.PipelineProcessor;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
+import org.polymap.core.security.SecurityContext;
+import org.polymap.core.security.StandardConfiguration;
 import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.Context;
@@ -109,6 +111,14 @@ public class P4Plugin
         
         log.info( "Bundle state: " + getStateLocation() );
         log.info( "Bundle data: " + CorePlugin.getDataLocation( instance() ) );
+
+        // JAAS config: no dialog; let LoginPanel create UI
+        SecurityContext.registerConfiguration( () -> new StandardConfiguration() {
+            @Override
+            public String getConfigName() {
+                return SecurityContext.SERVICES_CONFIG_NAME;
+            }
+        });
 
         // Handling errors in the UI
         StatusDispatcher.registerAdapter( new StatusDispatcher.LogAdapter() );

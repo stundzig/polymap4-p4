@@ -26,18 +26,19 @@ import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+
 import org.polymap.core.data.util.Geometries;
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.i18n.IMessages;
+import org.polymap.core.security.SecurityContext;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
-import org.polymap.rhei.batik.Memento;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.ContributionManager;
@@ -81,20 +82,21 @@ public class ProjectMapPanel
     
     @Override
     public void init() {
+        // the 'start' panel initializes context
         map.compareAndSet( null, ProjectRepository.unitOfWork().entity( IMap.class, "root" ) );
+        
+        // XXX fake user login; used by ProjectNodeUser for example
+        SecurityContext sc = SecurityContext.instance();
+        if (!sc.isLoggedIn()) {
+            if (!sc.login( "admin", "admin" )) {
+                throw new RuntimeException( "Default/fake login did not succeed." );
+            }
+        }
     }
 
     
     @Override
     public void dispose() {
-        if (mapViewer != null) {
-            Memento memento = getSite().getMemento();
-            Memento visibleLayers = memento.getOrCreateChild( "visibleLayers" );
-
-            for (ILayer l : mapViewer.getLayers()) {
-                visibleLayers.putBoolean( (String)l.id(), mapViewer.isVisible( l ) );
-            }
-        }
     }
 
 
@@ -102,9 +104,9 @@ public class ProjectMapPanel
     public void createContents( Composite parent ) {
         // title and layout
         String title = map.get().label.get();
-        getSite().setTitle( title );
-        getSite().setPreferredWidth( 650 );
-
+        site().title.set( title );
+        site().preferredWidth.set( 650 );
+        
         ((P4AppDesign)BatikApplication.instance().getAppDesign()).setAppTitle( title );
         
         parent.setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
@@ -138,14 +140,6 @@ public class ProjectMapPanel
             mapViewer.setInput( map.get() );
             on( mapViewer.getControl() ).fill().bottom( tableParent );
             mapViewer.getControl().moveBelow( null );
-            
-            // restore state
-            Memento memento = getSite().getMemento();
-            Memento visibleLayers = memento.getChild( "visibleLayers" );
-            
-            for (ILayer l : mapViewer.getLayers()) {
-                mapViewer.setVisible( l, visibleLayers.optBoolean( (String)l.id() ).orElse( true ) );
-            }
         }
         catch (Exception e) {
             throw new RuntimeException( e );

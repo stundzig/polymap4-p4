@@ -132,11 +132,11 @@ public class LayersPanel
         viewer.firstSecondaryActionProvider.set( new CheckboxActionProvider() {
             @Override
             protected boolean initSelection( MdListViewer _viewer, Object elm ) {
-                return mapViewer.isVisible( (ILayer)elm );
+                return ((ILayer)elm).userSettings.get().visible.get();
             }
             @Override
             protected void onSelectionChange( MdListViewer _viewer, Object elm ) {
-                mapViewer.setVisible( (ILayer)elm, isSelected( elm ) );
+                ((ILayer)elm).userSettings.get().visible.set( isSelected( elm ) );
             }
         });
         

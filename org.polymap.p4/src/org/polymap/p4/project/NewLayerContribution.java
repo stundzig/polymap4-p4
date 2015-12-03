@@ -34,6 +34,7 @@ import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.DefaultContribution;
 import org.polymap.rhei.batik.contribution.IContributionSite;
 
+import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.ResourceInfoPanel;
 
@@ -65,8 +66,10 @@ public class NewLayerContribution
     protected void execute( IContributionSite site ) throws Exception {
         String resId = P4Plugin.localResolver().resourceIdentifier( res.get() );
         
+        UnitOfWork uow = ProjectRepository.unitOfWork();
+        
         NewLayerOperation op = new NewLayerOperation()
-                .uow.put( ProjectRepository.unitOfWork().newUnitOfWork() )
+                .uow.put( uow.newUnitOfWork() )
                 .map.put( map.get() )
                 .label.put( res.get().getName() )
                 .resourceIdentifier.put( resId );

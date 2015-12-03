@@ -14,7 +14,11 @@
  */
 package org.polymap.p4.map;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import java.beans.PropertyChangeEvent;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +27,9 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.polymap.core.mapeditor.MapViewer;
+import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
+import org.polymap.core.project.ILayer.LayerUserSettings;
 import org.polymap.core.project.ProjectNode.ProjectNodeCommittedEvent;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -31,7 +37,8 @@ import org.polymap.core.runtime.event.EventManager;
 /**
  * Provides the content of an {@link IMap}.
  * <p/>
- * Triggers {@link MapViewer#refresh()} on {@link ProjectNodeCommittedEvent}. 
+ * This also tracks the state of the layers and triggers {@link MapViewer#refresh()}
+ * on {@link ProjectNodeCommittedEvent} and {@link PropertyChangeEvent}. 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
@@ -44,31 +51,66 @@ public class ProjectContentProvider
 
     private MapViewer           viewer;
 
+    private CommitListener      commitListener;
+
+    private PropertyListener    propertyListener;
+
     
     @Override
     public void inputChanged( @SuppressWarnings("hiding") Viewer viewer, Object oldInput, Object newInput ) {
         this.map = (IMap)newInput;
         this.viewer = (MapViewer)viewer;
         
-        EventManager.instance().subscribe( this, ev -> 
+        // commit listener
+        EventManager.instance().subscribe( commitListener = new CommitListener(), ev -> 
                 ev instanceof ProjectNodeCommittedEvent &&
                 ev.getSource() instanceof IMap &&
                 ((IMap)ev.getSource()).id() == map.id() );
                 // XXX check if structural change or just label changed
+
+        // property listener
+        EventManager.instance().subscribe( propertyListener = new PropertyListener(), ev -> {
+            if (ev instanceof PropertyChangeEvent) {
+                if (ev.getSource() instanceof LayerUserSettings) {
+                    LayerUserSettings userSettings = (LayerUserSettings)ev.getSource();
+                    ILayer eventLayer = userSettings.layer.get();
+                    IMap eventMap = eventLayer.parentMap.get();
+                    return eventMap.id().equals( map.id() );
+                }
+            }
+            return false;
+        });
+    }
+
+
+    /**
+     * 
+     */
+    class CommitListener {
+        @EventHandler( display=true, delay=100 )
+        protected void onCommit( List<ProjectNodeCommittedEvent> evs ) {
+            viewer.refresh();
+        }
+    }
+
+
+    /**
+     * 
+     */
+    class PropertyListener {
+        @EventHandler( display=true, delay=100 )
+        protected void onPropertyChange( List<PropertyChangeEvent> ev ) {
+            // FIXME check if layer was just created and onCommit() did it already
+            viewer.refresh();
+        }
     }
 
     
-    @EventHandler( display=true, delay=100 )
-    protected void mapLayersChanged( List<ProjectNodeCommittedEvent> evs ) {
-        log.info( "mapLayersChanged: " + evs );
-        viewer.refresh();
-    }
-    
-    
     @Override
     public Object[] getElements( Object inputElement ) {
-        log.info( "Layers: " + map.layers );
-        return map.layers.toArray();
+        Object[] result = map.layers.stream().filter( l -> l.userSettings.get().visible.get() ).toArray();
+        log.info( "Layers: " + Arrays.stream( result ).map( l -> ((ILayer)l).label.get() ).collect( Collectors.toList() ) );
+        return result;
     }
 
     
@@ -76,7 +118,8 @@ public class ProjectContentProvider
     public void dispose() {
         log.info( "..." );
         this.map = null;
-        EventManager.instance().unsubscribe( this );
+        EventManager.instance().unsubscribe( commitListener );
+        EventManager.instance().unsubscribe( propertyListener );
     }
     
 }

@@ -33,6 +33,7 @@ import org.polymap.model2.runtime.EntityRepository;
 import org.polymap.model2.runtime.ModelRuntimeException;
 import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.model2.runtime.ValueInitializer;
+import org.polymap.model2.store.OptimisticLocking;
 import org.polymap.model2.store.recordstore.RecordStoreAdapter;
 import org.polymap.p4.P4Plugin;
 import org.polymap.recordstore.lucene.LuceneRecordStore;
@@ -54,8 +55,11 @@ public class ProjectRepository {
             dir.mkdirs();
             LuceneRecordStore store = new LuceneRecordStore( dir, false );
             repo = EntityRepository.newConfiguration()
-                    .entities.set( new Class[] {ILayer.class, IMap.class} )
-                    .store.set( new RecordStoreAdapter( store ) )
+                    .entities.set( new Class[] {
+                            ILayer.class, IMap.class, ILayer.LayerUserSettings.class} )
+                    .store.set( 
+                            new OptimisticLocking( 
+                            new RecordStoreAdapter( store ) ) )
                     .create();
             
             checkInitRepo();
@@ -70,7 +74,7 @@ public class ProjectRepository {
             if (uow.entity( IMap.class, "root" ) == null) {
                 uow.createEntity( IMap.class, "root", (IMap prototype) -> {
                     prototype.label.set( "The Map" );
-                    prototype.visible.set( true );
+                    //prototype.visible.set( true );
                     return prototype;
                 });
                 uow.commit();
