@@ -61,6 +61,7 @@ import org.polymap.p4.data.imports.refine.TypedContent;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.refine.model.Cell;
 import com.google.refine.model.Column;
 import com.google.refine.model.Row;
@@ -170,7 +171,11 @@ public class CSVFileImporter
 
                             @Override
                             protected List<String> allValues() {
-                                return Lists.newArrayList( ",", "|", ";", "\\t", " " );
+                                List<String> ret = Lists.newArrayList( ",", "|", ";", "\\t", " ");
+                                if (!ret.contains( initialValue() )) {
+                                    ret.add( 0, initialValue());
+                                }
+                                return ret;
                             }
 
 
