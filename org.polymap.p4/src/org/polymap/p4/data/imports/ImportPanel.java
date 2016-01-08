@@ -71,6 +71,7 @@ import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.SimpleDialog;
+import org.polymap.rhei.batik.toolkit.Snackbar.Appearance;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
@@ -345,7 +346,7 @@ public class ImportPanel
             IOUtils.copy( in, out );
         }
         catch (Exception e) {
-            async( () -> site().status.set( new Status( IStatus.ERROR, P4Plugin.ID, "Unable to upload file.", e ) ) );
+            async( () -> site().toolkit().createSnackbar( Appearance.FadeIn, "Unable to upload file." ) );
             return;
         }
 

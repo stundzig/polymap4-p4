@@ -42,8 +42,6 @@ import org.polymap.rhei.batik.dashboard.DashletSite;
 import org.polymap.rhei.batik.dashboard.DefaultDashlet;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
-import org.polymap.rhei.batik.toolkit.md.AbstractFeedbackComponent.MessageType;
-import org.polymap.rhei.batik.toolkit.md.MdSnackbar;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import org.polymap.p4.P4Plugin;
@@ -87,7 +85,7 @@ public class LayerInfoPanel
         dashboard.addDashlet( new DeleteLayerDashlet() );
         dashboard.createContents( parent );
 
-        ContributionManager.instance().contributeFab( this );
+        ContributionManager.instance().contributeTo( this, this );
     }
 
     
@@ -133,8 +131,8 @@ public class LayerInfoPanel
             deleteBtn.addSelectionListener( new SelectionAdapter() {
                 @Override
                 public void widgetSelected( SelectionEvent e ) {
-                    MdSnackbar snackbar = tk.createSnackbar();
-                    snackbar.showIssue( MessageType.WARNING, "We are going to delete the project." );
+//                    MdSnackbar snackbar = tk.createSnackbar();
+//                    snackbar.showIssue( MessageType.WARNING, "We are going to delete the project." );
                     
                     DeleteLayerOperation op = new DeleteLayerOperation();
                     op.uow.set( ProjectRepository.unitOfWork().newUnitOfWork() );
