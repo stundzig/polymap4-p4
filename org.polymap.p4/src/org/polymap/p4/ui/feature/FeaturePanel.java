@@ -50,7 +50,8 @@ import org.polymap.p4.P4Plugin;
 import org.polymap.p4.ui.P4Panel;
 
 /**
- * 
+ * Displays a single feature from the {@link Context}. {@link StandardFeatureForm} is
+ * used to create field for every {@link Property}.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
