@@ -15,10 +15,12 @@
 package org.polymap.p4.project;
 
 import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
-import static org.polymap.rhei.batik.contribution.ContributionSiteFilters.panelType;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.operation.OperationSupport;
@@ -28,11 +30,13 @@ import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.Mandatory;
 import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.Scope;
-import org.polymap.rhei.batik.contribution.DefaultContribution;
 import org.polymap.rhei.batik.contribution.IContributionSite;
+import org.polymap.rhei.batik.contribution.IFabContribution;
+import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Plugin;
@@ -44,7 +48,7 @@ import org.polymap.p4.catalog.ResourceInfoPanel;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class NewLayerContribution
-        extends DefaultContribution {
+        implements IFabContribution {
 
     private static Log log = LogFactory.getLog( NewLayerContribution.class );
     
@@ -57,13 +61,22 @@ public class NewLayerContribution
     private Context<IResourceInfo>      res;
 
     
-    public NewLayerContribution() {
-        super( panelType( ResourceInfoPanel.class ), Place.FAB );
+    @Override
+    public void fillFab( IContributionSite site, IPanel panel ) {
+        if (panel instanceof ResourceInfoPanel) {
+            Button fab = ((MdToolkit)site.toolkit()).createFab();
+            fab.setToolTipText( "Create a new layer with this data" );
+            fab.addSelectionListener( new SelectionAdapter() {
+                @Override
+                public void widgetSelected( SelectionEvent ev ) {
+                    execute( site );
+                }
+            } );
+        }
     }
 
-    
-    @Override
-    protected void execute( IContributionSite site ) throws Exception {
+
+    protected void execute( IContributionSite site ) {
         String resId = P4Plugin.localResolver().resourceIdentifier( res.get() );
         
         UnitOfWork uow = ProjectRepository.unitOfWork();

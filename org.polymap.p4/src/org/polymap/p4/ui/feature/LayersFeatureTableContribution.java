@@ -12,7 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.project;
+package org.polymap.p4.ui.feature;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.geotools.feature.FeatureCollection;
 
@@ -35,10 +37,10 @@ import org.polymap.core.ui.UIUtils;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.Mandatory;
 import org.polymap.rhei.batik.Scope;
-import org.polymap.rhei.batik.contribution.IContributionFactory;
 import org.polymap.rhei.batik.contribution.IContributionSite;
-import org.polymap.rhei.batik.toolkit.md.MdItemContainer;
-import org.polymap.rhei.batik.toolkit.md.MdRadioItem;
+import org.polymap.rhei.batik.contribution.IToolbarContribution;
+import org.polymap.rhei.batik.toolkit.ItemContainer;
+import org.polymap.rhei.batik.toolkit.RadioItem;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 
 import org.polymap.p4.P4Plugin;
@@ -51,7 +53,7 @@ import org.polymap.p4.map.ProjectMapPanel;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class LayersFeatureTableContribution
-        implements IContributionFactory {
+        implements IToolbarContribution {
 
     private static Log log = LogFactory.getLog( LayersFeatureTableContribution.class );
 
@@ -61,19 +63,18 @@ public class LayersFeatureTableContribution
 
     
     @Override
-    public void fillToolbar( IContributionSite site, Object toolbar ) {
+    public void fillToolbar( IContributionSite site, MdToolbar2 toolbar ) {
         if (site.panel() instanceof ProjectMapPanel) {
-            MdToolbar2 tb = (MdToolbar2)toolbar;
 //            MdGroupItem group = new MdGroupItem( tb, "layers" );
             
             for (ILayer layer : map.get().layers) {
-                createLayerItem( tb, layer, site );
+                createLayerItem( toolbar, layer, site );
             }
         }
     }
 
     
-    protected void createLayerItem( MdItemContainer group, ILayer layer, IContributionSite site ) {
+    protected void createLayerItem( ItemContainer group, ILayer layer, IContributionSite site ) {
         UIJob job = new UIJob( "Connect layer" ) {
             @Override
             protected void runWithException( IProgressMonitor monitor ) throws Exception {
@@ -87,17 +88,22 @@ public class LayersFeatureTableContribution
                 // FeatureSource?
                 if (pipeline != null && pipeline.length() > 0) {
                     UIThreadExecutor.async( () -> {
-                        MdRadioItem item = new MdRadioItem( group );
+                        RadioItem item = new RadioItem( group );
                         item.text.put( StringUtils.abbreviate( layer.label.get(), 10 ) );
-                        item.tooltip.put( "Attributes table: " + layer.label.get() );
+                        item.tooltip.put( "Open attributes table of: " + layer.label.get() );
                         item.icon.put( P4Plugin.images().svgImage( "table.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+                        AtomicBoolean wasVisible = new AtomicBoolean();
                         item.onSelected.put( ev -> {
-                            createTableView( layer, pipeline, site );                        
+                            createTableView( layer, pipeline, site );
+                            
+                            wasVisible.set( layer.userSettings.get().visible.get() );
+                            layer.userSettings.get().visible.set( true );
                         });
                         item.onUnselected.put( ev -> {
                             ((ProjectMapPanel)site.panel()).addButtomView( parent -> {
-                                // empty
+                                // empty; remove content
                             });
+                            layer.userSettings.get().visible.set( wasVisible.get() );
                         });
                     });
                 }
@@ -129,11 +135,6 @@ public class LayersFeatureTableContribution
                 }
             }.schedule();  // UI callback?
         });
-    }
-
-    
-    @Override
-    public void fillFab( IContributionSite site ) {
     }
     
 }

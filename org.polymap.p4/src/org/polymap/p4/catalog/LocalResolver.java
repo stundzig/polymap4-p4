@@ -22,9 +22,6 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.polymap.core.catalog.IMetadata;
@@ -37,6 +34,8 @@ import org.polymap.core.data.rs.catalog.RServiceResolver;
 import org.polymap.core.data.shapefile.catalog.ShapefileServiceResolver;
 import org.polymap.core.data.wms.catalog.WmsServiceResolver;
 import org.polymap.core.project.ILayer;
+import org.polymap.core.runtime.cache.Cache;
+import org.polymap.core.runtime.cache.CacheConfig;
 
 import org.polymap.p4.P4Plugin;
 
@@ -76,10 +75,7 @@ public class LocalResolver
      * Cache {@link IResolvableInfo} instances in order to have just one underlying
      * service instances (WMS, Shape, RDataStore, etc.) per JVM.
      */
-    private Cache<IMetadata,IResolvableInfo> resolved = CacheBuilder.newBuilder()
-            .initialCapacity( 128 )
-            .concurrencyLevel( 2 )
-            .softValues().build();
+    private Cache<IMetadata,IResolvableInfo> resolved = CacheConfig.defaults().initSize( 128 ).createCache();
     
     
     public LocalResolver( LocalCatalog localCatalog ) {
@@ -131,7 +127,7 @@ public class LocalResolver
     
     @Override
     public boolean canResolve( IMetadata metadata ) {
-        if (resolved.getIfPresent( metadata ) != null) {
+        if (resolved.get( metadata ) != null) {
             return true;
         }
         else {
@@ -153,7 +149,7 @@ public class LocalResolver
      */
     @Override
     public IResolvableInfo resolve( IMetadata metadata, IProgressMonitor monitor ) throws Exception {
-        return resolved.get( metadata, () -> {
+        return resolved.get( metadata, key -> {
             for (int i=0; i<resolvers.length; i++) {
                 if (resolvers[i].canResolve( metadata ) ) {
                     return resolvers[i].resolve( metadata, monitor );

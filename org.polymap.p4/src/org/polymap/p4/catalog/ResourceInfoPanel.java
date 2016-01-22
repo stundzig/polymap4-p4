@@ -113,7 +113,7 @@ public class ResourceInfoPanel
         //dashboard.addDashlet( new MapDashlet() );
         dashboard.createContents( parent );
 
-        ContributionManager.instance().contributeFab( this );
+        ContributionManager.instance().contributeTo( this, this );
     }
 
     

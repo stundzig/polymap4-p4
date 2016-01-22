@@ -41,6 +41,8 @@ import org.polymap.core.ui.StatusDispatcher;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.contribution.ContributionManager;
+import org.polymap.rhei.batik.contribution.ContributionProviderExtension;
+import org.polymap.rhei.batik.contribution.IContributionProvider;
 import org.polymap.rhei.batik.toolkit.BatikStatusAdapter;
 
 import org.polymap.service.geoserver.GeoServerServlet;
@@ -48,9 +50,9 @@ import org.polymap.service.geoserver.GeoServerServlet;
 import org.polymap.p4.catalog.LocalCatalog;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
-import org.polymap.p4.project.LayersFeatureTableContribution;
 import org.polymap.p4.project.NewLayerContribution;
 import org.polymap.p4.project.ProjectRepository;
+import org.polymap.p4.ui.feature.LayersFeatureTableContribution;
 
 /**
  *
@@ -120,6 +122,21 @@ public class P4Plugin
             }
         });
 
+        // static UI contributions
+        // XXX make this an extension point
+        ContributionManager.registerExtension( new ContributionProviderExtension() {
+            @Override
+            public IContributionProvider createProvider() {
+                return new NewLayerContribution();
+            }
+        });
+        ContributionManager.registerExtension( new ContributionProviderExtension() {
+            @Override
+            public IContributionProvider createProvider() {
+                return new LayersFeatureTableContribution();
+            }
+        });
+        
         // Handling errors in the UI
         StatusDispatcher.registerAdapter( new StatusDispatcher.LogAdapter() );
         StatusDispatcher.registerAdapter( new BatikStatusAdapter() );
@@ -168,11 +185,6 @@ public class P4Plugin
             }
         };
         httpServiceTracker.open();
-
-        // static UI contributions
-        // XXX make this an extension point
-        ContributionManager.addStaticSupplier( () -> new NewLayerContribution() );
-        ContributionManager.addStaticSupplier( () -> new LayersFeatureTableContribution() );
     }
 
 

@@ -12,12 +12,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.project;
+package org.polymap.p4.ui.feature;
 
 import static org.polymap.core.ui.FormDataFactory.on;
 
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
+import org.opengis.feature.Feature;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
@@ -41,6 +42,9 @@ import org.eclipse.swt.widgets.Text;
 
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.BatikApplication;
+import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.rhei.table.DefaultFeatureTableColumn;
@@ -67,11 +71,17 @@ public class FeatureTable {
 
     private Button                      searchBtn;
     
+    /** */
+    @Scope( P4Plugin.Scope )
+    private Context<Feature>            selected;
+    
     
     public FeatureTable( Composite parent, FeatureCollection features, IPanelToolkit tk ) {
         this.features = features;
         this.tk = tk;
         parent.setLayout( FormLayoutFactory.defaults().create() );
+        
+        BatikApplication.instance().getContext().propagate( this );
         
         // topbar
         Composite topbar = on( tk.createComposite( parent ) ).fill().noBottom().height( 30 ).control();
@@ -85,6 +95,9 @@ public class FeatureTable {
         // table viewer
         createTableViewer( parent );
         on( viewer.getTable() ).fill().top( topbar );
+        
+//        ContributionManager.instance().contributeTo( viewer, null );
+//        viewer.addDoubleClickListener( );
     }
     
     

@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright (C) 2015, Falko Bräutigam. All rights reserved.
+ * Copyright (C) 2015-2016, Falko Bräutigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -38,7 +38,6 @@ import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.Context;
-import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.ContributionManager;
@@ -50,6 +49,7 @@ import org.polymap.p4.Messages;
 import org.polymap.p4.P4AppDesign;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.project.ProjectRepository;
+import org.polymap.p4.ui.P4Panel;
 import org.polymap.rap.openlayers.control.MousePositionControl;
 import org.polymap.rap.openlayers.control.ScaleLineControl;
 
@@ -59,7 +59,7 @@ import org.polymap.rap.openlayers.control.ScaleLineControl;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class ProjectMapPanel
-        extends DefaultPanel {
+        extends P4Panel {
 
     private static Log log = LogFactory.getLog( ProjectMapPanel.class );
 
@@ -113,15 +113,15 @@ public class ProjectMapPanel
         parent.setLayout( FormLayoutFactory.defaults().margins( 0 ).spacing( 5 ).create() );
         
         // buttom toolbar
-        MdToolbar2 tb2 = ((MdToolkit)site().toolkit()).createToolbar( parent );
-        on( tb2.getControl() ).fill().noTop();
-        tb2.getControl().moveAbove( null );
+        MdToolbar2 tb = ((MdToolkit)site().toolkit()).createToolbar( parent );
+        on( tb.getControl() ).fill().noTop();
+        tb.getControl().moveAbove( null );
         
-        ContributionManager.instance().contributeToolbar( this, tb2 );
+        ContributionManager.instance().contributeTo( tb, this );
         
         // table area
         tableParent = on( site().toolkit().createComposite( parent, SWT.NONE ) )
-                .fill().bottom( tb2.getControl() ).noTop().height( 5 ).control();
+                .fill().bottom( tb.getControl() ).noTop().height( 5 ).control();
         
         // mapViewer
         try {
@@ -145,7 +145,7 @@ public class ProjectMapPanel
             throw new RuntimeException( e );
         }
 
-        ContributionManager.instance().contributeFab( this );
+        ContributionManager.instance().contributeTo( this, this );
     }
 
     

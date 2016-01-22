@@ -85,7 +85,7 @@ public class ProjectInfoPanel
         dashboard.addDashlet( new BasicInfoDashlet() );
         dashboard.createContents( parent );
 
-        ContributionManager.instance().contributeFab( this );
+        ContributionManager.instance().contributeTo( this, this );
     }
 
     

@@ -67,6 +67,10 @@
             class="org.polymap.p4.project.ProjectInfoPanel"
             id="org.polymap.p4.project.ProjectInfoPanel">
       </panel>
+      <panel
+            class="org.polymap.p4.ui.feature.FeaturePanel"
+            id="org.polymap.p4.FeaturePanel">
+      </panel>
    </extension>
    <!--extension
          point="org.polymap.service.fs.contentProviders">
