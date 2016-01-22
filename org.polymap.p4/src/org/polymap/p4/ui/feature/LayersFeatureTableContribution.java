@@ -129,7 +129,7 @@ public class LayersFeatureTableContribution
                     
                     UIThreadExecutor.async( () -> {
                         UIUtils.disposeChildren( parent );
-                        new FeatureTable( parent, features, site.toolkit() );
+                        new FeaturesTable( parent, features, site.panelSite() );
                         parent.layout();
                     });        
                 }

@@ -15,6 +15,7 @@
 package org.polymap.p4.ui.feature;
 
 import static org.polymap.core.ui.FormDataFactory.on;
+import static org.polymap.core.ui.SelectionAdapter.on;
 
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
@@ -40,14 +41,18 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+
 import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.PanelSite;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
-import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.rhei.table.DefaultFeatureTableColumn;
+import org.polymap.rhei.table.FeatureCollectionContentProvider.FeatureTableElement;
 import org.polymap.rhei.table.FeatureTableViewer;
 
 import org.polymap.p4.P4Plugin;
@@ -57,15 +62,15 @@ import org.polymap.p4.P4Plugin;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class FeatureTable {
+public class FeaturesTable {
 
-    private static Log log = LogFactory.getLog( FeatureTable.class );
+    private static Log log = LogFactory.getLog( FeaturesTable.class );
 
     private FeatureTableViewer          viewer;
     
     private FeatureCollection           features;
 
-    private IPanelToolkit               tk;
+    private PanelSite                   site;
 
     private Text                        searchText;
 
@@ -76,15 +81,15 @@ public class FeatureTable {
     private Context<Feature>            selected;
     
     
-    public FeatureTable( Composite parent, FeatureCollection features, IPanelToolkit tk ) {
+    public FeaturesTable( Composite parent, FeatureCollection features, PanelSite site ) {
         this.features = features;
-        this.tk = tk;
+        this.site = site;
         parent.setLayout( FormLayoutFactory.defaults().create() );
         
         BatikApplication.instance().getContext().propagate( this );
         
         // topbar
-        Composite topbar = on( tk.createComposite( parent ) ).fill().noBottom().height( 30 ).control();
+        Composite topbar = on( tk().createComposite( parent ) ).fill().noBottom().height( 30 ).control();
         topbar.setLayout( FormLayoutFactory.defaults().spacing( 3 ).create() );
     
         // seach
@@ -95,15 +100,18 @@ public class FeatureTable {
         // table viewer
         createTableViewer( parent );
         on( viewer.getTable() ).fill().top( topbar );
-        
-//        ContributionManager.instance().contributeTo( viewer, null );
-//        viewer.addDoubleClickListener( );
+    }
+    
+    
+    protected MdToolkit tk() {
+        return (MdToolkit)site.toolkit();
     }
     
     
     protected void createTableViewer( Composite parent ) {
-        viewer = new FeatureTableViewer( parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION );
-        
+        viewer = new FeatureTableViewer( parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER );
+    
+        // add columns
         for (PropertyDescriptor prop : features.getSchema().getDescriptors()) {
             if (Geometry.class.isAssignableFrom( prop.getType().getBinding() )) {
                 // skip Geometry
@@ -112,13 +120,21 @@ public class FeatureTable {
                 viewer.addColumn( new DefaultFeatureTableColumn( prop ) );
             }
         }
+        //
+        viewer.setContent( features );
 
-        viewer.setContent( features );        
+        // selection -> FeaturePanel
+        viewer.addSelectionChangedListener( (SelectionChangedEvent ev) -> {
+            FeatureTableElement elm = (FeatureTableElement)on( ev.getSelection() ).first().get();
+            log.info( "selection: " + elm );
+            selected.set( elm.getFeature() );
+            BatikApplication.instance().getContext().openPanel( site.path(), FeaturePanel.ID );
+        });
     }
     
     
     protected void createTextSearch( Composite topbar ) {
-        searchText = tk.createText( topbar, null, SWT.BORDER );
+        searchText = tk().createText( topbar, null, SWT.BORDER );
         searchText.setToolTipText( "Beginning of a text to search for. At least 2 characters." );
         searchText.forceFocus();
         searchText.addModifyListener( new ModifyListener() {
@@ -136,7 +152,7 @@ public class FeatureTable {
             }
         });
 
-        searchBtn = tk.createButton( topbar, null, SWT.PUSH );
+        searchBtn = tk().createButton( topbar, null, SWT.PUSH );
         searchBtn.setToolTipText( "Start search" );
         searchBtn.setImage( P4Plugin.images().svgImage( "magnify.svg", SvgImageRegistryHelper.WHITE24 ) );
         searchBtn.addSelectionListener( new SelectionAdapter() {
