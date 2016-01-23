@@ -109,8 +109,8 @@ public class ProjectMapPanel
         
         ((P4AppDesign)BatikApplication.instance().getAppDesign()).setAppTitle( title );
         
-        parent.setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
-        parent.setLayout( FormLayoutFactory.defaults().margins( 0 ).spacing( 5 ).create() );
+        //parent.setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
+        parent.setLayout( FormLayoutFactory.defaults().margins( 0 ).spacing( 0 ).create() );
         
         // buttom toolbar
         MdToolbar2 tb = ((MdToolkit)site().toolkit()).createToolbar( parent );
@@ -121,7 +121,7 @@ public class ProjectMapPanel
         
         // table area
         tableParent = on( site().toolkit().createComposite( parent, SWT.NONE ) )
-                .fill().bottom( tb.getControl() ).noTop().height( 5 ).control();
+                .fill().bottom( tb.getControl() ).noTop().height( 0 ).control();
         
         // mapViewer
         try {
@@ -140,6 +140,7 @@ public class ProjectMapPanel
             mapViewer.setInput( map.get() );
             on( mapViewer.getControl() ).fill().bottom( tableParent );
             mapViewer.getControl().moveBelow( null );
+            mapViewer.getControl().setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
         }
         catch (Exception e) {
             throw new RuntimeException( e );
