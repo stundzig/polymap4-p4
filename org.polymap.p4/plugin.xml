@@ -60,10 +60,6 @@
             id="org.polymap.p4.project.LayerPanel">
       </panel>
       <panel
-            class="org.polymap.p4.data.imports.ImportPanel"
-            id="org.polymap.p4.ImportPanel">
-      </panel>
-      <panel
             class="org.polymap.p4.project.ProjectInfoPanel"
             id="org.polymap.p4.project.ProjectInfoPanel">
       </panel>
@@ -105,13 +101,6 @@
             name="Workbench">
       </contentProvider>
    </extension-->
-   <extension
-         point="org.polymap.core.operation.concerns">
-      <concern
-            class="org.polymap.p4.data.imports.features.AddLayerForImportedFeaturesConcern"
-            id="org.polymap.p4.AddLayerForImportedFeaturesConcern">
-      </concern>
-   </extension>
    <extension
          id="product"
          point="org.eclipse.core.runtime.products">

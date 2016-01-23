@@ -61,7 +61,7 @@ import org.polymap.p4.ui.feature.LayersFeatureTableContribution;
 public class P4Plugin
         extends AbstractUIPlugin {
 
-    private static Log              log = LogFactory.getLog( P4Plugin.class );
+    private static Log log = LogFactory.getLog( P4Plugin.class );
 
     public static final String      ID = "org.polymap.p4";
 

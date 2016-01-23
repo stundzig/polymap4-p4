@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Feature Importer Framework
+Bundle-SymbolicName: org.polymap.p4.data.importer;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.polymap.p4.data.importer.ImporterPlugin
+Bundle-Vendor: polymap.org
+Require-Bundle: org.polymap.core.data;bundle-version="4.0.0",
+ org.polymap.core.data.refine;bundle-version="4.0.0",
+ org.polymap.core.data.rs;bundle-version="4.0.0",
+ org.polymap.core.data.shapefile;bundle-version="4.0.0",
+ org.polymap.core.data.wms;bundle-version="4.0.0",
+ org.polymap.p4;bundle-version="1.0.0",
+ org.polymap.rap.updownload;bundle-version="2.0.0",
+ org.polymap.rhei.batik;bundle-version="4.0.0",
+ org.junit;bundle-version="4.11.0";resolution:=optional
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: lib/commons-compress-1.9.jar,
+ .
+Export-Package: org.polymap.p4.data.imports

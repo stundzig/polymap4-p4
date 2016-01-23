@@ -1,35 +1,32 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Polymap4 GIS client
+Bundle-Name: Polymap4 GIS application
 Bundle-SymbolicName: org.polymap.p4;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.polymap.p4.P4Plugin
 Bundle-Vendor: polymap.org
 Require-Bundle: org.eclipse.osgi.services,
  org.eclipse.rap.ui;bundle-version="2.3.1",
- org.polymap.core;bundle-version="4.0.0",
- org.polymap.core.data;bundle-version="4.0.0",
+ org.polymap.core;bundle-version="4.0.0";visibility:=reexport,
+ org.polymap.core.data;bundle-version="4.0.0";visibility:=reexport,
  org.polymap.core.data.wms;bundle-version="4.0.0",
- org.polymap.core.data.shapefile,
+ org.polymap.core.data.rs,
+ org.polymap.core.data.shapefile;bundle-version="4.0.0",
  org.polymap.core.mapeditor;bundle-version="4.0.0",
- org.polymap.core.project;bundle-version="4.0.0",
- org.polymap.core.catalog;bundle-version="4.0.0",
- org.polymap.rhei.batik,
- org.polymap.rhei.form,
+ org.polymap.core.project;bundle-version="4.0.0";visibility:=reexport,
+ org.polymap.core.catalog;bundle-version="4.0.0";visibility:=reexport,
+ org.polymap.rhei.batik;visibility:=reexport,
+ org.polymap.rhei.form;visibility:=reexport,
+ org.polymap.rhei.form.batik;visibility:=reexport,
  org.polymap.model2,
  org.polymap.model2.store.recordstore,
- org.polymap.rap.updownload;bundle-version="2.0.0",
  org.polymap.service.geoserver;bundle-version="4.0.0";resolution:=optional,
  org.polymap.service.fs;bundle-version="4.0.0";resolution:=optional,
- org.junit;resolution:=optional,
- org.polymap.core.data.refine;bundle-version="1.0.0",
- org.polymap.core.data.rs,
- org.polymap.rhei.form.batik
+ org.junit;resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/mockito-all-1.10.19.jar,
- lib/commons-compress-1.9.jar,
  lib/hamcrest-core-1.3.jar,
  lib/javassist-3.19.0-GA.jar,
  lib/objenesis-2.1.jar,
@@ -39,3 +36,11 @@ Bundle-ClassPath: .,
  lib/powermock-module-junit4-1.6.2.jar,
  lib/powermock-module-junit4-common-1.6.2.jar,
  lib/powermock-reflect-1.6.2.jar
+Export-Package: org.polymap.p4,
+ org.polymap.p4.catalog,
+ org.polymap.p4.data,
+ org.polymap.p4.map,
+ org.polymap.p4.project,
+ org.polymap.p4.style,
+ org.polymap.p4.ui,
+ org.polymap.p4.ui.feature

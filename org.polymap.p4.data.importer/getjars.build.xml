@@ -4,7 +4,7 @@
  from several maven repositories on the net. See copy.properties for
  general settings. 
  -->
-<project name="org.polymap.p4" default="build" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+<project name="org.polymap.p4.data.importer" default="build" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 	<description>Download open source jars from the internet.</description>
 
 	<property name="lib" value="${basedir}${file.separator}lib" />
@@ -59,10 +59,12 @@
 			<localRepository refid="local.repository" />
 			<remoteRepository refid="central.repository" />
 
+		    <dependency groupId="org.apache.commons" artifactId="commons-compress" version="1.9" />
+			
 			<!-- testing -->
-		    <dependency groupId="org.mockito" artifactId="mockito-all" version="1.10.19" />
+		    <!--dependency groupId="org.mockito" artifactId="mockito-all" version="1.10.19" />
 		    <dependency groupId="org.powermock" artifactId="powermock-module-junit4" version="1.6.2" />
-		    <dependency groupId="org.powermock" artifactId="powermock-api-mockito" version="1.6.2" />
+		    <dependency groupId="org.powermock" artifactId="powermock-api-mockito" version="1.6.2" /-->
 		</artifact:dependencies>
 	</target>
 

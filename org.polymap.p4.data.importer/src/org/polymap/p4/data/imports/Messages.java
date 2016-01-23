@@ -11,19 +11,21 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4;
+package org.polymap.p4.data.imports;
 
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.runtime.i18n.MessagesImpl;
 
+import org.polymap.p4.data.importer.ImporterPlugin;
+
 /**
- * The messages of the <code>org.polymap.p4</code> plugin.
+ * The messages of this package.
  * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class Messages {
 
-    private static final String       BUNDLE_NAME = P4Plugin.ID + ".messages";
+    private static final String       BUNDLE_NAME = ImporterPlugin.ID + ".messages";
 
     private static final MessagesImpl instance = new MessagesImpl( BUNDLE_NAME, Messages.class.getClassLoader() );
 
