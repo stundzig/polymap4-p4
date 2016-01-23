@@ -20,6 +20,7 @@ import org.polymap.core.runtime.config.Concern;
 import org.polymap.core.runtime.config.Config2;
 import org.polymap.core.runtime.config.Configurable;
 import org.polymap.core.runtime.config.DefaultBoolean;
+import org.polymap.core.runtime.config.DefaultString;
 import org.polymap.core.runtime.config.Mandatory;
 
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
@@ -62,6 +63,8 @@ public abstract class ImporterPrompt
     /** 
      * Short summary of the idea of this prompt. 
      */
+    @Mandatory
+    @DefaultString( "" )
     @Concern( ConfigChangeEvent.Fire.class )
     public Config2<ImporterPrompt,String>   summary;
 

@@ -130,10 +130,6 @@ public class ImporterContext
             public ImporterContext context() {
                 return ImporterContext.this;
             }
-            /**
-             * Creates a new prompt with specified id and add's also a default description and summary with key
-             * importer.prompt.*id*.summary and .description . 
-             */
             @Override
             public ImporterPrompt newPrompt( String id ) {
                 assert prompts != null : "newPrompt() called before createPrompts()!";
@@ -144,8 +140,6 @@ public class ImporterContext
                         return ImporterContext.this;
                     }                    
                 };
-                result.summary.put( Messages.get( "importer.prompt." + id + ".summary" ) );
-                result.description.put( Messages.get( "importer.prompt." + id + ".description" ) );
                 prompts.put( id, result );
                 EventManager.instance().publish( new ContextChangeEvent( ImporterContext.this ) );
                 return result;
