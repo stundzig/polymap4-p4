@@ -151,7 +151,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
         project = service.createProject( importJob, formatAndOptions, monitor );
         // reset it
         typedContent = null;
-        log.info( "project has rows: " + project.rows.size() );
+//        log.info( "project has rows: " + project.rows.size() );
         // TODO MONITOR for the features
         features = createFeatures();
     }
@@ -174,7 +174,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                 && (!Number.class.isAssignableFrom( content.columns().get( latitudeColumnIndex ).type() )
                         || !Number.class.isAssignableFrom( content.columns().get( longitudeColumnIndex ).type() ))) {
             // TODO error message to the user
-            log.error( "skipping coordinate creation" );
+//            log.error( "skipping coordinate creation" );
             latitudeColumnIndex = -1;
             longitudeColumnIndex = -1;
         }
