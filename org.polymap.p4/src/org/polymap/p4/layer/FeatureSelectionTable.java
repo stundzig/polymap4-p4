@@ -17,6 +17,9 @@ package org.polymap.p4.layer;
 import static org.polymap.core.ui.FormDataFactory.on;
 import static org.polymap.core.ui.SelectionAdapter.on;
 
+import org.geotools.data.FeatureEvent;
+import org.geotools.data.FeatureEvent.Type;
+import org.geotools.data.FeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
 import org.opengis.feature.type.PropertyDescriptor;
@@ -42,6 +45,8 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.BatikApplication;
@@ -65,6 +70,8 @@ public class FeatureSelectionTable {
 
     private FeatureSelection            featureSelection;
     
+    private FeatureStore                fs;
+    
     private FeatureCollection           features;
 
     private FeatureTableViewer          viewer;
@@ -74,20 +81,18 @@ public class FeatureSelectionTable {
     private Text                        searchText;
 
     private Button                      searchBtn;
-    
+
     
     public FeatureSelectionTable( Composite parent, FeatureSelection featureSelection, PanelSite site ) {
+        BatikApplication.instance().getContext().propagate( this );
         this.featureSelection = featureSelection;
         this.site = site;
-        
-        BatikApplication.instance().getContext().propagate( this );
 
         parent.setLayout( FormLayoutFactory.defaults().create() );
 
         try {
-            this.features = featureSelection
-                    .waitForFs().get()  // already loaded by LayerFeatureTableContribution
-                    .getFeatures( featureSelection.filter() );
+            this.fs = featureSelection.waitForFs().get();  // already loaded by LayerFeatureTableContribution
+            this.features = fs.getFeatures( featureSelection.filter() );
         }
         catch (Exception e) {
             log.warn( "", e );
@@ -137,6 +142,23 @@ public class FeatureSelectionTable {
             featureSelection.setClicked( elm.getFeature() );
             BatikApplication.instance().getContext().openPanel( site.path(), FeaturePanel.ID );
         });
+        
+        // commit events
+        EventManager.instance().subscribe( this, ev -> 
+                ev instanceof FeatureEvent && 
+                ((FeatureEvent)ev).getType() == Type.COMMIT &&
+                ((FeatureEvent)ev).getFeatureSource() == fs);
+    }
+    
+
+    @EventHandler( display=true )
+    protected void onFeatureChange( FeatureEvent ev ) {
+        if (!viewer.getTable().isDisposed()) {
+            viewer.refresh();
+        }
+        else {
+            EventManager.instance().unsubscribe( this );
+        }
     }
     
     
