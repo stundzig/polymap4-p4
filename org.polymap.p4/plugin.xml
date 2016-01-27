@@ -61,7 +61,8 @@
       </panel>
       <panel
             class="org.polymap.p4.project.ProjectInfoPanel"
-            id="org.polymap.p4.project.ProjectInfoPanel">
+            id="org.polymap.p4.project.ProjectInfoPanel"
+            stackPriority="-100">
       </panel>
       <panel
             class="org.polymap.p4.ui.feature.FeaturePanel"

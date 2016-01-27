@@ -19,7 +19,6 @@ import static org.polymap.core.ui.SelectionAdapter.on;
 
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
-import org.opengis.feature.Feature;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
@@ -46,9 +45,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.BatikApplication;
-import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.PanelSite;
-import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.rhei.table.DefaultFeatureTableColumn;
@@ -62,31 +59,41 @@ import org.polymap.p4.P4Plugin;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class FeaturesTable {
+public class FeatureSelectionTable {
 
-    private static Log log = LogFactory.getLog( FeaturesTable.class );
+    private static Log log = LogFactory.getLog( FeatureSelectionTable.class );
 
-    private FeatureTableViewer          viewer;
+    private FeatureSelection            featureSelection;
     
     private FeatureCollection           features;
 
+    private FeatureTableViewer          viewer;
+    
     private PanelSite                   site;
 
     private Text                        searchText;
 
     private Button                      searchBtn;
     
-    /** */
-    @Scope( P4Plugin.Scope )
-    private Context<Feature>            selected;
     
-    
-    public FeaturesTable( Composite parent, FeatureCollection features, PanelSite site ) {
-        this.features = features;
+    public FeatureSelectionTable( Composite parent, FeatureSelection featureSelection, PanelSite site ) {
+        this.featureSelection = featureSelection;
         this.site = site;
-        parent.setLayout( FormLayoutFactory.defaults().create() );
         
         BatikApplication.instance().getContext().propagate( this );
+
+        parent.setLayout( FormLayoutFactory.defaults().create() );
+
+        try {
+            this.features = featureSelection
+                    .waitForFs().get()  // already loaded by LayerFeatureTableContribution
+                    .getFeatures( featureSelection.filter() );
+        }
+        catch (Exception e) {
+            log.warn( "", e );
+            tk().createLabel( parent, "<p>Unable to featch features.</p>Reason: " + e.getLocalizedMessage() );
+            return;
+        }
         
         // topbar
         Composite topbar = on( tk().createComposite( parent ) ).fill().noBottom().height( 30 ).control();
@@ -127,7 +134,7 @@ public class FeaturesTable {
         viewer.addSelectionChangedListener( (SelectionChangedEvent ev) -> {
             FeatureTableElement elm = (FeatureTableElement)on( ev.getSelection() ).first().get();
             log.info( "selection: " + elm );
-            selected.set( elm.getFeature() );
+            featureSelection.setClicked( elm.getFeature() );
             BatikApplication.instance().getContext().openPanel( site.path(), FeaturePanel.ID );
         });
     }

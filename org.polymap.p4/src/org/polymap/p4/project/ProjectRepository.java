@@ -73,7 +73,7 @@ public class ProjectRepository {
         try (UnitOfWork uow = repo.newUnitOfWork()) {
             if (uow.entity( IMap.class, "root" ) == null) {
                 uow.createEntity( IMap.class, "root", (IMap prototype) -> {
-                    prototype.label.set( "The Map" );
+                    prototype.label.set( "First Map" );
                     //prototype.visible.set( true );
                     return prototype;
                 });

@@ -16,7 +16,7 @@ package org.polymap.p4.ui.feature;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.geotools.feature.FeatureCollection;
+import org.geotools.data.FeatureStore;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -24,10 +24,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.polymap.core.data.PipelineFeatureSource;
-import org.polymap.core.data.feature.FeaturesProducer;
-import org.polymap.core.data.pipeline.DataSourceDescription;
-import org.polymap.core.data.pipeline.Pipeline;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.UIJob;
@@ -44,8 +40,8 @@ import org.polymap.rhei.batik.toolkit.RadioItem;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 
 import org.polymap.p4.P4Plugin;
-import org.polymap.p4.data.P4PipelineIncubator;
 import org.polymap.p4.map.ProjectMapPanel;
+import org.polymap.p4.ui.P4Panel;
 
 /**
  * 
@@ -61,7 +57,11 @@ public class LayersFeatureTableContribution
     @Scope( P4Plugin.Scope )
     private Context<IMap>               map;
 
+    /** See {@link P4Panel#featureSelection}. */
+    @Scope( P4Plugin.Scope )
+    private Context<FeatureSelection>   featureSelection;
     
+
     @Override
     public void fillToolbar( IContributionSite site, MdToolbar2 toolbar ) {
         if (site.panel() instanceof ProjectMapPanel) {
@@ -75,45 +75,37 @@ public class LayersFeatureTableContribution
 
     
     protected void createLayerItem( ItemContainer group, ILayer layer, IContributionSite site ) {
-        UIJob job = new UIJob( "Connect layer" ) {
-            @Override
-            protected void runWithException( IProgressMonitor monitor ) throws Exception {
-                // data source for layer
-                DataSourceDescription dsd = P4Plugin.localResolver().connectLayer( layer, monitor )
-                        .orElseThrow( () -> new Exception( "No service for layer: " + layer.label.get() ) );
+        FeatureSelection.forLayer( layer )
+                .waitForFs( 
+                        fs -> { 
+                            UIThreadExecutor.async( () -> {
+                                RadioItem item = new RadioItem( group );
+                                item.text.put( StringUtils.abbreviate( layer.label.get(), 10 ) );
+                                item.tooltip.put( "Open attributes table of: " + layer.label.get() );
+                                item.icon.put( P4Plugin.images().svgImage( "table.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+                                AtomicBoolean wasVisible = new AtomicBoolean();
+                                item.onSelected.put( ev -> {
+                                    log.info( "fs=" + fs );
+                                    createTableView( layer, fs, site );
 
-                // create pipeline
-                Pipeline pipeline = P4PipelineIncubator.forLayer( layer ).newPipeline( FeaturesProducer.class, dsd, null );
-
-                // FeatureSource?
-                if (pipeline != null && pipeline.length() > 0) {
-                    UIThreadExecutor.async( () -> {
-                        RadioItem item = new RadioItem( group );
-                        item.text.put( StringUtils.abbreviate( layer.label.get(), 10 ) );
-                        item.tooltip.put( "Open attributes table of: " + layer.label.get() );
-                        item.icon.put( P4Plugin.images().svgImage( "table.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
-                        AtomicBoolean wasVisible = new AtomicBoolean();
-                        item.onSelected.put( ev -> {
-                            createTableView( layer, pipeline, site );
-                            
-                            wasVisible.set( layer.userSettings.get().visible.get() );
-                            layer.userSettings.get().visible.set( true );
-                        });
-                        item.onUnselected.put( ev -> {
-                            ((ProjectMapPanel)site.panel()).addButtomView( parent -> {
-                                // empty; remove content
+                                    wasVisible.set( layer.userSettings.get().visible.get() );
+                                    //layer.userSettings.get().visible.set( true );
+                                });
+                                item.onUnselected.put( ev -> {
+                                    ((ProjectMapPanel)site.panel()).addButtomView( parent -> {
+                                        // empty; remove content
+                                    });
+                                    //layer.userSettings.get().visible.set( wasVisible.get() );
+                                });
                             });
-                            layer.userSettings.get().visible.set( wasVisible.get() );
+                        },
+                        e -> {
+                            log.info( "No FeatureSelection for: " + layer.label.get() + " (" + e.getMessage() + ")" );
                         });
-                    });
-                }
-            }
-        };
-        job.scheduleWithUIUpdate();  // UI callback?        
     }
     
     
-    protected void createTableView( ILayer layer, Pipeline pipeline, IContributionSite site ) {
+    protected void createTableView( ILayer layer, FeatureStore fs, IContributionSite site ) {
         // create bottom view
         ((ProjectMapPanel)site.panel()).addButtomView( parent -> {
             
@@ -123,13 +115,12 @@ public class LayersFeatureTableContribution
             new UIJob( "Loading data" ) {
                 @Override
                 protected void runWithException( IProgressMonitor monitor ) throws Exception {
-                    log.info( "Creating viewer for: " + layer.label.get() );
-                    PipelineFeatureSource fs = new PipelineFeatureSource( pipeline );
-                    FeatureCollection features = fs.getFeatures();
-                    
                     UIThreadExecutor.async( () -> {
                         UIUtils.disposeChildren( parent );
-                        new FeaturesTable( parent, features, site.panelSite() );
+                        FeatureSelection layerFeatureSelection = FeatureSelection.forLayer( layer );
+                        featureSelection.set( layerFeatureSelection );
+                        
+                        new FeatureSelectionTable( parent, layerFeatureSelection, site.panelSite() );
                         parent.layout();
                     });        
                 }
