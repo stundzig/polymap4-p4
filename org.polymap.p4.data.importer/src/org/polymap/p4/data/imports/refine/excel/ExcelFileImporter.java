@@ -82,53 +82,62 @@ public class ExcelFileImporter
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         if (sheetIn.index() != -1 || formatAndOptions().sheetRecords().size() == 1) {
-            site.newPrompt( "ignoreBeforeHeadline" ).value
-                    .put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) ).extendedUI
-                            .put( new NumberfieldBasedPromptUiBuilder( this) {
+            site.newPrompt( "ignoreBeforeHeadline" ).summary
+                    .put( Messages.get( "importer.prompt.ignoreBeforeHeadline.summary" ) ).description
+                            .put( Messages.get( "importer.prompt.ignoreBeforeHeadline.description" ) ).value
+                                    .put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) ).extendedUI
+                                            .put( new NumberfieldBasedPromptUiBuilder( this) {
 
-                                @Override
-                                public void onSubmit( ImporterPrompt prompt ) {
-                                    formatAndOptions().setIgnoreLines( value );
-                                }
-
-
-                                @Override
-                                protected int initialValue() {
-                                    return Math.max( 0, formatAndOptions().ignoreLines() );
-                                }
-                            } );
-            site.newPrompt( "headlines" ).value
-                    .put( String.valueOf( formatAndOptions().headerLines() ) ).extendedUI
-                            .put( new NumberfieldBasedPromptUiBuilder( this) {
-
-                                @Override
-                                public void onSubmit( ImporterPrompt prompt ) {
-                                    formatAndOptions().setHeaderLines( value );
-                                }
+                                                @Override
+                                                public void onSubmit( ImporterPrompt prompt ) {
+                                                    formatAndOptions().setIgnoreLines( value );
+                                                }
 
 
-                                @Override
-                                protected int initialValue() {
-                                    return formatAndOptions().headerLines( );
-                                }
-                            } );
-            site.newPrompt( "ignoreAfterHeadline" ).value
-                    .put( String.valueOf( formatAndOptions().skipDataLines() ) ).extendedUI
-                            .put( new NumberfieldBasedPromptUiBuilder( this) {
+                                                @Override
+                                                protected int initialValue() {
+                                                    return Math.max( 0, formatAndOptions().ignoreLines() );
+                                                }
+                                            } );
+            site.newPrompt( "headlines" ).summary
+                    .put( Messages.get( "importer.prompt.headlines.summary" ) ).description
+                            .put( Messages.get( "importer.prompt.headlines.description" ) ).value
+                                    .put( String.valueOf( formatAndOptions().headerLines() ) ).extendedUI
+                                            .put( new NumberfieldBasedPromptUiBuilder( this) {
 
-                                @Override
-                                public void onSubmit( ImporterPrompt prompt ) {
-                                    formatAndOptions().setSkipDataLines( value );
-                                }
+                                                @Override
+                                                public void onSubmit( ImporterPrompt prompt ) {
+                                                    formatAndOptions().setHeaderLines( value );
+                                                }
 
 
-                                @Override
-                                protected int initialValue() {
-                                    return formatAndOptions().skipDataLines( );
-                                }
-                            } );
-            site.newPrompt( "coordinates" ).value.put( latitudeColumn() + "/" + longitudeColumn() ).extendedUI
-                    .put( coordinatesPromptUiBuilder() );
+                                                @Override
+                                                protected int initialValue() {
+                                                    return formatAndOptions().headerLines( );
+                                                }
+                                            } );
+            site.newPrompt( "ignoreAfterHeadline" ).summary
+                    .put( Messages.get( "importer.prompt.ignoreAfterHeadline.summary" ) ).description
+                            .put( Messages.get( "importer.prompt.ignoreAfterHeadline.description" ) ).value
+                                    .put( String.valueOf( formatAndOptions().skipDataLines() ) ).extendedUI
+                                            .put( new NumberfieldBasedPromptUiBuilder( this) {
+
+                                                @Override
+                                                public void onSubmit( ImporterPrompt prompt ) {
+                                                    formatAndOptions().setSkipDataLines( value );
+                                                }
+
+
+                                                @Override
+                                                protected int initialValue() {
+                                                    return formatAndOptions().skipDataLines( );
+                                                }
+                                            } );
+            site.newPrompt( "coordinates" ).summary
+                    .put( Messages.get( "importer.prompt.coordinates.summary" ) ).description
+                            .put( Messages.get( "importer.prompt.coordinates.description" ) ).value
+                                    .put( latitudeColumn() + "/" + longitudeColumn() ).extendedUI
+                                            .put( coordinatesPromptUiBuilder() );
         }
     }
 
@@ -202,14 +211,14 @@ public class ExcelFileImporter
 
 
     @Override
-    protected void prepare(IProgressMonitor monitor) throws Exception {
+    protected void prepare( IProgressMonitor monitor ) throws Exception {
         // during super.prepare() the file is moved to another location, so make copy
         // here, to support multiworksheet for initial loads
         if (sheetIn.index() == -1) {
             copyOfOriginalFile = new File( Files.createTempDir(), FilenameUtils.getName( file.getName() ) );
             Files.copy( file, copyOfOriginalFile );
         }
-        super.prepare(monitor);
+        super.prepare( monitor );
         // autoselect the first sheet, if only one exists
         if (formatAndOptions().sheetRecords().size() == 1) {
             formatAndOptions().setSheet( 0 );

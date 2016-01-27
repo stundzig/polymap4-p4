@@ -191,9 +191,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                     featureBuilder.add( point );
                 }
                 catch (Exception e) {
-                    log.error( String.format( "exception in creating point for imported file with %s and %s",
-                            row.cells().get( latitudeColumnIndex ).guessedValue(),
-                            row.cells().get( longitudeColumnIndex ).guessedValue() ), e );
+                    log.error( String.format( "exception in creating point for imported file" ), e );
                     featureBuilder.add( null );
                 }
             }

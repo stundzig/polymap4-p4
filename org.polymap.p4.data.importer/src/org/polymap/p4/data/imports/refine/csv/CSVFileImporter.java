@@ -98,118 +98,133 @@ public class CSVFileImporter
         // formatAndOptions().setQuoteCharacter( "\0" );
         // updateOptions( monitor );
         // TODO guess find the quote characters
-        //typedContent();
+        // typedContent();
         GuessedQuoteCharacter guessed = guessedQuoteCharacter();
-        if (!guessed.quoteCharacter().equals( formatAndOptions().quoteCharacter())) {
+        if (!guessed.quoteCharacter().equals( formatAndOptions().quoteCharacter() )) {
             formatAndOptions().setQuoteCharacter( guessed.quoteCharacter() );
             updateOptions( monitor );
         }
-        
+
     }
 
 
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
-        site.newPrompt( "ignoreBeforeHeadline" ).value
-                .put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) ).extendedUI
-                        .put( new NumberfieldBasedPromptUiBuilder( this) {
+        site.newPrompt( "ignoreBeforeHeadline" ).summary
+                .put( Messages.get( "importer.prompt.ignoreAfterHeadline.summary" ) ).description
+                        .put( Messages.get( "importer.prompt.ignoreAfterHeadline.description" ) ).value
+                                .put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) ).extendedUI
+                                        .put( new NumberfieldBasedPromptUiBuilder( this) {
 
-                            @Override
-                            public void onSubmit( ImporterPrompt prompt ) {
-                                formatAndOptions().setIgnoreLines( value );
-                            }
-
-
-                            @Override
-                            protected int initialValue() {
-                                return Math.max( 0, formatAndOptions().ignoreLines() );
-                            }
-                        } );
-        site.newPrompt( "headlines" ).value
-                .put( String.valueOf( formatAndOptions().headerLines() ) ).extendedUI
-                        .put( new NumberfieldBasedPromptUiBuilder( this) {
-
-                            @Override
-                            public void onSubmit( ImporterPrompt prompt ) {
-                                formatAndOptions().setHeaderLines( value );
-                            }
+                                            @Override
+                                            public void onSubmit( ImporterPrompt prompt ) {
+                                                formatAndOptions().setIgnoreLines( value );
+                                            }
 
 
-                            @Override
-                            protected int initialValue() {
-                                return formatAndOptions().headerLines( );
-                            }
-                        } );
-        site.newPrompt( "ignoreAfterHeadline" ).value
-                .put( String.valueOf( formatAndOptions().skipDataLines() ) ).extendedUI
-                        .put( new NumberfieldBasedPromptUiBuilder( this) {
+                                            @Override
+                                            protected int initialValue() {
+                                                return Math.max( 0, formatAndOptions().ignoreLines() );
+                                            }
+                                        } );
+        site.newPrompt( "headlines" ).summary
+                .put( Messages.get( "importer.prompt.headlines.summary" ) ).description
+                        .put( Messages.get( "importer.prompt.headlines.description" ) ).value
+                                .put( String.valueOf( formatAndOptions().headerLines() ) ).extendedUI
+                                        .put( new NumberfieldBasedPromptUiBuilder( this) {
 
-                            @Override
-                            public void onSubmit( ImporterPrompt prompt ) {
-                                formatAndOptions().setSkipDataLines( value );
-                            }
-
-
-                            @Override
-                            protected int initialValue() {
-                                return formatAndOptions().skipDataLines( );
-                            }
-                        } );
-        site.newPrompt( "separator" ).value
-                .put( formatAndOptions().separator() ).extendedUI
-                        .put( new ComboBasedPromptUiBuilder( this) {
-
-                            @Override
-                            protected String initialValue() {
-                                return formatAndOptions().separator();
-                            }
+                                            @Override
+                                            public void onSubmit( ImporterPrompt prompt ) {
+                                                formatAndOptions().setHeaderLines( value );
+                                            }
 
 
-                            @Override
-                            protected List<String> allValues() {
-                                List<String> ret = Lists.newArrayList( ",", "|", ";", "\\t", " ");
-                                if (!ret.contains( initialValue() )) {
-                                    ret.add( 0, initialValue());
-                                }
-                                return ret;
-                            }
+                                            @Override
+                                            protected int initialValue() {
+                                                return formatAndOptions().headerLines( );
+                                            }
+                                        } );
+        site.newPrompt( "ignoreAfterHeadline" ).summary
+                .put( Messages.get( "importer.prompt.ignoreAfterHeadline.summary" ) ).description
+                        .put( Messages.get( "importer.prompt.ignoreAfterHeadline.description" ) ).value
+                                .put( String.valueOf( formatAndOptions().skipDataLines() ) ).extendedUI
+                                        .put( new NumberfieldBasedPromptUiBuilder( this) {
+
+                                            @Override
+                                            public void onSubmit( ImporterPrompt prompt ) {
+                                                formatAndOptions().setSkipDataLines( value );
+                                            }
 
 
-                            @Override
-                            protected void onSubmit( ImporterPrompt prompt ) {
-                                formatAndOptions().setSeparator( value );
-                            }
-                        } );
-        site.newPrompt( "quoteCharacter" ).value
-                .put( formatAndOptions().quoteCharacter() ).extendedUI
-                        .put( new ComboBasedPromptUiBuilder( this) {
+                                            @Override
+                                            protected int initialValue() {
+                                                return formatAndOptions().skipDataLines( );
+                                            }
+                                        } );
+        site.newPrompt( "separator" ).summary
+                .put( Messages.get( "importer.prompt.separator.summary" ) ).description
+                        .put( Messages.get( "importer.prompt.separator.description" ) ).value
+                                .put( formatAndOptions().separator() ).extendedUI
+                                        .put( new ComboBasedPromptUiBuilder( this) {
 
-                            @Override
-                            protected String initialValue() {
-                                // TODO guess the quote character
-                                return formatAndOptions().quoteCharacter();
-                            }
-
-
-                            @Override
-                            protected List<String> allValues() {
-                                return Lists.newArrayList( "", "\"", "'" );
-                            }
+                                            @Override
+                                            protected String initialValue() {
+                                                return formatAndOptions().separator();
+                                            }
 
 
-                            @Override
-                            protected void onSubmit( ImporterPrompt prompt ) {
-                                formatAndOptions().setQuoteCharacter( value );
-                                // formatAndOptions().setProcessQuotes(
-                                // !StringUtils.isBlank( value ) );
-                            }
-                        } );
-        site.newPrompt( "encoding" ).value
-                .put( formatAndOptions().encoding() ).extendedUI
-                        .put( encodingPromptUiBuilder() ).severity
-                                .set( Severity.REQUIRED );
-        site.newPrompt( "coordinates" ).value.put( coordinatesPromptLabel() ).extendedUI
-                .put( coordinatesPromptUiBuilder() );
+                                            @Override
+                                            protected List<String> allValues() {
+                                                List<String> ret = Lists.newArrayList( ",", "|", ";", "\\t", " " );
+                                                if (!ret.contains( initialValue() )) {
+                                                    ret.add( 0, initialValue() );
+                                                }
+                                                return ret;
+                                            }
+
+
+                                            @Override
+                                            protected void onSubmit( ImporterPrompt prompt ) {
+                                                formatAndOptions().setSeparator( value );
+                                            }
+                                        } );
+        site.newPrompt( "quoteCharacter" ).summary
+                .put( Messages.get( "importer.prompt.quoteCharacter.summary" ) ).description
+                        .put( Messages.get( "importer.prompt.quoteCharacter.description" ) ).value
+                                .put( formatAndOptions().quoteCharacter() ).extendedUI
+                                        .put( new ComboBasedPromptUiBuilder( this) {
+
+                                            @Override
+                                            protected String initialValue() {
+                                                // TODO guess the quote character
+                                                return formatAndOptions().quoteCharacter();
+                                            }
+
+
+                                            @Override
+                                            protected List<String> allValues() {
+                                                return Lists.newArrayList( "", "\"", "'" );
+                                            }
+
+
+                                            @Override
+                                            protected void onSubmit( ImporterPrompt prompt ) {
+                                                formatAndOptions().setQuoteCharacter( value );
+                                                // formatAndOptions().setProcessQuotes(
+                                                // !StringUtils.isBlank( value ) );
+                                            }
+                                        } );
+        site.newPrompt( "encoding" ).summary
+                .put( Messages.get( "importer.prompt.encoding.summary" ) ).description
+                        .put( Messages.get( "importer.prompt.encoding.description" ) ).value
+                                .put( formatAndOptions().encoding() ).extendedUI
+                                        .put( encodingPromptUiBuilder() ).severity
+                                                .set( Severity.REQUIRED );
+        site.newPrompt( "coordinates" ).summary
+                .put( Messages.get( "importer.prompt.coordinates.summary" ) ).description
+                        .put( Messages.get( "importer.prompt.coordinates.description" ) ).value
+                                .put( coordinatesPromptLabel() ).extendedUI
+                                        .put( coordinatesPromptUiBuilder() );
     }
 
 
