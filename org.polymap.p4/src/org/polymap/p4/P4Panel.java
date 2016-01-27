@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.ui;
+package org.polymap.p4;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,10 +25,9 @@ import org.polymap.rhei.batik.Mandatory;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
-import org.polymap.p4.P4Plugin;
-import org.polymap.p4.ui.feature.FeaturePanel;
-import org.polymap.p4.ui.feature.FeatureSelection;
-import org.polymap.p4.ui.feature.LayersFeatureTableContribution;
+import org.polymap.p4.layer.FeaturePanel;
+import org.polymap.p4.layer.FeatureSelection;
+import org.polymap.p4.layer.LayersFeatureTableContribution;
 
 /**
  * 

@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.ui.feature;
+package org.polymap.p4.layer;
 
 import java.util.Map;
 import java.util.Optional;
@@ -52,9 +52,9 @@ import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.session.SessionSingleton;
 
+import org.polymap.p4.P4Panel;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
-import org.polymap.p4.ui.P4Panel;
 
 /**
  * Carries the {@link FeatureSource}, the {@link #filter()}ed features and the

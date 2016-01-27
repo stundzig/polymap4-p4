@@ -47,9 +47,9 @@ import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4AppDesign;
+import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.project.ProjectRepository;
-import org.polymap.p4.ui.P4Panel;
 import org.polymap.rap.openlayers.control.MousePositionControl;
 import org.polymap.rap.openlayers.control.ScaleLineControl;
 

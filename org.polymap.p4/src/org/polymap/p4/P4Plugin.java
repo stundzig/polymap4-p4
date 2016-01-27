@@ -50,9 +50,9 @@ import org.polymap.service.geoserver.GeoServerServlet;
 import org.polymap.p4.catalog.LocalCatalog;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
-import org.polymap.p4.project.NewLayerContribution;
+import org.polymap.p4.layer.LayersFeatureTableContribution;
+import org.polymap.p4.layer.NewLayerContribution;
 import org.polymap.p4.project.ProjectRepository;
-import org.polymap.p4.ui.feature.LayersFeatureTableContribution;
 
 /**
  *

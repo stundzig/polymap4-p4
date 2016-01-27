@@ -43,7 +43,7 @@
             id="org.polymap.batikapp.ProjectPanel">
       </panel>
       <panel
-            class="org.polymap.p4.project.LayersPanel"
+            class="org.polymap.p4.layer.LayersPanel"
             id="org.polymap.batikapp.LayersPanel"
             stackPriority="100">
       </panel>
@@ -56,7 +56,7 @@
             id="org.polymap.p4.ResourceInfoPanel">
       </panel>
       <panel
-            class="org.polymap.p4.project.LayerInfoPanel"
+            class="org.polymap.p4.layer.LayerInfoPanel"
             id="org.polymap.p4.project.LayerPanel">
       </panel>
       <panel
@@ -65,7 +65,7 @@
             stackPriority="-100">
       </panel>
       <panel
-            class="org.polymap.p4.ui.feature.FeaturePanel"
+            class="org.polymap.p4.layer.FeaturePanel"
             id="org.polymap.p4.FeaturePanel">
       </panel>
    </extension>

@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.ui.feature;
+package org.polymap.p4.layer;
 
 import static org.apache.commons.lang3.StringUtils.abbreviate;
 import static org.polymap.core.runtime.UIThreadExecutor.async;
@@ -44,7 +44,7 @@ import org.polymap.rhei.form.DefaultFormPage;
 import org.polymap.rhei.form.IFormPageSite;
 import org.polymap.rhei.form.batik.BatikFormContainer;
 
-import org.polymap.p4.ui.P4Panel;
+import org.polymap.p4.P4Panel;
 
 /**
  * Displays a {@link StandardFeatureForm} for the {@link FeatureSelection#clicked()}

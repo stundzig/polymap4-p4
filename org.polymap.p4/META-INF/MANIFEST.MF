@@ -39,8 +39,7 @@ Bundle-ClassPath: .,
 Export-Package: org.polymap.p4,
  org.polymap.p4.catalog,
  org.polymap.p4.data,
+ org.polymap.p4.layer,
  org.polymap.p4.map,
  org.polymap.p4.project,
- org.polymap.p4.style,
- org.polymap.p4.ui,
- org.polymap.p4.ui.feature
+ org.polymap.p4.style

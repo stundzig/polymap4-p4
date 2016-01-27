@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.project;
+package org.polymap.p4.layer;
 
 import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
 import org.apache.commons.logging.Log;
@@ -41,6 +41,7 @@ import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.ResourceInfoPanel;
+import org.polymap.p4.project.ProjectRepository;
 
 /**
  * 
