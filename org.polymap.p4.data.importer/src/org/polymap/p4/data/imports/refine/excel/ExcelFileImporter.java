@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.polymap.core.data.refine.impl.ExcelFormatAndOptions;
+import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.imports.ContextIn;
@@ -48,17 +49,19 @@ import com.google.common.io.Files;
 public class ExcelFileImporter
         extends AbstractRefineFileImporter<ExcelFormatAndOptions> {
 
-    private static Log log           = LogFactory.getLog( ExcelFileImporter.class );
+    private static Log             log           = LogFactory.getLog( ExcelFileImporter.class );
 
     @ContextIn
-    protected Sheet    sheetIn;
+    protected Sheet                sheetIn;
 
     @ContextOut
-    protected Sheet    sheetOut;
+    protected Sheet                sheetOut;
 
-    protected int      selectedSheet = -1;
+    protected int                  selectedSheet = -1;
 
-    private File       copyOfOriginalFile;
+    private File                   copyOfOriginalFile;
+
+    private static final IMessages i18nExcel     = Messages.forPrefix( "ImporterExcel" );
 
 
     @Override
@@ -68,12 +71,12 @@ public class ExcelFileImporter
         site.icon.set( ImporterPlugin.images().svgImage( "xls.svg", NORMAL24 ) );
         if (sheetIn.index() != -1) {
 
-            site.summary.set( Messages.get( "importer.excel.summary.sheet", file.getName(), sheetIn.name() ) );
+            site.summary.set( i18nExcel.get( "summarySheet", file.getName(), sheetIn.name() ) );
         }
         else {
-            site.summary.set( Messages.get( "importer.excel.summary", file.getName() ) );
+            site.summary.set( i18nExcel.get( "summary", file.getName() ) );
         }
-        site.description.set( Messages.get( "importer.excel.description" ) );
+        site.description.set( i18nExcel.get( "description" ) );
 
         super.init( site, monitor );
     }
@@ -83,8 +86,8 @@ public class ExcelFileImporter
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         if (sheetIn.index() != -1 || formatAndOptions().sheetRecords().size() == 1) {
             site.newPrompt( "ignoreBeforeHeadline" ).summary
-                    .put( Messages.get( "importer.prompt.ignoreBeforeHeadline.summary" ) ).description
-                            .put( Messages.get( "importer.prompt.ignoreBeforeHeadline.description" ) ).value
+                    .put( i18nPrompt.get( "ignoreBeforeHeadlineSummary" ) ).description
+                            .put( i18nPrompt.get( "ignoreBeforeHeadlineDescription" ) ).value
                                     .put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) ).extendedUI
                                             .put( new NumberfieldBasedPromptUiBuilder( this) {
 
@@ -100,8 +103,8 @@ public class ExcelFileImporter
                                                 }
                                             } );
             site.newPrompt( "headlines" ).summary
-                    .put( Messages.get( "importer.prompt.headlines.summary" ) ).description
-                            .put( Messages.get( "importer.prompt.headlines.description" ) ).value
+                    .put( i18nPrompt.get( "headlinesSummary" ) ).description
+                            .put( i18nPrompt.get( "headlinesDescription" ) ).value
                                     .put( String.valueOf( formatAndOptions().headerLines() ) ).extendedUI
                                             .put( new NumberfieldBasedPromptUiBuilder( this) {
 
@@ -117,8 +120,8 @@ public class ExcelFileImporter
                                                 }
                                             } );
             site.newPrompt( "ignoreAfterHeadline" ).summary
-                    .put( Messages.get( "importer.prompt.ignoreAfterHeadline.summary" ) ).description
-                            .put( Messages.get( "importer.prompt.ignoreAfterHeadline.description" ) ).value
+                    .put( i18nPrompt.get( "ignoreAfterHeadlineSummary" ) ).description
+                            .put( i18nPrompt.get( "ignoreAfterHeadlineDescription" ) ).value
                                     .put( String.valueOf( formatAndOptions().skipDataLines() ) ).extendedUI
                                             .put( new NumberfieldBasedPromptUiBuilder( this) {
 
@@ -134,9 +137,9 @@ public class ExcelFileImporter
                                                 }
                                             } );
             site.newPrompt( "coordinates" ).summary
-                    .put( Messages.get( "importer.prompt.coordinates.summary" ) ).description
-                            .put( Messages.get( "importer.prompt.coordinates.description" ) ).value
-                                    .put( latitudeColumn() + "/" + longitudeColumn() ).extendedUI
+                    .put( i18nPrompt.get( "coordinatesSummary" ) ).description
+                            .put( i18nPrompt.get( "coordinatesDescription" ) ).value
+                                    .put( coordinatesPromptLabel() ).extendedUI
                                             .put( coordinatesPromptUiBuilder() );
         }
     }
@@ -178,14 +181,14 @@ public class ExcelFileImporter
             // select the correct sheet
             parent.setLayout( new FormLayout() );
 
-            Label label = tk.createLabel( parent, Messages.get( "importer.excel.sheets" ), SWT.LEFT );
+            Label label = tk.createLabel( parent, i18nExcel.get( "excelSheets" ), SWT.LEFT );
             FormDataFactory.on( label );
 
             org.eclipse.swt.widgets.List list = tk.createList( parent, SWT.SINGLE );
             FormDataFactory.on( list ).fill().top( label, 5 );
 
             formatAndOptions().sheetRecords()
-                    .forEach( record -> list.add( Messages.get( "importer.excel.sheet", record.name, record.rows ) ) );
+                    .forEach( record -> list.add( i18nExcel.get( "excelSheet", record.name, record.rows ) ) );
             if (selectedSheet != -1) {
                 list.select( selectedSheet );
             }
@@ -222,14 +225,16 @@ public class ExcelFileImporter
         // autoselect the first sheet, if only one exists
         if (formatAndOptions().sheetRecords().size() == 1) {
             formatAndOptions().setSheet( 0 );
-            triggerUpdateOptions();
+//            triggerUpdateOptions();
+            updateOptions( monitor );
         }
         else {
             // if more the one sheets exists, and we are in the *subimporter*, select
             // this one
             if (sheetIn.index() != -1) {
                 formatAndOptions().setSheet( sheetIn.index() );
-                triggerUpdateOptions();
+                updateOptions( monitor );
+//                triggerUpdateOptions();
             }
         }
     }

@@ -15,17 +15,30 @@ package org.polymap.p4.data.imports.refine.csv;
 
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.List;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.core.runtime.IProgressMonitor;
+
+import com.google.common.collect.Lists;
+import com.google.refine.model.Cell;
+import com.google.refine.model.Column;
+import com.google.refine.model.Row;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -33,15 +46,16 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.polymap.core.data.refine.impl.CSVFormatAndOptions;
 import org.polymap.core.runtime.Polymap;
+import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
+
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+
 import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.imports.ImporterPrompt;
 import org.polymap.p4.data.imports.ImporterPrompt.PromptUIBuilder;
@@ -55,12 +69,6 @@ import org.polymap.p4.data.imports.refine.RefineCell;
 import org.polymap.p4.data.imports.refine.RefineRow;
 import org.polymap.p4.data.imports.refine.TypedColumn;
 import org.polymap.p4.data.imports.refine.TypedContent;
-import org.polymap.rhei.batik.toolkit.IPanelToolkit;
-
-import com.google.common.collect.Lists;
-import com.google.refine.model.Cell;
-import com.google.refine.model.Column;
-import com.google.refine.model.Row;
 
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
@@ -78,14 +86,16 @@ public class CSVFileImporter
 
     private GuessedQuoteCharacter guessedQuoteCharacter     = null;
 
+    private static final IMessages i18nCsv = Messages.forPrefix( "ImporterCsv" );
+
 
     @Override
     public void init( @SuppressWarnings("hiding" ) ImporterSite site, IProgressMonitor monitor) throws Exception {
         this.site = site;
 
         site.icon.set( ImporterPlugin.images().svgImage( "csv.svg", NORMAL24 ) );
-        site.summary.set( Messages.get( "importer.csv.summary", file.getName() ) );
-        site.description.set( Messages.get( "importer.csv.description" ) );
+        site.summary.set( i18nCsv.get( "summary", file.getName() ) );
+        site.description.set( i18nCsv.get( "description" ) );
 
         super.init( site, monitor );
     }
@@ -111,8 +121,8 @@ public class CSVFileImporter
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         site.newPrompt( "ignoreBeforeHeadline" ).summary
-                .put( Messages.get( "importer.prompt.ignoreAfterHeadline.summary" ) ).description
-                        .put( Messages.get( "importer.prompt.ignoreAfterHeadline.description" ) ).value
+                .put( i18nPrompt.get( "ignoreBeforeHeadlineSummary" )).description
+                        .put( i18nPrompt.get( "ignoreBeforeHeadlineDescription" ) ).value
                                 .put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) ).extendedUI
                                         .put( new NumberfieldBasedPromptUiBuilder( this) {
 
@@ -128,8 +138,8 @@ public class CSVFileImporter
                                             }
                                         } );
         site.newPrompt( "headlines" ).summary
-                .put( Messages.get( "importer.prompt.headlines.summary" ) ).description
-                        .put( Messages.get( "importer.prompt.headlines.description" ) ).value
+                .put( i18nPrompt.get( "headlinesSummary" )).description
+                        .put( i18nPrompt.get( "headlinesDescription" ) ).value
                                 .put( String.valueOf( formatAndOptions().headerLines() ) ).extendedUI
                                         .put( new NumberfieldBasedPromptUiBuilder( this) {
 
@@ -145,8 +155,8 @@ public class CSVFileImporter
                                             }
                                         } );
         site.newPrompt( "ignoreAfterHeadline" ).summary
-                .put( Messages.get( "importer.prompt.ignoreAfterHeadline.summary" ) ).description
-                        .put( Messages.get( "importer.prompt.ignoreAfterHeadline.description" ) ).value
+                .put( i18nPrompt.get( "ignoreAfterHeadlineSummary" )).description
+                        .put( i18nPrompt.get( "ignoreAfterHeadlineDescription" ) ).value
                                 .put( String.valueOf( formatAndOptions().skipDataLines() ) ).extendedUI
                                         .put( new NumberfieldBasedPromptUiBuilder( this) {
 
@@ -162,8 +172,8 @@ public class CSVFileImporter
                                             }
                                         } );
         site.newPrompt( "separator" ).summary
-                .put( Messages.get( "importer.prompt.separator.summary" ) ).description
-                        .put( Messages.get( "importer.prompt.separator.description" ) ).value
+                .put( i18nPrompt.get( "separatorSummary" )).description
+                        .put( i18nPrompt.get( "separatorDescription" ) ).value
                                 .put( formatAndOptions().separator() ).extendedUI
                                         .put( new ComboBasedPromptUiBuilder( this) {
 
@@ -189,8 +199,8 @@ public class CSVFileImporter
                                             }
                                         } );
         site.newPrompt( "quoteCharacter" ).summary
-                .put( Messages.get( "importer.prompt.quoteCharacter.summary" ) ).description
-                        .put( Messages.get( "importer.prompt.quoteCharacter.description" ) ).value
+                .put( i18nPrompt.get( "quoteCharacterSummary" )).description
+                        .put( i18nPrompt.get( "quoteCharacterDescription" ) ).value
                                 .put( formatAndOptions().quoteCharacter() ).extendedUI
                                         .put( new ComboBasedPromptUiBuilder( this) {
 
@@ -215,14 +225,14 @@ public class CSVFileImporter
                                             }
                                         } );
         site.newPrompt( "encoding" ).summary
-                .put( Messages.get( "importer.prompt.encoding.summary" ) ).description
-                        .put( Messages.get( "importer.prompt.encoding.description" ) ).value
+                .put( i18nPrompt.get( "encodingSummary" )).description
+                        .put( i18nPrompt.get( "encodingDescription" ) ).value
                                 .put( formatAndOptions().encoding() ).extendedUI
                                         .put( encodingPromptUiBuilder() ).severity
                                                 .set( Severity.REQUIRED );
         site.newPrompt( "coordinates" ).summary
-                .put( Messages.get( "importer.prompt.coordinates.summary" ) ).description
-                        .put( Messages.get( "importer.prompt.coordinates.description" ) ).value
+                .put( i18nPrompt.get( "coordinatesSummary" ) ).description
+                        .put( i18nPrompt.get( "coordinatesDescription" ) ).value
                                 .put( coordinatesPromptLabel() ).extendedUI
                                         .put( coordinatesPromptUiBuilder() );
     }
@@ -355,7 +365,7 @@ public class CSVFileImporter
 
                     layout.addColumnData( new ColumnPixelData( 700 ) );
                     TableViewerColumn viewerColumn = new TableViewerColumn( viewer, SWT.H_SCROLL );
-                    viewerColumn.getColumn().setText( Messages.get( "importer.prompt.encoding.samples" ) );
+                    viewerColumn.getColumn().setText( i18nPrompt.get( "encodingSamples" ) );
                     viewerColumn.setLabelProvider( new ColumnLabelProvider() {
 
                         @Override
@@ -393,20 +403,20 @@ public class CSVFileImporter
             }
 
 
-            protected String initialValue() {
-                return formatAndOptions().encoding();
-            }
-
-
-            protected List<String> allValues() {
-                return Lists.newArrayList( StandardCharsets.ISO_8859_1.name(),
-                        StandardCharsets.US_ASCII.name(), StandardCharsets.UTF_8.name(),
-                        StandardCharsets.UTF_16.name(),
-                        StandardCharsets.UTF_16BE.name(), StandardCharsets.UTF_16LE.name() );
-            }
-
-        };
+    protected String initialValue() {
+        return formatAndOptions().encoding();
     }
+
+
+    protected List<String> allValues() {
+        return Lists.newArrayList( StandardCharsets.ISO_8859_1.name(),
+                StandardCharsets.US_ASCII.name(), StandardCharsets.UTF_8.name(),
+                StandardCharsets.UTF_16.name(),
+                StandardCharsets.UTF_16BE.name(), StandardCharsets.UTF_16LE.name() );
+    }
+
+
+    };}
 
 
     protected List<String> potentialEncodingProblems() {

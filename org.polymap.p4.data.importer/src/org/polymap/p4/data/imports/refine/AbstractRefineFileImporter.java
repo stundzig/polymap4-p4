@@ -42,6 +42,7 @@ import org.osgi.framework.ServiceReference;
 import org.polymap.core.data.refine.RefineService;
 import org.polymap.core.data.refine.impl.FormatAndOptions;
 import org.polymap.core.data.refine.impl.ImportResponse;
+import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.imports.ContextIn;
@@ -71,6 +72,10 @@ import com.vividsolutions.jts.geom.Point;
 public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
         implements Importer {
 
+    protected static final IMessages     i18nPrompt          = Messages.forPrefix( "ImporterPrompt" );
+
+    protected static final IMessages     i18nRefine          = Messages.forPrefix( "ImporterRefine" );
+
     /*
      * GeometryFactory will be used to create the geometry attribute of each feature
      * (a Point object for the location)
@@ -83,12 +88,12 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     // each user selected columnname for longitude and latitude should be saved in
     // this user settings
     private static final Set<String>     LONGITUDES          = Sets.newHashSet( "geo_longitude", "lon", "longitude",
-            "geo_x", "x" );
+                                                                     "geo_x", "x" );
 
     // all known synonyms for latitude in lower case in all languages
     private static final Set<String>     LATITUDES           = Sets.newHashSet( "geo_latitude", "lat", "latitude",
-            "geo_y",
-            "y" );
+                                                                     "geo_y",
+                                                                     "y" );
 
     private static Log                   log                 = LogFactory.getLog( AbstractRefineFileImporter.class );
 
@@ -151,7 +156,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
         project = service.createProject( importJob, formatAndOptions, monitor );
         // reset it
         typedContent = null;
-//        log.info( "project has rows: " + project.rows.size() );
+        // log.info( "project has rows: " + project.rows.size() );
         // TODO MONITOR for the features
         features = createFeatures();
     }
@@ -174,7 +179,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                 && (!Number.class.isAssignableFrom( content.columns().get( latitudeColumnIndex ).type() )
                         || !Number.class.isAssignableFrom( content.columns().get( longitudeColumnIndex ).type() ))) {
             // TODO error message to the user
-//            log.error( "skipping coordinate creation" );
+            // log.error( "skipping coordinate creation" );
             latitudeColumnIndex = -1;
             longitudeColumnIndex = -1;
         }
@@ -184,10 +189,22 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
             if (latitudeColumnIndex != -1 && longitudeColumnIndex != -1) {
                 // construct the coordinate
                 try {
-                    Number latitude = (Number)row.cells().get( latitudeColumnIndex ).guessedValue();
-                    Number longitude = (Number)row.cells().get( longitudeColumnIndex ).guessedValue();
-                    Point point = GEOMETRYFACTORY
-                            .createPoint( new Coordinate( longitude.doubleValue(), latitude.doubleValue() ) );
+                    Number latitude = null;
+                    try {
+                        latitude = (Number)row.cells().get( latitudeColumnIndex ).guessedValue();
+                    }
+                    catch (IndexOutOfBoundsException ioobe) {
+                        // ignore, seems to be an emtpy line
+                    }
+                    Number longitude = null;
+                    try {
+                        longitude = (Number)row.cells().get( longitudeColumnIndex ).guessedValue();
+                    }
+                    catch (IndexOutOfBoundsException ioobe) {
+                        // ignore, seems to be an emtpy line
+                    }
+                    Point point = (latitude != null && longitude != null) ? GEOMETRYFACTORY
+                            .createPoint( new Coordinate( longitude.doubleValue(), latitude.doubleValue() ) ) : null;
                     featureBuilder.add( point );
                 }
                 catch (Exception e) {
@@ -222,7 +239,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
         else {
             parent.setLayout( new FormLayout() );
             Label label = toolkit.createLabel( parent,
-                    Messages.get( features.size() == 500 ? "importer.refine.rows.shrinked" : "importer.refine.rows",
+                    i18nRefine.get( features.size() == 500 ? "rowsShrinked" : "rows",
                             features.size() ) );
             FormDataFactory.on( label );
 
@@ -244,7 +261,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     @Override
     public void verify( IProgressMonitor monitor ) {
         log.info( "verify" );
-//        typedContent = null;
+        // typedContent = null;
         if (shouldUpdateOptions) {
             updateOptions( monitor );
             shouldUpdateOptions = false;
@@ -283,7 +300,6 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     protected synchronized TypedContent typedContent() {
         if (typedContent == null) {
             typedContent = new TypedContent( columnsWithTypes(), rows() );
-
         }
         return typedContent;
     }
@@ -397,14 +413,14 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                 //
                 String[] columnNames = numberColumnNames();
                 if (columnNames.length == 0) {
-                    FormDataFactory.on( tk.createLabel( parent, Messages.get( "importer.prompt.coordinates.nocolumns" ),
+                    FormDataFactory.on( tk.createLabel( parent, i18nPrompt.get( "coordinatesNocolumns" ),
                             SWT.LEFT ) ).left( 1 ).top( 5 ).width( 500 );
                 }
                 else {
                     // 2 lists with all columns to select and a label in
                     // front
                     Label lonLabel = new Label( parent, SWT.LEFT );
-                    lonLabel.setText( Messages.get( "importer.refine.lon.label" ) );
+                    lonLabel.setText( i18nRefine.get( "lonLabel" ) );
 
                     Combo lonValues = new Combo( parent, SWT.DROP_DOWN );
                     lonValues.setItems( columnNames );
@@ -426,7 +442,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                     }
 
                     Label latLabel = new Label( parent, SWT.LEFT );
-                    latLabel.setText( Messages.get( "importer.refine.lat.label" ) );
+                    latLabel.setText( i18nRefine.get( "latLabel" ) );
 
                     Combo latValues = new Combo( parent, SWT.DROP_DOWN );
                     latValues.setItems( columnNames );
@@ -460,6 +476,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
             public void submit( ImporterPrompt prompt ) {
                 setLatitudeColumn( latValue );
                 setLongitudeColumn( lonValue );
+                prompt.value.set( coordinatesPromptLabel() );
             }
         };
     }
