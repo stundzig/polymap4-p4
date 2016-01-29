@@ -15,41 +15,39 @@
 package org.polymap.p4.layer;
 
 import java.util.EventObject;
+import java.util.Optional;
 
-import org.opengis.filter.Filter;
+import org.opengis.feature.Feature;
 
 import org.polymap.core.runtime.config.Config;
 import org.polymap.core.runtime.config.ConfigurationFactory;
 import org.polymap.core.runtime.config.Immutable;
-import org.polymap.core.runtime.config.Mandatory;
 
 /**
- * Fired when {@link FeatureSelection} selection has changed. 
+ * Fired when {@link FeatureSelection#setClicked(Feature)} has been called. 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class FeatureSelectionEvent
+public class FeatureClickEvent
         extends EventObject {
 
-    @Mandatory
     @Immutable
-    public Config<Filter>       newSelection;
+    public Config<Feature>      clicked;
     
-    @Mandatory
     @Immutable
-    public Config<Filter>       oldSelection;
+    public Config<Feature>      previous;
     
     
-    public FeatureSelectionEvent( FeatureSelection source, Filter newSelection, Filter oldSelection ) {
+    public FeatureClickEvent( FeatureSelection source, Optional<Feature> clicked, Optional<Feature> previous ) {
         super( source );
         ConfigurationFactory.inject( this );
-        this.newSelection.set( newSelection );
-        this.oldSelection.set( oldSelection );
+        this.clicked.set( clicked.orElse( null ) );
+        this.previous.set( previous.orElse( null ) );
     }
 
     @Override
     public FeatureSelection getSource() {
         return (FeatureSelection)super.getSource();
     }
-
+    
 }

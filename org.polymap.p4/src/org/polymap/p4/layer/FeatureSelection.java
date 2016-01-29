@@ -28,7 +28,7 @@ import org.geotools.data.FeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.opengis.feature.Feature;
 import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory;
+import org.opengis.filter.FilterFactory2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,7 +70,7 @@ public class FeatureSelection {
     
     private static Log log = LogFactory.getLog( FeatureSelection.class );
 
-    public static final FilterFactory   ff = CommonFactoryFinder.getFilterFactory( null );
+    public static final FilterFactory2  ff = CommonFactoryFinder.getFilterFactory2( null );
 
     /**
      * The selection modes.
@@ -137,11 +137,16 @@ public class FeatureSelection {
 
     
     /**
-     * Call this from display thread.
+     * Waits for the {@link FeatureStore} to become available. Executes the given
+     * task when available.
+     * <p/>
+     * This should be called from display thread.
      *
-     * @param task The task to perform when the {@link FeatureStore} is available.
-     *        This is called from within an {@link UIJob}. Use
-     *        {@link UIThreadExecutor} to update the UI.
+     * @param task This is executed when the {@link FeatureStore} is available. This
+     *        is called from within an {@link UIJob}. Use {@link UIThreadExecutor} to
+     *        update the UI.
+     * @param errorHandler This is executed if there was an error while retrieving
+     *        teh FeatureStore.
      */
     public void waitForFs( Consumer<FeatureStore> task, Consumer<Exception> errorHandler ) {
         new UIJob( "Wait for FeatureStore" ) {
@@ -242,15 +247,26 @@ public class FeatureSelection {
         return filter;
     }
     
+    
     /**
-     * The one feature that was clicked in the table to open the form panel for it.
+     * The one feature that was 'clicked' somewhere in the UI. Usually a feature can
+     * be clicked in the map and a feature table.
      */
     public Optional<Feature> clicked() {
         return clicked;
     }
     
+    
+    /**
+     * 
+     *
+     * @param clicked The newly {@link #clicked()} feature, or null if currently
+     *        clicked feature should be un-clicked.
+     */
     public void setClicked( Feature clicked ) {
+        Optional<Feature> previous = this.clicked;
         this.clicked = Optional.ofNullable( clicked );
+        EventManager.instance().publish( new FeatureClickEvent( this, this.clicked, previous ) );
     }
 
 }

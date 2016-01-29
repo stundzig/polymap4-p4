@@ -48,10 +48,10 @@ import org.polymap.p4.map.ProjectMapPanel;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class LayersFeatureTableContribution
+public class FeatureSelectionTableContrib
         implements IToolbarContribution {
 
-    private static Log log = LogFactory.getLog( LayersFeatureTableContribution.class );
+    private static Log log = LogFactory.getLog( FeatureSelectionTableContrib.class );
 
     @Mandatory
     @Scope( P4Plugin.Scope )
@@ -82,20 +82,20 @@ public class LayersFeatureTableContribution
                                 RadioItem item = new RadioItem( group );
                                 item.text.put( StringUtils.abbreviate( layer.label.get(), 10 ) );
                                 item.tooltip.put( "Open attributes table of: " + layer.label.get() );
-                                item.icon.put( P4Plugin.images().svgImage( "table.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+                                item.icon.put( P4Plugin.images().svgImage( "layers.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
                                 AtomicBoolean wasVisible = new AtomicBoolean();
                                 item.onSelected.put( ev -> {
                                     log.info( "fs=" + fs );
                                     createTableView( layer, fs, site );
 
                                     wasVisible.set( layer.userSettings.get().visible.get() );
-                                    //layer.userSettings.get().visible.set( true );
+                                    layer.userSettings.get().visible.set( true );
                                 });
                                 item.onUnselected.put( ev -> {
                                     ((ProjectMapPanel)site.panel()).addButtomView( parent -> {
                                         // empty; remove content
                                     });
-                                    //layer.userSettings.get().visible.set( wasVisible.get() );
+                                    layer.userSettings.get().visible.set( wasVisible.get() );
                                 });
                             });
                         },

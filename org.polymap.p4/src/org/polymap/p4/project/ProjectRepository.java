@@ -74,6 +74,7 @@ public class ProjectRepository {
             if (uow.entity( IMap.class, "root" ) == null) {
                 uow.createEntity( IMap.class, "root", (IMap prototype) -> {
                     prototype.label.set( "First Map" );
+                    prototype.srsCode.set( "EPSG:3857" );
                     //prototype.visible.set( true );
                     return prototype;
                 });

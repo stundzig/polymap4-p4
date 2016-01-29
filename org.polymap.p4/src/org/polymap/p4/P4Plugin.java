@@ -50,7 +50,7 @@ import org.polymap.service.geoserver.GeoServerServlet;
 import org.polymap.p4.catalog.LocalCatalog;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
-import org.polymap.p4.layer.LayersFeatureTableContribution;
+import org.polymap.p4.layer.FeatureSelectionTableContrib;
 import org.polymap.p4.layer.NewLayerContribution;
 import org.polymap.p4.project.ProjectRepository;
 
@@ -133,7 +133,7 @@ public class P4Plugin
         ContributionManager.registerExtension( new ContributionProviderExtension() {
             @Override
             public IContributionProvider createProvider() {
-                return new LayersFeatureTableContribution();
+                return new FeatureSelectionTableContrib();
             }
         });
         

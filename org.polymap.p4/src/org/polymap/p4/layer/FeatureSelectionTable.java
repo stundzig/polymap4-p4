@@ -14,6 +14,7 @@
  */
 package org.polymap.p4.layer;
 
+import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
 import static org.polymap.core.ui.SelectionAdapter.on;
 
@@ -43,8 +44,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -56,6 +55,7 @@ import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.rhei.table.DefaultFeatureTableColumn;
 import org.polymap.rhei.table.FeatureCollectionContentProvider.FeatureTableElement;
 import org.polymap.rhei.table.FeatureTableViewer;
+import org.polymap.rhei.table.IFeatureTableElement;
 
 import org.polymap.p4.P4Plugin;
 
@@ -112,6 +112,16 @@ public class FeatureSelectionTable {
         // table viewer
         createTableViewer( parent );
         on( viewer.getTable() ).fill().top( topbar );
+        
+        // listen to commit events
+        EventManager.instance().subscribe( this, ifType( FeatureEvent.class, ev -> 
+                ev.getType() == Type.COMMIT &&
+                ev.getFeatureSource() == fs ) );
+        
+        // listen to click events
+        EventManager.instance().subscribe( this, ifType( FeatureClickEvent.class, ev -> 
+                ev.getSource() == this.featureSelection &&
+                ev.clicked.isPresent() ) );
     }
     
     
@@ -124,36 +134,58 @@ public class FeatureSelectionTable {
         viewer = new FeatureTableViewer( parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER );
     
         // add columns
+        DefaultFeatureTableColumn first = null;
         for (PropertyDescriptor prop : features.getSchema().getDescriptors()) {
             if (Geometry.class.isAssignableFrom( prop.getType().getBinding() )) {
                 // skip Geometry
             }
             else {
-                viewer.addColumn( new DefaultFeatureTableColumn( prop ) );
+                DefaultFeatureTableColumn column = new DefaultFeatureTableColumn( prop );
+                viewer.addColumn( column );
+                first = first != null ? first : column;
             }
         }
+        
+        // it is important to sort any column; otherwise preserving selection during refresh()
+        // always selects a new element, which causes an event, which causes a refresh() ...
+        first.sort( SWT.DOWN );
+        
         //
         viewer.setContent( features );
 
         // selection -> FeaturePanel
-        viewer.addSelectionChangedListener( (SelectionChangedEvent ev) -> {
-            FeatureTableElement elm = (FeatureTableElement)on( ev.getSelection() ).first().get();
-            log.info( "selection: " + elm );
-            featureSelection.setClicked( elm.getFeature() );
-            BatikApplication.instance().getContext().openPanel( site.path(), FeaturePanel.ID );
-        });
-        
-        // commit events
-        EventManager.instance().subscribe( this, ev -> 
-                ev instanceof FeatureEvent && 
-                ((FeatureEvent)ev).getType() == Type.COMMIT &&
-                ((FeatureEvent)ev).getFeatureSource() == fs);
+        viewer.addSelectionChangedListener( ev -> {
+            log.info( "" + ev.getSelection() );
+            on( ev.getSelection() ).first( FeatureTableElement.class ).ifPresent( elm -> {
+                log.info( "selection: " + elm );
+                featureSelection.setClicked( elm.getFeature() );
+            
+                BatikApplication.instance().getContext().openPanel( site.path(), FeaturePanel.ID );
+            });
+        });        
     }
     
 
     @EventHandler( display=true )
+    protected void onFeatureClick( FeatureClickEvent ev ) {
+        if (!viewer.getTable().isDisposed()) {
+            IFeatureTableElement[] selected = viewer.getSelectedElements();
+            String clickedFid = ev.clicked.get().getIdentifier().getID();
+            if (selected.length != 1 || !selected[0].fid().equals( clickedFid )) {
+                viewer.selectElement( clickedFid, true, false );
+            }
+        }
+        else {
+            EventManager.instance().unsubscribe( this );
+        }
+    }
+
+
+    @EventHandler( display=true )
     protected void onFeatureChange( FeatureEvent ev ) {
         if (!viewer.getTable().isDisposed()) {
+            // XXX this tries to preserve selection; this is index based; it causes
+            // a selection event; if sort has changed, another element ist selected!
             viewer.refresh();
         }
         else {

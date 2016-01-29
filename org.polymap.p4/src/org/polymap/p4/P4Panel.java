@@ -21,13 +21,12 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.DefaultPanel;
-import org.polymap.rhei.batik.Mandatory;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import org.polymap.p4.layer.FeaturePanel;
 import org.polymap.p4.layer.FeatureSelection;
-import org.polymap.p4.layer.LayersFeatureTableContribution;
+import org.polymap.p4.layer.FeatureSelectionTableContrib;
 
 /**
  * 
@@ -42,9 +41,8 @@ public abstract class P4Panel
     /**
      * The <b>active</b> layer and the <b>selected</b> features from this layer.
      * There is just one active layer at a given time. This layer is selected by
-     * choosing the feature table to open ({@link LayersFeatureTableContribution}).
+     * choosing the feature table to open ({@link FeatureSelectionTableContrib}).
      */
-    @Mandatory
     @Scope( P4Plugin.Scope )
     protected Context<FeatureSelection>     featureSelection;
     

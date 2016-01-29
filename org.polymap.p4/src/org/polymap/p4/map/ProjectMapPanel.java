@@ -15,18 +15,32 @@
 package org.polymap.p4.map;
 
 import static org.polymap.core.ui.FormDataFactory.on;
+import static org.polymap.p4.layer.FeatureSelection.ff;
 
 import java.util.function.Consumer;
 
+import org.geotools.data.FeatureStore;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.feature.Feature;
+import org.opengis.filter.Filter;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.rap.json.JsonArray;
+
+import org.polymap.core.data.Features;
 import org.polymap.core.data.util.Geometries;
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.project.ILayer;
@@ -34,6 +48,7 @@ import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.security.SecurityContext;
 import org.polymap.core.ui.FormLayoutFactory;
+import org.polymap.core.ui.StatusDispatcher;
 import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.BatikApplication;
@@ -41,6 +56,7 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.ContributionManager;
+import org.polymap.rhei.batik.toolkit.Snackbar.Appearance;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
@@ -50,6 +66,10 @@ import org.polymap.p4.P4AppDesign;
 import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.project.ProjectRepository;
+import org.polymap.rap.openlayers.base.OlEvent;
+import org.polymap.rap.openlayers.base.OlEventListener;
+import org.polymap.rap.openlayers.base.OlMap;
+import org.polymap.rap.openlayers.base.OlMap.Event;
 import org.polymap.rap.openlayers.control.MousePositionControl;
 import org.polymap.rap.openlayers.control.ScaleLineControl;
 
@@ -59,7 +79,8 @@ import org.polymap.rap.openlayers.control.ScaleLineControl;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class ProjectMapPanel
-        extends P4Panel {
+        extends P4Panel 
+        implements OlEventListener {
 
     private static Log log = LogFactory.getLog( ProjectMapPanel.class );
 
@@ -141,12 +162,76 @@ public class ProjectMapPanel
             on( mapViewer.getControl() ).fill().bottom( tableParent );
             mapViewer.getControl().moveBelow( null );
             mapViewer.getControl().setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
+            
+            //
+            OlMap olmap = mapViewer.getMap();
+            olmap.addEventListener( Event.click, this );
         }
         catch (Exception e) {
             throw new RuntimeException( e );
         }
 
         ContributionManager.instance().contributeTo( this, this );
+    }
+
+    
+    @Override
+    public void handleEvent( OlEvent ev ) {
+        log.info( "event: " + ev.properties() );
+        JsonArray coord = ev.properties().get( "feature" ).asObject().get( "coordinate" ).asArray();
+        double x = coord.get( 0 ).asDouble();
+        double y = coord.get( 1 ).asDouble();
+        
+        if (featureSelection.isPresent()) {
+            featureSelection.get().waitForFs(
+                    fs -> {
+                        try {
+                            clickFeature( fs, new Coordinate( x, y ) );
+                        }
+                        catch (Exception e) {
+                            StatusDispatcher.handleError( "Unable to select feature.", e );
+                        }
+                    },
+                    e -> {
+                        ILayer layer = featureSelection.get().layer();
+                        StatusDispatcher.handleError( "Unable to retrieve store of layer: " + layer.label.get(), e );
+                    });
+        }
+        else {
+            tk().createSnackbar( Appearance.FadeIn, "No active layer" );
+        }
+    }
+
+    
+    protected void clickFeature( FeatureStore fs, Coordinate clicked ) throws Exception {
+        CoordinateReferenceSystem mapCrs = Geometries.crs( map.get().srsCode.get() );
+        GeometryFactory gf = new GeometryFactory();
+
+        Point point = gf.createPoint( clicked );
+
+        // buffer: 50m
+        double buffer = 50;
+        Point norm = Geometries.transform( point, mapCrs, Geometries.crs( "EPSG:3857" ) );
+        ReferencedEnvelope buffered = new ReferencedEnvelope(
+                norm.getX()-buffer, norm.getX()+buffer, norm.getY()-buffer, norm.getY()+buffer,
+                Geometries.crs( "EPSG:3857" ) );
+        
+        // transform -> dataCrs
+        CoordinateReferenceSystem dataCrs = fs.getSchema().getCoordinateReferenceSystem();
+        buffered = buffered.transform( dataCrs, true );
+
+        // get feature
+        Filter filter = ff.intersects( ff.property( "" ), ff.literal( JTS.toGeometry( (Envelope)buffered ) ) );
+        FeatureCollection selected = fs.getFeatures( filter );
+        if (selected.isEmpty()) {
+            return; // nothing found
+        }
+        if (selected.size() > 1) {
+            log.info( "Multiple features found: " + selected.size() );
+        }
+        Feature any = (Feature)Features.stream( selected ).findAny().get();
+        featureSelection.get().setClicked( any );
+        log.info( "clicked: " + any );
     }
 
     
