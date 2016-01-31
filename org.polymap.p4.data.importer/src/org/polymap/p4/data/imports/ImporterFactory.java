@@ -13,8 +13,13 @@
  */
 package org.polymap.p4.data.imports;
 
+import org.polymap.p4.data.imports.shapefile.ShpImporterFactory;
+
 /**
- * 
+ * Build one or more {@link Importer} instances by checking all possible
+ * {@link ContextIn} variables and possible variants. For example, in case of a file
+ * {@link Importer} the factory should also check for List of File and create
+ * one Importer per file, see {@link ShpImporterFactory}.
  *
  * @see ContextIn
  * @see ContextOut
