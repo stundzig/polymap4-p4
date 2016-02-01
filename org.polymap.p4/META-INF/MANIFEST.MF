@@ -5,14 +5,14 @@ Bundle-SymbolicName: org.polymap.p4;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.polymap.p4.P4Plugin
 Bundle-Vendor: polymap.org
-Require-Bundle: org.eclipse.osgi.services,
+Require-Bundle: org.eclipse.osgi.services;visibility:=reexport,
  org.eclipse.rap.ui;bundle-version="2.3.1",
  org.polymap.core;bundle-version="4.0.0";visibility:=reexport,
  org.polymap.core.data;bundle-version="4.0.0";visibility:=reexport,
  org.polymap.core.data.wms;bundle-version="4.0.0",
  org.polymap.core.data.rs,
  org.polymap.core.data.shapefile;bundle-version="4.0.0",
- org.polymap.core.mapeditor;bundle-version="4.0.0",
+ org.polymap.core.mapeditor;bundle-version="4.0.0";visibility:=reexport,
  org.polymap.core.project;bundle-version="4.0.0";visibility:=reexport,
  org.polymap.core.catalog;bundle-version="4.0.0";visibility:=reexport,
  org.polymap.rhei.batik;visibility:=reexport,
