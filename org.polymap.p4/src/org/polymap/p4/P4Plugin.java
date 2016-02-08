@@ -43,7 +43,7 @@ import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.contribution.ContributionManager;
 import org.polymap.rhei.batik.contribution.ContributionProviderExtension;
 import org.polymap.rhei.batik.contribution.IContributionProvider;
-import org.polymap.rhei.batik.toolkit.BatikStatusAdapter;
+import org.polymap.rhei.batik.toolkit.BatikDialogStatusAdapter;
 
 import org.polymap.service.geoserver.GeoServerServlet;
 
@@ -139,7 +139,7 @@ public class P4Plugin
         
         // Handling errors in the UI
         StatusDispatcher.registerAdapter( new StatusDispatcher.LogAdapter() );
-        StatusDispatcher.registerAdapter( new BatikStatusAdapter() );
+        StatusDispatcher.registerAdapter( new BatikDialogStatusAdapter() );
         
         localCatalog = new LocalCatalog();
         localResolver = new LocalResolver( localCatalog );
