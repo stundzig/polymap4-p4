@@ -114,5 +114,17 @@
          </property>
       </product>
    </extension>
+   <extension
+         id="org.polymap.p4.app"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="org.polymap.p4.P4Application">
+         </run>
+      </application>
+   </extension>
 
 </plugin>

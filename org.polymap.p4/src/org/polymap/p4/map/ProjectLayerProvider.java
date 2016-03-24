@@ -107,7 +107,7 @@ public class ProjectLayerProvider
         // start creating pipeline
         String layerName = createPipeline( elm );
         
-        // make OpenLayers single-tile layer
+        // single-tile layer
         return new ImageLayer()
                  .source.put( new ImageWMSSource()
                          .url.put( "." + alias )
@@ -118,12 +118,12 @@ public class ProjectLayerProvider
         
 //        // make OpenLayers tiled layer
 //        return new TileLayer()
-//                 .source.put( new TileWMSSource()
-//                         .url.put( ".." + alias )
-//                         .params.put( new WMSRequestParams()
-//                                 .version.put( "1.1.1" )  // send "SRS" param
-//                                 .layers.put( layerName )
-//                                 .format.put( "image/png" ) ) );
+//                .source.put( new TileWMSSource()
+//                        .url.put( ".." + alias )
+//                        .params.put( new WMSRequestParams()
+//                                .version.put( "1.1.1" )  // send "SRS" param
+//                                .layers.put( layerName )
+//                                .format.put( "image/png" ) ) );
     }
 
     
