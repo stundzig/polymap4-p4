@@ -23,6 +23,7 @@ import org.geotools.data.FeatureStore;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.json.JSONArray;
 import org.opengis.feature.Feature;
 import org.opengis.filter.Filter;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -37,8 +38,6 @@ import com.vividsolutions.jts.geom.Point;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.rap.json.JsonArray;
 
 import org.polymap.core.data.Features;
 import org.polymap.core.data.util.Geometries;
@@ -178,9 +177,9 @@ public class ProjectMapPanel
     @Override
     public void handleEvent( OlEvent ev ) {
         log.info( "event: " + ev.properties() );
-        JsonArray coord = ev.properties().get( "feature" ).asObject().get( "coordinate" ).asArray();
-        double x = coord.get( 0 ).asDouble();
-        double y = coord.get( 1 ).asDouble();
+        JSONArray coord = ev.properties().getJSONObject( "feature" ).getJSONArray( "coordinate" );
+        double x = coord.getDouble( 0 );
+        double y = coord.getDouble( 1 );
         
         if (featureSelection.isPresent()) {
             featureSelection.get().waitForFs(
