@@ -12,10 +12,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.translate.UnicodeEscaper;
 import org.junit.Test;
-import org.polymap.p4.data.imports.refine.csv.Type;
-import org.polymap.p4.data.imports.refine.csv.TypeGuesser;
 
 import com.google.common.collect.Lists;
+
+import org.polymap.p4.data.importer.refine.csv.Type;
+import org.polymap.p4.data.importer.refine.csv.TypeGuesser;
 
 public class TypeGuesserTest {
 

@@ -26,7 +26,7 @@ import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 public class ImporterPlugin 
         extends AbstractUIPlugin {
 
-    public static final String      ID = "org.polymap.p4.data.imports";
+    public static final String      ID = "org.polymap.p4.data.importer";
     
     private static ImporterPlugin   instance;
 
