@@ -36,6 +36,8 @@ import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.project.IMap;
 import org.polymap.core.project.operations.NewLayerOperation;
 import org.polymap.core.runtime.UIThreadExecutor;
+import org.polymap.core.style.DefaultStyle;
+import org.polymap.core.style.model.FeatureStyle;
 import org.polymap.core.ui.ColumnDataFactory;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
@@ -124,11 +126,20 @@ public class AddLayerForImportedFeaturesConcern
         protected void createLayer() {
             String resId = delegate.resourceIdentifier();
             String label = input.getText();
+            
+            // create default style
+            // XXX this isn't a good place (see also NewLayerContribution)
+            FeatureStyle featureStyle = P4Plugin.styleRepo().newFeatureStyle();
+            DefaultStyle.createPointStyle( featureStyle, null );
+            log.info( "FeatureStyle.id: " + featureStyle.id() );
+            featureStyle.store();
+            
             NewLayerOperation op = new NewLayerOperation()
                     .uow.put( ProjectRepository.unitOfWork().newUnitOfWork() )
                     .map.put( map.get() )
                     .label.put( label )
-                    .resourceIdentifier.put( resId );
+                    .resourceIdentifier.put( resId )
+                    .styleIdentifier.put( featureStyle.id() );
 
             OperationSupport.instance().execute( op, true, false );
         }

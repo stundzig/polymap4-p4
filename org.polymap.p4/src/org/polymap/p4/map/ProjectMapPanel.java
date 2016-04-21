@@ -85,6 +85,8 @@ public class ProjectMapPanel
 
     public static final PanelIdentifier ID = PanelIdentifier.parse( "start" );
     
+    public static final String          BOTTOM_TOOLBAR_TAG = "ProjectMapPanel.Bottom";
+
     private static final IMessages      i18n = Messages.forPrefix( "ProjectPanel" );
 
     /**
@@ -130,14 +132,13 @@ public class ProjectMapPanel
         ((P4AppDesign)BatikApplication.instance().getAppDesign()).setAppTitle( title );
         
         //parent.setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
-        parent.setLayout( FormLayoutFactory.defaults().margins( 0 ).spacing( 0 ).create() );
+        parent.setLayout( FormLayoutFactory.defaults().margins( 0, 0, 5, 0 ).spacing( 0 ).create() );
         
         // buttom toolbar
-        MdToolbar2 tb = ((MdToolkit)site().toolkit()).createToolbar( parent );
+        MdToolbar2 tb = ((MdToolkit)site().toolkit()).createToolbar( parent, SWT.BOTTOM );
         on( tb.getControl() ).fill().noTop();
         tb.getControl().moveAbove( null );
-        
-        ContributionManager.instance().contributeTo( tb, this );
+        ContributionManager.instance().contributeTo( tb, this, BOTTOM_TOOLBAR_TAG );
         
         // table area
         tableParent = on( site().toolkit().createComposite( parent, SWT.NONE ) )

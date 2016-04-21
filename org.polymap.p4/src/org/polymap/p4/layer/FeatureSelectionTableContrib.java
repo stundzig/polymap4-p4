@@ -64,8 +64,8 @@ public class FeatureSelectionTableContrib
 
     @Override
     public void fillToolbar( IContributionSite site, MdToolbar2 toolbar ) {
-        if (site.panel() instanceof ProjectMapPanel) {
-//            MdGroupItem group = new MdGroupItem( tb, "layers" );
+        if (site.panel() instanceof ProjectMapPanel 
+                && site.tagsContain( ProjectMapPanel.BOTTOM_TOOLBAR_TAG )) {
             
             for (ILayer layer : map.get().layers) {
                 createLayerItem( toolbar, layer, site );
@@ -81,7 +81,7 @@ public class FeatureSelectionTableContrib
                             UIThreadExecutor.async( () -> {
                                 RadioItem item = new RadioItem( group );
                                 item.text.put( StringUtils.abbreviate( layer.label.get(), 10 ) );
-                                item.tooltip.put( "Open attributes table of: " + layer.label.get() );
+                                item.tooltip.put( "Show contents of " + layer.label.get() );
                                 item.icon.put( P4Plugin.images().svgImage( "layers.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
                                 AtomicBoolean wasVisible = new AtomicBoolean();
                                 item.onSelected.put( ev -> {
@@ -120,7 +120,7 @@ public class FeatureSelectionTableContrib
                         FeatureSelection layerFeatureSelection = FeatureSelection.forLayer( layer );
                         featureSelection.set( layerFeatureSelection );
                         
-                        new FeatureSelectionTable( parent, layerFeatureSelection, site.panelSite() );
+                        new FeatureSelectionTable( parent, layerFeatureSelection, site.panel() );
                         parent.layout();
                     });        
                 }

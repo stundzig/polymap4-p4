@@ -16,6 +16,8 @@ package org.polymap.p4;
 
 import java.util.Optional;
 
+import java.io.File;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
@@ -36,6 +38,8 @@ import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
 import org.polymap.core.security.SecurityContext;
 import org.polymap.core.security.StandardConfiguration;
+import org.polymap.core.style.StylePlugin;
+import org.polymap.core.style.model.StyleRepository;
 import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.Context;
@@ -53,6 +57,7 @@ import org.polymap.p4.data.P4PipelineIncubator;
 import org.polymap.p4.layer.FeatureSelectionTableContrib;
 import org.polymap.p4.layer.NewLayerContribution;
 import org.polymap.p4.project.ProjectRepository;
+import org.polymap.p4.style.LayerStyleContrib;
 
 /**
  *
@@ -92,7 +97,10 @@ public class P4Plugin
     public static LocalResolver localResolver() {
         return instance().localResolver;
     }
-    
+
+    public static StyleRepository styleRepo() {
+        return instance().styleRepo;
+    }
     
     // instance *******************************************
 
@@ -105,6 +113,8 @@ public class P4Plugin
     private ServiceTracker          httpServiceTracker;
 
     private Optional<HttpService>   httpService = Optional.empty();
+    
+    private StyleRepository         styleRepo;
 
 
     public void start( BundleContext context ) throws Exception {
@@ -126,23 +136,28 @@ public class P4Plugin
         // XXX make this an extension point
         ContributionManager.registerExtension( new ContributionProviderExtension() {
             @Override
-            public IContributionProvider createProvider() {
-                return new NewLayerContribution();
-            }
+            public IContributionProvider createProvider() { return new NewLayerContribution(); }
         });
         ContributionManager.registerExtension( new ContributionProviderExtension() {
             @Override
-            public IContributionProvider createProvider() {
-                return new FeatureSelectionTableContrib();
-            }
+            public IContributionProvider createProvider() { return new FeatureSelectionTableContrib(); }
+        });
+        ContributionManager.registerExtension( new ContributionProviderExtension() {
+            @Override
+            public IContributionProvider createProvider() { return new LayerStyleContrib(); }
         });
         
         // Handling errors in the UI
         StatusDispatcher.registerAdapter( new StatusDispatcher.LogAdapter() );
         StatusDispatcher.registerAdapter( new BatikDialogStatusAdapter() );
         
+        //
         localCatalog = new LocalCatalog();
         localResolver = new LocalResolver( localCatalog );
+        
+        // styleRepo
+        File styleDataDir = CorePlugin.getDataLocation( StylePlugin.instance() );
+        styleRepo = new StyleRepository( styleDataDir );
 
         // register HTTP resource
         httpServiceTracker = new ServiceTracker( context, HttpService.class.getName(), null ) {
@@ -191,6 +206,7 @@ public class P4Plugin
     public void stop( BundleContext context ) throws Exception {
         httpServiceTracker.close();
         localCatalog.close();
+        styleRepo.close();
 
         instance = null;
         super.stop( context );

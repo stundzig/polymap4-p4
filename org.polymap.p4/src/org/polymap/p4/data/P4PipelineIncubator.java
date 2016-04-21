@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright (C) 2015, Falko Bräutigam. All rights reserved.
+ * Copyright (C) 2015-2016, Falko Bräutigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -14,6 +14,9 @@
  */
 package org.polymap.p4.data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,6 +27,8 @@ import org.polymap.core.data.image.ImageEncodeProcessor;
 import org.polymap.core.data.pipeline.DefaultPipelineIncubator;
 import org.polymap.core.data.pipeline.PipelineIncubator;
 import org.polymap.core.data.pipeline.PipelineProcessor;
+import org.polymap.core.data.pipeline.PipelineProcessorSite;
+import org.polymap.core.data.pipeline.ProcessorDescription;
 import org.polymap.core.data.wms.WmsRenderProcessor;
 import org.polymap.core.project.ILayer;
 
@@ -49,14 +54,38 @@ public class P4PipelineIncubator
 
     
     public static P4PipelineIncubator forLayer( ILayer layer ) {
-        return new P4PipelineIncubator();
+        return new P4PipelineIncubator( layer );
     }
     
     
     // instance *******************************************
     
-    public P4PipelineIncubator() {
+    private ILayer                  layer;
+    
+    private Map<String,Object>      properties = new HashMap();
+    
+    
+    public P4PipelineIncubator( ILayer layer ) {
         super( procTypes );
+        this.layer = layer;
+    }
+    
+
+    public P4PipelineIncubator addProperty( String key, Object value ) {
+        if (properties.put( key, value ) != null) {
+            throw new IllegalStateException( "Property already exists: " + key );
+        }
+        return this;
+    }
+    
+    
+    @Override
+    protected PipelineProcessorSite createProcessorSite( ProcessorDescription procDesc ) {
+        Map<String,Object> props = new HashMap( properties );
+        if (procDesc.getProps() != null) {
+            props.putAll( procDesc.getProps() );
+        }
+        return new PipelineProcessorSite( props );
     }
     
 }

@@ -68,6 +68,10 @@
             class="org.polymap.p4.layer.FeaturePanel"
             id="org.polymap.p4.FeaturePanel">
       </panel>
+      <panel
+            class="org.polymap.p4.style.LayerStylePanel"
+            id="org.polymap.p4.LayerStylePanel">
+      </panel>
    </extension>
    <!--extension
          point="org.polymap.service.fs.contentProviders">

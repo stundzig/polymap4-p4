@@ -26,6 +26,8 @@ import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.project.IMap;
 import org.polymap.core.project.operations.NewLayerOperation;
+import org.polymap.core.style.DefaultStyle;
+import org.polymap.core.style.model.FeatureStyle;
 import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.BatikApplication;
@@ -80,20 +82,29 @@ public class NewLayerContribution
     protected void execute( IContributionSite site ) {
         String resId = P4Plugin.localResolver().resourceIdentifier( res.get() );
         
+        // create default style
+        // XXX isn't a good place, see AddLayerOperationConcern
+        FeatureStyle featureStyle = P4Plugin.styleRepo().newFeatureStyle();
+        DefaultStyle.createPointStyle( featureStyle, null );
+        log.info( "FeatureStyle.id: " + featureStyle.id() );
+        
         UnitOfWork uow = ProjectRepository.unitOfWork();
         
         NewLayerOperation op = new NewLayerOperation()
                 .uow.put( uow.newUnitOfWork() )
                 .map.put( map.get() )
                 .label.put( res.get().getName() )
-                .resourceIdentifier.put( resId );
+                .resourceIdentifier.put( resId )
+                .styleIdentifier.put( featureStyle.id() );
 
         OperationSupport.instance().execute2( op, true, false, ev2 -> asyncFast( () -> {
             if (ev2.getResult().isOK()) {
+                featureStyle.store();
+                
                 PanelPath parentPath = site.panelSite().path().removeLast( 1 );
                 BatikApplication.instance().getContext().closePanel( parentPath );
 
-//                // close panel and parent, assuming that projct map is root
+//                // close panel and parent, assuming that project map is root
 //                site.getContext().openPanel( PanelPath.ROOT, new PanelIdentifier( "start" ) );
             }
             else {

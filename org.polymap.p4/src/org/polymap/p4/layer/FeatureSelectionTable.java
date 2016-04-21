@@ -49,8 +49,10 @@ import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.BatikApplication;
-import org.polymap.rhei.batik.PanelSite;
+import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
+import org.polymap.rhei.batik.contribution.ContributionManager;
+import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.rhei.table.DefaultFeatureTableColumn;
 import org.polymap.rhei.table.FeatureCollectionContentProvider.FeatureTableElement;
@@ -67,6 +69,8 @@ import org.polymap.p4.P4Plugin;
 public class FeatureSelectionTable {
 
     private static Log log = LogFactory.getLog( FeatureSelectionTable.class );
+    
+    public static final String          TOOLBAR_TAG = "FeatureSelectionTable";
 
     private FeatureSelection            featureSelection;
     
@@ -74,19 +78,21 @@ public class FeatureSelectionTable {
     
     private FeatureCollection           features;
 
+    private IPanel                      panel;
+    
     private FeatureTableViewer          viewer;
     
-    private PanelSite                   site;
-
     private Text                        searchText;
 
     private Button                      searchBtn;
 
+    private MdToolbar2                  toolbar;
+
     
-    public FeatureSelectionTable( Composite parent, FeatureSelection featureSelection, PanelSite site ) {
+    public FeatureSelectionTable( Composite parent, FeatureSelection featureSelection, IPanel panel ) {
         BatikApplication.instance().getContext().propagate( this );
         this.featureSelection = featureSelection;
-        this.site = site;
+        this.panel = panel;
 
         parent.setLayout( FormLayoutFactory.defaults().create() );
 
@@ -96,18 +102,23 @@ public class FeatureSelectionTable {
         }
         catch (Exception e) {
             log.warn( "", e );
-            tk().createLabel( parent, "<p>Unable to featch features.</p>Reason: " + e.getLocalizedMessage() );
+            tk().createLabel( parent, "<p>Unable to fetch features.</p>Reason: " + e.getLocalizedMessage() );
             return;
         }
         
         // topbar
-        Composite topbar = on( tk().createComposite( parent ) ).fill().noBottom().height( 30 ).control();
-        topbar.setLayout( FormLayoutFactory.defaults().spacing( 3 ).create() );
+        Composite topbar = on( tk().createComposite( parent ) ).fill().noBottom().height( 36 ).control();
+        topbar.setLayout( FormLayoutFactory.defaults().spacing( 3 ).margins( 3 ).create() );
     
         // seach
         createTextSearch( topbar );
-        on( searchBtn ).fill().noLeft().control();
+        on( searchBtn ).fill().noLeft().right( 100, -205 );
         on( searchText ).fill().right( searchBtn );
+        
+        // toolbar
+        toolbar = tk().createToolbar( topbar, SWT.RIGHT, SWT.FLAT );
+        on( toolbar.getControl() ).fill().left( 100, -200 ).width( 200 );
+        ContributionManager.instance().contributeTo( toolbar, panel, TOOLBAR_TAG );
 
         // table viewer
         createTableViewer( parent );
@@ -126,7 +137,7 @@ public class FeatureSelectionTable {
     
     
     protected MdToolkit tk() {
-        return (MdToolkit)site.toolkit();
+        return (MdToolkit)panel.site().toolkit();
     }
     
     
@@ -160,7 +171,7 @@ public class FeatureSelectionTable {
                 log.info( "selection: " + elm );
                 featureSelection.setClicked( elm.getFeature() );
             
-                BatikApplication.instance().getContext().openPanel( site.path(), FeaturePanel.ID );
+                BatikApplication.instance().getContext().openPanel( panel.site().path(), FeaturePanel.ID );
             });
         });        
     }
@@ -196,7 +207,9 @@ public class FeatureSelectionTable {
     
     protected void createTextSearch( Composite topbar ) {
         searchText = tk().createText( topbar, null, SWT.BORDER );
-        searchText.setToolTipText( "Beginning of a text to search for. At least 2 characters." );
+        searchText.setToolTipText( "Text to search for in all properties.<br/>" +
+                "\"Tex\" finds: \"Text\", \"Texts\", etc.<br/>" +
+                "Wildcard: *, ?");
         searchText.forceFocus();
         searchText.addModifyListener( new ModifyListener() {
             @Override

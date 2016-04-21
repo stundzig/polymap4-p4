@@ -14,11 +14,17 @@
  */
 package org.polymap.p4.map;
 
+import java.util.function.Supplier;
+
+import org.geotools.styling.Style;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.polymap.core.data.feature.DefaultStyles;
+import org.polymap.core.data.feature.FeatureRenderProcessor2;
 import org.polymap.core.data.image.EncodedImageProducer;
 import org.polymap.core.data.pipeline.DataSourceDescription;
 import org.polymap.core.data.pipeline.Pipeline;
@@ -30,7 +36,6 @@ import org.polymap.core.runtime.BlockingReference2;
 import org.polymap.core.runtime.UIJob;
 import org.polymap.core.runtime.cache.Cache;
 import org.polymap.core.runtime.cache.CacheConfig;
-
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
@@ -88,8 +93,20 @@ public class ProjectLayerProvider
                     DataSourceDescription dsd = LocalResolver.instance().connectLayer( layer, monitor )
                             .orElseThrow( () -> new RuntimeException( "No data source for layer: " + layer ) );
 
+                    // feature style
+                    Supplier<Style> styleSupplier = () -> {
+                        String styleId = layer.styleIdentifier.get();
+                        if (styleId != null) {
+                            return P4Plugin.styleRepo().serializedFeatureStyle( styleId, Style.class ).get();
+                        }
+                        else {
+                            return new DefaultStyles().createAllStyle();
+                        }
+                    };
+                    
                     // create pipeline for it
                     Pipeline pipeline = P4PipelineIncubator.forLayer( layer )
+                            .addProperty( FeatureRenderProcessor2.STYLE_SUPPLIER, styleSupplier )
                             .newPipeline( EncodedImageProducer.class, dsd, null );
                     assert pipeline != null && pipeline.length() > 0 : "Unable to build pipeline for: " + dsd;
                     emptyRef.set( pipeline );

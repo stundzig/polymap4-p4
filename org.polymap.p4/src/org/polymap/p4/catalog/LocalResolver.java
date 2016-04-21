@@ -45,7 +45,7 @@ import org.polymap.p4.P4Plugin;
  * <p/>
  * Holds a static list of metadata {@link #resolvers} which are responsible of
  * creating a service/resource out of a metadata entry. A {@link ILayer} is connected
- * to an metadata entry via the {@link #resourceIdentifier(IResourceInfo)} which
+ * to a metadata entry via the {@link #resourceIdentifier(IResourceInfo)} which
  * consists of the metadata identifier and the resource name.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
