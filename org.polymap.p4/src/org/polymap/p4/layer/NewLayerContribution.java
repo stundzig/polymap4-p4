@@ -83,9 +83,10 @@ public class NewLayerContribution
         String resId = P4Plugin.localResolver().resourceIdentifier( res.get() );
         
         // create default style
-        // XXX isn't a good place, see AddLayerOperationConcern
+        // XXX 86: [Style] Default style (http://github.com/Polymap4/polymap4-p4/issues/issue/86
+        // see AddLayerOperationConcern
         FeatureStyle featureStyle = P4Plugin.styleRepo().newFeatureStyle();
-        DefaultStyle.createPointStyle( featureStyle, null );
+        DefaultStyle.createAllStyle( featureStyle );
         log.info( "FeatureStyle.id: " + featureStyle.id() );
         
         UnitOfWork uow = ProjectRepository.unitOfWork();

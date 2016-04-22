@@ -128,9 +128,10 @@ public class AddLayerForImportedFeaturesConcern
             String label = input.getText();
             
             // create default style
+            // XXX 86: [Style] Default style (http://github.com/Polymap4/polymap4-p4/issues/issue/86
             // XXX this isn't a good place (see also NewLayerContribution)
             FeatureStyle featureStyle = P4Plugin.styleRepo().newFeatureStyle();
-            DefaultStyle.createPointStyle( featureStyle, null );
+            DefaultStyle.createAllStyle( featureStyle );
             log.info( "FeatureStyle.id: " + featureStyle.id() );
             featureStyle.store();
             
