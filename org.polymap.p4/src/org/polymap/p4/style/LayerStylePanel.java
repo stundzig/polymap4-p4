@@ -21,12 +21,12 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+
 import org.polymap.core.project.ILayer;
 import org.polymap.core.style.model.FeatureStyle;
 import org.polymap.core.style.model.PointStyle;
 import org.polymap.core.style.model.Style;
 import org.polymap.core.style.model.StylePropertyValue;
-import org.polymap.core.style.ui.StylePropertyField;
 import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.StatusDispatcher;
 
@@ -116,7 +116,7 @@ public class LayerStylePanel
         for (PropertyInfo<StylePropertyValue> propInfo : propInfos) {
             if (StylePropertyValue.class.isAssignableFrom( propInfo.getType() )) {
                 StylePropertyField field = new StylePropertyField(
-                        (Property<StylePropertyValue>)propInfo.get( style ) );
+                        (Property<StylePropertyValue>)propInfo.get( style ), getContext(), getSite() );
                 field.createContents( parent );
             }
         }

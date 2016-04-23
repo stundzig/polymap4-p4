@@ -43,4 +43,5 @@ Export-Package: org.polymap.p4,
  org.polymap.p4.layer,
  org.polymap.p4.map,
  org.polymap.p4.project,
- org.polymap.p4.style
+ org.polymap.p4.style,
+ org.polymap.p4.style.color
