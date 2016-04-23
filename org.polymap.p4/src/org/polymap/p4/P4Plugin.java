@@ -20,6 +20,7 @@ import java.io.File;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -40,6 +41,7 @@ import org.polymap.core.security.SecurityContext;
 import org.polymap.core.security.StandardConfiguration;
 import org.polymap.core.style.StylePlugin;
 import org.polymap.core.style.model.StyleRepository;
+import org.polymap.core.style.ui.UIService;
 import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.Context;
@@ -58,6 +60,7 @@ import org.polymap.p4.layer.FeatureSelectionTableContrib;
 import org.polymap.p4.layer.NewLayerContribution;
 import org.polymap.p4.project.ProjectRepository;
 import org.polymap.p4.style.LayerStyleContrib;
+import org.polymap.p4.style.P4UIService;
 
 /**
  *
@@ -116,6 +119,8 @@ public class P4Plugin
     
     private StyleRepository         styleRepo;
 
+    private ServiceRegistration<UIService> styleUIRegistration;
+
 
     public void start( BundleContext context ) throws Exception {
         super.start( context );
@@ -155,9 +160,10 @@ public class P4Plugin
         localCatalog = new LocalCatalog();
         localResolver = new LocalResolver( localCatalog );
         
-        // styleRepo
+        // Style
         File styleDataDir = CorePlugin.getDataLocation( StylePlugin.instance() );
         styleRepo = new StyleRepository( styleDataDir );
+        styleUIRegistration = context.registerService( UIService.class, new P4UIService(), null );
 
         // register HTTP resource
         httpServiceTracker = new ServiceTracker( context, HttpService.class.getName(), null ) {
@@ -207,6 +213,7 @@ public class P4Plugin
         httpServiceTracker.close();
         localCatalog.close();
         styleRepo.close();
+        styleUIRegistration.unregister();
 
         instance = null;
         super.stop( context );
