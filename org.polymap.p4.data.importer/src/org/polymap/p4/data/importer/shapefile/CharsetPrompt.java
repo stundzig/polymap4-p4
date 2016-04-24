@@ -64,7 +64,8 @@ public class CharsetPrompt {
                 .summary.put( "Content encoding" )
                 .description.put( "The encoding of the feature content. If unsure use ISO-8859-1." )
                 .value.put( selection.name() )
-                .severity.put( Severity.VERIFY ).extendedUI.put( new FilteredListPromptUIBuilder() {
+                .severity.put( Severity.VERIFY )
+                .extendedUI.put( new FilteredListPromptUIBuilder() {
                     
                     @Override
                     public void submit( ImporterPrompt prompt ) {
@@ -73,9 +74,8 @@ public class CharsetPrompt {
                     }
                     
                     @Override
-                    protected String[] listItems() {
-                        Set<String> charsetCodes = Charset.availableCharsets().keySet();
-                        return charsetCodes.toArray( new String[charsetCodes.size()] );
+                    protected Set<String> listItems() {
+                        return Charset.availableCharsets().keySet();
                     }
                     
                     @Override

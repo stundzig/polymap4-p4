@@ -16,9 +16,11 @@ package org.polymap.p4.data.importer.utils;
 
 import static org.polymap.core.ui.FormDataFactory.on;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
+
+import com.google.common.base.Splitter;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -44,7 +46,12 @@ import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
 public abstract class FilteredListPromptUIBuilder
         implements PromptUIBuilder {
 
-    protected abstract String[] listItems();
+    protected Set<String>                   items;
+    
+    private org.eclipse.swt.widgets.List    list;
+    
+    
+    protected abstract Set<String> listItems();
 
     protected abstract String initiallySelectedItem();
 
@@ -55,32 +62,34 @@ public abstract class FilteredListPromptUIBuilder
     public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
         parent.setLayout( FormLayoutFactory.defaults().spacing( 0 ).create() );
         
-        Label label = on( new Label( parent, SWT.NONE ) )
-                .fill().noBottom().control();
+        items = listItems();
+        String initiallySelected = initiallySelectedItem();
+        
+        Label label = on( new Label( parent, SWT.NONE ) ).fill().noBottom().control();
         label.setText( "Filter:" );
         
-        Text filterText = on( new Text( parent, SWT.BORDER ) )
-                .left( 0 ).top( label ).right( 100 ).control();
-        filterText.setToolTipText( "Name of the charset or part thereof" );
+        Text filterText = on( new Text( parent, SWT.BORDER ) ).left( 0 ).top( label ).right( 100 ).control();
+        filterText.setToolTipText( "Filter available items" );
         filterText.forceFocus();
+        filterText.setText( initiallySelected );
+        filterText.selectAll();
 
-        org.eclipse.swt.widgets.List list = on( new org.eclipse.swt.widgets.List( parent, SWT.V_SCROLL ) )
+        list = on( new org.eclipse.swt.widgets.List( parent, SWT.V_SCROLL ) )
                 .fill().top( filterText, 10 ).width( 250 ).height( 250 ).control();
-        
-        list.setItems( listItems() );
-        list.setSelection( new String[] { initiallySelectedItem() } );
+                
+        setListItems( filterSelectable( initiallySelected ) );
+        list.setSelection( new String[] { initiallySelected } );
         list.addSelectionListener( new SelectionAdapter() {
             @Override
-            public void widgetSelected( SelectionEvent e ) {
+            public void widgetSelected( SelectionEvent ev ) {
                 String item = list.getItem( list.getSelectionIndex() );
                 handleSelection( item );
             }
         } );
         filterText.addModifyListener( new ModifyListener() {
             @Override
-            public void modifyText( ModifyEvent event ) {
-                List<String> filtered = filterSelectable( filterText.getText() );
-                list.setItems( filtered.toArray( new String[filtered.size()] ) );
+            public void modifyText( ModifyEvent ev ) {
+                setListItems( filterSelectable( filterText.getText() ) );
                 if (list.getItems().length > 0) {
                     list.select( 0 );
                     handleSelection( list.getItem( list.getSelectionIndex() ) );
@@ -90,10 +99,25 @@ public abstract class FilteredListPromptUIBuilder
         parent.pack();
     }
 
-
-    protected List<String> filterSelectable( String text ) {
-        return Arrays.stream( listItems() )
-                .filter( item -> item.toLowerCase().contains( text.toLowerCase() ) )
-                .collect( Collectors.toList() );
+    
+    protected void setListItems( List<String> filtered ) {
+        String[] array = filtered.toArray( new String[ filtered.size() ] );
+        list.setItems( array );
     }
+
+    
+    protected List<String> filterSelectable( String text ) {
+        List<String> tags = Splitter.on( " " ).omitEmptyStrings().trimResults().splitToList( text.toLowerCase() );
+        List<String> result = new ArrayList( 128 );
+        outer: for (String item : items) {
+            for (String tag : tags) {
+                if (!item.toLowerCase().contains( tag )) {
+                    continue outer;
+                }
+            }
+            result.add( item );
+        }
+        return result;
+    }
+    
 }

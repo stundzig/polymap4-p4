@@ -69,6 +69,8 @@ public class ShpImporter
 
     private CharsetPrompt           charsetPrompt;
 
+    private CrsPrompt               crsPrompt;
+
 
     @Override
     public ImporterSite site() {
@@ -89,6 +91,7 @@ public class ShpImporter
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         charsetPrompt = new CharsetPrompt( site, files );
+        crsPrompt = new CrsPrompt( site, files );
     }
 
 
@@ -104,6 +107,7 @@ public class ShpImporter
 
             ds = (ShapefileDataStore)dsFactory.createNewDataStore( params );
             ds.setCharset( charsetPrompt.selection() );
+            ds.forceSchemaCRS( crsPrompt.selection() );
             
             Query query = new Query();
             query.setMaxFeatures( 100 );
