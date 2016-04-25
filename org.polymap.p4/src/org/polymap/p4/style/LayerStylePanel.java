@@ -15,6 +15,7 @@
 package org.polymap.p4.style;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.polymap.core.runtime.UIThreadExecutor.async;
 import static org.polymap.core.ui.FormDataFactory.on;
 
 import java.util.Collection;
@@ -27,12 +28,12 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.polymap.core.project.ILayer;
-import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.style.DefaultStyle;
 import org.polymap.core.style.model.FeatureStyle;
 import org.polymap.core.style.model.PointStyle;
@@ -41,6 +42,7 @@ import org.polymap.core.style.model.Style;
 import org.polymap.core.style.model.StyleGroup;
 import org.polymap.core.style.model.StylePropertyValue;
 import org.polymap.core.style.ui.StylePropertyField;
+import org.polymap.core.ui.ColumnDataFactory;
 import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.StatusDispatcher;
@@ -142,7 +144,7 @@ public class LayerStylePanel
         list.setInput( featureStyle );
         list.expandAll();
         if (!featureStyle.members().isEmpty()) {
-            UIThreadExecutor.async( () -> list.setSelection( new StructuredSelection( featureStyle.members().iterator().next() ) ) );
+            async( () -> list.setSelection( new StructuredSelection( featureStyle.members().iterator().next() ) ) );
         }
         
         //
@@ -177,7 +179,9 @@ public class LayerStylePanel
         for (PropertyInfo<StylePropertyValue> propInfo : propInfos) {
             if (StylePropertyValue.class.isAssignableFrom( propInfo.getType() )) {
                 StylePropertyField field = new StylePropertyField( (Property<StylePropertyValue>)propInfo.get( style ) );
-                field.createContents( parent );
+                Control control = field.createContents( parent );
+                // the widthHint is a minimal width; without the fields expand the enclosing section
+                control.setLayoutData( ColumnDataFactory.defaults().widthHint( 350 ).create() );
             }
         }
         parent.layout( true );
