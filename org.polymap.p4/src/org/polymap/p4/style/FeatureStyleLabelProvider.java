@@ -19,12 +19,13 @@ import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
-
 import org.polymap.core.style.model.FeatureStyle;
 import org.polymap.core.style.model.PointStyle;
 import org.polymap.core.style.model.PolygonStyle;
 import org.polymap.core.style.model.Style;
 import org.polymap.core.style.model.StyleGroup;
+
+import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import org.polymap.p4.P4Plugin;
 
@@ -38,6 +39,13 @@ public class FeatureStyleLabelProvider
 
     private static Log log = LogFactory.getLog( FeatureStyleLabelProvider.class );
 
+    private MdToolkit           tk;
+
+    
+    public FeatureStyleLabelProvider( MdToolkit tk ) {
+        this.tk = tk;
+    }
+
 
     @Override
     public void update( ViewerCell cell ) {
@@ -50,6 +58,8 @@ public class FeatureStyleLabelProvider
         
         // default title
         String title = ((Style)elm).title.get();
+//        title = sanitize( title );
+//        title = tk.markdown( title, cell.getItem() );
         
         // Style images
         if (elm instanceof StyleGroup) {

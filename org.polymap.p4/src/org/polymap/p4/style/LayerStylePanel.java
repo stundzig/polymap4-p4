@@ -16,30 +16,40 @@ package org.polymap.p4.style;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.polymap.core.runtime.UIThreadExecutor.async;
+import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.ViewerCell;
 
 import org.polymap.core.project.ILayer;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.style.DefaultStyle;
 import org.polymap.core.style.model.FeatureStyle;
 import org.polymap.core.style.model.PointStyle;
 import org.polymap.core.style.model.PolygonStyle;
 import org.polymap.core.style.model.Style;
 import org.polymap.core.style.model.StyleGroup;
+import org.polymap.core.style.model.StylePropertyChange;
 import org.polymap.core.style.model.StylePropertyValue;
 import org.polymap.core.style.ui.StylePropertyField;
 import org.polymap.core.ui.ColumnDataFactory;
@@ -55,6 +65,8 @@ import org.polymap.rhei.batik.toolkit.ActionItem;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.ItemContainer;
 import org.polymap.rhei.batik.toolkit.Snackbar.Appearance;
+import org.polymap.rhei.batik.toolkit.md.ActionProvider;
+import org.polymap.rhei.batik.toolkit.md.CheckboxActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 
@@ -85,6 +97,8 @@ public class LayerStylePanel
     private MdToolbar2                  toolbar;
     
     private IPanelSection               editorSection;
+
+    private Button                      fab;
     
     
     @Override
@@ -115,8 +129,8 @@ public class LayerStylePanel
 
     @Override
     public void createContents( Composite parent ) {
-        getSite().setTitle( "Styling" );  // + ": " + layer.get().label.get() );
-        getSite().setPreferredWidth( 350 );
+        site().title.set( "Styling" );  // + ": " + layer.get().label.get() );
+        site().preferredWidth.set( 350 );
         ContributionManager.instance().contributeTo( this, this );
         
         // toolbar
@@ -128,11 +142,13 @@ public class LayerStylePanel
         // style list
         list = tk().createListViewer( parent, SWT.SINGLE, SWT.FULL_SELECTION );
         list.setContentProvider( new FeatureStyleContentProvider() );
-        list.firstLineLabelProvider.set( new FeatureStyleLabelProvider() );
-        list.iconProvider.set( new FeatureStyleLabelProvider() );
+        list.iconProvider.set( new FeatureStyleLabelProvider( tk() ) );
+        list.firstLineLabelProvider.set( new FeatureStyleLabelProvider( tk() ) );
+        list.secondLineLabelProvider.set( new FeatureStyleDescriptionProvider( tk() ) );
+        list.secondSecondaryActionProvider.set( new ActiveActionProvider() );
+        list.firstSecondaryActionProvider.set( new RemoveActionProvider() );
         list.setComparer( new StyleIdentityComparer() );
         list.addSelectionChangedListener( ev -> {
-            log.info( "Event: " + ev );
             Object elm = org.polymap.core.ui.SelectionAdapter.on( ev.getSelection() ).first().get(); 
             if (elm instanceof StyleGroup) {
                 // ...
@@ -151,21 +167,45 @@ public class LayerStylePanel
         editorSection = tk().createPanelSection( parent, ""/*, SWT.BORDER*/ );
         
         // fab
-        Button fab = tk().createFab();
+        fab = tk().createFab();
+        fab.setVisible( false );
         fab.setToolTipText( "Save changes" );
         fab.addSelectionListener( new SelectionAdapter() {
             @Override
             public void widgetSelected( SelectionEvent ev ) {
                 featureStyle.store();
                 tk().createSnackbar( Appearance.FadeIn, "Saved" );
+                fab.setEnabled( false );
+                //fab.setVisible( false );
             }
         });
         
+        // listen to StylePropertyChange
+        EventManager.instance().subscribe( this, ifType( StylePropertyChange.class, 
+                ev -> ev.getSource() == featureStyle ) );
+        
         // layout
-        parent.setLayout( FormLayoutFactory.defaults().margins( 3, 8 ).spacing( 8 ).create() );
-        on( toolbar.getControl() ).fill()/*.height( 32 )*/.noBottom();
+        parent.setLayout( FormLayoutFactory.defaults().margins( 0, 8 ).spacing( 8 ).create() );
+        on( toolbar.getControl() ).left( 0, 3 ).right( 100, -3 ).top( 0 );
         on( list.getControl() ).fill().top( toolbar.getControl() ).bottom( 23 );
         on( editorSection.getControl() ).fill().top( list.getControl() );
+    }
+    
+    
+    @EventHandler( display=true, delay=100 )
+    protected void featureStyleCanged( List<StylePropertyChange> evs ) {
+        if (fab != null && !fab.isDisposed()) {
+            enableSubmit();
+        }
+        else {
+            EventManager.instance().unsubscribe( this );
+        }
+    }
+    
+    
+    protected void enableSubmit() {
+        fab.setEnabled( true );
+        fab.setVisible( true );
     }
     
     
@@ -175,13 +215,48 @@ public class LayerStylePanel
         
         parent.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 0, 5 ).spacing( 10 ).create() );
         
+        Color bg = parent.getBackground();
+        Color fg = parent.getForeground();
+        java.awt.Color brighter = new java.awt.Color( fg.getRed(), fg.getGreen(), fg.getBlue() )
+                .brighter().brighter();
+
+        // title
+        Text title = new Text( parent, SWT.NONE );
+        title.setBackground( bg );
+        title.setText( style.title.get() );
+        title.addModifyListener( new ModifyListener() {
+            @Override
+            public void modifyText( ModifyEvent ev ) {
+                // XXX sanitize user input string (?)
+                style.title.set( title.getText() );
+                list.update( style, null );
+                editorSection.setTitle( style.title.get() );
+            }
+        });
+        
+        // description
+        Text descr = new Text( parent, SWT.MULTI | SWT.WRAP );
+        ColumnDataFactory.on( descr ).heightHint( 28 );
+        descr.setBackground( bg );
+        descr.setForeground( UIUtils.getColor( brighter.getRed(), brighter.getGreen(), brighter.getBlue() ) );
+        descr.setText( style.description.get() );
+        descr.addModifyListener( new ModifyListener() {
+            @Override
+            public void modifyText( ModifyEvent ev ) {
+                // XXX sanitize user input string (?)
+                style.description.set( descr.getText() );
+                list.update( style, null );
+            }
+        });
+        
         Collection<PropertyInfo<StylePropertyValue>> propInfos = style.info().getProperties();
         for (PropertyInfo<StylePropertyValue> propInfo : propInfos) {
             if (StylePropertyValue.class.isAssignableFrom( propInfo.getType() )) {
                 StylePropertyField field = new StylePropertyField( (Property<StylePropertyValue>)propInfo.get( style ) );
                 Control control = field.createContents( parent );
+                
                 // the widthHint is a minimal width; without the fields expand the enclosing section
-                control.setLayoutData( ColumnDataFactory.defaults().widthHint( 350 ).create() );
+                control.setLayoutData( ColumnDataFactory.defaults().widthHint( site().preferredWidth.get()-20 ).create() );
             }
         }
         parent.layout( true );
@@ -191,12 +266,52 @@ public class LayerStylePanel
     /**
      * 
      */
+    class ActiveActionProvider
+            extends CheckboxActionProvider {
+
+        @Override
+        protected boolean initSelection( MdListViewer viewer, Object elm ) {
+            return ((Style)elm).active.get();
+        }
+
+        @Override
+        protected void onSelectionChange( MdListViewer viewer, Object elm ) {
+            ((Style)elm).active.set( isSelected( elm ) );
+        }
+    }
+    
+    
+    /**
+     * 
+     */
+    class RemoveActionProvider
+            extends ActionProvider {
+
+        public RemoveActionProvider() {
+            super();
+        }
+
+        @Override
+        public void perform( MdListViewer viewer, Object element ) {
+            // XXX Auto-generated method stub
+            throw new RuntimeException( "not yet implemented." );
+        }
+
+        @Override
+        public void update( ViewerCell cell ) {
+            cell.setImage( P4Plugin.images().svgImage( "delete.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+        }
+    }
+    
+    
+    /**
+     * 
+     */
     class AddPointItem
             extends ActionItem {
 
         public AddPointItem( ItemContainer container ) {
             super( container );
-            text.set( "" );
             icon.set( P4Plugin.images().svgImage( "map-marker.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             tooltip.set( "Create a new Point/Marker render description" );
             action.set( ev -> {
@@ -215,7 +330,6 @@ public class LayerStylePanel
 
         public AddPolygonItem( ItemContainer container ) {
             super( container );
-            text.set( "" );
             icon.set( P4Plugin.images().svgImage( "vector-polygon.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             tooltip.set( "Create a new Polygon render description" );
             action.set( ev -> {

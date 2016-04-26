@@ -36,12 +36,15 @@ import org.polymap.core.runtime.BlockingReference2;
 import org.polymap.core.runtime.UIJob;
 import org.polymap.core.runtime.cache.Cache;
 import org.polymap.core.runtime.cache.CacheConfig;
+
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
 import org.polymap.rap.openlayers.layer.ImageLayer;
 import org.polymap.rap.openlayers.layer.Layer;
+import org.polymap.rap.openlayers.layer.TileLayer;
 import org.polymap.rap.openlayers.source.ImageWMSSource;
+import org.polymap.rap.openlayers.source.TileWMSSource;
 import org.polymap.rap.openlayers.source.WMSRequestParams;
 
 /**
@@ -123,8 +126,14 @@ public class ProjectLayerProvider
     public Layer getLayer( ILayer elm ) {
         // start creating pipeline
         String layerName = createPipeline( elm );
-        
-        // single-tile layer
+        return buildLayer( layerName );
+    }
+    
+
+    /**
+     * Single-tile layer
+     */
+    protected Layer buildLayer( String layerName ) {
         return new ImageLayer()
                  .source.put( new ImageWMSSource()
                          .url.put( "." + alias )
@@ -132,15 +141,17 @@ public class ProjectLayerProvider
                                  .version.put( "1.1.1" )  // send "SRS" param
                                  .layers.put( layerName )
                                  .format.put( "image/png" ) ) );
-        
-//        // make OpenLayers tiled layer
-//        return new TileLayer()
-//                .source.put( new TileWMSSource()
-//                        .url.put( ".." + alias )
-//                        .params.put( new WMSRequestParams()
-//                                .version.put( "1.1.1" )  // send "SRS" param
-//                                .layers.put( layerName )
-//                                .format.put( "image/png" ) ) );
+    }
+    
+    
+    protected Layer buildTiledLayer( String layerName ) {
+        return new TileLayer()
+                .source.put( new TileWMSSource()
+                        .url.put( ".." + alias )
+                        .params.put( new WMSRequestParams()
+                                .version.put( "1.1.1" )  // send "SRS" param
+                                .layers.put( layerName )
+                                .format.put( "image/png" ) ) );
     }
 
     

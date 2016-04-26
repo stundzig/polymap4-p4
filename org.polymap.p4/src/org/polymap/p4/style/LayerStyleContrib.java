@@ -19,14 +19,9 @@ import java.util.Optional;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.polymap.core.runtime.event.EventHandler;
-
-import org.polymap.rhei.batik.IPanelSite.PanelStatus;
-import org.polymap.rhei.batik.PanelChangeEvent;
-import org.polymap.rhei.batik.PanelChangeEvent.EventType;
 import org.polymap.rhei.batik.contribution.IContributionSite;
 import org.polymap.rhei.batik.contribution.IToolbarContribution;
-import org.polymap.rhei.batik.toolkit.ToggleItem;
+import org.polymap.rhei.batik.toolkit.ActionItem;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 
 import org.polymap.p4.P4Plugin;
@@ -44,7 +39,7 @@ public class LayerStyleContrib
 
     private static Log log = LogFactory.getLog( LayerStyleContrib.class );
 
-    private ToggleItem                      item;
+    private ActionItem                      item;
     
     private Optional<LayerStylePanel>       childPanel = Optional.empty();
 
@@ -55,36 +50,36 @@ public class LayerStyleContrib
                 && site.tagsContain( FeatureSelectionTable.TOOLBAR_TAG )) {
             assert item == null;
             
-            item = new ToggleItem( toolbar );
+            item = new ActionItem( toolbar );
             item.text.set( "" );
             item.icon.set( P4Plugin.images().svgImage( "brush.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             item.tooltip.set( "Edit geometry styling" );
-            item.onSelected.set( ev -> {
-                assert !childPanel.isPresent();
+            item.action.set( ev -> {
+//                assert !childPanel.isPresent();
                 childPanel = site.context().openPanel( site.panelSite().path(), LayerStylePanel.ID );
                 
-                // FIXME does not work
-                site.context().addListener( LayerStyleContrib.this, ev2 -> 
-                        ev2.getPanel() == childPanel.orElse( null ) && ev2.getType().isOnOf( EventType.LIFECYCLE ) );
+//                // FIXME does not work
+//                site.context().addListener( LayerStyleContrib.this, ev2 -> 
+//                        ev2.getPanel() == childPanel.orElse( null ) && ev2.getType().isOnOf( EventType.LIFECYCLE ) );
             });
-            item.onUnselected.set( ev -> {
-                if (childPanel.isPresent() && !childPanel.get().isDisposed()) {
-                    site.context().closePanel( childPanel.get().site().path() );
-                    childPanel = Optional.empty();
-                    site.context().removeListener( LayerStyleContrib.this );
-                }
-            });
+//            item.onUnselected.set( ev -> {
+//                if (childPanel.isPresent() && !childPanel.get().isDisposed()) {
+//                    site.context().closePanel( childPanel.get().site().path() );
+//                    childPanel = Optional.empty();
+//                    site.context().removeListener( LayerStyleContrib.this );
+//                }
+//            });
         }
     }
 
     
-    @EventHandler( display=true )
-    protected void childPanelClosed( PanelChangeEvent ev ) {
-        log.info( "Child panel lifecycle: " + ev.getPanel().site().panelStatus() );
-        if (item != null /*&& !item.isDisposed()*/
-                && ev.getPanel().site().panelStatus() == PanelStatus.CREATED) {
-            item.selected.set( false );
-        }
-    }
+//    @EventHandler( display=true )
+//    protected void childPanelClosed( PanelChangeEvent ev ) {
+//        log.info( "Child panel lifecycle: " + ev.getPanel().site().panelStatus() );
+//        if (item != null /*&& !item.isDisposed()*/
+//                && ev.getPanel().site().panelStatus() == PanelStatus.CREATED) {
+//            item.selected.set( false );
+//        }
+//    }
     
 }
