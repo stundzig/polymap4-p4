@@ -21,6 +21,7 @@ import static org.polymap.core.ui.FormDataFactory.on;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -149,12 +150,16 @@ public class LayerStylePanel
         list.firstSecondaryActionProvider.set( new RemoveActionProvider() );
         list.setComparer( new StyleIdentityComparer() );
         list.addSelectionChangedListener( ev -> {
-            Object elm = org.polymap.core.ui.SelectionAdapter.on( ev.getSelection() ).first().get(); 
-            if (elm instanceof StyleGroup) {
+            Optional<?> elm = org.polymap.core.ui.SelectionAdapter.on( ev.getSelection() ).first();
+            if (!elm.isPresent()) {
+                editorSection.setTitle( "" );
+                UIUtils.disposeChildren( editorSection.getBody() );
+            }
+            else if (elm.get() instanceof StyleGroup) {
                 // ...
             }
-            else if (elm instanceof Style) {
-                createStyleEditor( editorSection.getBody(), (Style)elm );   
+            else if (elm.get() instanceof Style) {
+                createStyleEditor( editorSection.getBody(), (Style)elm.get() );   
             }
         });
         list.setInput( featureStyle );
@@ -287,14 +292,12 @@ public class LayerStylePanel
     class RemoveActionProvider
             extends ActionProvider {
 
-        public RemoveActionProvider() {
-            super();
-        }
-
         @Override
-        public void perform( MdListViewer viewer, Object element ) {
-            // XXX Auto-generated method stub
-            throw new RuntimeException( "not yet implemented." );
+        public void perform( MdListViewer viewer, Object elm ) {
+            ((Style)elm).removed.set( true );
+            //list.getTree().deselectAll();
+            list.remove( elm );
+            //list.getTree().layout( true );            
         }
 
         @Override
