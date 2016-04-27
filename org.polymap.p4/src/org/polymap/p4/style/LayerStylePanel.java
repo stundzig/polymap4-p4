@@ -182,6 +182,10 @@ public class LayerStylePanel
                 tk().createSnackbar( Appearance.FadeIn, "Saved" );
                 fab.setEnabled( false );
                 //fab.setVisible( false );
+                
+                ILayer layer = featureSelection.get().layer();
+                //layer.userSettings.get().visible.set( false );
+                layer.userSettings.get().visible.set( true );
             }
         });
         

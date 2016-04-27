@@ -68,7 +68,7 @@ public class ProjectContentProvider
                 ((IMap)ev.getSource()).id() == map.id() );
                 // XXX check if structural change or just label changed
 
-        // property listener
+        // listen to LayerUserSettings#visible
         EventManager.instance().subscribe( propertyListener = new PropertyListener(), ev -> {
             if (ev instanceof PropertyChangeEvent) {
                 if (ev.getSource() instanceof LayerUserSettings) {
@@ -99,9 +99,14 @@ public class ProjectContentProvider
      */
     class PropertyListener {
         @EventHandler( display=true, delay=100 )
-        protected void onPropertyChange( List<PropertyChangeEvent> ev ) {
+        protected void onPropertyChange( List<PropertyChangeEvent> evs ) {
             // FIXME check if layer was just created and onCommit() did it already
-            viewer.refresh();
+            for (PropertyChangeEvent ev : evs) {
+                LayerUserSettings userSettings = (LayerUserSettings)ev.getSource();
+                ILayer eventLayer = userSettings.layer.get();
+                ILayer mapLayer = map.belongsTo().entity( eventLayer );
+                viewer.refresh( mapLayer );
+            }
         }
     }
 
