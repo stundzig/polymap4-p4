@@ -22,6 +22,9 @@ import static org.polymap.core.ui.FormDataFactory.on;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,6 +56,7 @@ import org.polymap.core.style.model.StyleGroup;
 import org.polymap.core.style.model.StylePropertyChange;
 import org.polymap.core.style.model.StylePropertyValue;
 import org.polymap.core.style.ui.StylePropertyField;
+import org.polymap.core.style.ui.StylePropertyFieldSite;
 import org.polymap.core.ui.ColumnDataFactory;
 import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -138,6 +142,7 @@ public class LayerStylePanel
         toolbar = tk().createToolbar( parent, SWT.TOP );
         new AddPointItem( toolbar );
         new AddPolygonItem( toolbar );
+        new AddTextItem( toolbar );
         ContributionManager.instance().contributeTo( toolbar, this, TOOLBAR );
         
         // style list
@@ -261,7 +266,16 @@ public class LayerStylePanel
         Collection<PropertyInfo<StylePropertyValue>> propInfos = style.info().getProperties();
         for (PropertyInfo<StylePropertyValue> propInfo : propInfos) {
             if (StylePropertyValue.class.isAssignableFrom( propInfo.getType() )) {
-                StylePropertyField field = new StylePropertyField( (Property<StylePropertyValue>)propInfo.get( style ) );
+                StylePropertyFieldSite fieldSite = new StylePropertyFieldSite();
+                fieldSite.prop.set((Property<StylePropertyValue>)propInfo.get( style ) );
+                // XXX FIXME, add a wait message here and remove this try catch
+                try {
+                    fieldSite.featureStore.set(featureSelection.get().waitForFs().get(5, TimeUnit.SECONDS));
+                }
+                catch (TimeoutException | InterruptedException | ExecutionException e) {
+                    StatusDispatcher.handleError( "Error during load of the FeatureStore", e );
+                }
+                StylePropertyField field = new StylePropertyField( fieldSite );
                 Control control = field.createContents( parent );
                 
                 // the widthHint is a minimal width; without the fields expand the enclosing section
@@ -346,6 +360,23 @@ public class LayerStylePanel
         }
     }
 
+    
+    /**
+     * 
+     */
+    class AddTextItem
+            extends ActionItem {
+
+        public AddTextItem( ItemContainer container ) {
+            super( container );
+            icon.set( P4Plugin.images().svgImage( "vector-polygon.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+            tooltip.set( "Create a new Text render description" );
+            action.set( ev -> {
+                DefaultStyle.fillTextStyle( featureStyle.members().createElement( TextStyle.defaults ) );
+                list.refresh( true );
+            });
+        }
+    }
     
     /**
      * 
