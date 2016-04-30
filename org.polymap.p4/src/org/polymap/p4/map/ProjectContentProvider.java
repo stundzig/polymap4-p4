@@ -70,13 +70,9 @@ public class ProjectContentProvider
 
         // listen to LayerUserSettings#visible
         EventManager.instance().subscribe( propertyListener = new PropertyListener(), ev -> {
-            if (ev instanceof PropertyChangeEvent) {
-                if (ev.getSource() instanceof LayerUserSettings) {
-                    LayerUserSettings userSettings = (LayerUserSettings)ev.getSource();
-                    ILayer eventLayer = userSettings.layer.get();
-                    IMap eventMap = eventLayer.parentMap.get();
-                    return eventMap.id().equals( map.id() );
-                }
+            if (ev instanceof PropertyChangeEvent && ev.getSource() instanceof LayerUserSettings) {
+                String layerId = ((LayerUserSettings)ev.getSource()).layerId();
+                return map.layers.stream().filter( l -> l.id().equals( layerId ) ).findAny().isPresent();
             }
             return false;
         });
@@ -102,10 +98,15 @@ public class ProjectContentProvider
         protected void onPropertyChange( List<PropertyChangeEvent> evs ) {
             // FIXME check if layer was just created and onCommit() did it already
             for (PropertyChangeEvent ev : evs) {
-                LayerUserSettings userSettings = (LayerUserSettings)ev.getSource();
-                ILayer eventLayer = userSettings.layer.get();
-                ILayer mapLayer = map.belongsTo().entity( eventLayer );
-                viewer.refresh( mapLayer );
+//                String layerId = ((LayerUserSettings)ev.getSource()).layerId();
+//                ILayer layer = map.layers.stream().filter( l -> l.id().equals( layerId ) ).findAny().get();
+//                if (viewer.getLayers().conta ins( layer )) {
+//                    viewer.refresh( layer );
+//                }
+//                else {
+//                    viewer.refresh();
+//                }
+                viewer.refresh();
             }
         }
     }

@@ -14,6 +14,9 @@
  */
 package org.polymap.p4.layer;
 
+import static org.polymap.core.runtime.UIThreadExecutor.async;
+
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.geotools.data.FeatureStore;
@@ -27,11 +30,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.UIJob;
-import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.Mandatory;
+import org.polymap.rhei.batik.Memento;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.IContributionSite;
 import org.polymap.rhei.batik.contribution.IToolbarContribution;
@@ -53,61 +57,68 @@ public class FeatureSelectionTableContrib
 
     private static Log log = LogFactory.getLog( FeatureSelectionTableContrib.class );
 
+    /** Inbound */
     @Mandatory
     @Scope( P4Plugin.Scope )
     private Context<IMap>               map;
 
-    /** See {@link P4Panel#featureSelection}. */
+    /** Outbound. See {@link P4Panel#featureSelection}. */
     @Scope( P4Plugin.Scope )
     private Context<FeatureSelection>   featureSelection;
     
+    private IContributionSite           site;
+    
 
     @Override
-    public void fillToolbar( IContributionSite site, MdToolbar2 toolbar ) {
+    public void fillToolbar( @SuppressWarnings( "hiding" ) IContributionSite site, MdToolbar2 toolbar ) {
         if (site.panel() instanceof ProjectMapPanel 
                 && site.tagsContain( ProjectMapPanel.BOTTOM_TOOLBAR_TAG )) {
             
+            this.site = site;
             for (ILayer layer : map.get().layers) {
-                createLayerItem( toolbar, layer, site );
+                createLayerItem( toolbar, layer );
             }
         }
     }
 
-    
-    protected void createLayerItem( ItemContainer group, ILayer layer, IContributionSite site ) {
-        FeatureSelection.forLayer( layer )
-                .waitForFs( 
-                        fs -> { 
-                            UIThreadExecutor.async( () -> {
-                                RadioItem item = new RadioItem( group );
-                                item.text.put( StringUtils.abbreviate( layer.label.get(), 10 ) );
-                                item.tooltip.put( "Show contents of " + layer.label.get() );
-                                item.icon.put( P4Plugin.images().svgImage( "layers.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
-                                AtomicBoolean wasVisible = new AtomicBoolean();
-                                item.onSelected.put( ev -> {
-                                    log.info( "fs=" + fs );
-                                    createTableView( layer, fs, site );
 
-                                    wasVisible.set( layer.userSettings.get().visible.get() );
-                                    layer.userSettings.get().visible.set( true );
-                                });
-                                item.onUnselected.put( ev -> {
-                                    ((ProjectMapPanel)site.panel()).addButtomView( parent -> {
-                                        // empty; remove content
-                                    });
-                                    layer.userSettings.get().visible.set( wasVisible.get() );
-                                });
-                            });
-                        },
-                        e -> {
-                            log.info( "No FeatureSelection for: " + layer.label.get() + " (" + e.getMessage() + ")" );
-                        });
+    protected void createLayerItem( ItemContainer group, ILayer layer ) {
+        Memento memento = site.panel().site().memento();
+        Optional<String> selectedLayerId = memento.getOrCreateChild( getClass().getName() ).optString( "selectedLayerId" );
+        
+        FeatureSelection.forLayer( layer ).waitForFs( 
+                fs -> async( () -> {
+                    RadioItem item = new RadioItem( group );
+                    item.text.put( StringUtils.abbreviate( layer.label.get(), 15 ) );
+                    item.tooltip.put( "Show contents of " + layer.label.get() );
+                    item.icon.put( P4Plugin.images().svgImage( "layers.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+                    AtomicBoolean wasVisible = new AtomicBoolean();
+                    item.onSelected.put( ev -> {
+                        log.info( "fs=" + fs );
+                        createTableView( layer, fs );
+                        saveState( layer, true );
+
+                        wasVisible.set( layer.userSettings.get().visible.get() );
+                        layer.userSettings.get().visible.set( true );
+                    });
+                    item.onUnselected.put( ev -> {
+                        ((ProjectMapPanel)site.panel()).closeButtomView();
+                        layer.userSettings.get().visible.set( wasVisible.get() );
+                        saveState( layer, false );
+                    });
+                    
+                    // memento select
+                    item.selected.set( selectedLayerId.orElse( "$%&" ).equals( layer.id() ) );
+                }),
+                e -> {
+                    log.info( "No FeatureSelection for: " + layer.label.get() + " (" + e.getMessage() + ")" );
+                });
     }
     
     
-    protected void createTableView( ILayer layer, FeatureStore fs, IContributionSite site ) {
+    protected void createTableView( ILayer layer, FeatureStore fs ) {
         // create bottom view
-        ((ProjectMapPanel)site.panel()).addButtomView( parent -> {
+        ((ProjectMapPanel)site.panel()).updateButtomView( parent -> {
             
             site.toolkit().createFlowText( parent, " Loading " + layer.label.get() + "..." );
             parent.layout();
@@ -115,7 +126,7 @@ public class FeatureSelectionTableContrib
             new UIJob( "Loading data" ) {
                 @Override
                 protected void runWithException( IProgressMonitor monitor ) throws Exception {
-                    UIThreadExecutor.async( () -> {
+                    async( () -> {
                         UIUtils.disposeChildren( parent );
                         FeatureSelection layerFeatureSelection = FeatureSelection.forLayer( layer );
                         featureSelection.set( layerFeatureSelection );
@@ -128,4 +139,13 @@ public class FeatureSelectionTableContrib
         });
     }
     
+    
+    protected void saveState( ILayer layer, boolean visible ) {
+        IPanel panel = site.panel();
+        Memento memento = panel.site().memento();
+        Memento childMem = memento.getOrCreateChild( getClass().getName() );
+        childMem.putString( "selectedLayerId", visible ? (String)layer.id() : "__unselected__" );
+        memento.save();
+    }
+
 }

@@ -135,7 +135,7 @@ public class ProjectMapPanel
         parent.setLayout( FormLayoutFactory.defaults().margins( 0, 0, 5, 0 ).spacing( 0 ).create() );
         
         // buttom toolbar
-        MdToolbar2 tb = ((MdToolkit)site().toolkit()).createToolbar( parent, SWT.BOTTOM );
+        MdToolbar2 tb = ((MdToolkit)site().toolkit()).createToolbar( parent, SWT.FLAT );
         on( tb.getControl() ).fill().noTop();
         tb.getControl().moveAbove( null );
         ContributionManager.instance().contributeTo( tb, this, BOTTOM_TOOLBAR_TAG );
@@ -240,11 +240,18 @@ public class ProjectMapPanel
      *
      * @param creator
      */
-    public void addButtomView( Consumer<Composite> creator ) {
+    public void updateButtomView( Consumer<Composite> creator ) {
         on( tableParent ).height( 200 );
         
         UIUtils.disposeChildren( tableParent );
         creator.accept( tableParent );
+        tableParent.getParent().layout();
+    }
+
+
+    public void closeButtomView() {
+        on( tableParent ).height( 0 );
+        UIUtils.disposeChildren( tableParent );
         tableParent.getParent().layout();
     }
     
