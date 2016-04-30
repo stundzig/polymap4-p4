@@ -26,6 +26,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.geotools.data.FeatureStore;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -47,14 +49,18 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.style.DefaultStyle;
+import org.polymap.core.style.Messages;
 import org.polymap.core.style.model.FeatureStyle;
 import org.polymap.core.style.model.PointStyle;
 import org.polymap.core.style.model.PolygonStyle;
 import org.polymap.core.style.model.Style;
+import org.polymap.core.style.model.StyleComposite;
 import org.polymap.core.style.model.StyleGroup;
 import org.polymap.core.style.model.StylePropertyChange;
 import org.polymap.core.style.model.StylePropertyValue;
+import org.polymap.core.style.model.TextStyle;
 import org.polymap.core.style.ui.StylePropertyField;
 import org.polymap.core.style.ui.StylePropertyFieldSite;
 import org.polymap.core.ui.ColumnDataFactory;
@@ -104,8 +110,10 @@ public class LayerStylePanel
     private IPanelSection               editorSection;
 
     private Button                      fab;
-    
-    
+
+    private final static IMessages      i18nStyle = Messages.forPrefix( "Fields" );
+
+
     @Override
     public boolean beforeInit() {
         IPanel parent = getContext().getPanel( getSite().getPath().removeLast( 1 ) );
@@ -181,6 +189,7 @@ public class LayerStylePanel
         fab.setVisible( false );
         fab.setToolTipText( "Save changes" );
         fab.addSelectionListener( new SelectionAdapter() {
+
             @Override
             public void widgetSelected( SelectionEvent ev ) {
                 featureStyle.store();
@@ -239,6 +248,7 @@ public class LayerStylePanel
         title.setBackground( bg );
         title.setText( style.title.get() );
         title.addModifyListener( new ModifyListener() {
+
             @Override
             public void modifyText( ModifyEvent ev ) {
                 // XXX sanitize user input string (?)
@@ -255,36 +265,52 @@ public class LayerStylePanel
         descr.setForeground( UIUtils.getColor( brighter.getRed(), brighter.getGreen(), brighter.getBlue() ) );
         descr.setText( style.description.get() );
         descr.addModifyListener( new ModifyListener() {
+
             @Override
             public void modifyText( ModifyEvent ev ) {
                 // XXX sanitize user input string (?)
                 style.description.set( descr.getText() );
                 list.update( style, null );
             }
-        });
-        
-        Collection<PropertyInfo<StylePropertyValue>> propInfos = style.info().getProperties();
-        for (PropertyInfo<StylePropertyValue> propInfo : propInfos) {
-            if (StylePropertyValue.class.isAssignableFrom( propInfo.getType() )) {
-                StylePropertyFieldSite fieldSite = new StylePropertyFieldSite();
-                fieldSite.prop.set((Property<StylePropertyValue>)propInfo.get( style ) );
-                // XXX FIXME, add a wait message here and remove this try catch
-                try {
-                    fieldSite.featureStore.set(featureSelection.get().waitForFs().get(5, TimeUnit.SECONDS));
-                }
-                catch (TimeoutException | InterruptedException | ExecutionException e) {
-                    StatusDispatcher.handleError( "Error during load of the FeatureStore", e );
-                }
-                StylePropertyField field = new StylePropertyField( fieldSite );
-                Control control = field.createContents( parent );
-                
-                // the widthHint is a minimal width; without the fields expand the enclosing section
-                control.setLayoutData( ColumnDataFactory.defaults().widthHint( site().preferredWidth.get()-20 ).create() );
-            }
+        } );
+
+        // XXX FIXME, add a wait message here and remove this try catch
+        try {
+            final FeatureStore featureStore = featureSelection.get().waitForFs().get( 5, TimeUnit.SECONDS );
+            createEditorFields(parent, featureStore, style);
+        }
+        catch (TimeoutException | InterruptedException | ExecutionException e) {
+            StatusDispatcher.handleError( "Error during load of the FeatureStore", e );
         }
         parent.layout( true );
     }
 
+
+    private void createEditorFields( final Composite parent, final FeatureStore featureStore,
+            final org.polymap.model2.Composite style ) {
+        Collection<PropertyInfo<? extends org.polymap.model2.Composite>> propInfos = style.info().getProperties();
+        for (PropertyInfo<? extends org.polymap.model2.Composite> propInfo : propInfos) {
+            if (StylePropertyValue.class.isAssignableFrom( propInfo.getType() )) {
+                StylePropertyFieldSite fieldSite = new StylePropertyFieldSite();
+                fieldSite.prop.set( (Property<StylePropertyValue>)propInfo.get( style ) );
+                fieldSite.featureStore.set( featureStore );
+                StylePropertyField field = new StylePropertyField( fieldSite );
+                Control control = field.createContents( parent );
+
+                // the widthHint is a minimal width; without the fields expand
+                // the
+                // enclosing section
+                control.setLayoutData( ColumnDataFactory.defaults().widthHint( site().preferredWidth.get()
+                        - 20 ).create() );
+            }
+            else if (StyleComposite.class.isAssignableFrom( propInfo.getType() )) {
+                IPanelSection section = tk().createPanelSection( parent, i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) ), IPanelSection.EXPANDABLE, SWT.BORDER );
+                section.setExpanded( false );
+                section.getBody().setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 0, 5 ).spacing( 10 ).create() );
+                createEditorFields( section.getBody(), featureStore, ((Property<? extends org.polymap.model2.Composite>)propInfo.get( style )).get() );
+            }
+        }
+    }
 
     /**
      * 
@@ -296,6 +322,7 @@ public class LayerStylePanel
         protected boolean initSelection( MdListViewer viewer, Object elm ) {
             return ((Style)elm).active.get();
         }
+
 
         @Override
         protected void onSelectionChange( MdListViewer viewer, Object elm ) {
@@ -317,6 +344,7 @@ public class LayerStylePanel
             list.remove( elm );
             //list.getTree().layout( true );            
         }
+
 
         @Override
         public void update( ViewerCell cell ) {
@@ -356,11 +384,11 @@ public class LayerStylePanel
             action.set( ev -> {
                 DefaultStyle.fillPolygonStyle( featureStyle.members().createElement( PolygonStyle.defaults ) );
                 list.refresh( true );
-            });
+            } );
         }
     }
 
-    
+
     /**
      * 
      */
@@ -374,25 +402,27 @@ public class LayerStylePanel
             action.set( ev -> {
                 DefaultStyle.fillTextStyle( featureStyle.members().createElement( TextStyle.defaults ) );
                 list.refresh( true );
-            });
+            } );
         }
     }
-    
+
+
     /**
      * 
      */
     protected class StyleIdentityComparer
             implements IElementComparer {
-    
+
         @Override
         public int hashCode( Object elm ) {
             return elm.hashCode();
         }
-    
+
+
         @Override
         public boolean equals( Object a, Object b ) {
             return a == b;
         }
     }
-    
+
 }
