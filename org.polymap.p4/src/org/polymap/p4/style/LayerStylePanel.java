@@ -111,7 +111,7 @@ public class LayerStylePanel
 
     private Button                      fab;
 
-    private final static IMessages      i18nStyle = Messages.forPrefix( "Fields" );
+    private final static IMessages      i18nStyle = Messages.forPrefix( "Field" );
 
 
     @Override
@@ -397,6 +397,7 @@ public class LayerStylePanel
 
         public AddTextItem( ItemContainer container ) {
             super( container );
+            // XXX we need a text icon here
             icon.set( P4Plugin.images().svgImage( "vector-polygon.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             tooltip.set( "Create a new Text render description" );
             action.set( ev -> {
