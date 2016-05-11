@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 
 import org.polymap.core.style.model.FeatureStyle;
+import org.polymap.core.style.model.LineStyle;
 import org.polymap.core.style.model.PointStyle;
 import org.polymap.core.style.model.PolygonStyle;
 import org.polymap.core.style.model.Style;
@@ -79,11 +80,12 @@ public class FeatureStyleLabelProvider
         else if (elm instanceof TextStyle) {
             cell.setText( title != null ? title : "Text" );
             // XXX we need a text icon here
-            cell.setImage( P4Plugin.images().svgImage( "map-marker.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+            cell.setImage( P4Plugin.images().svgImage( "textstyle.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
         }
-//        else if (cell.getElement() instanceof LineStyle) {
-//            cell.setImage( P4Plugin.images().svgImage( "vector-line.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
-//        }
+        else if (cell.getElement() instanceof LineStyle) {
+            cell.setText( title != null ? title : "Line" );
+            cell.setImage( P4Plugin.images().svgImage( "vector-line.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+        }
     }
     
 }

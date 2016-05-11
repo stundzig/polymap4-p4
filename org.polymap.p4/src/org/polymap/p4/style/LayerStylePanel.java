@@ -396,7 +396,7 @@ public class LayerStylePanel
 
         public AddLineItem( ItemContainer container ) {
             super( container );
-            icon.set( P4Plugin.images().svgImage( "vector-polygon.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+            icon.set( P4Plugin.images().svgImage( "vector-line.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             tooltip.set( "Create a new Line render description" );
             action.set( ev -> {
                 DefaultStyle.fillLineStyle( featureStyle.members().createElement( LineStyle.defaults ) );
@@ -415,7 +415,7 @@ public class LayerStylePanel
         public AddTextItem( ItemContainer container ) {
             super( container );
             // XXX we need a text icon here
-            icon.set( P4Plugin.images().svgImage( "vector-polygon.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+            icon.set( P4Plugin.images().svgImage( "textstyle.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             tooltip.set( "Create a new Text render description" );
             action.set( ev -> {
                 DefaultStyle.fillTextStyle( featureStyle.members().createElement( TextStyle.defaults ) );
