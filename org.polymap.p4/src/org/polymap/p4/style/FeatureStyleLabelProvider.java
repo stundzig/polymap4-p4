@@ -80,11 +80,11 @@ public class FeatureStyleLabelProvider
         else if (elm instanceof TextStyle) {
             cell.setText( title != null ? title : "Text" );
             // XXX we need a text icon here
-            cell.setImage( P4Plugin.images().svgImage( "textstyle.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+            cell.setImage( P4Plugin.images().svgImage( "format-title.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
         }
         else if (cell.getElement() instanceof LineStyle) {
             cell.setText( title != null ? title : "Line" );
-            cell.setImage( P4Plugin.images().svgImage( "vector-line.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+            cell.setImage( P4Plugin.images().svgImage( "vector-polyline.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
         }
     }
     
