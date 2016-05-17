@@ -53,6 +53,7 @@ import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.style.DefaultStyle;
 import org.polymap.core.style.Messages;
 import org.polymap.core.style.model.FeatureStyle;
+import org.polymap.core.style.model.LineStyle;
 import org.polymap.core.style.model.PointStyle;
 import org.polymap.core.style.model.PolygonStyle;
 import org.polymap.core.style.model.Style;
@@ -150,6 +151,7 @@ public class LayerStylePanel
         toolbar = tk().createToolbar( parent, SWT.TOP );
         new AddPointItem( toolbar );
         new AddPolygonItem( toolbar );
+        new AddLineItem( toolbar );
         new AddTextItem( toolbar );
         ContributionManager.instance().contributeTo( toolbar, this, TOOLBAR );
         
@@ -389,6 +391,21 @@ public class LayerStylePanel
     }
 
 
+    class AddLineItem
+            extends ActionItem {
+
+        public AddLineItem( ItemContainer container ) {
+            super( container );
+            icon.set( P4Plugin.images().svgImage( "vector-line.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+            tooltip.set( "Create a new Line render description" );
+            action.set( ev -> {
+                DefaultStyle.fillLineStyle( featureStyle.members().createElement( LineStyle.defaults ) );
+                list.refresh( true );
+            } );
+        }
+    }
+
+
     /**
      * 
      */
@@ -398,7 +415,7 @@ public class LayerStylePanel
         public AddTextItem( ItemContainer container ) {
             super( container );
             // XXX we need a text icon here
-            icon.set( P4Plugin.images().svgImage( "vector-polygon.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+            icon.set( P4Plugin.images().svgImage( "textstyle.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             tooltip.set( "Create a new Text render description" );
             action.set( ev -> {
                 DefaultStyle.fillTextStyle( featureStyle.members().createElement( TextStyle.defaults ) );
