@@ -159,7 +159,7 @@ public class LayersPanel
         
         // listen to ILayer changes
         EventManager.instance().subscribe( this, ifType( PropertyChangeEvent.class, 
-                ev -> map.get().containsLayer( (ILayer)ev.getSource() ) ) );
+                ev -> ev.getSource() instanceof ILayer && map.get().containsLayer( (ILayer)ev.getSource() ) ) );
     }
 
 
