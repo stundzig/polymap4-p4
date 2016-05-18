@@ -131,7 +131,7 @@ public class ProjectLayerProvider
     
 
     /**
-     * Single-tile layer
+     * Builds a single-tile layer
      */
     protected Layer buildLayer( String layerName ) {
         return new ImageLayer()
@@ -153,13 +153,11 @@ public class ProjectLayerProvider
                                 .layers.put( layerName )
                                 .format.put( "image/png" ) ) );
     }
-
     
     
     @Override
     public int getPriority( ILayer elm ) {
-        // XXX
-        return 0;
+        return elm.orderKey.get();
     }
 
 

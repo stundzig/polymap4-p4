@@ -14,6 +14,8 @@
  */
 package org.polymap.p4.map;
 
+import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,8 +30,8 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.project.ILayer;
-import org.polymap.core.project.IMap;
 import org.polymap.core.project.ILayer.LayerUserSettings;
+import org.polymap.core.project.IMap;
 import org.polymap.core.project.ProjectNode.ProjectNodeCommittedEvent;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -62,20 +64,25 @@ public class ProjectContentProvider
         this.viewer = (MapViewer)viewer;
         
         // commit listener
-        EventManager.instance().subscribe( commitListener = new CommitListener(), ev -> 
-                ev instanceof ProjectNodeCommittedEvent &&
+        commitListener = new CommitListener();
+        EventManager.instance().subscribe( commitListener, ifType( ProjectNodeCommittedEvent.class, ev ->
                 ev.getSource() instanceof IMap &&
-                ((IMap)ev.getSource()).id() == map.id() );
+                map.id().equals( ((IMap)ev.getSource()).id() )
+                ||
+                ev.getSource() instanceof ILayer &&
+                map.containsLayer( (ILayer)ev.getSource() ) ) );
+        
                 // XXX check if structural change or just label changed
 
         // listen to LayerUserSettings#visible
-        EventManager.instance().subscribe( propertyListener = new PropertyListener(), ev -> {
-            if (ev instanceof PropertyChangeEvent && ev.getSource() instanceof LayerUserSettings) {
+        propertyListener = new PropertyListener();
+        EventManager.instance().subscribe( propertyListener, ifType( PropertyChangeEvent.class, ev -> {
+            if (ev.getSource() instanceof LayerUserSettings) {
                 String layerId = ((LayerUserSettings)ev.getSource()).layerId();
                 return map.layers.stream().filter( l -> l.id().equals( layerId ) ).findAny().isPresent();
             }
             return false;
-        });
+        }));
     }
 
 
@@ -83,6 +90,7 @@ public class ProjectContentProvider
      * 
      */
     class CommitListener {
+        
         @EventHandler( display=true, delay=100 )
         protected void onCommit( List<ProjectNodeCommittedEvent> evs ) {
             viewer.refresh();
@@ -94,10 +102,11 @@ public class ProjectContentProvider
      * 
      */
     class PropertyListener {
+        
         @EventHandler( display=true, delay=100 )
         protected void onPropertyChange( List<PropertyChangeEvent> evs ) {
             // FIXME check if layer was just created and onCommit() did it already
-            for (PropertyChangeEvent ev : evs) {
+//            for (PropertyChangeEvent ev : evs) {
 //                String layerId = ((LayerUserSettings)ev.getSource()).layerId();
 //                ILayer layer = map.layers.stream().filter( l -> l.id().equals( layerId ) ).findAny().get();
 //                if (viewer.getLayers().conta ins( layer )) {
@@ -107,7 +116,7 @@ public class ProjectContentProvider
 //                    viewer.refresh();
 //                }
                 viewer.refresh();
-            }
+//            }
         }
     }
 
