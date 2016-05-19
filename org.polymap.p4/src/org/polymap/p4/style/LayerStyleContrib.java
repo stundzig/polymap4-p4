@@ -15,16 +15,25 @@
 package org.polymap.p4.style;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.polymap.core.style.ui.StyleEditorInput;
+import org.polymap.core.ui.StatusDispatcher;
+
+import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.IContributionSite;
 import org.polymap.rhei.batik.contribution.IToolbarContribution;
 import org.polymap.rhei.batik.toolkit.ActionItem;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.layer.FeatureSelection;
 import org.polymap.p4.layer.FeatureSelectionTable;
 import org.polymap.p4.map.ProjectMapPanel;
 
@@ -43,6 +52,11 @@ public class LayerStyleContrib
     
     private Optional<LayerStylePanel>       childPanel = Optional.empty();
 
+    @Scope( P4Plugin.StyleScope )
+    protected Context<StyleEditorInput>     styleEditorInput;
+
+    @Scope( P4Plugin.Scope )
+    protected Context<FeatureSelection>     featureSelection;
     
     @Override
     public void fillToolbar( IContributionSite site, MdToolbar2 toolbar ) {
@@ -50,18 +64,25 @@ public class LayerStyleContrib
                 && site.tagsContain( FeatureSelectionTable.TOOLBAR_TAG )) {
             assert item == null;
             
-            item = new ActionItem( toolbar );
-            item.text.set( "" );
-            item.icon.set( P4Plugin.images().svgImage( "brush.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
-            item.tooltip.set( "Edit geometry styling" );
-            item.action.set( ev -> {
-//                assert !childPanel.isPresent();
-                childPanel = site.context().openPanel( site.panelSite().path(), LayerStylePanel.ID );
+            try {
+                styleEditorInput.set( new StyleEditorInput( featureSelection.get().layer().styleIdentifier.get(), featureSelection.get().waitForFs().get( 5, TimeUnit.SECONDS )));
+                item = new ActionItem( toolbar );
+                item.text.set( "" );
+                item.icon.set( P4Plugin.images().svgImage( "brush.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+                item.tooltip.set( "Edit geometry styling" );
+                item.action.set( ev -> {
+//                    assert !childPanel.isPresent();
+                    childPanel = site.context().openPanel( site.panelSite().path(), LayerStylePanel.ID );
+                });
+            }
+            catch (TimeoutException | InterruptedException | ExecutionException e) {
+                StatusDispatcher.handleError( "Error during load of the FeatureStore", e );
+            }
+           
                 
 //                // FIXME does not work
 //                site.context().addListener( LayerStyleContrib.this, ev2 -> 
 //                        ev2.getPanel() == childPanel.orElse( null ) && ev2.getType().isOnOf( EventType.LIFECYCLE ) );
-            });
 //            item.onUnselected.set( ev -> {
 //                if (childPanel.isPresent() && !childPanel.get().isDisposed()) {
 //                    site.context().closePanel( childPanel.get().site().path() );

@@ -22,11 +22,9 @@ import static org.polymap.core.ui.FormDataFactory.on;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.geotools.data.FeatureStore;
+import org.opengis.feature.type.FeatureType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,15 +51,12 @@ import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.style.DefaultStyle;
 import org.polymap.core.style.Messages;
 import org.polymap.core.style.model.FeatureStyle;
-import org.polymap.core.style.model.LineStyle;
-import org.polymap.core.style.model.PointStyle;
-import org.polymap.core.style.model.PolygonStyle;
 import org.polymap.core.style.model.Style;
 import org.polymap.core.style.model.StyleComposite;
 import org.polymap.core.style.model.StyleGroup;
 import org.polymap.core.style.model.StylePropertyChange;
 import org.polymap.core.style.model.StylePropertyValue;
-import org.polymap.core.style.model.TextStyle;
+import org.polymap.core.style.ui.StyleEditorInput;
 import org.polymap.core.style.ui.StylePropertyField;
 import org.polymap.core.style.ui.StylePropertyFieldSite;
 import org.polymap.core.ui.ColumnDataFactory;
@@ -70,8 +65,11 @@ import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.StatusDispatcher;
 import org.polymap.core.ui.UIUtils;
 
+import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.IPanel;
+import org.polymap.rhei.batik.Mandatory;
 import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.ContributionManager;
 import org.polymap.rhei.batik.toolkit.ActionItem;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
@@ -114,6 +112,9 @@ public class LayerStylePanel
 
     private final static IMessages      i18nStyle = Messages.forPrefix( "Field" );
 
+    @Mandatory
+    @Scope( P4Plugin.StyleScope )
+    protected Context<StyleEditorInput> styleEditorInput;
 
     @Override
     public boolean beforeInit() {
@@ -131,8 +132,7 @@ public class LayerStylePanel
     @Override
     public void init() {
         try {
-            ILayer layer = featureSelection.get().layer();
-            featureStyle = P4Plugin.styleRepo().featureStyle( layer.styleIdentifier.get() )
+            featureStyle = P4Plugin.styleRepo().featureStyle( styleEditorInput.get().styleIdentifier() )
                     .orElseThrow( () -> new IllegalStateException( "Layer has no style.") );
         }
         catch (Exception e) {
@@ -245,8 +245,11 @@ public class LayerStylePanel
         java.awt.Color brighter = new java.awt.Color( fg.getRed(), fg.getGreen(), fg.getBlue() )
                 .brighter().brighter();
 
+        Composite headLine = tk().createComposite( parent, SWT.NONE );
+        headLine.setLayout( FormLayoutFactory.defaults().margins( 0, 5 ).spacing( 10 ).create() );
+        
         // title
-        Text title = new Text( parent, SWT.NONE );
+        Text title = new Text( headLine, SWT.NONE );
         title.setBackground( bg );
         title.setText( style.title.get() );
         title.addModifyListener( new ModifyListener() {
@@ -261,8 +264,7 @@ public class LayerStylePanel
         });
         
         // description
-        Text descr = new Text( parent, SWT.MULTI | SWT.WRAP );
-        ColumnDataFactory.on( descr ).heightHint( 28 );
+        Text descr = new Text( headLine, SWT.MULTI | SWT.WRAP );
         descr.setBackground( bg );
         descr.setForeground( UIUtils.getColor( brighter.getRed(), brighter.getGreen(), brighter.getBlue() ) );
         descr.setText( style.description.get() );
@@ -275,20 +277,16 @@ public class LayerStylePanel
                 list.update( style, null );
             }
         } );
+        on( title ).width( 150 );
+        on( descr ).height( 28 ).left( title );
 
         // XXX FIXME, add a wait message here and remove this try catch
-        try {
-            final FeatureStore featureStore = featureSelection.get().waitForFs().get( 5, TimeUnit.SECONDS );
-            createEditorFields(parent, featureStore, style);
-        }
-        catch (TimeoutException | InterruptedException | ExecutionException e) {
-            StatusDispatcher.handleError( "Error during load of the FeatureStore", e );
-        }
+        createEditorFields( parent, styleEditorInput.get().featureType(), styleEditorInput.get().featureStore(), style );
         parent.layout( true );
     }
 
 
-    private void createEditorFields( final Composite parent, final FeatureStore featureStore,
+    private void createEditorFields( final Composite parent, final FeatureType featureType, final FeatureStore featureStore,
             final org.polymap.model2.Composite style ) {
         Collection<PropertyInfo<? extends org.polymap.model2.Composite>> propInfos = style.info().getProperties();
         for (PropertyInfo<? extends org.polymap.model2.Composite> propInfo : propInfos) {
@@ -296,6 +294,7 @@ public class LayerStylePanel
                 StylePropertyFieldSite fieldSite = new StylePropertyFieldSite();
                 fieldSite.prop.set( (Property<StylePropertyValue>)propInfo.get( style ) );
                 fieldSite.featureStore.set( featureStore );
+                fieldSite.featureType.set(featureType );
                 StylePropertyField field = new StylePropertyField( fieldSite );
                 Control control = field.createContents( parent );
 
@@ -309,7 +308,7 @@ public class LayerStylePanel
                 IPanelSection section = tk().createPanelSection( parent, i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) ), IPanelSection.EXPANDABLE, SWT.BORDER );
                 section.setExpanded( false );
                 section.getBody().setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 0, 5 ).spacing( 10 ).create() );
-                createEditorFields( section.getBody(), featureStore, ((Property<? extends org.polymap.model2.Composite>)propInfo.get( style )).get() );
+                createEditorFields( section.getBody(), featureType, featureStore, ((Property<? extends org.polymap.model2.Composite>)propInfo.get( style )).get() );
             }
         }
     }
@@ -366,7 +365,7 @@ public class LayerStylePanel
             icon.set( P4Plugin.images().svgImage( "map-marker.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             tooltip.set( "Create a new Point/Marker render description" );
             action.set( ev -> {
-                DefaultStyle.fillPointStyle( featureStyle.members().createElement( PointStyle.defaults ) );
+                DefaultStyle.fillPointStyle( featureStyle );
                 list.refresh( true );
             });
         }
@@ -384,7 +383,7 @@ public class LayerStylePanel
             icon.set( P4Plugin.images().svgImage( "vector-polygon.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             tooltip.set( "Create a new Polygon render description" );
             action.set( ev -> {
-                DefaultStyle.fillPolygonStyle( featureStyle.members().createElement( PolygonStyle.defaults ) );
+                DefaultStyle.fillPolygonStyle( featureStyle );
                 list.refresh( true );
             } );
         }
@@ -399,7 +398,7 @@ public class LayerStylePanel
             icon.set( P4Plugin.images().svgImage( "vector-polyline.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             tooltip.set( "Create a new Line render description" );
             action.set( ev -> {
-                DefaultStyle.fillLineStyle( featureStyle.members().createElement( LineStyle.defaults ) );
+                DefaultStyle.fillLineStyle( featureStyle );
                 list.refresh( true );
             } );
         }
@@ -418,7 +417,7 @@ public class LayerStylePanel
             icon.set( P4Plugin.images().svgImage( "format-title.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             tooltip.set( "Create a new Text render description" );
             action.set( ev -> {
-                DefaultStyle.fillTextStyle( featureStyle.members().createElement( TextStyle.defaults ) );
+                DefaultStyle.fillTextStyle( featureStyle );
                 list.refresh( true );
             } );
         }
