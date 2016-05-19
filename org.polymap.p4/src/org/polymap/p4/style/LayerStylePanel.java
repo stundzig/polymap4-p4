@@ -263,7 +263,7 @@ public class LayerStylePanel
         });
         
         // description
-        Text descr = new Text( headLine, SWT.MULTI | SWT.WRAP );
+        Text descr = new Text( headLine, SWT.NONE );
         descr.setBackground( bg );
         descr.setForeground( UIUtils.getColor( brighter.getRed(), brighter.getGreen(), brighter.getBlue() ) );
         descr.setText( style.description.get() );
@@ -277,7 +277,7 @@ public class LayerStylePanel
             }
         } );
         on( title ).width( 150 );
-        on( descr ).height( 28 ).left( title );
+        on( descr ).left( title ).right( 100 );
 
         // XXX FIXME, add a wait message here and remove this try catch
         createEditorFields( parent, styleEditorInput.get().featureType(), styleEditorInput.get().featureStore(), style );
