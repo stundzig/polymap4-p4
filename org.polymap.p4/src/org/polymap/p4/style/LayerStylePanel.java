@@ -308,9 +308,9 @@ public class LayerStylePanel
             }
             else if (StyleComposite.class.isAssignableFrom( propInfo.getType() )) {
                 
-                Section section = tk().createSection( parent, i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) ), ExpandableComposite.TREE_NODE
-                        | Section.SHORT_TITLE_BAR | Section.FOCUS_TITLE );
+                Section section = tk().createSection( parent, i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) ), ExpandableComposite.TREE_NODE, Section.SHORT_TITLE_BAR, Section.FOCUS_TITLE, SWT.BORDER );
                 section.setExpanded( false );
+                section.setBackground( UIUtils.getColor( 235,  235, 235) );
                 ((Composite)section.getClient()).setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 0, 5 ).spacing( 10 ).create() );
                 createEditorFields( (Composite)section.getClient(), featureType, featureStore, ((Property<? extends org.polymap.model2.Composite>)propInfo.get( style )).get() );
             }
