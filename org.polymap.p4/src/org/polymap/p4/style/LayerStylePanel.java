@@ -56,7 +56,6 @@ import org.polymap.core.style.model.StyleComposite;
 import org.polymap.core.style.model.StyleGroup;
 import org.polymap.core.style.model.StylePropertyChange;
 import org.polymap.core.style.model.StylePropertyValue;
-import org.polymap.core.style.ui.StyleEditorInput;
 import org.polymap.core.style.ui.StylePropertyField;
 import org.polymap.core.style.ui.StylePropertyFieldSite;
 import org.polymap.core.ui.ColumnDataFactory;

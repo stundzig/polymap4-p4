@@ -22,7 +22,6 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.polymap.core.style.ui.StyleEditorInput;
 import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.Context;
