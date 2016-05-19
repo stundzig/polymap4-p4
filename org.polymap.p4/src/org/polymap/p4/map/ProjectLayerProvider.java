@@ -14,6 +14,8 @@
  */
 package org.polymap.p4.map;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import org.geotools.styling.Style;
@@ -34,9 +36,6 @@ import org.polymap.core.mapeditor.services.SimpleWmsServer;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.runtime.BlockingReference2;
 import org.polymap.core.runtime.UIJob;
-import org.polymap.core.runtime.cache.Cache;
-import org.polymap.core.runtime.cache.CacheConfig;
-
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.LocalResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
@@ -60,7 +59,7 @@ public class ProjectLayerProvider
 
     private String                                      alias;
     
-    private Cache<String,BlockingReference2<Pipeline>>  pipelines = CacheConfig.defaults().initSize( 32 ).createCache();
+    private Map<String,BlockingReference2<Pipeline>>    pipelines = new ConcurrentHashMap();
     
     
     public ProjectLayerProvider() {
@@ -86,7 +85,7 @@ public class ProjectLayerProvider
     
     protected String createPipeline( ILayer layer ) {
         String layerName = layer.label.get();
-        pipelines.get( layerName, key -> {
+        pipelines.computeIfAbsent( layerName, key -> {
             BlockingReference2<Pipeline> emptyRef = new BlockingReference2();
 
             new UIJob( layerName ) {
