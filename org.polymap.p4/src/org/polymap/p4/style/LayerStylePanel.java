@@ -44,6 +44,9 @@ import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerCell;
 
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.forms.widgets.Section;
+
 import org.polymap.core.project.ILayer;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -304,10 +307,12 @@ public class LayerStylePanel
                         - 20 ).create() );
             }
             else if (StyleComposite.class.isAssignableFrom( propInfo.getType() )) {
-                IPanelSection section = tk().createPanelSection( parent, i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) ), IPanelSection.EXPANDABLE, SWT.BORDER );
+                
+                Section section = tk().createSection( parent, i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) ), ExpandableComposite.TREE_NODE
+                        | Section.SHORT_TITLE_BAR | Section.FOCUS_TITLE );
                 section.setExpanded( false );
-                section.getBody().setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 0, 5 ).spacing( 10 ).create() );
-                createEditorFields( section.getBody(), featureType, featureStore, ((Property<? extends org.polymap.model2.Composite>)propInfo.get( style )).get() );
+                ((Composite)section.getClient()).setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 0, 5 ).spacing( 10 ).create() );
+                createEditorFields( (Composite)section.getClient(), featureType, featureStore, ((Property<? extends org.polymap.model2.Composite>)propInfo.get( style )).get() );
             }
         }
     }
