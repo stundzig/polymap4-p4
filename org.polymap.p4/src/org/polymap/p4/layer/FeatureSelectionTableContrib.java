@@ -95,8 +95,9 @@ public class FeatureSelectionTableContrib
                 createLayerItem( toolbar, layer );
             }
             
-            EventManager.instance().subscribe( this, ifType( ProjectNodeCommittedEvent.class, 
-                    ev -> ev.getSource() instanceof ILayer && map.get().containsLayer( (ILayer)ev.getSource() ) ) );
+            EventManager.instance().subscribe( this, ifType( ProjectNodeCommittedEvent.class, ev -> 
+                    ev.getSource() instanceof ILayer && 
+                    map.get().containsLayer( ev.getEntity( map.get().belongsTo() ) ) ) );
         }
     }
 
@@ -118,7 +119,7 @@ public class FeatureSelectionTableContrib
         else {
             Set<String> handledLayerIds = new HashSet();
             for (ProjectNodeCommittedEvent ev : evs) {
-                ILayer layer = (ILayer)ev.getSource();
+                ILayer layer = ev.getEntity( map.get().belongsTo() );
                 if (!handledLayerIds.contains( layer.id() )) {
                     handledLayerIds.add( layer.id() );
                     

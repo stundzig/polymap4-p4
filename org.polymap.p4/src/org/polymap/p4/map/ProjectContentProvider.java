@@ -32,6 +32,7 @@ import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.ILayer.LayerUserSettings;
 import org.polymap.core.project.IMap;
+import org.polymap.core.project.ProjectNode;
 import org.polymap.core.project.ProjectNode.ProjectNodeCommittedEvent;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -65,14 +66,13 @@ public class ProjectContentProvider
         
         // commit listener
         commitListener = new CommitListener();
-        EventManager.instance().subscribe( commitListener, ifType( ProjectNodeCommittedEvent.class, ev ->
-                ev.getSource() instanceof IMap &&
-                map.id().equals( ((IMap)ev.getSource()).id() )
-                ||
-                ev.getSource() instanceof ILayer &&
-                map.containsLayer( (ILayer)ev.getSource() ) ) );
-        
+        EventManager.instance().subscribe( commitListener, ifType( ProjectNodeCommittedEvent.class, ev -> {
+                ProjectNode src = ev.getEntity( map.belongsTo() );
+                return 
+                        src instanceof IMap && map.id().equals( src.id() ) ||
+                        src instanceof ILayer && map.containsLayer( (ILayer)src );
                 // XXX check if structural change or just label changed
+        } ) );
 
         // listen to LayerUserSettings#visible
         propertyListener = new PropertyListener();
