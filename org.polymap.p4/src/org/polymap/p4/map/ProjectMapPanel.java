@@ -104,6 +104,8 @@ public class ProjectMapPanel
     
     @Override
     public void init() {
+        super.init();
+        
         // the 'start' panel initializes context
         map.compareAndSet( null, ProjectRepository.unitOfWork().entity( IMap.class, "root" ) );
         
@@ -127,7 +129,7 @@ public class ProjectMapPanel
         // title and layout
         String title = map.get().label.get();
         site().title.set( title );
-        site().preferredWidth.set( 650 );
+        site().setSize( SIDE_PANEL_WIDTH, Integer.MAX_VALUE, Integer.MAX_VALUE );
         
         ((P4AppDesign)BatikApplication.instance().getAppDesign()).setAppTitle( title );
         
@@ -245,14 +247,14 @@ public class ProjectMapPanel
         
         UIUtils.disposeChildren( tableParent );
         creator.accept( tableParent );
-        tableParent.getParent().layout();
+        tableParent.getParent().layout( true );
     }
 
 
     public void closeButtomView() {
         on( tableParent ).height( 0 );
         UIUtils.disposeChildren( tableParent );
-        tableParent.getParent().layout();
+        tableParent.getParent().layout( true );
     }
     
 }

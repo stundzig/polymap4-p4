@@ -38,12 +38,12 @@ import org.polymap.core.ui.SelectionAdapter;
 
 import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
-import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
+import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.map.ProjectMapPanel;
 
@@ -53,7 +53,7 @@ import org.polymap.p4.map.ProjectMapPanel;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class CatalogPanel
-        extends DefaultPanel {
+        extends P4Panel {
 
     private static Log log = LogFactory.getLog( CatalogPanel.class );
 
@@ -73,7 +73,6 @@ public class CatalogPanel
                     site().title.set( "" );
                     site().tooltip.set( "Data catalog" );
                     site().icon.set( P4Plugin.images().svgImage( "book-open.svg", P4Plugin.HEADER_ICON_CONFIG ) );
-                    getSite().setPreferredWidth( 350 );
                     return true;
                 })
                 .orElse( false );
@@ -82,7 +81,8 @@ public class CatalogPanel
 
     @Override
     public void createContents( Composite parent ) {
-        getSite().setTitle( "Catalog" );
+        site().title.set( "Catalog" );
+        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH );
         parent.setLayout( FormLayoutFactory.defaults().create() );
         
         viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION, SWT.SINGLE );

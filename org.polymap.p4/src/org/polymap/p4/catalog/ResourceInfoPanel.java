@@ -51,6 +51,7 @@ import org.polymap.rhei.batik.toolkit.MinHeightConstraint;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
+import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.rap.openlayers.base.OlFeature;
 import org.polymap.rap.openlayers.control.MousePositionControl;
@@ -79,7 +80,7 @@ import org.polymap.rap.openlayers.types.Coordinate;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class ResourceInfoPanel
-        extends DefaultPanel {
+        extends P4Panel {
 
     private static Log log = LogFactory.getLog( ResourceInfoPanel.class );
 
@@ -96,16 +97,10 @@ public class ResourceInfoPanel
     private Dashboard                   dashboard;
 
     
-    @Override
-    public boolean wantsToBeShown() {
-        return false;
-    }
-
 
     @Override
     public void createContents( Composite parent ) {
-        getSite().setTitle( "Resource" );
-        getSite().setPreferredWidth( 300 );
+        site().title.set( "Resource" );
         
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
         dashboard.addDashlet( new BasicInfoDashlet() );

@@ -18,7 +18,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.polymap.core.runtime.UIThreadExecutor.async;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -122,9 +121,9 @@ public class LayerStylePanel
     public boolean beforeInit() {
         IPanel parent = getContext().getPanel( getSite().getPath().removeLast( 1 ) );
         if (parent instanceof LayerInfoPanel) {
-            getSite().setTitle( "" );
-            getSite().setTooltip( "Edit styling" );
-            getSite().setIcon( P4Plugin.images().svgImage( "brush.svg", P4Plugin.HEADER_ICON_CONFIG ) );
+            site().title.set( "" );
+            site().tooltip.set( "Edit styling" );
+            site().icon.set( P4Plugin.images().svgImage( "brush.svg", P4Plugin.HEADER_ICON_CONFIG ) );
             return true;
         }
         return false;
@@ -133,6 +132,7 @@ public class LayerStylePanel
 
     @Override
     public void init() {
+        super.init();
         try {
             featureStyle = P4Plugin.styleRepo().featureStyle( styleEditorInput.get().styleIdentifier() )
                     .orElseThrow( () -> new IllegalStateException( "Layer has no style.") );
@@ -146,7 +146,6 @@ public class LayerStylePanel
     @Override
     public void createContents( Composite parent ) {
         site().title.set( "Styling" );  // + ": " + layer.get().label.get() );
-        site().preferredWidth.set( 350 );
         ContributionManager.instance().contributeTo( this, this );
         
         // toolbar
@@ -193,7 +192,6 @@ public class LayerStylePanel
         fab.setVisible( false );
         fab.setToolTipText( "Save changes" );
         fab.addSelectionListener( new SelectionAdapter() {
-
             @Override
             public void widgetSelected( SelectionEvent ev ) {
                 featureStyle.store();
@@ -271,7 +269,6 @@ public class LayerStylePanel
         descr.setForeground( UIUtils.getColor( brighter.getRed(), brighter.getGreen(), brighter.getBlue() ) );
         descr.setText( style.description.get() );
         descr.addModifyListener( new ModifyListener() {
-
             @Override
             public void modifyText( ModifyEvent ev ) {
                 // XXX sanitize user input string (?)

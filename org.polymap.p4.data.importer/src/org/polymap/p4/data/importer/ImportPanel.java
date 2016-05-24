@@ -75,6 +75,7 @@ import org.polymap.rhei.batik.toolkit.Snackbar.Appearance;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
+import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.importer.ImportsLabelProvider.Type;
 import org.polymap.p4.data.importer.features.ImportFeaturesOperation;
@@ -89,7 +90,7 @@ import org.polymap.rap.updownload.upload.UploadService;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class ImportPanel
-        extends DefaultPanel 
+        extends P4Panel
         implements IUploadHandler {
 
     private static Log log = LogFactory.getLog( ImportPanel.class );
@@ -124,7 +125,6 @@ public class ImportPanel
                     site().title.set( "" );
                     site().tooltip.set( "Import new data into the catalog" );
                     site().icon.set( ImporterPlugin.images().svgImage( "plus-circle-outline.svg", P4Plugin.HEADER_ICON_CONFIG ) );
-                    site().preferredWidth.set( 350 );
                     return true;
                 } )
                 .orElse( false );
@@ -133,6 +133,8 @@ public class ImportPanel
     
     @Override
     public void init() {
+        super.init();
+        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH*2, Integer.MAX_VALUE );
         site().title.set( "Import" );
         context = nextContext.isPresent() ? nextContext.get() : new ImporterContext(); 
 

@@ -16,7 +16,6 @@ package org.polymap.p4.layer;
 
 import static org.apache.commons.lang3.StringUtils.abbreviate;
 import static org.polymap.core.runtime.UIThreadExecutor.async;
-
 import org.geotools.data.FeatureStore;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
@@ -73,11 +72,6 @@ public class FeaturePanel
     private boolean                     previouslyValid = true;
     
     
-    @Override
-    public void init() {
-    }
-
-
     @Override
     public void createContents( Composite parent ) {
         try {

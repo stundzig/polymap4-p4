@@ -27,7 +27,6 @@ import org.eclipse.jface.action.Action;
 import org.polymap.core.project.IMap;
 
 import org.polymap.rhei.batik.Context;
-import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.ContributionManager;
@@ -38,6 +37,7 @@ import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.batik.toolkit.SimpleDialog;
 
+import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.map.ProjectMapPanel;
 
@@ -47,7 +47,7 @@ import org.polymap.p4.map.ProjectMapPanel;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class ProjectInfoPanel
-        extends DefaultPanel {
+        extends P4Panel {
 
     private static Log log = LogFactory.getLog( ProjectInfoPanel.class );
 
@@ -62,14 +62,13 @@ public class ProjectInfoPanel
 
     
     @Override
-    public boolean wantsToBeShown() {
+    public boolean beforeInit() {
         return parentPanel()
                 .filter( parent -> parent instanceof ProjectMapPanel )
                 .map( parent -> {
                     site().title.set( "" );
                     site().tooltip.set( "Project settings" );
                     site().icon.set( P4Plugin.images().svgImage( "settings.svg", P4Plugin.HEADER_ICON_CONFIG ) );
-                    getSite().setPreferredWidth( 200 );
                     return true;
                 })
                 .orElse( false );
@@ -79,7 +78,6 @@ public class ProjectInfoPanel
     @Override
     public void createContents( Composite parent ) {
         getSite().setTitle( "Settings: " + map.get().label.get() );
-        getSite().setPreferredWidth( 300 );
         
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
         dashboard.addDashlet( new BasicInfoDashlet() );

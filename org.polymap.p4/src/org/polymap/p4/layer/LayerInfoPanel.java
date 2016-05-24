@@ -15,7 +15,6 @@
 package org.polymap.p4.layer;
 
 import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,7 +31,6 @@ import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.Context;
-import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.Scope;
@@ -42,8 +40,7 @@ import org.polymap.rhei.batik.dashboard.DashletSite;
 import org.polymap.rhei.batik.dashboard.DefaultDashlet;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
-import org.polymap.rhei.batik.toolkit.md.MdToolkit;
-
+import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.project.ProjectRepository;
 
@@ -53,7 +50,7 @@ import org.polymap.p4.project.ProjectRepository;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class LayerInfoPanel
-        extends DefaultPanel {
+        extends P4Panel {
 
     private static Log log = LogFactory.getLog( LayerInfoPanel.class );
 
@@ -66,24 +63,14 @@ public class LayerInfoPanel
     
     private Dashboard                   dashboard;
 
-    private MdToolkit                   tk;
-
     
     @Override
-    public boolean wantsToBeShown() {
-        return false;
-    }
-
-
-    @Override
     public void createContents( Composite parent ) {
-        getSite().setTitle( "Layer: " + layer.get().label.get() );
-        getSite().setPreferredWidth( 350 );
-        tk = (MdToolkit)site().toolkit();
+        site().title.set( layer.get().label.get() );
         
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
         dashboard.addDashlet( new BasicInfoDashlet() );
-        dashboard.addDashlet( new DeleteLayerDashlet() );
+        //dashboard.addDashlet( new DeleteLayerDashlet() );
         dashboard.createContents( parent );
 
         ContributionManager.instance().contributeTo( this, this );
@@ -127,7 +114,7 @@ public class LayerInfoPanel
 
         @Override
         public void createContents( Composite parent ) {
-            Button deleteBtn = tk.createButton( parent, "Delete this layer", SWT.PUSH );
+            Button deleteBtn = tk().createButton( parent, "Delete this layer", SWT.PUSH );
             deleteBtn.setToolTipText( "Delete this layer." );
             deleteBtn.addSelectionListener( new SelectionAdapter() {
                 @Override

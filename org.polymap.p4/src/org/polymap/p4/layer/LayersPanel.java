@@ -54,7 +54,6 @@ import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
 
 import org.polymap.rhei.batik.Context;
-import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.Mandatory;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
@@ -64,6 +63,7 @@ import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import org.polymap.model2.runtime.UnitOfWork;
+import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.map.ProjectMapPanel;
 import org.polymap.p4.project.ProjectRepository;
@@ -74,7 +74,7 @@ import org.polymap.p4.project.ProjectRepository;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class LayersPanel
-        extends DefaultPanel {
+        extends P4Panel {
 
     private static Log log = LogFactory.getLog( LayersPanel.class );
 
@@ -96,15 +96,12 @@ public class LayersPanel
     
     @Override
     public boolean beforeInit() {
-        return parentPanel()
-                .filter( parent -> parent instanceof ProjectMapPanel )
-                .map( parent -> {
-                    getSite().setIcon( P4Plugin.images().svgImage( "layers.svg", P4Plugin.HEADER_ICON_CONFIG ) );
-                    getSite().setTitle( "" );
-                    getSite().setPreferredWidth( 200 );
-                    return true;
-                })
-                .orElse( false );
+        if (parentPanel().orElse( null ) instanceof ProjectMapPanel) {
+            site().icon.set( P4Plugin.images().svgImage( "layers.svg", P4Plugin.HEADER_ICON_CONFIG ) );
+            site().title.set( "" );
+            return true;
+        }
+        return false;
     }
 
 
@@ -123,6 +120,7 @@ public class LayersPanel
 
     @Override
     public void createContents( Composite parent ) {
+        site().title.set( "Layers" );
         parent.setLayout( FormLayoutFactory.defaults().create() );
         
         viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.SINGLE, SWT.FULL_SELECTION );

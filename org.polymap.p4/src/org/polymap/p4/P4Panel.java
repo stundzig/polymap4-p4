@@ -38,6 +38,8 @@ public abstract class P4Panel
 
     private static Log log = LogFactory.getLog( FeaturePanel.class );
     
+    public static final int                 SIDE_PANEL_WIDTH = 380;
+    
     /**
      * The <b>active</b> layer and the <b>selected</b> features from this layer.
      * There is just one active layer at a given time. This layer is selected by
@@ -46,6 +48,17 @@ public abstract class P4Panel
     @Scope( P4Plugin.Scope )
     protected Context<FeatureSelection>     featureSelection;
     
+    /**
+     * Sets size to: 
+     * <pre>
+     * SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH, Integer.MAX_VALUE
+     * </pre>
+     */
+    @Override
+    public void init() {
+        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH, Integer.MAX_VALUE );
+    }
+
     
     protected MdToolkit tk() {
         return (MdToolkit)site().toolkit();
