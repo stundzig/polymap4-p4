@@ -40,7 +40,6 @@ import org.polymap.core.runtime.UIJob;
 import org.polymap.core.runtime.UIThreadExecutor;
 
 import org.polymap.rhei.batik.Context;
-import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.contribution.ContributionManager;
