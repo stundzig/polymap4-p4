@@ -176,11 +176,8 @@ public class P4Plugin
                     // fake/test GeoServer
                         IMap map = ProjectRepository.newUnitOfWork().entity( IMap.class, "root" );
                         try {
-                            service.registerServlet( "/wms", new GeoServerServlet() {
-                                @Override
-                                public IMap getMap() {
-                                    return map;
-                                }
+                            String alias = "/services";
+                            service.registerServlet( alias, new GeoServerServlet( alias, map ) {
                                 @Override
                                 protected Pipeline createPipeline( ILayer layer,
                                         Class<? extends PipelineProcessor> usecase ) throws Exception {
