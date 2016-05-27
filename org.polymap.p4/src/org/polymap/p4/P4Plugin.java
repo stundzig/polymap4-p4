@@ -174,32 +174,32 @@ public class P4Plugin
 
                 httpService.ifPresent( service -> {
                     // fake/test GeoServer
-                        IMap map = ProjectRepository.newUnitOfWork().entity( IMap.class, "root" );
-                        try {
-                            String alias = "/services";
-                            service.registerServlet( alias, new GeoServerServlet( alias, map ) {
-                                @Override
-                                protected Pipeline createPipeline( ILayer layer,
-                                        Class<? extends PipelineProcessor> usecase ) throws Exception {
-                                    // resolve service
-                                    NullProgressMonitor monitor = new NullProgressMonitor();
-                                    DataSourceDescription dsd = LocalResolver
-                                            .instance()
-                                            .connectLayer( layer, monitor )
-                                            .orElseThrow( () -> new RuntimeException( "No data source for layer: " + layer ) );
+                    IMap map = ProjectRepository.newUnitOfWork().entity( IMap.class, "root" );
+                    try {
+                        String alias = "/services";
+                        service.registerServlet( alias, new GeoServerServlet( alias, map ) {
+                            @Override
+                            protected Pipeline createPipeline( ILayer layer,
+                                    Class<? extends PipelineProcessor> usecase ) throws Exception {
+                                // resolve service
+                                NullProgressMonitor monitor = new NullProgressMonitor();
+                                DataSourceDescription dsd = LocalResolver
+                                        .instance()
+                                        .connectLayer( layer, monitor )
+                                        .orElseThrow( () -> new RuntimeException( "No data source for layer: " + layer ) );
 
-                                    // create pipeline for it
-                                    return P4PipelineIncubator.forLayer( layer ).newPipeline( usecase, dsd, null );
-                                }
-                            }, null, null );
-                        }
-                        catch (NoClassDefFoundError e) {
-                            log.warn( "No GeoServer plugin found!" );
-                        }
-                        catch (Exception e) {
-                            throw new RuntimeException( e );
-                        }
-                    } );
+                                // create pipeline for it
+                                return P4PipelineIncubator.forLayer( layer ).newPipeline( usecase, dsd, null );
+                            }
+                        }, null, null );
+                    }
+                    catch (NoClassDefFoundError e) {
+                        log.warn( "No GeoServer plugin found!", e );
+                    }
+                    catch (Exception e) {
+                        throw new RuntimeException( e );
+                    }
+                } );
                 return httpService.get();
             }
         };

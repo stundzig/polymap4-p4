@@ -50,7 +50,6 @@ import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.StatusDispatcher;
 import org.polymap.core.ui.UIUtils;
 
-import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
@@ -127,11 +126,8 @@ public class ProjectMapPanel
     @Override
     public void createContents( Composite parent ) {
         // title and layout
-        String title = map.get().label.get();
-        site().title.set( title );
+        site().title.set( P4AppDesign.appTitle );
         site().setSize( SIDE_PANEL_WIDTH, Integer.MAX_VALUE, Integer.MAX_VALUE );
-        
-        ((P4AppDesign)BatikApplication.instance().getAppDesign()).setAppTitle( title );
         
         //parent.setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
         parent.setLayout( FormLayoutFactory.defaults().margins( 0, 0, 5, 0 ).spacing( 0 ).create() );
