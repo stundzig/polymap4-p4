@@ -29,14 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.polymap.core.CorePlugin;
-import org.polymap.core.data.pipeline.DataSourceDescription;
-import org.polymap.core.data.pipeline.Pipeline;
-import org.polymap.core.data.pipeline.PipelineProcessor;
-import org.polymap.core.project.ILayer;
-import org.polymap.core.project.IMap;
 import org.polymap.core.security.SecurityContext;
 import org.polymap.core.security.StandardConfiguration;
 import org.polymap.core.style.StylePlugin;
@@ -51,14 +44,10 @@ import org.polymap.rhei.batik.contribution.ContributionProviderExtension;
 import org.polymap.rhei.batik.contribution.IContributionProvider;
 import org.polymap.rhei.batik.toolkit.BatikDialogStatusAdapter;
 
-import org.polymap.service.geoserver.GeoServerServlet;
-
 import org.polymap.p4.catalog.LocalCatalog;
 import org.polymap.p4.catalog.LocalResolver;
-import org.polymap.p4.data.P4PipelineIncubator;
 import org.polymap.p4.layer.FeatureSelectionTableContrib;
 import org.polymap.p4.layer.NewLayerContribution;
-import org.polymap.p4.project.ProjectRepository;
 import org.polymap.p4.style.LayerStyleContrib;
 import org.polymap.p4.style.P4UIService;
 
@@ -114,13 +103,13 @@ public class P4Plugin
 
     private LocalResolver           localResolver;
 
-    private ServiceTracker          httpServiceTracker;
-
     private Optional<HttpService>   httpService = Optional.empty();
     
     private StyleRepository         styleRepo;
 
     private ServiceRegistration<UIService> styleUIRegistration;
+
+    private ServiceTracker httpServiceTracker;
 
 
     public void start( BundleContext context ) throws Exception {
@@ -166,40 +155,11 @@ public class P4Plugin
         styleRepo = new StyleRepository( styleDataDir );
         styleUIRegistration = context.registerService( UIService.class, new P4UIService(), null );
 
-        // register HTTP resource
+        // find httpService
         httpServiceTracker = new ServiceTracker( context, HttpService.class.getName(), null ) {
             @Override
             public Object addingService( ServiceReference reference ) {
                 httpService = Optional.ofNullable( (HttpService)super.addingService( reference ) );
-
-                httpService.ifPresent( service -> {
-                    // fake/test GeoServer
-                    IMap map = ProjectRepository.newUnitOfWork().entity( IMap.class, "root" );
-                    try {
-                        String alias = "/services";
-                        service.registerServlet( alias, new GeoServerServlet( alias, map ) {
-                            @Override
-                            protected Pipeline createPipeline( ILayer layer,
-                                    Class<? extends PipelineProcessor> usecase ) throws Exception {
-                                // resolve service
-                                NullProgressMonitor monitor = new NullProgressMonitor();
-                                DataSourceDescription dsd = LocalResolver
-                                        .instance()
-                                        .connectLayer( layer, monitor )
-                                        .orElseThrow( () -> new RuntimeException( "No data source for layer: " + layer ) );
-
-                                // create pipeline for it
-                                return P4PipelineIncubator.forLayer( layer ).newPipeline( usecase, dsd, null );
-                            }
-                        }, null, null );
-                    }
-                    catch (NoClassDefFoundError e) {
-                        log.warn( "No GeoServer plugin found!", e );
-                    }
-                    catch (Exception e) {
-                        throw new RuntimeException( e );
-                    }
-                } );
                 return httpService.get();
             }
         };
@@ -217,7 +177,7 @@ public class P4Plugin
         super.stop( context );
     }
 
-
+    
     public HttpService httpService() {
         return httpService.orElseThrow( () -> new IllegalStateException( "No HTTP service!" ) );
     }
