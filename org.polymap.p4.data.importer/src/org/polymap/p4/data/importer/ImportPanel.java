@@ -66,7 +66,6 @@ import org.polymap.core.ui.SelectionAdapter;
 import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.Context;
-import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
@@ -134,7 +133,7 @@ public class ImportPanel
     @Override
     public void init() {
         super.init();
-        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH*2, Integer.MAX_VALUE );
+        site().setSize( SIDE_PANEL_WIDTH, (int)(SIDE_PANEL_WIDTH*1.75), Integer.MAX_VALUE );
         site().title.set( "Import" );
         context = nextContext.isPresent() ? nextContext.get() : new ImporterContext(); 
 
