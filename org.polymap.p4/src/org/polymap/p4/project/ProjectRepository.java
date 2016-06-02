@@ -17,10 +17,17 @@ package org.polymap.p4.project;
 import java.io.File;
 import java.io.IOException;
 
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
+import org.opengis.geometry.Envelope;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.polymap.core.CorePlugin;
+import org.polymap.core.data.util.Geometries;
+import org.polymap.core.project.EnvelopeComposite;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.session.SessionContext;
@@ -72,14 +79,24 @@ public class ProjectRepository {
     protected static void checkInitRepo() {
         try (UnitOfWork uow = repo.newUnitOfWork()) {
             if (uow.entity( IMap.class, "root" ) == null) {
-                uow.createEntity( IMap.class, "root", (IMap prototype) -> {
-                    prototype.label.set( "First Map" );
-                    prototype.srsCode.set( "EPSG:3857" );
-                    //prototype.visible.set( true );
-                    return prototype;
+                String srs = "EPSG:3857";
+                CoordinateReferenceSystem crs = Geometries.crs( srs );
+                Envelope extent = CRS.getEnvelope( crs ) != null
+                        ? CRS.getEnvelope( crs )
+                        : ReferencedEnvelope.EVERYTHING;
+                
+                // The one and only project of a P4 instance
+                uow.createEntity( IMap.class, "root", (IMap proto) -> {
+                    proto.label.set( "Project" );
+                    proto.srsCode.set( srs );
+                    proto.maxExtent.createValue( EnvelopeComposite.defaults( extent ) );
+                    return proto;
                 });
                 uow.commit();
             }
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e );
         }
     }
 
