@@ -201,7 +201,9 @@ public class LayerStylePanel
                 
                 ILayer layer = featureSelection.get().layer();
                 //layer.userSettings.get().visible.set( false );
-                layer.userSettings.get().visible.set( true );
+                //layer.userSettings.get().visible.set( true );
+                
+                layer.styleIdentifier.set( layer.styleIdentifier.get() );
             }
         });
         

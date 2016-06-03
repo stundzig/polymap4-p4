@@ -16,10 +16,7 @@ package org.polymap.p4.map;
 
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import java.beans.PropertyChangeEvent;
 
 import org.apache.commons.logging.Log;
@@ -36,6 +33,7 @@ import org.polymap.core.project.ProjectNode;
 import org.polymap.core.project.ProjectNode.ProjectNodeCommittedEvent;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+import org.polymap.core.style.model.FeatureStyleCommitedEvent;
 
 /**
  * Provides the content of an {@link IMap}.
@@ -54,19 +52,25 @@ public class ProjectContentProvider
 
     private MapViewer           viewer;
 
-    private CommitListener      commitListener;
+    private ProjectNodeListener projectNodeListener;
 
     private PropertyListener    propertyListener;
+
+    private StyleListener       styleListener;
 
     
     @Override
     public void inputChanged( @SuppressWarnings("hiding") Viewer viewer, Object oldInput, Object newInput ) {
+        if (map != null) {
+            dispose();
+        }
+        
         this.map = (IMap)newInput;
         this.viewer = (MapViewer)viewer;
         
-        // commit listener
-        commitListener = new CommitListener();
-        EventManager.instance().subscribe( commitListener, ifType( ProjectNodeCommittedEvent.class, ev -> {
+        // listen to ProjectNodeCommitEvent
+        projectNodeListener = new ProjectNodeListener();
+        EventManager.instance().subscribe( projectNodeListener, ifType( ProjectNodeCommittedEvent.class, ev -> {
                 ProjectNode src = ev.getEntity( map.belongsTo() );
                 return 
                         src instanceof IMap && map.id().equals( src.id() ) ||
@@ -79,32 +83,75 @@ public class ProjectContentProvider
         EventManager.instance().subscribe( propertyListener, ifType( PropertyChangeEvent.class, ev -> {
             if (ev.getSource() instanceof LayerUserSettings) {
                 String layerId = ((LayerUserSettings)ev.getSource()).layerId();
-                return map.layers.stream().filter( l -> l.id().equals( layerId ) ).findAny().isPresent();
+                return map.layers.stream()
+                        .filter( l -> l.id().equals( layerId ) )
+                        .findAny().isPresent();
             }
             return false;
-        }));
+        } ) );
+        
+        styleListener = new StyleListener();
+        EventManager.instance().subscribe( styleListener, ifType( FeatureStyleCommitedEvent.class, ev -> {
+            return map.layers.stream()
+                    .filter( l -> l.userSettings.get().visible.get() )
+                    .filter( l -> l.styleIdentifier.get().equals( ev.getSource().id() )  )
+                    .findAny().isPresent();
+        } ) );
     }
 
+    
+    @Override
+    public Object[] getElements( Object inputElement ) {
+        return map.layers.stream()
+                .filter( l -> l.userSettings.get().visible.get() ).toArray();
+    }
+
+
+    @Override
+    public void dispose() {
+        log.info( "..." );
+        this.map = null;
+        EventManager.instance().unsubscribe( projectNodeListener );
+        EventManager.instance().unsubscribe( propertyListener );
+        EventManager.instance().unsubscribe( styleListener );
+    }
 
     /**
      * 
      */
-    class CommitListener {
-        
+    class ProjectNodeListener {
         @EventHandler( display=true, delay=100 )
         protected void onCommit( List<ProjectNodeCommittedEvent> evs ) {
             viewer.refresh();
         }
     }
 
+    /**
+     * 
+     */
+    class StyleListener {
+        @EventHandler( display=true, delay=100 )
+        protected void onCommit( List<FeatureStyleCommitedEvent> evs ) {
+            log.info( "..." );
+            for (FeatureStyleCommitedEvent ev : evs) {
+                for (ILayer layer : map.layers) {
+                    if (layer.styleIdentifier.get().equals( ev.getSource().id() ) ) {
+                        log.info( "refresh: " + layer.label.get() );
+                        viewer.refresh( layer );
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * 
      */
     class PropertyListener {
-        
         @EventHandler( display=true, delay=100 )
         protected void onPropertyChange( List<PropertyChangeEvent> evs ) {
+            viewer.refresh();
+            
             // FIXME check if layer was just created and onCommit() did it already
 //            for (PropertyChangeEvent ev : evs) {
 //                String layerId = ((LayerUserSettings)ev.getSource()).layerId();
@@ -115,26 +162,9 @@ public class ProjectContentProvider
 //                else {
 //                    viewer.refresh();
 //                }
-                viewer.refresh();
+//                viewer.refresh();
 //            }
         }
-    }
-
-    
-    @Override
-    public Object[] getElements( Object inputElement ) {
-        Object[] result = map.layers.stream().filter( l -> l.userSettings.get().visible.get() ).toArray();
-        log.info( "Layers: " + Arrays.stream( result ).map( l -> ((ILayer)l).label.get() ).collect( Collectors.toList() ) );
-        return result;
-    }
-
-    
-    @Override
-    public void dispose() {
-        log.info( "..." );
-        this.map = null;
-        EventManager.instance().unsubscribe( commitListener );
-        EventManager.instance().unsubscribe( propertyListener );
     }
     
 }
