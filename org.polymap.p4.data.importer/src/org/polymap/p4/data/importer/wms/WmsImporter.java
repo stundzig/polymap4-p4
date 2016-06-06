@@ -15,10 +15,7 @@ package org.polymap.p4.data.importer.wms;
 
 import static org.polymap.core.ui.FormDataFactory.on;
 
-import java.util.Arrays;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import java.net.URL;
 
 import org.geotools.data.ows.Layer;
@@ -28,6 +25,8 @@ import org.geotools.data.wms.WebMapServer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.google.common.collect.Sets;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -192,7 +191,9 @@ public class WmsImporter
             update.newEntry( metadata -> {
                 metadata.setTitle( info.getTitle() );
                 //metadata.setDescription( info. );
-                metadata.setKeywords( Arrays.stream( info.getKeywordList() ).collect( Collectors.toSet() ) );
+                if (info.getKeywordList() != null) {
+                    metadata.setKeywords( Sets.newHashSet( info.getKeywordList() ) );
+                }
                 metadata.setConnectionParams( WmsServiceResolver.createParams( url ) );
             });
             update.commit();
