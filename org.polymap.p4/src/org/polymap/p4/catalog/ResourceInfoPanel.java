@@ -100,6 +100,7 @@ public class ResourceInfoPanel
     @Override
     public void createContents( Composite parent ) {
         site().title.set( "Resource" );
+        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH );
         
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
         dashboard.addDashlet( new BasicInfoDashlet() );

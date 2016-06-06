@@ -68,7 +68,8 @@ public class NewLayerContribution
     public void fillFab( IContributionSite site, IPanel panel ) {
         if (panel instanceof ResourceInfoPanel) {
             Button fab = ((MdToolkit)site.toolkit()).createFab();
-            fab.setToolTipText( "Create a new layer with this data" );
+            fab.setImage( P4Plugin.images().svgImage( "plus.svg", P4Plugin.HEADER_ICON_CONFIG ) );
+            fab.setToolTipText( "Create a new layer for this data" );
             fab.addSelectionListener( new SelectionAdapter() {
                 @Override
                 public void widgetSelected( SelectionEvent ev ) {
@@ -91,6 +92,16 @@ public class NewLayerContribution
         
         UnitOfWork uow = ProjectRepository.unitOfWork();
         
+        if (res.get().getName() == null) {
+            MdToolkit tk = (MdToolkit)site.toolkit();
+            tk.createSimpleDialog( "WMS Resource" )
+                    .addOkAction( () -> true )
+                    .setContents( parent -> {
+                        tk.createFlowText( parent, "This WMS resource has no name.<br/> It does not seem to be an addable layer." );
+                    })
+                    .open();
+            return;
+        }
         NewLayerOperation op = new NewLayerOperation()
                 .uow.put( uow.newUnitOfWork() )
                 .map.put( map.get() )
