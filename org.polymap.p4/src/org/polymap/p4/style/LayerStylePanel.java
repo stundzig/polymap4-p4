@@ -18,7 +18,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.polymap.core.runtime.UIThreadExecutor.async;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -312,6 +311,7 @@ public class LayerStylePanel
             else if (StyleComposite.class.isAssignableFrom( propInfo.getType() )) {
                 
                 Section section = tk().createSection( parent, i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) ), ExpandableComposite.TREE_NODE, Section.SHORT_TITLE_BAR, Section.FOCUS_TITLE, SWT.BORDER );
+                section.setToolTipText( i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) + "Tooltip" ) );
                 section.setExpanded( false );
                 section.setBackground( UIUtils.getColor( 235,  235, 235) );
                 ((Composite)section.getClient()).setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 0, 5 ).spacing( 10 ).create() );
