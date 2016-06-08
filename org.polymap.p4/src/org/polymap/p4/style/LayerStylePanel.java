@@ -21,6 +21,8 @@ import static org.polymap.core.ui.FormDataFactory.on;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.geotools.data.FeatureStore;
 import org.opengis.feature.type.FeatureType;
@@ -60,6 +62,7 @@ import org.polymap.core.style.model.StylePropertyChange;
 import org.polymap.core.style.model.StylePropertyValue;
 import org.polymap.core.style.ui.StylePropertyField;
 import org.polymap.core.style.ui.StylePropertyFieldSite;
+import org.polymap.core.style.ui.UIOrderComparator;
 import org.polymap.core.ui.ColumnDataFactory;
 import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -91,6 +94,7 @@ import org.polymap.p4.layer.LayerInfoPanel;
  * 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
+ * @author Steffen Stundzig
  */
 public class LayerStylePanel
         extends P4Panel {
@@ -281,7 +285,6 @@ public class LayerStylePanel
         on( title ).width( 150 );
         on( descr ).left( title ).right( 100 );
 
-        // XXX FIXME, add a wait message here and remove this try catch
         createEditorFields( parent, styleEditorInput.get().featureType(), styleEditorInput.get().featureStore(), style );
         parent.layout( true );
     }
@@ -289,7 +292,8 @@ public class LayerStylePanel
 
     private void createEditorFields( final Composite parent, final FeatureType featureType, final FeatureStore featureStore,
             final org.polymap.model2.Composite style ) {
-        Collection<PropertyInfo<? extends org.polymap.model2.Composite>> propInfos = style.info().getProperties();
+        SortedSet<PropertyInfo<? extends org.polymap.model2.Composite>> propInfos = new TreeSet<PropertyInfo<? extends org.polymap.model2.Composite>>(new UIOrderComparator());
+        propInfos.addAll( style.info().getProperties());
         for (PropertyInfo<? extends org.polymap.model2.Composite> propInfo : propInfos) {
             if (StylePropertyValue.class.isAssignableFrom( propInfo.getType() )) {
                 StylePropertyFieldSite fieldSite = new StylePropertyFieldSite();
