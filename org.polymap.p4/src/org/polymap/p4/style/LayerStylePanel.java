@@ -15,6 +15,7 @@
 package org.polymap.p4.style;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.eclipse.ui.forms.widgets.ExpandableComposite.TREE_NODE;
 import static org.polymap.core.runtime.UIThreadExecutor.async;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
@@ -44,7 +45,6 @@ import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerCell;
 
-import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.Section;
 
 import org.polymap.core.project.ILayer;
@@ -306,19 +306,24 @@ public class LayerStylePanel
                 Control control = field.createContents( parent );
 
                 // the widthHint is a minimal width; without the fields expand
-                // the
-                // enclosing section
-                control.setLayoutData( ColumnDataFactory.defaults().widthHint( site().preferredWidth.get()
-                        - 20 ).create() );
+                // the enclosing section
+                control.setLayoutData( ColumnDataFactory.defaults()
+                        .widthHint( site().preferredWidth.get() - 20 ).create() );
             }
             else if (StyleComposite.class.isAssignableFrom( propInfo.getType() )) {
-                
-                Section section = tk().createSection( parent, i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) ), ExpandableComposite.TREE_NODE, Section.SHORT_TITLE_BAR, Section.FOCUS_TITLE, SWT.BORDER );
+                Section section = tk().createSection( parent, 
+                        i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) ), 
+                        TREE_NODE, Section.SHORT_TITLE_BAR, Section.FOCUS_TITLE, SWT.BORDER );
                 section.setToolTipText( i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) + "Tooltip" ) );
                 section.setExpanded( false );
                 section.setBackground( UIUtils.getColor( 235,  235, 235) );
-                ((Composite)section.getClient()).setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 0, 5 ).spacing( 10 ).create() );
-                createEditorFields( (Composite)section.getClient(), featureType, featureStore, ((Property<? extends org.polymap.model2.Composite>)propInfo.get( style )).get() );
+                
+                ((Composite)section.getClient()).setLayout( ColumnLayoutFactory.defaults()
+                        .columns( 1, 1 ).margins( 0, 5 ).spacing( 8 ).create() );
+                
+                createEditorFields( 
+                        (Composite)section.getClient(), featureType, featureStore, 
+                        ((Property<? extends org.polymap.model2.Composite>)propInfo.get( style )).get() );
             }
         }
     }
