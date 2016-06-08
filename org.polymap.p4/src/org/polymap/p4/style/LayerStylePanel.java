@@ -243,22 +243,21 @@ public class LayerStylePanel
         editorSection.setTitle( defaultString( style.title.get(), "Style settings" ) );
         UIUtils.disposeChildren( parent );
         
-        parent.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 0, 5 ).spacing( 10 ).create() );
+        parent.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 0, 0 ).spacing( 8 ).create() );
         
-        Color bg = parent.getBackground();
+        //Color bg = parent.getBackground();
         Color fg = parent.getForeground();
         java.awt.Color brighter = new java.awt.Color( fg.getRed(), fg.getGreen(), fg.getBlue() )
                 .brighter().brighter();
 
         Composite headLine = tk().createComposite( parent, SWT.NONE );
-        headLine.setLayout( FormLayoutFactory.defaults().margins( 0, 5 ).spacing( 10 ).create() );
+        headLine.setLayout( FormLayoutFactory.defaults().margins( 0, 0 ).spacing( 5 ).create() );
         
         // title
-        Text title = new Text( headLine, SWT.NONE );
-        title.setBackground( bg );
+        Text title = new Text( headLine, SWT.BORDER );
+        //title.setBackground( bg );
         title.setText( style.title.get() );
         title.addModifyListener( new ModifyListener() {
-
             @Override
             public void modifyText( ModifyEvent ev ) {
                 // XXX sanitize user input string (?)
@@ -267,11 +266,11 @@ public class LayerStylePanel
                 editorSection.setTitle( style.title.get() );
             }
         });
-        title.setToolTipText( i18nStyle.get("styleNameTooltip") );
+        title.setToolTipText( i18nStyle.get( "styleNameTooltip" ) );
         
         // description
-        Text descr = new Text( headLine, SWT.NONE );
-        descr.setBackground( bg );
+        Text descr = new Text( headLine, SWT.BORDER );
+        //descr.setBackground( bg );
         descr.setForeground( UIUtils.getColor( brighter.getRed(), brighter.getGreen(), brighter.getBlue() ) );
         descr.setText( style.description.get() );
         descr.addModifyListener( new ModifyListener() {
@@ -319,7 +318,7 @@ public class LayerStylePanel
                 section.setBackground( UIUtils.getColor( 235,  235, 235) );
                 
                 ((Composite)section.getClient()).setLayout( ColumnLayoutFactory.defaults()
-                        .columns( 1, 1 ).margins( 0, 5 ).spacing( 8 ).create() );
+                        .columns( 1, 1 ).margins( 0, 0 ).spacing( 5 ).create() );
                 
                 createEditorFields( 
                         (Composite)section.getClient(), featureType, featureStore, 
