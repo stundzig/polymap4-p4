@@ -267,6 +267,7 @@ public class LayerStylePanel
                 editorSection.setTitle( style.title.get() );
             }
         });
+        title.setToolTipText( i18nStyle.get("styleNameTooltip") );
         
         // description
         Text descr = new Text( headLine, SWT.NONE );
@@ -281,6 +282,8 @@ public class LayerStylePanel
                 list.update( style, null );
             }
         } );
+        descr.setToolTipText( i18nStyle.get("styleDescriptionTooltip") );
+
         on( title ).width( 150 );
         on( descr ).left( title ).right( 100 );
 
