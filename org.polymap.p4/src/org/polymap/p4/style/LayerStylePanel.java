@@ -318,7 +318,7 @@ public class LayerStylePanel
                 section.setBackground( UIUtils.getColor( 235,  235, 235) );
                 
                 ((Composite)section.getClient()).setLayout( ColumnLayoutFactory.defaults()
-                        .columns( 1, 1 ).margins( 0, 0 ).spacing( 5 ).create() );
+                        .columns( 1, 1 ).margins( 0, 0, 5, 0 ).spacing( 5 ).create() );
                 
                 createEditorFields( 
                         (Composite)section.getClient(), featureType, featureStore, 
