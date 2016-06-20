@@ -63,7 +63,9 @@ public class ProjectRepository {
             LuceneRecordStore store = new LuceneRecordStore( dir, false );
             repo = EntityRepository.newConfiguration()
                     .entities.set( new Class[] {
-                            ILayer.class, IMap.class, ILayer.LayerUserSettings.class} )
+                            IMap.class, 
+                            ILayer.class, 
+                            ILayer.LayerUserSettings.class} )
                     .store.set( 
                             new OptimisticLocking( 
                             new RecordStoreAdapter( store ) ) )
