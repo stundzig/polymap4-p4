@@ -431,7 +431,7 @@ public class LayerStylePanel
             icon.set( P4Plugin.images().svgImage( "format-title.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
             tooltip.set( "Create a new Text render description" );
             action.set( ev -> {
-                DefaultStyle.fillTextStyle( featureStyle );
+                DefaultStyle.fillTextStyle( featureStyle, styleEditorInput.get().featureType() );
                 list.refresh( true );
             } );
         }

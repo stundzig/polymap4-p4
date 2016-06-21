@@ -66,6 +66,9 @@ public class ImportFeaturesOperation
         return fs;
     }
 
+    public FeatureCollection features() {
+        return features;
+    }
     
     /**
      * The resource id of the newly created schema. 
