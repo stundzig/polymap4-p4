@@ -333,6 +333,11 @@ public class LayerStylePanel
     class ActiveActionProvider
             extends CheckboxActionProvider {
 
+        
+        public ActiveActionProvider() {
+            super( P4Plugin.images().svgImage( "eye.svg", P4Plugin.TOOLBAR_ICON_CONFIG ), P4Plugin.images().svgImage( "eye-off.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+        }
+        
         @Override
         protected boolean initSelection( MdListViewer viewer, Object elm ) {
             return ((Style)elm).active.get();
