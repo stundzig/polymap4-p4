@@ -15,9 +15,15 @@ package org.polymap.p4.data.importer.shapefile;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.charset.Charset;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,6 +35,7 @@ import org.geotools.data.Query;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.feature.FeatureCollection;
+import org.geotools.referencing.ReferencingFactoryFinder;
 import org.opengis.feature.simple.SimpleFeatureType;
 
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
@@ -91,7 +98,16 @@ public class ShpImporter
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         charsetPrompt = new CharsetPrompt( site, files );
-        crsPrompt = new CrsPrompt( site, files );
+        crsPrompt = new CrsPrompt( site, () -> {
+            Optional<File> prjFile = files.stream().filter( f -> "prj".equalsIgnoreCase( FilenameUtils.getExtension( f.getName() ) ) ).findAny();
+            String readError = null;
+                if (prjFile.isPresent()) {
+                    // encoding used in geotools' PrjFileReader
+                    String wkt = FileUtils.readFileToString( prjFile.get(), Charset.forName( "ISO-8859-1" ) );
+                    return  ReferencingFactoryFinder.getCRSFactory( null ).createFromWKT( wkt );
+                } 
+                return null;
+        } );
     }
 
 

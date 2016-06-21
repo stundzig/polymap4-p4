@@ -14,17 +14,12 @@
  */
 package org.polymap.p4.data.importer.shapefile;
 
-import static org.apache.commons.io.FilenameUtils.getExtension;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-
-import java.io.File;
-import java.nio.charset.Charset;
+import java.util.function.Supplier;
 
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
@@ -32,7 +27,6 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CRSAuthorityFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -61,20 +55,16 @@ public class CrsPrompt {
     private HashMap<String,String>      crsNames;
 
 
-    public CrsPrompt( ImporterSite site, List<File> files ) {
+    public CrsPrompt( ImporterSite site, Supplier<CoordinateReferenceSystem> crsSupplier ) {
         this.site = site;
         
         initCrsNames();
         
+        
         // read *.prj file
-        Optional<File> prjFile = files.stream().filter( f -> "prj".equalsIgnoreCase( getExtension( f.getName() ) ) ).findAny();
         String readError = null;
         try {
-            if (prjFile.isPresent()) {
-                // encoding used in geotools' PrjFileReader
-                String wkt = FileUtils.readFileToString( prjFile.get(), Charset.forName( "ISO-8859-1" ) );
-                selection = ReferencingFactoryFinder.getCRSFactory( null ).createFromWKT( wkt );
-            }
+            selection = crsSupplier.get();
         }
         catch (Exception e) {
             readError = e.getMessage();
