@@ -126,7 +126,7 @@ public class LayerStylePanel
         if (parent instanceof LayerInfoPanel) {
             site().title.set( "" );
             site().tooltip.set( "Edit styling" );
-            site().icon.set( P4Plugin.images().svgImage( "brush.svg", P4Plugin.HEADER_ICON_CONFIG ) );
+            site().icon.set( P4Plugin.images().svgImage( "palette.svg", P4Plugin.HEADER_ICON_CONFIG ) );
             return true;
         }
         return false;

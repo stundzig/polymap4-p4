@@ -22,6 +22,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.Context;
@@ -31,6 +32,7 @@ import org.polymap.rhei.batik.contribution.IToolbarContribution;
 import org.polymap.rhei.batik.toolkit.ActionItem;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 
+import org.polymap.p4.Messages;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.layer.FeatureSelection;
 import org.polymap.p4.layer.FeatureSelectionTable;
@@ -41,11 +43,14 @@ import org.polymap.p4.map.ProjectMapPanel;
  * {@link FeatureSelectionTable}.
  *
  * @author Falko Bräutigam
+ * @author Steffen Stundzig
  */
 public class LayerStyleContrib
         implements IToolbarContribution {
 
     private static Log log = LogFactory.getLog( LayerStyleContrib.class );
+
+    private static final IMessages          i18n = Messages.forPrefix( "Styler" );
 
     private ActionItem                      item;
     
@@ -67,8 +72,8 @@ public class LayerStyleContrib
                 styleEditorInput.set( new StyleEditorInput( featureSelection.get().layer().styleIdentifier.get(), featureSelection.get().waitForFs().get( 5, TimeUnit.SECONDS )));
                 item = new ActionItem( toolbar );
                 item.text.set( "" );
-                item.icon.set( P4Plugin.images().svgImage( "brush.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
-                item.tooltip.set( "Edit geometry styling" );
+                item.icon.set( P4Plugin.images().svgImage("palette.svg", P4Plugin.TOOLBAR_ICON_CONFIG ) );
+                item.tooltip.set( i18n.get("start") );
                 item.action.set( ev -> {
 //                    assert !childPanel.isPresent();
                     childPanel = site.context().openPanel( site.panelSite().path(), LayerStylePanel.ID );
