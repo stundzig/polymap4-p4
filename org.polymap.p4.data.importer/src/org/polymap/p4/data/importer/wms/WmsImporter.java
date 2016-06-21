@@ -151,7 +151,7 @@ public class WmsImporter
                 String title = capabilities.getService().getTitle();
                 log.info( "Service title: " + title );
 
-                if (P4Plugin.localCatalog().query( "" ).execute().stream()
+                if (P4Plugin.localCatalog().query( "", monitor ).execute().stream()
                         .filter( metadata -> metadata.getTitle().equals( title ) )
                         .findAny()
                         .isPresent()) {

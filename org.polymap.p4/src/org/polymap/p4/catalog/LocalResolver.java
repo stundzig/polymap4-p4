@@ -14,7 +14,7 @@
  */
 package org.polymap.p4.catalog;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
@@ -29,10 +29,8 @@ import org.polymap.core.catalog.resolve.IMetadataResourceResolver;
 import org.polymap.core.catalog.resolve.IResolvableInfo;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.catalog.resolve.IServiceInfo;
+import org.polymap.core.catalog.resolve.ResourceResolverExtension;
 import org.polymap.core.data.pipeline.DataSourceDescription;
-import org.polymap.core.data.rs.catalog.RServiceResolver;
-import org.polymap.core.data.shapefile.catalog.ShapefileServiceResolver;
-import org.polymap.core.data.wms.catalog.WmsServiceResolver;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.runtime.cache.Cache;
 import org.polymap.core.runtime.cache.CacheConfig;
@@ -43,7 +41,7 @@ import org.polymap.p4.P4Plugin;
  * Provides the connection between an {@link ILayer} -> {@link IMetadata} ->
  * {@link IServiceInfo} and back.
  * <p/>
- * Holds a static list of metadata {@link #resolvers} which are responsible of
+ * Holds a list of metadata {@link #resolvers} which are responsible of actually
  * creating a service/resource out of a metadata entry. A {@link ILayer} is connected
  * to a metadata entry via the {@link #resourceIdentifier(IResourceInfo)} which
  * consists of the metadata identifier and the resource name.
@@ -55,11 +53,6 @@ public class LocalResolver
 
     private static Log log = LogFactory.getLog( LocalResolver.class );
 
-    public static final IMetadataResourceResolver[] resolvers = { 
-            new WmsServiceResolver(), 
-            new ShapefileServiceResolver(), 
-            new RServiceResolver() };
-    
     public static final String                      ID_DELIMITER = "|";
     
     public static LocalResolver instance() {
@@ -70,7 +63,10 @@ public class LocalResolver
     // instance *******************************************
     
     private LocalCatalog                    localCatalog;
-    
+
+    /** The delegates. */
+    private List<IMetadataResourceResolver> resolvers; 
+
     /**
      * Cache {@link IResolvableInfo} instances in order to have just one underlying
      * service instances (WMS, Shape, RDataStore, etc.) per JVM.
@@ -81,6 +77,7 @@ public class LocalResolver
     public LocalResolver( LocalCatalog localCatalog ) {
         assert localCatalog != null;
         this.localCatalog = localCatalog;
+        this.resolvers = ResourceResolverExtension.createAllResolvers(); 
     }
 
 
@@ -106,7 +103,7 @@ public class LocalResolver
         String metadataId = tokens.nextToken();
         String resName = tokens.nextToken();
         
-        IMetadata metadata = localCatalog.entry( metadataId ).get();
+        IMetadata metadata = localCatalog.entry( metadataId, monitor ).get();
         
         if (metadata != null) {
             IServiceInfo serviceInfo = (IServiceInfo)resolve( metadata, monitor );
@@ -127,14 +124,9 @@ public class LocalResolver
     
     @Override
     public boolean canResolve( IMetadata metadata ) {
-        if (resolved.get( metadata ) != null) {
-            return true;
-        }
-        else {
-            return Arrays.stream( resolvers )
-                    .filter( resolver -> resolver.canResolve( metadata ) )
-                    .findFirst().isPresent();
-        }
+        return resolved.get( metadata ) == null
+                ? resolvers.stream().filter( r -> r.canResolve( metadata ) ).findFirst().isPresent()
+                : true;
     }
 
     
@@ -150,15 +142,16 @@ public class LocalResolver
     @Override
     public IResolvableInfo resolve( IMetadata metadata, IProgressMonitor monitor ) throws Exception {
         return resolved.get( metadata, key -> {
-            for (int i=0; i<resolvers.length; i++) {
-                if (resolvers[i].canResolve( metadata ) ) {
-                    return resolvers[i].resolve( metadata, monitor );
+            for (IMetadataResourceResolver resolver : resolvers) {
+                if (resolver.canResolve( metadata ) ) {
+                    return resolver.resolve( metadata, monitor );
                 }            
             }
             return (IResolvableInfo)null;
         });
     }
 
+    
     @Override
     public Map<String,String> createParams( Object service ) {
         // XXX Auto-generated method stub

@@ -130,5 +130,11 @@
          </run>
       </application>
    </extension>
+   <extension
+         point="org.polymap.core.catalog.catalogProviders">
+      <catalogProvider
+            class="org.polymap.p4.catalog.LocalCatalogProvider">
+      </catalogProvider>
+   </extension>
 
 </plugin>

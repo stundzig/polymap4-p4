@@ -27,7 +27,9 @@ import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.ViewerCell;
 
+import org.polymap.core.catalog.CatalogProviderExtension;
 import org.polymap.core.catalog.IMetadata;
+import org.polymap.core.catalog.IMetadataCatalog;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.catalog.ui.MetadataContentProvider;
 import org.polymap.core.catalog.ui.MetadataDescriptionProvider;
@@ -72,7 +74,7 @@ public class CatalogPanel
                 .map( parent -> {
                     site().title.set( "" );
                     site().tooltip.set( "Data catalog" );
-                    site().icon.set( P4Plugin.images().svgImage( "book-open.svg", P4Plugin.HEADER_ICON_CONFIG ) );
+                    site().icon.set( P4Plugin.images().svgImage( "book-open-page-variant.svg", P4Plugin.HEADER_ICON_CONFIG ) );
                     return true;
                 })
                 .orElse( false );
@@ -92,8 +94,11 @@ public class CatalogPanel
         viewer.iconProvider.set( new CellLabelProvider() {
             @Override
             public void update( ViewerCell cell ) {
-                if (cell.getElement() instanceof IMetadata) {
-                    cell.setImage( P4Plugin.images().svgImage( "layers.svg", NORMAL24 ) );
+                if (cell.getElement() instanceof IMetadataCatalog) {
+                    cell.setImage( P4Plugin.images().svgImage( "book-open-variant.svg", NORMAL24 ) );
+                }
+                else if (cell.getElement() instanceof IMetadata) {
+                    cell.setImage( P4Plugin.images().svgImage( "buffer.svg", NORMAL24 ) );
                 }
                 else if (cell.getElement() == MetadataContentProvider.LOADING) {
                     cell.setImage( BatikPlugin.images().image( "resources/icons/loading24.gif" ) );
@@ -117,8 +122,7 @@ public class CatalogPanel
                 });
             }
         } );
-//        viewer.firstSecondaryActionProvider.set( new CatalogEntryDeleteActionProvider() );
-        viewer.setInput( P4Plugin.localCatalog() );
+        viewer.setInput( CatalogProviderExtension.createAllCatalogs() );
 
         // fill the entiry space as items are expandable; scrollbar would not adopted otherwise
         viewer.getTree().setLayoutData( FormDataFactory.filled().create() );

@@ -61,7 +61,7 @@ public class LocalCatalog
      */
     public IMetadata localFeaturesStoreEntry() {
         try {
-            return entry( LOCAL_FEATURES_STORE_ID ).get();
+            return entry( LOCAL_FEATURES_STORE_ID, new NullProgressMonitor() ).get();
         }
         catch (Exception e) {
             throw new RuntimeException( e );
@@ -99,7 +99,7 @@ public class LocalCatalog
     
     protected void createEntries() throws Exception {
         // check empty
-        if (query( "" ).execute().size() == 0) {
+        if (query( "", new NullProgressMonitor() ).execute().size() == 0) {
             // create standard entries
             try (Updater update = prepareUpdate()) {
                 LOCAL_FEATURES_STORE_DIR.mkdirs();

@@ -109,7 +109,7 @@ public class P4Plugin
 
     private ServiceRegistration<UIService> styleUIRegistration;
 
-    private ServiceTracker httpServiceTracker;
+    private ServiceTracker          httpServiceTracker;
 
 
     public void start( BundleContext context ) throws Exception {
@@ -142,11 +142,11 @@ public class P4Plugin
             public IContributionProvider createProvider() { return new LayerStyleContrib(); }
         });
         
-        // Handling errors in the UI
+        // handling errors in the UI
         StatusDispatcher.registerAdapter( new StatusDispatcher.LogAdapter() );
         StatusDispatcher.registerAdapter( new BatikDialogStatusAdapter() );
         
-        //
+        // Catalog / Resolver
         localCatalog = new LocalCatalog();
         localResolver = new LocalResolver( localCatalog );
         
