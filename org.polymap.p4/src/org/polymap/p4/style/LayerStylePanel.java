@@ -19,6 +19,7 @@ import static org.eclipse.ui.forms.widgets.ExpandableComposite.TREE_NODE;
 import static org.polymap.core.runtime.UIThreadExecutor.async;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -30,6 +31,7 @@ import org.opengis.feature.type.FeatureType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.collect.Lists;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -119,6 +121,8 @@ public class LayerStylePanel
     @Mandatory
     @Scope( P4Plugin.StyleScope )
     protected Context<StyleEditorInput> styleEditorInput;
+
+    private List<StylePropertyField> fields = Lists.newArrayList();
 
     @Override
     public boolean beforeInit() {
@@ -225,19 +229,14 @@ public class LayerStylePanel
     @EventHandler( display=true, delay=100 )
     protected void featureStyleCanged( List<StylePropertyChange> evs ) {
         if (fab != null && !fab.isDisposed()) {
-            enableSubmit();
+            boolean enabled = fields.stream().allMatch( field -> field.isValid() );
+            fab.setEnabled( enabled );
+            fab.setVisible( enabled );
         }
         else {
             EventManager.instance().unsubscribe( this );
         }
     }
-    
-    
-    protected void enableSubmit() {
-        fab.setEnabled( true );
-        fab.setVisible( true );
-    }
-    
     
     protected void createStyleEditor( Composite parent, Style style ) {
         editorSection.setTitle( defaultString( style.title.get(), "Style settings" ) );
@@ -283,16 +282,18 @@ public class LayerStylePanel
         } );
         descr.setToolTipText( i18nStyle.get("styleDescriptionTooltip") );
 
-        on( title ).width( 150 );
-        on( descr ).left( title ).right( 100 );
+        on( title ).left(0).right( 30 );
+        on( descr ).left( title, 3 ).right( 100 );
 
-        createEditorFields( parent, styleEditorInput.get().featureType(), styleEditorInput.get().featureStore(), style, 1 );
-        parent.layout( true );
+        fields.clear();
+        java.awt.Color sectionBackgroundColor = new java.awt.Color( 235,  235, 235);
+        createEditorFields( parent, styleEditorInput.get().featureType(), styleEditorInput.get().featureStore(), style, 1, sectionBackgroundColor );
+        site().layout( true );
     }
 
 
     private void createEditorFields( final Composite parent, final FeatureType featureType, final FeatureStore featureStore,
-            final org.polymap.model2.Composite style, final int level ) {
+            final org.polymap.model2.Composite style, final int level, final java.awt.Color sectionBackgroundColor ) {
         SortedSet<PropertyInfo<? extends org.polymap.model2.Composite>> propInfos = new TreeSet<PropertyInfo<? extends org.polymap.model2.Composite>>(new UIOrderComparator());
         propInfos.addAll( style.info().getProperties());
         for (PropertyInfo<? extends org.polymap.model2.Composite> propInfo : propInfos) {
@@ -302,6 +303,7 @@ public class LayerStylePanel
                 fieldSite.featureStore.set( featureStore );
                 fieldSite.featureType.set(featureType );
                 StylePropertyField field = new StylePropertyField( fieldSite );
+                fields .add( field );
                 Control control = field.createContents( parent );
 
                 // the widthHint is a minimal width; without the fields expand
@@ -315,14 +317,13 @@ public class LayerStylePanel
                         TREE_NODE, Section.SHORT_TITLE_BAR, Section.FOCUS_TITLE, SWT.BORDER );
                 section.setToolTipText( i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) + "Tooltip" ) );
                 section.setExpanded( level == 1 );
-                section.setBackground( UIUtils.getColor( 235,  235, 235) );
-                
+                section.setBackground( UIUtils.getColor( sectionBackgroundColor.getRed() * (11-level) /10, sectionBackgroundColor.getGreen()* (11-level) /10, sectionBackgroundColor.getBlue()* (11-level) /10) );
                 ((Composite)section.getClient()).setLayout( ColumnLayoutFactory.defaults()
                         .columns( 1, 1 ).margins( 0, 0, 5, 0 ).spacing( 5 ).create() );
                 
                 createEditorFields( 
                         (Composite)section.getClient(), featureType, featureStore, 
-                        ((Property<? extends org.polymap.model2.Composite>)propInfo.get( style )).get(), level + 1 );
+                        ((Property<? extends org.polymap.model2.Composite>)propInfo.get( style )).get(), level + 1, sectionBackgroundColor );
             }
         }
     }
