@@ -50,7 +50,13 @@ public class SchemaNamePrompt {
             currentName = "features";
         }
 
-        site.newPrompt( "schemaname" ).summary.put( summary ).description.put( description ).value.put( currentName ).severity.put( Severity.REQUIRED ).extendedUI.put( new PromptUIBuilder() {
+        site.newPrompt( "schemaName" )
+            .summary.put( summary )
+            .description.put( description )
+            .value.put( currentName )
+            .severity.put( Severity.REQUIRED )
+            .ok.put( !nameExists() )
+            .extendedUI.put( new PromptUIBuilder() {
 
             @Override
             public void submit( ImporterPrompt prompt ) {
@@ -68,37 +74,38 @@ public class SchemaNamePrompt {
                 text.addModifyListener( event -> {
                     Text t = (Text)event.getSource();
                     currentName = t.getText();
-                    checkName( l );
+                    checkName( prompt, l );
                 } );
-                
+
                 FormDataFactory.on( text ).left( 1 ).top( 5 ).width( 350 );
                 FormDataFactory.on( l ).left( 1 ).top( text, 5 );
 
-                prompt.value.set( text.getText() );
-                checkName( l );
+                checkName( prompt, l );
             }
 
 
-            private boolean nameExists() {
-                try {
-                    return P4Plugin.localCatalog().localFeaturesStore().getSchema( new NameImpl( currentName ) ) != null;
-                }
-                catch (Exception e) {
-                    // do nothing, exception is thrown, if schema doesnt exist
-                }
-                return false;
-            }
-
-
-            private void checkName( Label l ) {
+            private void checkName( ImporterPrompt prompt, Label l ) {
                 if (nameExists()) {
-                    l.setText( "exists" );
+                    l.setText( "This name always exists in your database. Please use another name." );
+                    prompt.ok.set( false );
                 }
                 else {
                     l.setText( "" );
+                    prompt.ok.set( true );
                 }
             }
         } );
+    }
+
+
+    protected boolean nameExists() {
+        try {
+            return P4Plugin.localCatalog().localFeaturesStore().getSchema( new NameImpl( currentName ) ) != null;
+        }
+        catch (Exception e) {
+            // do nothing, exception is thrown, if schema doesnt exist
+        }
+        return false;
     }
 
 

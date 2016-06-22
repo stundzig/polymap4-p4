@@ -106,11 +106,11 @@ public class GeojsonImporter
             return Charset.forName( "UTF-8" );
         } );
         // http://geojson.org/geojson-spec.html#coordinate-reference-system-objects
-        crsPrompt = new CrsPrompt( site, "Coordinate reference system", "The coordinate reference system for projecting the feature content. "
-                + "If unsure use EPSG:4326 (= WGS 84).", () -> {
+        crsPrompt = new CrsPrompt( site, "Coordinate reference system", "The coordinate reference system for projecting the feature content."
+                + "If unsure use EPSG:4326.", () -> {
                     return getPredefinedCRS();
                 } );
-        schemaNamePrompt = new SchemaNamePrompt( site, "summary", "description", () -> {
+        schemaNamePrompt = new SchemaNamePrompt( site, "Name of the dataset ", "Each dataset has its own name in the local database. The name must be unqiue.", () -> {
             return FilenameUtils.getBaseName( geojsonFile.getName() );
         } );
     }
@@ -203,6 +203,14 @@ public class GeojsonImporter
                 }
             }
         }
+        if (predefinedCRS == null) {
+            try {
+                predefinedCRS = CRS.decode( "EPSG:4326" );
+            }
+            catch (Exception e) {
+                // do nothing
+            }
+        }
         return predefinedCRS;
     }
 
@@ -231,21 +239,10 @@ public class GeojsonImporter
         // hasNext must be called before the first next()
         featureIterator.hasNext();
         final SimpleFeature first = featureIterator.next();
-        // final SimpleFeature first = featureJSON.readFeature( isr );
         featureIterator.close();
         isr.close();
         final SimpleFeatureType originalSchema = SimpleFeatureTypeBuilder.retype( first.getFeatureType(), crsPrompt.selection() );
         final FeatureType schema = new SimpleFeatureTypeImpl( new NameImpl( schemaNamePrompt.selection() ), originalSchema.getAttributeDescriptors(), originalSchema.getGeometryDescriptor(), originalSchema.isAbstract(), originalSchema.getRestrictions(), originalSchema.getSuper(), originalSchema.getDescription() );
-        // featureIterator.close();
-        // while (i < 100 && featureIterator.hasNext()) {
-        // SimpleFeature next = featureIterator.next();
-        // if (featureList == null) {
-        // featureList = new ListFeatureCollection(next.getFeatureType());
-        // }
-        // featureList.add(next);
-        // i++;
-        // }
-        // featureIterator.close();
         features = new FeatureCollection() {
 
             @Override
