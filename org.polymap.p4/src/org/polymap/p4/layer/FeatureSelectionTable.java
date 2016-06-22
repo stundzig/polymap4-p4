@@ -112,12 +112,12 @@ public class FeatureSelectionTable {
     
         // seach
         createTextSearch( topbar );
-        on( searchBtn ).fill().noLeft().right( 100, -205 );
+        on( searchBtn ).fill().noLeft().right( 60 );
         on( searchText ).fill().right( searchBtn );
         
         // toolbar
-        toolbar = tk().createToolbar( topbar, SWT.RIGHT, SWT.FLAT );
-        on( toolbar.getControl() ).fill().left( 100, -200 ).width( 200 );
+        toolbar = tk().createToolbar( topbar,  SWT.FLAT );
+        on( toolbar.getControl() ).fill().noLeft().right( 100 );
         ContributionManager.instance().contributeTo( toolbar, panel, TOOLBAR_TAG );
 
         // table viewer
