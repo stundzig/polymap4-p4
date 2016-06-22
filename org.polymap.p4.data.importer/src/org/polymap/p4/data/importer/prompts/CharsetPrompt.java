@@ -12,27 +12,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.data.importer.shapefile;
+package org.polymap.p4.data.importer.prompts;
 
-import static org.apache.commons.io.FileUtils.readFileToString;
-import static org.apache.commons.io.FilenameUtils.getExtension;
-
-import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
-import java.io.File;
 import java.nio.charset.Charset;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.polymap.core.runtime.Streams;
-import org.polymap.core.runtime.Streams.ExceptionCollector;
-
 import org.polymap.p4.data.importer.ImporterPrompt;
-import org.polymap.p4.data.importer.ImporterSite;
 import org.polymap.p4.data.importer.ImporterPrompt.Severity;
-import org.polymap.p4.data.importer.utils.FilteredListPromptUIBuilder;
+import org.polymap.p4.data.importer.ImporterSite;
 
 /**
  * 
@@ -40,29 +29,22 @@ import org.polymap.p4.data.importer.utils.FilteredListPromptUIBuilder;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class CharsetPrompt {
-
-    private static Log log = LogFactory.getLog( CharsetPrompt.class );
     
-    private static Charset      DEFAULT  = Charset.forName( "ISO-8859-1" );
+    public static Charset       DEFAULT  = Charset.forName( "ISO-8859-1" );
 
-    private ImporterSite        site;
-
-    private Charset             selection = DEFAULT;
+    private Charset             selection = null;
 
 
-    public CharsetPrompt( ImporterSite site, List<File> files ) {
-        this.site = site;
+    public CharsetPrompt( final ImporterSite site, final String summary, final String description, Supplier<Charset> charsetSupplier ) {
         
-        try (ExceptionCollector<RuntimeException> exc = Streams.exceptions()) {
-            selection = Charset.forName( files.stream()
-                    .filter( f -> "cpg".equalsIgnoreCase( getExtension( f.getName() ) ) ).findAny()
-                    .map( f -> exc.check( () -> readFileToString( f ).trim() ) )
-                    .orElse( DEFAULT.name() ) );
+        selection = charsetSupplier.get();
+        if (selection == null) {
+            selection = DEFAULT;
         }
 
         site.newPrompt( "charset" )
-                .summary.put( "Content encoding" )
-                .description.put( "The encoding of the feature content. If unsure use ISO-8859-1." )
+                .summary.put( summary )
+                .description.put( description )
                 .value.put( selection.name() )
                 .severity.put( Severity.VERIFY )
                 .extendedUI.put( new FilteredListPromptUIBuilder() {

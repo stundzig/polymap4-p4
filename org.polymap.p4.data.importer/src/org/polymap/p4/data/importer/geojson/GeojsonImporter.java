@@ -14,25 +14,33 @@
  */
 package org.polymap.p4.data.importer.geojson;
 
+import java.util.Collection;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 import org.geotools.data.collection.ListFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.FeatureIterator;
+import org.geotools.feature.NameImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeImpl;
 import org.geotools.geojson.feature.FeatureJSON;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.opengis.feature.FeatureVisitor;
+import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.FeatureType;
-import org.opengis.referencing.FactoryException;
+import org.opengis.filter.Filter;
+import org.opengis.filter.sort.SortBy;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.util.ProgressListener;
+
+import org.apache.commons.io.FilenameUtils;
 
 import org.eclipse.swt.widgets.Composite;
 
@@ -41,38 +49,44 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
-import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.importer.ContextIn;
+import org.polymap.p4.data.importer.ContextOut;
 import org.polymap.p4.data.importer.Importer;
-import org.polymap.p4.data.importer.ImporterPrompt.Severity;
+import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.importer.ImporterSite;
+import org.polymap.p4.data.importer.prompts.CharsetPrompt;
+import org.polymap.p4.data.importer.prompts.CrsPrompt;
+import org.polymap.p4.data.importer.prompts.SchemaNamePrompt;
 import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
- *
+ * @author Steffen Stundzig
  */
 public class GeojsonImporter
         implements Importer {
 
-    private ImporterSite      site             = null;
+    private ImporterSite      site      = null;
 
     @ContextIn
     protected File            geojsonFile;
 
-    private FeatureCollection features         = null;
+    @ContextOut
+    private FeatureCollection features  = null;
 
-    private Exception         exception        = null;
+    private Exception         exception = null;
 
-    private CharSetSelection  charSetSelection = new CharSetSelection();
+    private CrsPrompt         crsPrompt;
 
-    private CRSSelection      crsSelection     = new CRSSelection();
+    private CharsetPrompt     charsetPrompt;
+
+    private SchemaNamePrompt  schemaNamePrompt;
 
 
     @Override
     public void init( ImporterSite site, IProgressMonitor monitor ) throws Exception {
         this.site = site;
-        site.icon.set( P4Plugin.images().svgImage( "shp.svg", SvgImageRegistryHelper.NORMAL24 ) );
+        site.icon.set( ImporterPlugin.images().svgImage( "json.svg", SvgImageRegistryHelper.NORMAL24 ) );
         site.summary.set( "GeoJSON file: " + geojsonFile.getName() );
         site.description.set( "GeoJSON is a format for encoding a variety of geographic data structures." );
         site.terminal.set( true );
@@ -88,99 +102,106 @@ public class GeojsonImporter
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         // charset prompt
-        site.newPrompt( "charset" ).summary.put( "GeoJSON file content encoding" ).description
-                .put( "The encoding of the GeoJSON file content. If unsure use UTF-8." ).value
-                .put( "UTF-8" ).severity
-                .put( Severity.VERIFY ).extendedUI.put( new CharsetPromptBuilder( charSetSelection ) );
+        charsetPrompt = new CharsetPrompt( site, "Content encoding", "The encoding of the feature content. If unsure use UTF-8.", () -> {
+            return Charset.forName( "UTF-8" );
+        } );
         // http://geojson.org/geojson-spec.html#coordinate-reference-system-objects
-        CoordinateReferenceSystem predefinedCRS = getPredefinedCRS();
-        if (predefinedCRS != null) {
-            crsSelection.setSelected( predefinedCRS );
-        }
-        else {
-            site.newPrompt( "crs" ).summary.put( "Coordinate reference system" ).description
-                    .put( "The coordinate reference system for projecting the feature content. "
-                            + "If unsure use EPSG:4326 (= WGS 84)." ).value
-                    .put( "EPSG:4326" ).severity.put( Severity.VERIFY ).extendedUI
-                    .put( new CRSPromptBuilder( crsSelection ) );
-        }
+        crsPrompt = new CrsPrompt( site, "Coordinate reference system", "The coordinate reference system for projecting the feature content. "
+                + "If unsure use EPSG:4326 (= WGS 84).", () -> {
+                    return getPredefinedCRS();
+                } );
+        schemaNamePrompt = new SchemaNamePrompt( site, "summary", "description", () -> {
+            return FilenameUtils.getBaseName( geojsonFile.getName() );
+        } );
     }
 
 
     @Override
     public void verify( IProgressMonitor monitor ) {
-        String encoding = null;
-        if (charSetSelection
-                .getSelected() != null) {
-            encoding = charSetSelection.getSelected().name();
-        }
-        else {
-            encoding = charSetSelection.getDefault().getKey();
-        }
-        FeatureJSON featureJSON = new FeatureJSON();
-        try (InputStreamReader isr = new InputStreamReader( new FileInputStream( geojsonFile ), encoding )) {
-            features = featureJSON.readFeatureCollection( isr );
-            if (crsSelection.getSelected() != null) {
-                FeatureType schema = features.getSchema();
-                if (schema instanceof SimpleFeatureType) {
-                    SimpleFeatureType featureType = SimpleFeatureTypeBuilder.retype( (SimpleFeatureType)schema,
-                            crsSelection.getSelected() );
-                    if (features instanceof SimpleFeatureCollection) {
-                        ListFeatureCollection listFeatures = new ListFeatureCollection( featureType );
-                        SimpleFeatureIterator iterator = ((SimpleFeatureCollection)features).features();
-                        while (iterator.hasNext()) {
-                            listFeatures.add( iterator.next() );
-                        }
-                        features = listFeatures;
-                    }
+        System.err.println( "verify " + System.currentTimeMillis() );
+        InputStreamReader isr = null;
+        FeatureIterator<SimpleFeature> featureIterator = null;
+        try {
+            String encoding = charsetPrompt.selection().name();
+            FeatureJSON featureJSON = new FeatureJSON();
+            isr = new InputStreamReader( new FileInputStream( geojsonFile ), encoding );
+            featureIterator = featureJSON.streamFeatureCollection( isr );
+            ListFeatureCollection featureList = null;
+            int i = 0;
+            while (i < 100 && featureIterator.hasNext()) {
+                SimpleFeature next = featureIterator.next();
+                if (featureList == null) {
+                    featureList = new ListFeatureCollection( next.getFeatureType() );
                 }
+                featureList.add( next );
+                i++;
             }
+            features = featureList;
+            // featureJSON.readFeatureCollection( isr );
+            // if (crsPrompt.selection() != null) {
+            // FeatureType schema = features.getSchema();
+            // if (schema instanceof SimpleFeatureType) {
+            //// SimpleFeatureType featureType = SimpleFeatureTypeBuilder.retype(
+            // (SimpleFeatureType)schema, crsPrompt.selection() );
+            // if (features instanceof SimpleFeatureCollection) {
+            // ListFeatureCollection listFeatures = new ListFeatureCollection(
+            // featureType );
+            // SimpleFeatureIterator iterator =
+            // ((SimpleFeatureCollection)features).features();
+            // while (iterator.hasNext()) {
+            // listFeatures.add( iterator.next() );
+            // }
+            // features = listFeatures;
+            // }
+            // }
+            // }
+            site.ok.set( true );
+            exception = null;
         }
-        catch (IOException e) {
+        catch (Exception e) {
+            site.ok.set( false );
             exception = e;
         }
+        finally {
+            if (isr != null) {
+                try {
+                    isr.close();
+                }
+                catch (IOException e) {
+                    // do nothing
+                }
+            }
+            if (featureIterator != null) {
+                featureIterator.close();
+            }
+        }
+        System.err.println( "verify done " + System.currentTimeMillis() );
     }
 
 
     private CoordinateReferenceSystem getPredefinedCRS() {
         CoordinateReferenceSystem predefinedCRS = null;
-        JSONParser parser = new JSONParser();
-        try (InputStreamReader isr2 = new InputStreamReader( new FileInputStream( geojsonFile ) )) {
-            JSONObject root = (JSONObject)parser.parse( isr2 );
-            // http://www.macwright.org/2015/03/23/geojson-second-bite.html#coordinate
-            JSONObject crs = (JSONObject)root.get( "crs" );
-            if (crs != null) {
-                String type = (String)crs.get( "type" );
-                if ("link".equals( type )) {
-                    JSONObject properties = (JSONObject)crs.get( "properties" );
-                    if (properties != null) {
-                        // TODO: handle CRS link
-                        // String linkType = properties.getString( "type" );
-                        // String href = properties.getString( "href" );
-                    }
-                }
-                else if ("name".equals( type )) {
-                    JSONObject properties = (JSONObject)crs.get( "properties" );
-                    if (properties != null) {
-                        String name = (String)properties.get( "name" );
-                        if (name != null) {
-                            try {
-                                // http://www.geotoolkit.org/modules/referencing/faq.html#lookupURN
-                                predefinedCRS = CRS.decode( name, false );
-                            }
-                            catch (FactoryException e) {
-                                exception = e;
-                            }
-                        }
-                    }
-                }
+        InputStreamReader isr = null;
+        try {
+            isr = new InputStreamReader( new FileInputStream( geojsonFile ), CharsetPrompt.DEFAULT );
+            FeatureJSON featureJSON = new FeatureJSON();
+            predefinedCRS = featureJSON.readCRS( isr );
+            if (predefinedCRS == null) {
+                predefinedCRS = CRS.decode( "EPSG:4326" );
             }
         }
-        catch (IOException ioe) {
+        catch (Exception ioe) {
             exception = ioe;
         }
-        catch (ParseException pe) {
-            exception = pe;
+        finally {
+            if (isr != null) {
+                try {
+                    isr.close();
+                }
+                catch (IOException e) {
+                    // do nothing
+                }
+            }
         }
         return predefinedCRS;
     }
@@ -189,7 +210,8 @@ public class GeojsonImporter
     @Override
     public void createResultViewer( Composite parent, IPanelToolkit toolkit ) {
         if (exception != null) {
-            toolkit.createFlowText( parent, "\nUnable to read the data.\n\n" + "**Reason**: " + exception.getMessage() );
+            toolkit.createFlowText( parent, "\nUnable to read the data.\n\n" + "**Reason**: "
+                    + exception.getMessage() );
         }
         else {
             SimpleFeatureType schema = (SimpleFeatureType)features.getSchema();
@@ -201,7 +223,124 @@ public class GeojsonImporter
 
     @Override
     public void execute( IProgressMonitor monitor ) throws Exception {
-        // TODO Auto-generated method stub
+        // load all per streamiterator
+        String encoding = charsetPrompt.selection().name();
+        FeatureJSON featureJSON = new FeatureJSON();
+        InputStreamReader isr = new InputStreamReader( new FileInputStream( geojsonFile ), encoding );
+        FeatureIterator<SimpleFeature> featureIterator = featureJSON.streamFeatureCollection( isr );
+        // hasNext must be called before the first next()
+        featureIterator.hasNext();
+        final SimpleFeature first = featureIterator.next();
+        // final SimpleFeature first = featureJSON.readFeature( isr );
+        featureIterator.close();
+        isr.close();
+        final SimpleFeatureType originalSchema = SimpleFeatureTypeBuilder.retype( first.getFeatureType(), crsPrompt.selection() );
+        final FeatureType schema = new SimpleFeatureTypeImpl( new NameImpl( schemaNamePrompt.selection() ), originalSchema.getAttributeDescriptors(), originalSchema.getGeometryDescriptor(), originalSchema.isAbstract(), originalSchema.getRestrictions(), originalSchema.getSuper(), originalSchema.getDescription() );
+        // featureIterator.close();
+        // while (i < 100 && featureIterator.hasNext()) {
+        // SimpleFeature next = featureIterator.next();
+        // if (featureList == null) {
+        // featureList = new ListFeatureCollection(next.getFeatureType());
+        // }
+        // featureList.add(next);
+        // i++;
+        // }
+        // featureIterator.close();
+        features = new FeatureCollection() {
 
+            @Override
+            public FeatureIterator features() {
+                try {
+                    return featureJSON.streamFeatureCollection( new InputStreamReader( new FileInputStream( geojsonFile ), encoding ) );
+                }
+                catch (Exception e) {
+                    throw new RuntimeException( e );
+                }
+            }
+
+
+            @Override
+            public FeatureType getSchema() {
+                return schema;
+            }
+
+
+            @Override
+            public String getID() {
+                return first.getID();
+            }
+
+
+            @Override
+            public void accepts( FeatureVisitor visitor, ProgressListener progress ) throws IOException {
+                FeatureIterator iterator = features();
+                while (iterator.hasNext()) {
+                    visitor.visit( iterator.next() );
+                }
+            }
+
+
+            @Override
+            public FeatureCollection subCollection( Filter filter ) {
+                // TODO Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+
+
+            @Override
+            public FeatureCollection sort( SortBy order ) {
+                // TODO Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+
+
+            @Override
+            public ReferencedEnvelope getBounds() {
+                // TODO Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+
+
+            @Override
+            public boolean contains( Object o ) {
+                // TODO Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+
+
+            @Override
+            public boolean containsAll( Collection o ) {
+                // TODO Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+
+
+            @Override
+            public boolean isEmpty() {
+                return false;
+            }
+
+
+            @Override
+            public int size() {
+                // TODO Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+
+
+            @Override
+            public Object[] toArray() {
+                // TODO Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+
+
+            @Override
+            public Object[] toArray( Object[] a ) {
+                // TODO Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+
+        };
     }
 }

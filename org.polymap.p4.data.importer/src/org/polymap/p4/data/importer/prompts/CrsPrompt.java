@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.p4.data.importer.shapefile;
+package org.polymap.p4.data.importer.prompts;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +37,6 @@ import org.polymap.core.data.util.Geometries;
 import org.polymap.p4.data.importer.ImporterPrompt;
 import org.polymap.p4.data.importer.ImporterPrompt.Severity;
 import org.polymap.p4.data.importer.ImporterSite;
-import org.polymap.p4.data.importer.utils.FilteredListPromptUIBuilder;
 
 /**
  * 
@@ -55,7 +54,7 @@ public class CrsPrompt {
     private HashMap<String,String>      crsNames;
 
 
-    public CrsPrompt( ImporterSite site, Supplier<CoordinateReferenceSystem> crsSupplier ) {
+    public CrsPrompt( final ImporterSite site, final String summary, final String description, final Supplier<CoordinateReferenceSystem> crsSupplier ) {
         this.site = site;
         
         initCrsNames();
@@ -71,8 +70,8 @@ public class CrsPrompt {
         }
 
         site.newPrompt( "crs" )
-                .summary.put( "CRS" )
-                .description.put( readError != null ? "Unable to read *.prj: "+readError : "The Coordinate Reference System." )
+                .summary.put( summary )
+                .description.put( description )
                 .value.put( selection != null ? crsName( selection ) : "???" )
                 .severity.put( selection != null ? Severity.VERIFY : Severity.REQUIRED )
                 .extendedUI.put( new FilteredListPromptUIBuilder() {

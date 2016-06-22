@@ -11,7 +11,7 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.data.importer.refine;
+package org.polymap.p4.data.importer.prompts;
 
 import java.util.List;
 
@@ -28,6 +28,7 @@ import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import org.polymap.p4.data.importer.ImporterPrompt;
 import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
+import org.polymap.p4.data.importer.refine.AbstractRefineFileImporter;
 
 /**
  * An abstract Builder for different prompts in the CSV and Excel imports.

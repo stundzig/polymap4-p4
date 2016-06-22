@@ -17,6 +17,9 @@ import java.io.File;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
+import static org.apache.commons.io.FileUtils.readFileToString;
+import static org.apache.commons.io.FilenameUtils.getExtension;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +41,9 @@ import org.geotools.feature.FeatureCollection;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.opengis.feature.simple.SimpleFeatureType;
 
+import org.polymap.core.runtime.Streams;
+import org.polymap.core.runtime.Streams.ExceptionCollector;
+
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
@@ -46,6 +52,8 @@ import org.polymap.p4.data.importer.ContextOut;
 import org.polymap.p4.data.importer.Importer;
 import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.importer.ImporterSite;
+import org.polymap.p4.data.importer.prompts.CharsetPrompt;
+import org.polymap.p4.data.importer.prompts.CrsPrompt;
 
 /**
  * 
@@ -86,7 +94,7 @@ public class ShpImporter
 
 
     @Override
-    public void init( @SuppressWarnings("hiding") ImporterSite site, IProgressMonitor monitor ) {
+    public void init( ImporterSite site, IProgressMonitor monitor ) {
         this.site = site;
         site.icon.set( ImporterPlugin.images().svgImage( "shp.svg", SvgImageRegistryHelper.NORMAL24 ) );
         site.summary.set( "Shapefile: " + shp.getName() );
@@ -97,16 +105,29 @@ public class ShpImporter
 
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
-        charsetPrompt = new CharsetPrompt( site, files );
-        crsPrompt = new CrsPrompt( site, () -> {
+        charsetPrompt = new CharsetPrompt( site, "Content encoding", "The encoding of the feature content. If unsure use ISO-8859-1.", () -> {
+            Charset crs = null;
+            try (ExceptionCollector<RuntimeException> exc = Streams.exceptions()) {
+                crs = Charset.forName( files.stream()
+                        .filter( f -> "cpg".equalsIgnoreCase( getExtension( f.getName() ) ) ).findAny()
+                        .map( f -> exc.check( () -> readFileToString( f ).trim() ) )
+                        .orElse( CharsetPrompt.DEFAULT.name() ) );
+            }
+            return crs;
+        } );
+        crsPrompt = new CrsPrompt( site, "CRS", "The Coordinate Reference System.", () -> {
             Optional<File> prjFile = files.stream().filter( f -> "prj".equalsIgnoreCase( FilenameUtils.getExtension( f.getName() ) ) ).findAny();
-            String readError = null;
-                if (prjFile.isPresent()) {
+            if (prjFile.isPresent()) {
+                try {
                     // encoding used in geotools' PrjFileReader
                     String wkt = FileUtils.readFileToString( prjFile.get(), Charset.forName( "ISO-8859-1" ) );
-                    return  ReferencingFactoryFinder.getCRSFactory( null ).createFromWKT( wkt );
-                } 
-                return null;
+                    return ReferencingFactoryFinder.getCRSFactory( null ).createFromWKT( wkt );
+                }
+                catch (Exception e) {
+                    throw new RuntimeException( e );
+                }
+            }
+            return null;
         } );
     }
 

@@ -40,8 +40,8 @@ import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.importer.ImporterPrompt;
 import org.polymap.p4.data.importer.ImporterSite;
 import org.polymap.p4.data.importer.Messages;
+import org.polymap.p4.data.importer.prompts.NumberfieldBasedPromptUiBuilder;
 import org.polymap.p4.data.importer.refine.AbstractRefineFileImporter;
-import org.polymap.p4.data.importer.refine.NumberfieldBasedPromptUiBuilder;
 
 import com.google.common.io.Files;
 

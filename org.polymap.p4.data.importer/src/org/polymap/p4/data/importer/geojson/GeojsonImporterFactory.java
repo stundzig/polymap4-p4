@@ -16,13 +16,14 @@ package org.polymap.p4.data.importer.geojson;
 
 import java.util.List;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 
 import org.apache.commons.io.FilenameUtils;
 
 import org.polymap.p4.data.importer.ContextIn;
 import org.polymap.p4.data.importer.ImporterFactory;
-import org.polymap.p4.data.importer.ImporterFactory.ImporterBuilder;
 
 /**
  * @author Joerg Reichert <joerg@mapzone.io>
@@ -52,6 +53,40 @@ public class GeojsonImporterFactory
         }
         if ("geojson".equalsIgnoreCase( FilenameUtils.getExtension( file.getName() ) )) {
             return true;
+        }
+        try {
+            // XXX brute force
+            if ("json".equalsIgnoreCase( FilenameUtils.getExtension( file.getName() ) )) {
+                BufferedReader reader = null;
+                try {
+                    reader = new BufferedReader( new FileReader( file ) );
+                    String line;
+                    // search for the second {
+                    boolean firstBracketFound = false;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.toLowerCase().contains( "featurecollection" )) {
+                            return true;
+                        }
+                        int index = line.indexOf( "{" );
+                        if (index != -1 && !firstBracketFound) {
+                            firstBracketFound = true;
+                            index = line.indexOf( "{", index + 1 );
+                        }
+                        if (index != -1 && firstBracketFound) {
+                            return false;
+                        }
+                    }
+                    return false;
+                }
+                finally {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            // do nothing
         }
         return false;
     }
