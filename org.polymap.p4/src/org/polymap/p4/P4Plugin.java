@@ -158,7 +158,7 @@ public class P4Plugin
         StatusDispatcher.registerAdapter( new StatusDispatcher.LogAdapter() );
         StatusDispatcher.registerAdapter( new BatikDialogStatusAdapter() );
         
-        // Catalog / Resolver
+        // catalogs / resolver
         catalogs = CatalogProviderExtension.createAllCatalogs();
         localCatalog = (LocalCatalog)catalogs.stream().filter( c -> c instanceof LocalCatalog ).findAny()
                 .orElseThrow( () -> new IllegalStateException( "No LocalCatalog found." ) );
