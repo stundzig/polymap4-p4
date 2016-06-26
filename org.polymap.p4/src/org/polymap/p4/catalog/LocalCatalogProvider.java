@@ -17,8 +17,6 @@ package org.polymap.p4.catalog;
 import org.polymap.core.catalog.CatalogProvider;
 import org.polymap.core.catalog.IMetadataCatalog;
 
-import org.polymap.p4.P4Plugin;
-
 /**
  * 
  *
@@ -29,7 +27,12 @@ public class LocalCatalogProvider
 
     @Override
     public IMetadataCatalog get() {
-        return P4Plugin.localCatalog();
+        try {
+            return new LocalCatalog();
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e );
+        }
     }
     
 }

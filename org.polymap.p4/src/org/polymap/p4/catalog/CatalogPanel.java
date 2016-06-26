@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.ViewerCell;
 
-import org.polymap.core.catalog.CatalogProviderExtension;
 import org.polymap.core.catalog.IMetadata;
 import org.polymap.core.catalog.IMetadataCatalog;
 import org.polymap.core.catalog.resolve.IResourceInfo;
@@ -122,7 +121,7 @@ public class CatalogPanel
                 });
             }
         } );
-        viewer.setInput( CatalogProviderExtension.createAllCatalogs() );
+        viewer.setInput( P4Plugin.catalogs() );
 
         // fill the entiry space as items are expandable; scrollbar would not adopted otherwise
         viewer.getTree().setLayoutData( FormDataFactory.filled().create() );
