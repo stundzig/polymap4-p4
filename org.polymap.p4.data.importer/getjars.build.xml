@@ -6,6 +6,7 @@
  -->
 <project name="org.polymap.p4.data.importer" default="build" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 	<description>Download open source jars from the internet.</description>
+	<property name="geotools.version" value="13.2" />
 
 	<property name="lib" value="${basedir}${file.separator}lib" />
 	<property name="libs_src_dir" value="${lib}${file.separator}sources" />
@@ -60,7 +61,7 @@
 			<remoteRepository refid="central.repository" />
 
 		    <dependency groupId="org.apache.commons" artifactId="commons-compress" version="1.9" />
-			
+		    <dependency groupId="org.geotools.xsd" artifactId="gt-xsd-kml" version="${geotools.version}" />
 			<!-- testing -->
 		    <!--dependency groupId="org.mockito" artifactId="mockito-all" version="1.10.19" />
 		    <dependency groupId="org.powermock" artifactId="powermock-module-junit4" version="1.6.2" />

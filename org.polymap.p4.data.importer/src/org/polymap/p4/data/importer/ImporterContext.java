@@ -60,7 +60,8 @@ import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.p4.data.importer.ImporterFactory.ImporterBuilder;
 import org.polymap.p4.data.importer.ImporterPrompt.Severity;
 import org.polymap.p4.data.importer.archive.ArchiveFileImporterFactory;
-import org.polymap.p4.data.importer.geojson.GeojsonImporterFactory;
+import org.polymap.p4.data.importer.geojson.GeoJSONImporterFactory;
+import org.polymap.p4.data.importer.kml.KMLImporterFactory;
 import org.polymap.p4.data.importer.refine.csv.CSVFileImporterFactory;
 import org.polymap.p4.data.importer.refine.excel.ExcelFileImporterFactory;
 import org.polymap.p4.data.importer.shapefile.ShpImporterFactory;
@@ -83,7 +84,8 @@ public class ImporterContext
             ArchiveFileImporterFactory.class, 
             CSVFileImporterFactory.class, 
             ExcelFileImporterFactory.class, 
-            GeojsonImporterFactory.class,
+            KMLImporterFactory.class,
+            GeoJSONImporterFactory.class,
             ShpImporterFactory.class,
             WmsImporterFactory.class };
     

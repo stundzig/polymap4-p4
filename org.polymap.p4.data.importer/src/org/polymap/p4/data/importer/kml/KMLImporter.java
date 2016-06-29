@@ -12,32 +12,21 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
  */
-package org.polymap.p4.data.importer.geojson;
+package org.polymap.p4.data.importer.kml;
 
 import java.util.Collection;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
-import org.geotools.feature.NameImpl;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.feature.simple.SimpleFeatureTypeImpl;
-import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.referencing.CRS;
 import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.FeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.sort.SortBy;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.ProgressListener;
 
 import org.apache.commons.io.FilenameUtils;
@@ -54,31 +43,28 @@ import org.polymap.p4.data.importer.ContextOut;
 import org.polymap.p4.data.importer.Importer;
 import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.importer.ImporterSite;
-import org.polymap.p4.data.importer.prompts.CharsetPrompt;
-import org.polymap.p4.data.importer.prompts.CrsPrompt;
 import org.polymap.p4.data.importer.prompts.SchemaNamePrompt;
 import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 
 /**
- * @author Joerg Reichert <joerg@mapzone.io>
  * @author Steffen Stundzig
  */
-public class GeojsonImporter
+public class KMLImporter
         implements Importer {
 
     private ImporterSite      site      = null;
 
     @ContextIn
-    protected File            geojsonFile;
+    protected File            kmlFile;
 
     @ContextOut
     private FeatureCollection features  = null;
 
     private Exception         exception = null;
 
-    private CrsPrompt         crsPrompt;
+    // private CrsPrompt crsPrompt;
 
-    private CharsetPrompt     charsetPrompt;
+    // private CharsetPrompt charsetPrompt;
 
     private SchemaNamePrompt  schemaNamePrompt;
 
@@ -86,9 +72,9 @@ public class GeojsonImporter
     @Override
     public void init( ImporterSite site, IProgressMonitor monitor ) throws Exception {
         this.site = site;
-        site.icon.set( ImporterPlugin.images().svgImage( "json.svg", SvgImageRegistryHelper.NORMAL24 ) );
-        site.summary.set( "GeoJSON file: " + geojsonFile.getName() );
-        site.description.set( "GeoJSON is a format for encoding a variety of geographic data structures." );
+        site.icon.set( ImporterPlugin.images().svgImage( "file-xml.svg", SvgImageRegistryHelper.NORMAL24 ) );
+        site.summary.set( "KML file: " + kmlFile.getName() );
+        site.description.set( "Keyhole Markup Language (KML) is for expressing geographic annotation and visualization within Internet-based, two-dimensional maps." );
         site.terminal.set( true );
     }
 
@@ -102,16 +88,19 @@ public class GeojsonImporter
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         // charset prompt
-        charsetPrompt = new CharsetPrompt( site, "Content encoding", "The encoding of the feature content. If unsure use UTF-8.", () -> {
-            return Charset.forName( "UTF-8" );
-        } );
+        // charsetPrompt = new CharsetPrompt( site, "Content encoding", "The encoding
+        // of the feature content. If unsure use UTF-8.", () -> {
+        // return Charset.forName( "UTF-8" );
+        // } );
+        // //
         // http://geojson.org/geojson-spec.html#coordinate-reference-system-objects
-        crsPrompt = new CrsPrompt( site, "Coordinate reference system", "The coordinate reference system for projecting the feature content."
-                + "If unsure use EPSG:4326.", () -> {
-                    return getPredefinedCRS();
-                } );
+        // crsPrompt = new CrsPrompt( site, "Coordinate reference system", "The
+        // coordinate reference system for projecting the feature content."
+        // + "If unsure use EPSG:4326.", () -> {
+        // return getPredefinedCRS();
+        // } );
         schemaNamePrompt = new SchemaNamePrompt( site, "Name of the dataset ", "Each dataset has its own name in the local database. The name must be unqiue.", () -> {
-            return FilenameUtils.getBaseName( geojsonFile.getName() );
+            return FilenameUtils.getBaseName( kmlFile.getName() );
         } );
     }
 
@@ -119,13 +108,9 @@ public class GeojsonImporter
     @Override
     public void verify( IProgressMonitor monitor ) {
         System.err.println( "verify " + System.currentTimeMillis() );
-        InputStreamReader isr = null;
         FeatureIterator<SimpleFeature> featureIterator = null;
         try {
-            String encoding = charsetPrompt.selection().name();
-            FeatureJSON featureJSON = new FeatureJSON();
-            isr = new InputStreamReader( new FileInputStream( geojsonFile ), encoding );
-            featureIterator = featureJSON.streamFeatureCollection( isr );
+            featureIterator = new KMLFeatureIterator( kmlFile, schemaNamePrompt.selection() );
             ListFeatureCollection featureList = null;
             int i = 0;
             while (i < 100 && featureIterator.hasNext()) {
@@ -137,24 +122,6 @@ public class GeojsonImporter
                 i++;
             }
             features = featureList;
-            // featureJSON.readFeatureCollection( isr );
-            // if (crsPrompt.selection() != null) {
-            // FeatureType schema = features.getSchema();
-            // if (schema instanceof SimpleFeatureType) {
-            //// SimpleFeatureType featureType = SimpleFeatureTypeBuilder.retype(
-            // (SimpleFeatureType)schema, crsPrompt.selection() );
-            // if (features instanceof SimpleFeatureCollection) {
-            // ListFeatureCollection listFeatures = new ListFeatureCollection(
-            // featureType );
-            // SimpleFeatureIterator iterator =
-            // ((SimpleFeatureCollection)features).features();
-            // while (iterator.hasNext()) {
-            // listFeatures.add( iterator.next() );
-            // }
-            // features = listFeatures;
-            // }
-            // }
-            // }
             site.ok.set( true );
             exception = null;
         }
@@ -163,55 +130,11 @@ public class GeojsonImporter
             exception = e;
         }
         finally {
-            if (isr != null) {
-                try {
-                    isr.close();
-                }
-                catch (IOException e) {
-                    // do nothing
-                }
-            }
             if (featureIterator != null) {
                 featureIterator.close();
             }
         }
         System.err.println( "verify done " + System.currentTimeMillis() );
-    }
-
-
-    private CoordinateReferenceSystem getPredefinedCRS() {
-        CoordinateReferenceSystem predefinedCRS = null;
-        InputStreamReader isr = null;
-        try {
-            isr = new InputStreamReader( new FileInputStream( geojsonFile ), CharsetPrompt.DEFAULT );
-            FeatureJSON featureJSON = new FeatureJSON();
-            predefinedCRS = featureJSON.readCRS( isr );
-            if (predefinedCRS == null) {
-                predefinedCRS = CRS.decode( "EPSG:4326" );
-            }
-        }
-        catch (Exception ioe) {
-            exception = ioe;
-        }
-        finally {
-            if (isr != null) {
-                try {
-                    isr.close();
-                }
-                catch (IOException e) {
-                    // do nothing
-                }
-            }
-        }
-        if (predefinedCRS == null) {
-            try {
-                predefinedCRS = CRS.decode( "EPSG:4326" );
-            }
-            catch (Exception e) {
-                // do nothing
-            }
-        }
-        return predefinedCRS;
     }
 
 
@@ -231,24 +154,14 @@ public class GeojsonImporter
 
     @Override
     public void execute( IProgressMonitor monitor ) throws Exception {
-        // load all per streamiterator
-        String encoding = charsetPrompt.selection().name();
-        FeatureJSON featureJSON = new FeatureJSON();
-        InputStreamReader isr = new InputStreamReader( new FileInputStream( geojsonFile ), encoding );
-        FeatureIterator<SimpleFeature> featureIterator = featureJSON.streamFeatureCollection( isr );
-        // hasNext must be called before the first next()
-        featureIterator.hasNext();
-        final SimpleFeature first = featureIterator.next();
-        featureIterator.close();
-        isr.close();
-        final SimpleFeatureType originalSchema = SimpleFeatureTypeBuilder.retype( first.getFeatureType(), crsPrompt.selection() );
-        final FeatureType schema = new SimpleFeatureTypeImpl( new NameImpl( schemaNamePrompt.selection() ), originalSchema.getAttributeDescriptors(), originalSchema.getGeometryDescriptor(), originalSchema.isAbstract(), originalSchema.getRestrictions(), originalSchema.getSuper(), originalSchema.getDescription() );
-        features = new FeatureCollection() {
+        final KMLFeatureIterator featureIterator = new KMLFeatureIterator( kmlFile, schemaNamePrompt.selection() );
+        final SimpleFeatureType schema = featureIterator.getFeatureType();
+        features = new FeatureCollection<SimpleFeatureType,SimpleFeature>() {
 
             @Override
-            public FeatureIterator features() {
+            public FeatureIterator<SimpleFeature> features() {
                 try {
-                    return featureJSON.streamFeatureCollection( new InputStreamReader( new FileInputStream( geojsonFile ), encoding ) );
+                    return featureIterator;
                 }
                 catch (Exception e) {
                     throw new RuntimeException( e );
@@ -257,20 +170,20 @@ public class GeojsonImporter
 
 
             @Override
-            public FeatureType getSchema() {
+            public SimpleFeatureType getSchema() {
                 return schema;
             }
 
 
             @Override
             public String getID() {
-                return first.getID();
+                return null;
             }
 
 
             @Override
             public void accepts( FeatureVisitor visitor, ProgressListener progress ) throws IOException {
-                FeatureIterator iterator = features();
+                FeatureIterator<SimpleFeature> iterator = features();
                 while (iterator.hasNext()) {
                     visitor.visit( iterator.next() );
                 }
@@ -278,14 +191,14 @@ public class GeojsonImporter
 
 
             @Override
-            public FeatureCollection subCollection( Filter filter ) {
+            public FeatureCollection<SimpleFeatureType,SimpleFeature> subCollection( Filter filter ) {
                 // TODO Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
 
 
             @Override
-            public FeatureCollection sort( SortBy order ) {
+            public FeatureCollection<SimpleFeatureType,SimpleFeature> sort( SortBy order ) {
                 // TODO Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }

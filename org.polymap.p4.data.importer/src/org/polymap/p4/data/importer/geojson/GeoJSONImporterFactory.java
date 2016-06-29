@@ -29,7 +29,7 @@ import org.polymap.p4.data.importer.ImporterFactory;
  * @author Joerg Reichert <joerg@mapzone.io>
  *
  */
-public class GeojsonImporterFactory
+public class GeoJSONImporterFactory
         implements ImporterFactory {
 
     @ContextIn
@@ -42,7 +42,7 @@ public class GeojsonImporterFactory
     @Override
     public void createImporters( ImporterBuilder builder ) throws Exception {
         if (isSupported( file )) {
-            builder.newImporter( new GeojsonImporter(), file );
+            builder.newImporter( new GeoJSONImporter(), file );
         }
     }
 

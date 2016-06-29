@@ -1,4 +1,4 @@
-package org.polymap.p4.data.imports.refine.csv;
+package org.polymap.p4.data.importer.refine.csv;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
