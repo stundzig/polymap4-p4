@@ -65,7 +65,8 @@ public class ProjectRepository {
                     .entities.set( new Class[] {
                             IMap.class, 
                             ILayer.class, 
-                            ILayer.LayerUserSettings.class} )
+                            ILayer.LayerUserSettings.class, 
+                            MetadataReference.class } )
                     .store.set( 
                             new OptimisticLocking( 
                             new RecordStoreAdapter( store ) ) )

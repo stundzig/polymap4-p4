@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright (C) 2015, Falko Bräutigam. All rights reserved.
+ * Copyright (C) 2015-2016, Falko Bräutigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -13,6 +13,8 @@
  * Lesser General Public License for more details.
  */
 package org.polymap.p4.catalog;
+
+import static org.polymap.core.CorePlugin.getDataLocation;
 
 import java.io.File;
 
@@ -29,6 +31,8 @@ import org.polymap.core.catalog.local.LocalMetadataCatalog;
 import org.polymap.core.catalog.resolve.IResolvableInfo;
 import org.polymap.core.data.rs.catalog.RServiceResolver;
 import org.polymap.core.data.wms.catalog.WmsServiceResolver;
+
+import org.polymap.rhei.fulltext.store.lucene.LuceneFulltextIndex;
 
 import org.polymap.model2.store.recordstore.RecordStoreAdapter;
 import org.polymap.p4.P4Plugin;
@@ -48,10 +52,18 @@ public class LocalCatalog
 
     private static final String     LOCAL_FEATURES_STORE_ID = "_local_features_store_";
 
+    private LuceneRecordStore       store;
+
+    private LuceneFulltextIndex     index;
+    
     
     public LocalCatalog() throws Exception {
-        super( new RecordStoreAdapter( new LuceneRecordStore( 
-                new File( CorePlugin.getDataLocation( P4Plugin.instance() ), "localCatalog" ), false ) ) );
+        File dataDir = getDataLocation( P4Plugin.instance() );
+        store = new LuceneRecordStore( new File( dataDir, "localCatalog" ), false );
+        index = new LuceneFulltextIndex( new File( dataDir, "localCatalogIndex" ) );
+        
+        init( new RecordStoreAdapter( store ), index );
+        
         createEntries();
     }
 
@@ -99,7 +111,7 @@ public class LocalCatalog
     
     protected void createEntries() throws Exception {
         // check empty
-        if (query( "", new NullProgressMonitor() ).execute().size() == 0) {
+        if (query( ALL_QUERY, new NullProgressMonitor() ).execute().size() == 0) {
             // create standard entries
             try (Updater update = prepareUpdate()) {
                 LOCAL_FEATURES_STORE_DIR.mkdirs();

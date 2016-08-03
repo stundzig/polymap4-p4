@@ -14,6 +14,7 @@
  */
 package org.polymap.p4;
 
+import java.util.List;
 import java.util.Optional;
 
 import java.io.File;
@@ -30,6 +31,8 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.polymap.core.CorePlugin;
+import org.polymap.core.catalog.CatalogProviderExtension;
+import org.polymap.core.catalog.IMetadataCatalog;
 import org.polymap.core.security.SecurityContext;
 import org.polymap.core.security.StandardConfiguration;
 import org.polymap.core.style.StylePlugin;
@@ -83,6 +86,13 @@ public class P4Plugin
         return instance().images;
     }
     
+    /**
+     * All catalogs of this instance, including the {@link #localCatalog}. 
+     */
+    public static List<IMetadataCatalog> catalogs() {
+        return instance().catalogs;
+    }
+    
     public static LocalCatalog localCatalog() {
         return instance().localCatalog;
     }
@@ -99,6 +109,8 @@ public class P4Plugin
 
     public SvgImageRegistryHelper   images = new SvgImageRegistryHelper( this );
 
+    private List<IMetadataCatalog>  catalogs;
+    
     private LocalCatalog            localCatalog;
 
     private LocalResolver           localResolver;
@@ -146,8 +158,10 @@ public class P4Plugin
         StatusDispatcher.registerAdapter( new StatusDispatcher.LogAdapter() );
         StatusDispatcher.registerAdapter( new BatikDialogStatusAdapter() );
         
-        // Catalog / Resolver
-        localCatalog = new LocalCatalog();
+        // catalogs / resolver
+        catalogs = CatalogProviderExtension.createAllCatalogs();
+        localCatalog = (LocalCatalog)catalogs.stream().filter( c -> c instanceof LocalCatalog ).findAny()
+                .orElseThrow( () -> new IllegalStateException( "No LocalCatalog found." ) );
         localResolver = new LocalResolver( localCatalog );
         
         // Style

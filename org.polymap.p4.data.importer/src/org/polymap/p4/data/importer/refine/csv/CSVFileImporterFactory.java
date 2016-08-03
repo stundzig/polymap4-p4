@@ -35,7 +35,7 @@ public class CSVFileImporterFactory
 
     private static Log              log            = LogFactory.getLog( CSVFileImporterFactory.class );
 
-    public final static Set<String> supportedTypes = Sets.newHashSet( ".csv", ".tsv" );
+    public final static Set<String> supportedTypes = Sets.newHashSet( ".csv", ".tsv", ".txt" );
 
     @ContextIn
     protected File                  file;

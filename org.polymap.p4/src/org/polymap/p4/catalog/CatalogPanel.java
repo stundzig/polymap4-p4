@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright (C) 2015, Falko Bräutigam. All rights reserved.
+ * Copyright (C) 2015-2016, Falko Bräutigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -25,9 +25,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerCell;
 
-import org.polymap.core.catalog.CatalogProviderExtension;
 import org.polymap.core.catalog.IMetadata;
 import org.polymap.core.catalog.IMetadataCatalog;
 import org.polymap.core.catalog.resolve.IResourceInfo;
@@ -42,6 +42,11 @@ import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
+import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
+import org.polymap.rhei.batik.toolkit.ActionText;
+import org.polymap.rhei.batik.toolkit.ClearTextAction;
+import org.polymap.rhei.batik.toolkit.TextActionItem;
+import org.polymap.rhei.batik.toolkit.TextActionItem.Type;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
@@ -85,10 +90,11 @@ public class CatalogPanel
     public void createContents( Composite parent ) {
         site().title.set( "Catalog" );
         site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH );
-        parent.setLayout( FormLayoutFactory.defaults().create() );
+        parent.setLayout( FormLayoutFactory.defaults().margins( 0, 5 ).create() );
         
+        // tree/list viewer
         viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION, SWT.SINGLE );
-        viewer.setContentProvider( new MetadataContentProvider( P4Plugin.localResolver() ) );
+        viewer.setContentProvider( new P4MetadataContentProvider( P4Plugin.localResolver() ) );
         viewer.firstLineLabelProvider.set( new MetadataLabelProvider() );
         viewer.secondLineLabelProvider.set( new MetadataDescriptionProvider() );
         viewer.iconProvider.set( new CellLabelProvider() {
@@ -121,24 +127,36 @@ public class CatalogPanel
                     }
                 });
             }
-        } );
-        viewer.setInput( CatalogProviderExtension.createAllCatalogs() );
+        });
+        viewer.setInput( P4Plugin.catalogs() );
 
+        // search field
+        ActionText search = tk().createActionText( parent, "" );
+        new TextActionItem( search, Type.DEFAULT )
+                .action.put( ev -> doSearch( search.getText().getText() ) )
+                .text.put( "Search..." )
+                .tooltip.put( "Fulltext search. Use * as wildcard.<br/>&lt;ENTER&gt; starts the search." )
+                .icon.put( P4Plugin.images().svgImage( "magnify.svg", SvgImageRegistryHelper.DISABLED12 ) );
+        new ClearTextAction( search );
+        
+        // layout
+        search.getControl().setLayoutData( FormDataFactory.filled().noBottom().create() );
         // fill the entiry space as items are expandable; scrollbar would not adopted otherwise
-        viewer.getTree().setLayoutData( FormDataFactory.filled().create() );
-        
-//        viewer.getControl().setLayoutData( new ConstraintData( 
-//                new MinWidthConstraint( 500, 1 ), new MinHeightConstraint( 3000, 1 ) ) );
-        
-//        Button okBtn = getSite().toolkit().createButton( parent, "Ok", SWT.PUSH );
-//        //okBtn.setLayoutData( FormDataFactory.filled().top( 0, 100 ).clearBottom().create() );
-//        okBtn.addSelectionListener( new SelectionAdapter() {
-//            @Override
-//            public void widgetSelected( SelectionEvent ev ) {
-//                viewer.expandAll();
-////                getContext().closePanel( getSite().getPath() );
-//            }
-//        });
+        viewer.getTree().setLayoutData( FormDataFactory.filled().top( search.getControl() ).create() );
     }
 
+    
+    protected void doSearch( String query ) {
+        log.info( "doSearch(): ..." );
+        
+        P4MetadataContentProvider cp = (P4MetadataContentProvider)viewer.getContentProvider();
+        cp.catalogQuery.set( query );
+        cp.flush();
+        
+        // otherwise preserveSelection() fails because of no getParent()
+        viewer.setSelection( new StructuredSelection() );
+        viewer.setInput( P4Plugin.catalogs() );
+        viewer.expandToLevel( 2 );
+    }
+    
 }

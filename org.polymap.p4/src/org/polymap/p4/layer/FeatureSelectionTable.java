@@ -210,7 +210,7 @@ public class FeatureSelectionTable {
         searchText.setToolTipText( "Text to search for in all properties.<br/>" +
                 "\"Tex\" finds: \"Text\", \"Texts\", etc.<br/>" +
                 "Wildcard: *, ?");
-        searchText.forceFocus();
+        //searchText.forceFocus();
         searchText.addModifyListener( new ModifyListener() {
             @Override
             public void modifyText( ModifyEvent ev ) {

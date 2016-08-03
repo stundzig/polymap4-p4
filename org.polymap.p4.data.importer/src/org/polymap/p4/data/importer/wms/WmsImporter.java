@@ -273,7 +273,7 @@ public class WmsImporter
             Service info = wms.getCapabilities().getService();
             update.newEntry( metadata -> {
                 metadata.setTitle( info.getTitle() );
-                // metadata.setDescription( info. );
+                metadata.setDescription( info.get_abstract() );
                 if (info.getKeywordList() != null) {
                     metadata.setKeywords( Sets.newHashSet( info.getKeywordList() ) );
                 }

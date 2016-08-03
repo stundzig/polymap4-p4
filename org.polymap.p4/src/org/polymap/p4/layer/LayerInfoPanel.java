@@ -15,6 +15,8 @@
 package org.polymap.p4.layer;
 
 import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
+import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,9 +26,13 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.operations.DeleteLayerOperation;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.BatikApplication;
@@ -38,8 +44,14 @@ import org.polymap.rhei.batik.contribution.ContributionManager;
 import org.polymap.rhei.batik.dashboard.Dashboard;
 import org.polymap.rhei.batik.dashboard.DashletSite;
 import org.polymap.rhei.batik.dashboard.DefaultDashlet;
+import org.polymap.rhei.batik.dashboard.IDashlet;
+import org.polymap.rhei.batik.dashboard.ISubmitableDashlet;
+import org.polymap.rhei.batik.dashboard.SubmitStatusChangeEvent;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+import org.polymap.rhei.batik.toolkit.Snackbar.Appearance;
+
+import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.project.ProjectRepository;
@@ -58,46 +70,79 @@ public class LayerInfoPanel
     
     public static final String          DASHBOARD_ID = "org.polymap.p4.project.layer";
     
-    @Scope(P4Plugin.Scope)
-    private Context<ILayer>             layer;
+    @Scope( P4Plugin.Scope )
+    private Context<ILayer>             contextLayer;
     
+    /** The local, modifiable nested {@link UnitOfWork}. */
+    private UnitOfWork                  nested;
+    
+    /** The local, modifiable Entity which belongs to {@link #nested}. */
+    private ILayer                      layer;
+
     private Dashboard                   dashboard;
+
+    private Button                      fab;
 
     
     @Override
+    public void init() {
+        nested = ProjectRepository.unitOfWork().newUnitOfWork();
+        layer = nested.entity( contextLayer.get() );
+    }
+
+
+    @Override
+    public void dispose() {
+        nested.close();
+        EventManager.instance().unsubscribe( this );
+    }
+
+
+    @Override
     public void createContents( Composite parent ) {
-        site().title.set( layer.get().label.get() );
+        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH );
+        site().title.set( layer.label.get() );
+        ContributionManager.instance().contributeTo( this, this );
         
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
-        dashboard.addDashlet( new BasicInfoDashlet() );
+        dashboard.addDashlet( new BasicInfoDashlet( layer ) );
         //dashboard.addDashlet( new DeleteLayerDashlet() );
         dashboard.createContents( parent );
 
-        ContributionManager.instance().contributeTo( this, this );
+        fab = tk().createFab();
+        fab.setToolTipText( "Submit changes" );
+        fab.setVisible( false );
+        fab.addSelectionListener( new SelectionAdapter() {
+            @Override
+            public void widgetSelected( SelectionEvent ev ) {
+                try {
+                    for (IDashlet dashlet : dashboard.dashlets()) {
+                        ((ISubmitableDashlet)dashlet).submit( new NullProgressMonitor() );
+                    }
+                    nested.commit();
+                    tk().createSnackbar( Appearance.FadeIn, "Saved" );
+                }
+                catch (Exception e) {
+                    StatusDispatcher.handleError( "Unable to submit all changes.", e );
+                }
+            }
+        });
+        
+        EventManager.instance().subscribe( this, ifType( SubmitStatusChangeEvent.class, ev -> {
+            return ev.getDashboard() == dashboard;
+        }));
     }
 
     
-    /**
-     * 
-     */
-    class BasicInfoDashlet
-            extends DefaultDashlet {
-
-        @Override
-        public void init( DashletSite site ) {
-            super.init( site );
-            site.title.set( layer.get().label.get() );
-            site.constraints.get().add( new PriorityConstraint( 100 ) );
-            site.constraints.get().add( new MinWidthConstraint( 350, 1 ) );
+    @EventHandler( display=true )
+    protected void submitStatusChanged( SubmitStatusChangeEvent ev ) {
+        fab.setVisible( true );
+        if (fab != null && !fab.isDisposed()) {
+            fab.setEnabled( ev.getsSubmitable() );
         }
-
-        @Override
-        public void createContents( Composite parent ) {
-            getSite().toolkit().createFlowText( parent, "..." );
-        }        
     }
     
-
+    
     /**
      * 
      */
@@ -124,7 +169,7 @@ public class LayerInfoPanel
                     
                     DeleteLayerOperation op = new DeleteLayerOperation();
                     op.uow.set( ProjectRepository.unitOfWork().newUnitOfWork() );
-                    op.layer.set( layer.get() );
+                    op.layer.set( layer );
 
                     OperationSupport.instance().execute2( op, true, false, ev2 -> asyncFast( () -> {
                         if (ev2.getResult().isOK()) {
