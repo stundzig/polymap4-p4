@@ -39,7 +39,7 @@ import org.apache.commons.io.FilenameUtils;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
- * Read a KML file directly.
+ * Read a KML or a KMZ file directly.
  *
  * @author Steffen Stundzig
  */

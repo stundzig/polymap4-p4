@@ -107,7 +107,7 @@ public class KMLImporter
 
     @Override
     public void verify( IProgressMonitor monitor ) {
-        System.err.println( "verify " + System.currentTimeMillis() );
+        // System.err.println( "verify " + System.currentTimeMillis() );
         FeatureIterator<SimpleFeature> featureIterator = null;
         try {
             featureIterator = new KMLFeatureIterator( kmlFile, schemaNamePrompt.selection() );
@@ -134,7 +134,7 @@ public class KMLImporter
                 featureIterator.close();
             }
         }
-        System.err.println( "verify done " + System.currentTimeMillis() );
+        // System.err.println( "verify done " + System.currentTimeMillis() );
     }
 
 
@@ -192,35 +192,30 @@ public class KMLImporter
 
             @Override
             public FeatureCollection<SimpleFeatureType,SimpleFeature> subCollection( Filter filter ) {
-                // TODO Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
 
 
             @Override
             public FeatureCollection<SimpleFeatureType,SimpleFeature> sort( SortBy order ) {
-                // TODO Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
 
 
             @Override
             public ReferencedEnvelope getBounds() {
-                // TODO Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
 
 
             @Override
             public boolean contains( Object o ) {
-                // TODO Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
 
 
             @Override
             public boolean containsAll( Collection o ) {
-                // TODO Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
 
@@ -233,21 +228,18 @@ public class KMLImporter
 
             @Override
             public int size() {
-                // TODO Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
 
 
             @Override
             public Object[] toArray() {
-                // TODO Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
 
 
             @Override
             public Object[] toArray( Object[] a ) {
-                // TODO Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
 
