@@ -85,7 +85,7 @@ public class ArchiveReader
 
     public boolean canHandle( File f, @SuppressWarnings("hiding") IProgressMonitor monitor ) {
         String ext = FilenameUtils.getExtension( f.getName() ).toLowerCase();
-        return ext.equals( "zip" ) || ext.equals( "tar" ) || ext.equals( "gz" );
+        return ext.equals( "zip" ) || ext.equals( "tar" ) || ext.equals( "gz" ) || ext.equals( "kmz" );
         // XXX check content / magic number if extension failed
     }
     
@@ -117,7 +117,7 @@ public class ArchiveReader
             return;
         }
         contentType = contentType == null ? "" : contentType;
-        if (name.toLowerCase().endsWith( ".zip" ) || contentType.equalsIgnoreCase( "application/zip" )) {
+        if (name.toLowerCase().endsWith( ".zip" ) || name.toLowerCase().endsWith( ".kmz" ) || contentType.equalsIgnoreCase( "application/zip" )) {
             handleZip( name, in );
         }
         else if (name.toLowerCase().endsWith( ".tar" ) || contentType.equalsIgnoreCase( "application/tar" )) {

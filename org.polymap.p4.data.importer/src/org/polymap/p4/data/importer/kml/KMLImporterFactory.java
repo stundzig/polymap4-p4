@@ -39,11 +39,17 @@ public class KMLImporterFactory
         if (isSupported( file )) {
             builder.newImporter( new KMLImporter(), file );
         }
+        if (files != null) {
+            for (File file : files) {
+                if (isSupported( file )) {
+                    builder.newImporter( new KMLImporter(), file );
+                }
+            }
+        }
     }
 
 
     private boolean isSupported( File file ) {
-        return file != null && ("kml".equalsIgnoreCase( FilenameUtils.getExtension( file.getName() ) )
-                || "kmz".equalsIgnoreCase( FilenameUtils.getExtension( file.getName() ) ));
+        return file != null && ("kml".equalsIgnoreCase( FilenameUtils.getExtension( file.getName() ) ));
     }
 }

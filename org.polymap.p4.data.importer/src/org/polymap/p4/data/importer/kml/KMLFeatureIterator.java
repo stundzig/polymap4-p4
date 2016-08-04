@@ -15,7 +15,6 @@
 package org.polymap.p4.data.importer.kml;
 
 import java.util.NoSuchElementException;
-import java.util.zip.ZipFile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,10 +34,8 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.feature.type.GeometryType;
 
-import org.apache.commons.io.FilenameUtils;
-
 /**
- * Read a KML or a KMZ file directly.
+ * Reads a KML file.
  *
  * @author Steffen Stundzig
  */
@@ -53,21 +50,10 @@ public class KMLFeatureIterator
 
     private final InputStream fis;
 
-    private final ZipFile     zip;
-
 
     public KMLFeatureIterator( final File file, final String schemaName ) throws IOException {
-
-        if (FilenameUtils.getExtension( file.getName() ).equals( "kmz" )) {
-            zip = new ZipFile( file );
-            // we use only the first element, but thekmz can contain more elements
-            fis = zip.getInputStream( zip.entries().nextElement() );
-        }
-        else {
-            zip = null;
-            fis = new FileInputStream( file );
-        }
         try {
+            fis = new FileInputStream( file );
             parser = new PullParser( new org.geotools.kml.v22.KMLConfiguration(), fis, org.geotools.kml.v22.KML.Placemark );
             f = (SimpleFeature)parser.parse();
             if (f == null) {
@@ -78,7 +64,8 @@ public class KMLFeatureIterator
 
             SimpleFeatureType originalSchema = f != null ? f.getType() : null;
             if (originalSchema != null) {
-//                originalSchema = SimpleFeatureTypeBuilder.retype( originalSchema, CRS.decode( "EPSG:4326" ) );
+                // originalSchema = SimpleFeatureTypeBuilder.retype( originalSchema,
+                // CRS.decode( "EPSG:4326" ) );
                 GeometryDescriptor originalGeom = originalSchema.getGeometryDescriptor();
                 GeometryType geomType = originalGeom.getType();
                 if (f.getDefaultGeometryProperty() != null) {
@@ -145,9 +132,6 @@ public class KMLFeatureIterator
     public void close() {
         try {
             fis.close();
-            if (zip != null) {
-                zip.close();
-            }
         }
         catch (IOException e) {
             throw new RuntimeException( e );
