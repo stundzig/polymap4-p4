@@ -1,0 +1,2236 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<kml xmlns='http://www.opengis.net/kml/2.2'>
+	<Document>
+		<name>Alpenvereinskarten der Ostalpen</name>
+		<description><![CDATA[​Sie können die Alpenvereinskarten im DAV-Shop bestellen.]]></description>
+		<Folder>
+			<name>Alpenvereinskarten</name>
+			<Placemark>
+				<name>Hochschwabgruppe 1:50.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/FmK-rJck_k3fXJalZBmZubCuxtw7lNucBFiVli-OZTDVxonGCkRQI7jM5Ze4mZWAriRzSHFOvF0VKlK3nXezx0z-NzpeyrSNS3wB" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100076<br>Blattnummer: 18<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-F4EB37-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100076</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>18</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/FmK-rJck_k3fXJalZBmZubCuxtw7lNucBFiVli-OZTDVxonGCkRQI7jM5Ze4mZWAriRzSHFOvF0VKlK3nXezx0z-NzpeyrSNS3wB</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>14.733901,47.734542000000005,0.0 14.735578000000002,47.375275,0.0 15.047015,47.37563599999999,0.0 15.052057,47.371241,0.0 15.135009999999998,47.371138,0.0 15.137647,47.375524,0.0 15.315442,47.375184,0.0 15.317516999999999,47.734387999999996,0.0 14.733901,47.734542000000005,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Innsbruck und Umgebung 1:50.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/KZGxk62cZqTUhAvJmTq9HwgNCRohnjPhX2zDNsmcCefI2FVgj8-qmVz0HANo6s55vQUwM3_eA31wcPrSVGbM5r8BHBXvz5zTEJl2" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100044<br>Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100045<br>Blattnummer: 31/5<br>Aktualität: 2010]]></description>
+				<styleUrl>#poly-F4EB37-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100044
+Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100045</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>31/5</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2010</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/KZGxk62cZqTUhAvJmTq9HwgNCRohnjPhX2zDNsmcCefI2FVgj8-qmVz0HANo6s55vQUwM3_eA31wcPrSVGbM5r8BHBXvz5zTEJl2</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.606212,47.40165999999999,0.0 11.082005999999998,47.40165999999999,0.0 11.081006000000002,47.325660000000006,0.0 11.042005999999999,47.325660000000006,0.0 11.042005999999999,47.28065999999999,0.0 11.082006,47.28065999999999,0.0 11.082829,47.04366000000001,0.0 11.083006,47.04366000000001,0.0 11.685001999999999,47.04366000000001,0.0 11.686002,47.30962100000001,0.0 11.605003000000002,47.30966,0.0 11.606212,47.40165999999999,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Verwallgruppe 1:50 000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/RuIR51rp5hVZHHDEy7GnJeoZJt6IPRqkrA8U8YrNOtjaifU3nxy1Jr55juChrwNgPRMAKcYjFMwL-cBK87QBQHuwv-lhMY4PyX-y" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100074<br>Blattnummer: 28<br>Aktualität: 2010]]></description>
+				<styleUrl>#poly-F4EB37-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100074</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>28</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2010</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/RuIR51rp5hVZHHDEy7GnJeoZJt6IPRqkrA8U8YrNOtjaifU3nxy1Jr55juChrwNgPRMAKcYjFMwL-cBK87QBQHuwv-lhMY4PyX-y</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>9.867459999999998,47.15367,0.0 9.869012,46.953513,0.0 10.506254,46.953345,0.0 10.507315,47.153439,0.0 9.867459999999998,47.15367,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Tuxer Alpen 1:50.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/pTolfMsPqVYpruk5cUaQU3CyVqoWQtOtWldLS6i_j1g8Iclwiy6zSjeYxQKuVt7IfzNpNHVFHB9UDuLoyIxmpIMBYkO7dSdWXvtQ" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100072<br>Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100073<br>Blattnummer: 33<br>Aktualität: 2009]]></description>
+				<styleUrl>#poly-F4EB37-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100072
+Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100073</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>33</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2009</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/pTolfMsPqVYpruk5cUaQU3CyVqoWQtOtWldLS6i_j1g8Iclwiy6zSjeYxQKuVt7IfzNpNHVFHB9UDuLoyIxmpIMBYkO7dSdWXvtQ</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.391,47.399,0.0 11.393000000000002,47.059000000000005,0.0 11.904,47.059000000000005,0.0 11.905,47.399,0.0 11.391,47.399,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Brennerberge 1:50.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/uTGBGzT8OjYJ-pRDV2hH2aTiLJLM-7e7beJsfMcZBBR7EIR_k-Wo4fyre_xrqwHkGmHsxDnSFj4N37kdc7WHKtXN89k19f_s0bU8" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100040<br>Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100043<br>Blattnummer: 31/3<br>Aktualität: 2009]]></description>
+				<styleUrl>#poly-F4EB37-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100040
+Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100043</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>31/3</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2009</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/uTGBGzT8OjYJ-pRDV2hH2aTiLJLM-7e7beJsfMcZBBR7EIR_k-Wo4fyre_xrqwHkGmHsxDnSFj4N37kdc7WHKtXN89k19f_s0bU8</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.185999999999998,47.099422,0.0 11.187000000000001,46.833,0.0 11.699,46.832,0.0 11.701,47.099000000000004,0.0 11.185999999999998,47.099422,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Niedere Tauern I 1:50.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/o4KwzGChd_g8xjJ0RxFaUdLCu3OUf5msKF9HhSLs2SP6YlBXX3VdFmK748lag3a6eWxelMa1CSKHFg4Wx6RHOSwZ6dnUM1ECn3ZS" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100063<br>Blattnummer: 45/1<br>Aktualität: 2014]]></description>
+				<styleUrl>#poly-F4EB37-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100063</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>45/1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2014</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/o4KwzGChd_g8xjJ0RxFaUdLCu3OUf5msKF9HhSLs2SP6YlBXX3VdFmK748lag3a6eWxelMa1CSKHFg4Wx6RHOSwZ6dnUM1ECn3ZS</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.810999999999998,47.398999999999994,0.0 12.812999999999999,47.099000000000004,0.0 13.418999999999999,47.1,0.0 13.42,47.4,0.0 12.810999999999998,47.398999999999994,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Niedere Tauern II 1:50.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/uwTbZVSaObjZOoIja25OvlwZXylaG5HKVOPHUkcHioKF8VhGD26H-tJ062AdTQGblJvDX0857pQK3IAykccCqccw7LcwQ8tTN4fi" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100064<br>Blattnummer: 45/2<br>Aktualität: 2010]]></description>
+				<styleUrl>#poly-F4EB37-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100064</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>45/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2010</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/uwTbZVSaObjZOoIja25OvlwZXylaG5HKVOPHUkcHioKF8VhGD26H-tJ062AdTQGblJvDX0857pQK3IAykccCqccw7LcwQ8tTN4fi</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>13.387,47.426,0.0 13.387000000000002,47.122,0.0 13.833,47.12200000000001,0.0 13.833,47.426,0.0 13.387,47.426,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Niedere Tauern III 1:50.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/4QpWnaaEGbz1GZADoEqpK7gxbC8ssMTkxxJBPaNWcHWTXd7ufrRWmTjTSy_jEMk0H3lrdT5zbxh8wq0EqX-1D3qazB56uEkmT9eW" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100065<br>Blattnummer: 45/3<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-F4EB37-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100065</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>45/3</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/4QpWnaaEGbz1GZADoEqpK7gxbC8ssMTkxxJBPaNWcHWTXd7ufrRWmTjTSy_jEMk0H3lrdT5zbxh8wq0EqX-1D3qazB56uEkmT9eW</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>13.721999999999998,47.467,0.0 13.721999999999998,47.14,0.0 14.208,47.14,0.0 14.208,47.467,0.0 13.721999999999998,47.467,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Kitzbüheler Alpen - Ost 1:50.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/qZpLGY862oVjVhhvBKumleUiaJ7EeY9AuyjE7AJS2n7s0ZW3JUFU8T--r_6ZWHpSCPlT_bkFUsT9XU4TCJyH72eqO_WnficNiPm5" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100047<br>Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100049<br>Blattnummer: 34/2<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-F4EB37-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100047
+Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100049</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>34/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/qZpLGY862oVjVhhvBKumleUiaJ7EeY9AuyjE7AJS2n7s0ZW3JUFU8T--r_6ZWHpSCPlT_bkFUsT9XU4TCJyH72eqO_WnficNiPm5</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.832999999999998,47.5,0.0 12.300355,47.5,0.0 12.300355,47.167,0.0 12.832999999999998,47.167,0.0 12.832999999999998,47.5,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Kitzbüheler Alpen - West 1:50.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/OseNMpFSYlwHVAp7O1UIfh7ZUwPPzbsx-b_pa60pjnCqa2dXMneUN-knds3VEAwgIUNbpoFuWxLW1DWji4auWQonzv3hoWfbm6yZ" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100046<br>Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100048<br>Blattnummer: 34/1<br>Aktualität: 2010]]></description>
+				<styleUrl>#poly-F4EB37-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100046
+Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100048</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>34/1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2010</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/OseNMpFSYlwHVAp7O1UIfh7ZUwPPzbsx-b_pa60pjnCqa2dXMneUN-knds3VEAwgIUNbpoFuWxLW1DWji4auWQonzv3hoWfbm6yZ</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.321041,47.507318,0.0 11.838179,47.508135,0.0 11.838773,47.166655,0.0 12.325569000000002,47.167023,0.0 12.321041,47.507318,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Allgäuer-Lechtaler Alpen Ost 1:25.000</name>
+				<description><![CDATA[Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100002<br>Blattnummer: 2/2<br>Aktualität: 2006]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100002</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>2/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2006</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.386999999999999,47.419,0.0 10.389999999999999,47.247,0.0 10.562000000000001,47.24700000000001,0.0 10.558999999999997,47.42,0.0 10.386999999999999,47.419,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Lechtaler Alpen - Arlberggebiet 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/hY7b-egVM9--D-nBgq-WUEmmX_DulGFPPuYHlgjaDxN0zqzA1vh9vV8Hen2kKuF_22IFlKyLNt7zrlgxFprwM3l8r0p12IebQAsh" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: <br>Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100003<br>Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100006<br>Blattnummer: 3/2<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: 
+Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100003
+Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100006</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>3/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/hY7b-egVM9--D-nBgq-WUEmmX_DulGFPPuYHlgjaDxN0zqzA1vh9vV8Hen2kKuF_22IFlKyLNt7zrlgxFprwM3l8r0p12IebQAsh</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.053,47.28,0.0 10.054,47.07399999999999,0.0 10.307,47.07399999999999,0.0 10.307,47.249,0.0 10.280999999999999,47.249,0.0 10.280999999999999,47.281,0.0 10.053,47.28,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Wetterstein- und Mieminger Gebirge - West 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/Z7-cdC457zcqsxj0pE2wMwZ4H3wxBzSZqYJKz3hcWNNhhaIKgCVxRMbWoQkmNsuEpVhtlWTKLvnfAynm7n8KmyghyLewmgxskx31" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100007<br>Blattnummer: 4/1<br>Aktualität: 2009]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100007</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>4/1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2009</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/Z7-cdC457zcqsxj0pE2wMwZ4H3wxBzSZqYJKz3hcWNNhhaIKgCVxRMbWoQkmNsuEpVhtlWTKLvnfAynm7n8KmyghyLewmgxskx31</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.717999999999998,47.487,0.0 10.717,47.307,0.0 10.924849999999998,47.307,0.0 10.926,47.486,0.0 10.717999999999998,47.487,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Wetterstein- und Mieminger Gebirge - Mitte 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/EioS9Oib2meluSDY5AjiCLP7Dc8yKVt4aCaNXF_GmHLeZu42ehl1_4qjTqlKyUIrFtMaQ1Bw2zgdgjqclwMU-HBxyFDZ4DVZi4Dw" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100008<br>Blattnummer: 4/2<br>Aktualität: 2007]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100008</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>4/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2007</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/EioS9Oib2meluSDY5AjiCLP7Dc8yKVt4aCaNXF_GmHLeZu42ehl1_4qjTqlKyUIrFtMaQ1Bw2zgdgjqclwMU-HBxyFDZ4DVZi4Dw</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.890000000000002,47.486,0.0 10.888,47.307,0.0 11.097000000000001,47.305,0.0 11.099000000000002,47.48400000000001,0.0 10.890000000000002,47.486,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Wetterstein- und Mieminger Gebirge - Ost 1:25.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/PK3Avhifs9ggtaUyPM8w80NimzHuDL7pVfoiTuPas6oFIFsjaTZGpqhw_LVJPuOPxSCOuve11Z8Wtp4zEdXQBTothfkocGRE-M7j" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100009<br>Blattnummer: 4/3<br>Aktualität: 2011]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100009</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>4/3</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2011</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/PK3Avhifs9ggtaUyPM8w80NimzHuDL7pVfoiTuPas6oFIFsjaTZGpqhw_LVJPuOPxSCOuve11Z8Wtp4zEdXQBTothfkocGRE-M7j</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.062,47.485,0.0 11.060999999999998,47.310017,0.0 11.267195,47.309,0.0 11.269,47.483,0.0 11.062,47.485,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Karwendelgebirge - West 1:25.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/xJGhL34gqQsIeYPH_0YvK7kFgFDArEysrYoBuWBgfcuoRlIesc1nGvfI8H9-AegrEO8_Wtq0mihsqVT7HufdJhZYp8K7t_p9hThs" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100010<br>Blattnummer: 5/1<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100010</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>5/1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/xJGhL34gqQsIeYPH_0YvK7kFgFDArEysrYoBuWBgfcuoRlIesc1nGvfI8H9-AegrEO8_Wtq0mihsqVT7HufdJhZYp8K7t_p9hThs</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.178005,47.40165999999999,0.0 11.178005000000002,47.262660000000004,0.0 11.400004000000001,47.263117,0.0 11.400395000000001,47.47766,0.0 11.255487,47.477624999999996,0.0 11.255487,47.43408099999999,0.0 11.235005,47.433367000000004,0.0 11.178005,47.40165999999999,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Steinernes Meer 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/otJ0Oe-hRQdZZR7XWc8QBefv8OIWXnRAI7yN2T8b-40csdn-gGyBRN1osF47vzY1lqiFtdZaX8ZQOoxypal9bFH-4wZZY2kfFc0C" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100016<br>Blattnummer: 10/1<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100016</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>10/1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/otJ0Oe-hRQdZZR7XWc8QBefv8OIWXnRAI7yN2T8b-40csdn-gGyBRN1osF47vzY1lqiFtdZaX8ZQOoxypal9bFH-4wZZY2kfFc0C</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.836999999999998,47.539,0.0 12.838000000000001,47.437,0.0 12.829,47.43,0.0 12.828999999999999,47.419,0.0 12.838000000000001,47.419,0.0 12.838000000000001,47.407000000000004,0.0 12.870000000000001,47.407,0.0 12.890999999999998,47.397999999999996,0.0 12.890999999999998,47.379,0.0 13.031,47.379,0.0 13.030000000000001,47.54,0.0 12.977999999999998,47.54,0.0 12.978,47.545,0.0 12.968000000000002,47.545,0.0 12.963000000000001,47.540000000000006,0.0 12.836999999999998,47.539,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Hochkönig, Hagengebirge 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/C89IP4LJluFslk7rQwGtUXg9Req3mMIST3GRB38cCuiPLlRn4Qnpb4rWhkqSos5TbmWG1VadU5h4LN-xYFGYsrN1fGpdgZt0QrOh" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100017<br>Blattnummer: 10/2<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100017</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>10/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/C89IP4LJluFslk7rQwGtUXg9Req3mMIST3GRB38cCuiPLlRn4Qnpb4rWhkqSos5TbmWG1VadU5h4LN-xYFGYsrN1fGpdgZt0QrOh</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.975999999999999,47.39300000000001,0.0 13.171000000000001,47.39300000000001,0.0 13.171000000000001,47.574000000000005,0.0 12.976000000000003,47.574000000000005,0.0 12.975999999999999,47.39300000000001,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Lechtaler Alpen - Parseierspitze 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/ZDo0G2icMjC9tC1NPeMmKFShMOBjoLvE9nzJGl5Au7SlhNidNA3EWgQ1HpxJYZFJh3XRbT8vPbHNU6Ea1AQLbtBrsjjyJqniKUS5" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100004<br>Blattnummer: 3/3<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100004</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>3/3</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/ZDo0G2icMjC9tC1NPeMmKFShMOBjoLvE9nzJGl5Au7SlhNidNA3EWgQ1HpxJYZFJh3XRbT8vPbHNU6Ea1AQLbtBrsjjyJqniKUS5</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.298,47.268,0.0 10.297999999999998,47.12599999999999,0.0 10.584,47.12800000000001,0.0 10.579,47.271,0.0 10.298,47.268,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Lechtaler Alpen - Heiterwand und Muttekopfgebiet 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/084Pzy0N0TFxj-S2KzWZ5fA7My_yZW2Ckyphnoskrl29eWmEM8Q-psKAsvezRJHgQP0BMRDuwxL0NWMCjagJuGTAGPS1FWuR-f-k" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100005<br>Blattnummer: 3/4<br>Aktualität: 2010]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100005</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>3/4</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2010</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/084Pzy0N0TFxj-S2KzWZ5fA7My_yZW2Ckyphnoskrl29eWmEM8Q-psKAsvezRJHgQP0BMRDuwxL0NWMCjagJuGTAGPS1FWuR-f-k</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.558999999999997,47.37684699999999,0.0 10.558999999999997,47.271,0.0 10.579,47.27,0.0 10.580000000000002,47.18500000000001,0.0 10.759000000000002,47.185,0.0 10.759000000000002,47.376847,0.0 10.558999999999997,47.37684699999999,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Karwendelgebirge - Mitte 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/Vh8wxtE2wmH5AIwyDl6o7u1MS5u2w1et9X7zteJliIoq2zIVzqj7Gw8H8ICsyWw5etpd7UHOSsDs1CK6ij1hKOQdjrmUWEOrjUBD" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100011<br>Blattnummer: 5/2<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100011</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>5/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/Vh8wxtE2wmH5AIwyDl6o7u1MS5u2w1et9X7zteJliIoq2zIVzqj7Gw8H8ICsyWw5etpd7UHOSsDs1CK6ij1hKOQdjrmUWEOrjUBD</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.370000000000001,47.479,0.0 11.37,47.266,0.0 11.575,47.266,0.0 11.576000000000002,47.479,0.0 11.370000000000001,47.479,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Karwendelgebirge - Ost 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/zioAJ0wLhoBDrJJYO13OPz7gM7dpOvdysd86teg3CYkLGnk-Rnw-SxKZqWQ71KuTUlQxeyPTDmEOAyAMc7Ald6tQiMfHY844crNO" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100012<br>Blattnummer: 5/3<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100012</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>5/3</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/zioAJ0wLhoBDrJJYO13OPz7gM7dpOvdysd86teg3CYkLGnk-Rnw-SxKZqWQ71KuTUlQxeyPTDmEOAyAMc7Ald6tQiMfHY844crNO</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.564,47.504999999999995,0.0 11.563,47.299,0.0 11.757,47.299,0.0 11.759,47.504999999999995,0.0 11.564,47.504999999999995,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Silvrettagruppe 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/O1s9qMeGR8BPP1abTY5pcWDpkfgy3Tq-GXwF69dZfVKWjys9-Nqx6QimPZhF5dFUmS-cpteyK4BRgJocKPMh-Rh0LsUZL7k-XZCs" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100025<br>Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100026<br>Blattnummer: 26<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100025
+Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100026</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>26</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/O1s9qMeGR8BPP1abTY5pcWDpkfgy3Tq-GXwF69dZfVKWjys9-Nqx6QimPZhF5dFUmS-cpteyK4BRgJocKPMh-Rh0LsUZL7k-XZCs</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>9.982999999999999,46.983,0.0 9.983,46.816,0.0 10.299,46.816,0.0 10.299,46.906,0.0 10.311,46.914,0.0 10.311,46.951,0.0 10.299,46.96,0.0 10.299,46.983,0.0 9.982999999999999,46.983,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Ötztaler Alpen - Nauderer Berge 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/Rlw8B3_eAf5fkBMuNnkfhesiPJC-TxZo-W-vguLqOeFZbhb94KdHFbGEFy3OtxtHcwWfd8NRoo7-wjs2xXK-O5bUKN_BEKKiEPkx" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100031<br>Blattnummer: 30/4<br>Aktualität: 2008]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100031</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>30/4</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2008</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/Rlw8B3_eAf5fkBMuNnkfhesiPJC-TxZo-W-vguLqOeFZbhb94KdHFbGEFy3OtxtHcwWfd8NRoo7-wjs2xXK-O5bUKN_BEKKiEPkx</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.470000000000002,46.974000000000004,0.0 10.470000000000002,46.833,0.0 10.712000000000002,46.833,0.0 10.712000000000002,46.974000000000004,0.0 10.470000000000002,46.974000000000004,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Ötztaler Alpen - Kaunergrat 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/ZAFWiqNp06k2Cx_qJYHIap06KzgT0NYM_jCOo717bzcAz1QwOZjIpQ0EHeutzQWOyNaoLnLnhRqPWO9RgXIJ9dwjJzd9G3DGo57t" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100030<br>Blattnummer: 30/3<br>Aktualität: 2014]]></description>
+				<styleUrl>#poly-009D57-1-73</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100030</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>30/3</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2014</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/ZAFWiqNp06k2Cx_qJYHIap06KzgT0NYM_jCOo717bzcAz1QwOZjIpQ0EHeutzQWOyNaoLnLnhRqPWO9RgXIJ9dwjJzd9G3DGo57t</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.661956999999997,47.092,0.0 10.661,46.917,0.0 10.879,46.916,0.0 10.880999999999998,47.091,0.0 10.661956999999997,47.092,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Ötztaler Alpen - Geigenkamm 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/6SBlEFXvwC1Gsy-MBHVnBCmcjmQBqIDiwDPP-QJRGaYmM2IDeLYH1fvocatGfF6t4ct1n-yeRSi9nOe_H6qjgbXmD1NyaB3fVsJs" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100032<br>Blattnummer: 30/5<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100032</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>30/5</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/6SBlEFXvwC1Gsy-MBHVnBCmcjmQBqIDiwDPP-QJRGaYmM2IDeLYH1fvocatGfF6t4ct1n-yeRSi9nOe_H6qjgbXmD1NyaB3fVsJs</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.792000000000002,47.09,0.0 10.79,46.916,0.0 11.026,46.915,0.0 11.028,47.089,0.0 10.792000000000002,47.09,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Ötztaler Alpen - Weißkugel 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/yFXFq-A0hnMcmAxRoDza8xFuWztM0w_CYw-4GYq_kRDR6HKFJoIfihfNISwNNRiB1K9h3cM9bpPZ_rGJ0kKa-uyP72Q4bTFbipaG" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100029<br>Blattnummer: 30/2<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100029</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>30/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/yFXFq-A0hnMcmAxRoDza8xFuWztM0w_CYw-4GYq_kRDR6HKFJoIfihfNISwNNRiB1K9h3cM9bpPZ_rGJ0kKa-uyP72Q4bTFbipaG</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.662000000000003,46.93852,0.0 10.659999999999998,46.762,0.0 10.889000000000001,46.761,0.0 10.890999999999998,46.938,0.0 10.662000000000003,46.93852,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Ötztaler Alpen - Gurgl 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/ZfQy4j9agrZNtJbnm6iG7_wFRLVBZreDffE422xOsTUmTJQiGM_cyzGY9eTeuCWZiYj6M97pN7QYH1WGWMK2X-dX2auONQp1UWq6" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100028<br>Blattnummer: 30/1<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100028</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>30/1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/ZfQy4j9agrZNtJbnm6iG7_wFRLVBZreDffE422xOsTUmTJQiGM_cyzGY9eTeuCWZiYj6M97pN7QYH1WGWMK2X-dX2auONQp1UWq6</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.856,46.751021,0.0 11.118149,46.749341,0.0 11.120347000000002,46.922,0.0 10.857170999999997,46.923811,0.0 10.856,46.751021,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Ötztaler Alpen - Wildspitze 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/JmmcWCnZRG01g9rv-Hyk3bR-PKu8W0Y5LOj_Ye-kriPg2QQdrKN2zmzn-8zzowJDQ5WsothnT6sb4_NvsX8LtMGyztpqnGNceE_H" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100033<br>Blattnummer: 30/6<br>Aktualität: 2014]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100033</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>30/6</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2014</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/JmmcWCnZRG01g9rv-Hyk3bR-PKu8W0Y5LOj_Ye-kriPg2QQdrKN2zmzn-8zzowJDQ5WsothnT6sb4_NvsX8LtMGyztpqnGNceE_H</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.97,46.971,0.0 10.772,46.973,0.0 10.771000000000003,46.842,0.0 10.967707,46.841,0.0 10.97,46.971,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Stubaier Alpen - Hochstubai 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/K_ngUlUmrPtuNGs8BxalAcVsscTmEuTAf6mHtA2z6oO_2uzxAWmGtUXKg1WVJVL_k8vOxpt52E2TSLfqD9XRL9DZ53sriqS4ih1y" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100038<br>Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100041<br>Blattnummer: 31/1<br>Aktualität: 2011]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100038
+Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100041</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>31/1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2011</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/K_ngUlUmrPtuNGs8BxalAcVsscTmEuTAf6mHtA2z6oO_2uzxAWmGtUXKg1WVJVL_k8vOxpt52E2TSLfqD9XRL9DZ53sriqS4ih1y</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.965,47.081,0.0 10.964,46.906,0.0 11.292,46.904,0.0 11.294000000000002,47.079,0.0 10.965,47.081,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Stubaier Alpen - Sellrain 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/A2pZV_68fNLrB_g_dwLdoFUD9vXZVf6qlkqNx7RCORtReD7pXMsmnD8BtC_YLa7dakbbVnULAh6XZ70DOXVjy66TdKEXhmNN19hV" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100039<br>Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100042<br>Blattnummer: 31/2<br>Aktualität: 2009]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100039
+Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100042</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>31/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2009</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/A2pZV_68fNLrB_g_dwLdoFUD9vXZVf6qlkqNx7RCORtReD7pXMsmnD8BtC_YLa7dakbbVnULAh6XZ70DOXVjy66TdKEXhmNN19hV</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.213999999999999,47.245,0.0 10.952,47.24600000000001,0.0 10.950999999999999,47.07157,0.0 11.212,47.071,0.0 11.213999999999999,47.245,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Zillertaler Alpen - West 1:25.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/zfXu7WCPcpvA93MewgJ6Ac3rBLSyCyOBhDjlUV4WKVRRZdTbIGjW6IlQYPokf9lQqD0hBLn6HJDWQ_RO2qeWmGsGCNygM1XbIfUZ" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100050<br>Blattnummer: 35/1<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100050</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>35/1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/zfXu7WCPcpvA93MewgJ6Ac3rBLSyCyOBhDjlUV4WKVRRZdTbIGjW6IlQYPokf9lQqD0hBLn6HJDWQ_RO2qeWmGsGCNygM1XbIfUZ</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.60404,47.133,0.0 11.605,46.954,0.0 11.815,46.955,0.0 11.815000000000001,47.133,0.0 11.60404,47.133,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Zillertaler Alpen - Mitte 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/RQabSGXkqCRV4MJETWdrzEL31GWx8KVaRt340Kw8u95H4Hwt0jWfiot9WdvNWCLZ725z2Gwfa5IFzd9kWkWwfqc7nEsV1Lso6ePT61BS" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100051<br>Blattnummer: 35/2<br>Aktualität: 2014]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100051</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>35/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2014</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/RQabSGXkqCRV4MJETWdrzEL31GWx8KVaRt340Kw8u95H4Hwt0jWfiot9WdvNWCLZ725z2Gwfa5IFzd9kWkWwfqc7nEsV1Lso6ePT61BS</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.793000000000001,47.179,0.0 11.793000000000001,46.973,0.0 12.017,46.973,0.0 12.017,47.179,0.0 11.793000000000001,47.179,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Zillertaler Alpen - Ost 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/nSjPLWN4jOBQmSpqasKEmU9lG7Azn1R2gyFB8CEbmtioNtS8_L4JaIJeAkJEPMbfKsVyu41ycY0Efd-ls7hyt_MhevxJZnrBcXXf" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100052<br>Blattnummer: 35/3<br>Aktualität: 2011]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100052</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>35/3</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2011</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/nSjPLWN4jOBQmSpqasKEmU9lG7Azn1R2gyFB8CEbmtioNtS8_L4JaIJeAkJEPMbfKsVyu41ycY0Efd-ls7hyt_MhevxJZnrBcXXf</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.008,47.242,0.0 12.008000000000001,47.017,0.0 12.223000000000003,47.017,0.0 12.222999999999999,47.06,0.0 12.241000000000001,47.069,0.0 12.222999999999999,47.083,0.0 12.224,47.242000000000004,0.0 12.008,47.242,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Venedigergruppe 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/_B_J514gid64FJrCyPCK75lFrp8lwqR3HDUdMW1b8PcEX0x2VqZN1eLHTB3UagMJjbPgcO39Mj67M7zXdUGvmeyEU-IGGA6TeuiN" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100054<br>Blattnummer: 36<br>Aktualität: 2014]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100054</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>36</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2014</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/_B_J514gid64FJrCyPCK75lFrp8lwqR3HDUdMW1b8PcEX0x2VqZN1eLHTB3UagMJjbPgcO39Mj67M7zXdUGvmeyEU-IGGA6TeuiN</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.203,47.176,0.0 12.203,47.006,0.0 12.535,47.006,0.0 12.535999999999998,47.176,0.0 12.203,47.176,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Granatspitzgruppe 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/cKhiAFIpB8xQJR-U0Vej_rfnP1hdcHIw1k14pbvB3GoWwu3OZWbBVfILZvwolGS7hrQu_Bij4dXYYnhoM-wZH3wwA_3mpADiyHpU" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100056<br>Blattnummer: 39<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100056</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>39</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/cKhiAFIpB8xQJR-U0Vej_rfnP1hdcHIw1k14pbvB3GoWwu3OZWbBVfILZvwolGS7hrQu_Bij4dXYYnhoM-wZH3wwA_3mpADiyHpU</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.446,47.178,0.0 12.447,47.000046,0.0 12.683,47.00000000000001,0.0 12.683,47.178,0.0 12.446,47.178,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Schobergruppe 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/uHG5xwNiQ3GzoWCxgU1T-breuoljgSGAHmom6RUgbkIENU_VJrRp5E_b1PLiIx7yZC9L4yWB6IFU1ZVYJ6ELJIFjyg4H95_y-IrL" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100059<br>Blattnummer: 41<br>Aktualität: 2014]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100059</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>41</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2014</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/uHG5xwNiQ3GzoWCxgU1T-breuoljgSGAHmom6RUgbkIENU_VJrRp5E_b1PLiIx7yZC9L4yWB6IFU1ZVYJ6ELJIFjyg4H95_y-IrL</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.613999999999999,47.055,0.0 12.615,46.813,0.0 12.84,46.813,0.0 12.840000000000002,46.848,0.0 12.871,46.848000000000006,0.0 12.871,46.852000000000004,0.0 12.877999999999998,46.852000000000004,0.0 12.877999999999998,47.055,0.0 12.613999999999999,47.055,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Sonnblick 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/Y3NDv2zyZ-x4pKNfgYWa81zc04WTAJBbbOMfVZm2GUeHwHnx1nbxb9E0lyEEkMq9ju-ObNcnVQYDrM1Q3Nd1y_hGAWs8UuL31Xf_" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100060<br>Blattnummer: 42<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100060</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>42</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/Y3NDv2zyZ-x4pKNfgYWa81zc04WTAJBbbOMfVZm2GUeHwHnx1nbxb9E0lyEEkMq9ju-ObNcnVQYDrM1Q3Nd1y_hGAWs8UuL31Xf_</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.832999999999998,47.112,0.0 12.837,47.02900000000001,0.0 12.872999999999996,47.029,0.0 12.872999999999998,46.95099999999999,0.0 12.955000000000002,46.951,0.0 12.954999999999998,46.933,0.0 13.179000000000002,46.93200000000001,0.0 13.179000000000002,47.112,0.0 13.148999999999997,47.112,0.0 13.144,47.118,0.0 13.085,47.118,0.0 13.080000000000002,47.112,0.0 12.832999999999998,47.112,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Hochalmspitze - Ankogel 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/hUJmwgP8m_HP7eVyLfx4oy9emgOmihswXLbJH9zOaBYIcRQHX-6kPCPJ7TXHSCPOdAfZaXkLfHEkhef7jEmuQIPm47kzj5RFAEmy" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100062<br>Blattnummer: 44<br>Aktualität: 2012]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100062</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>44</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2012</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/hUJmwgP8m_HP7eVyLfx4oy9emgOmihswXLbJH9zOaBYIcRQHX-6kPCPJ7TXHSCPOdAfZaXkLfHEkhef7jEmuQIPm47kzj5RFAEmy</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>13.171999999999999,47.105,0.0 13.174,46.94199999999999,0.0 13.426,46.942,0.0 13.425999999999998,47.10499999999999,0.0 13.171999999999999,47.105,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Dachstein 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/fBOsfxjeaXtqOfyGruIps6zNs2XI4wjp0nmt5r5RWk9v78xCO0lQKbA1dUganiIyRgqJt7BSKZBEeBW5ewkuWyUxEv4rXwRpQm-C" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100018<br>Blattnummer: 14<br>Aktualität: 2012]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100018</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>14</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2012</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/fBOsfxjeaXtqOfyGruIps6zNs2XI4wjp0nmt5r5RWk9v78xCO0lQKbA1dUganiIyRgqJt7BSKZBEeBW5ewkuWyUxEv4rXwRpQm-C</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>13.753000000000004,47.571,0.0 13.474,47.569,0.0 13.476,47.415,0.0 13.754,47.416,0.0 13.753000000000004,47.571,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Totes Gebirge - Mitte 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/2qV89Wq7RbwCi5qAnp0TFso5GxSRWIZ1iQd4dkqoivXgnDvwl04HW85250ZjjJ_MaCCeveUAmsZQPLETbvkHubFGd2ZbVZycYKmf" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100020<br>Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100023<br>Blattnummer: 15/2<br>Aktualität: 2008]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100020
+Ausgabe SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100023</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>15/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2008</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/2qV89Wq7RbwCi5qAnp0TFso5GxSRWIZ1iQd4dkqoivXgnDvwl04HW85250ZjjJ_MaCCeveUAmsZQPLETbvkHubFGd2ZbVZycYKmf</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>13.918,47.76800000000001,0.0 13.916,47.549,0.0 14.183,47.547,0.0 14.185,47.722,0.0 14.179,47.722,0.0 14.178999999999998,47.723,0.0 14.145,47.72299999999999,0.0 14.146000000000003,47.767,0.0 13.918,47.76800000000001,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Totes Gebirge - West 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/tcOcObblul4q_1Dc1MkhBBv5Z8V4dGlINS7hdBl8PCqoFETM2tQF_rtjztEDEEQ5OeYDl3odCItAifUn3qK2TsM1-eEMLh3rl7b9" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100019<br>Blattnummer: 15/1<br>Aktualität: 2014]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100019</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>15/1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2014</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/tcOcObblul4q_1Dc1MkhBBv5Z8V4dGlINS7hdBl8PCqoFETM2tQF_rtjztEDEEQ5OeYDl3odCItAifUn3qK2TsM1-eEMLh3rl7b9</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>13.948,47.76800000000001,0.0 13.701,47.76800000000001,0.0 13.702,47.619,0.0 13.948,47.619,0.0 13.948,47.76800000000001,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Totes Gebirge - Ost 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/fdTCJS38zStXp-eGDSlhRqms6M7z4Uptm7ZS5cMMnvawY16LQ8joDOmicLy6xs98YAWOxF2CWNQVnmg_Ka6S4famd1btA_2WphTa" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100021<br>Blattnummer: 15/3<br>Aktualität: 2010]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100021</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>15/3</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2010</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/fdTCJS38zStXp-eGDSlhRqms6M7z4Uptm7ZS5cMMnvawY16LQ8joDOmicLy6xs98YAWOxF2CWNQVnmg_Ka6S4famd1btA_2WphTa</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>14.349,47.71399999999999,0.0 14.154000000000002,47.715,0.0 14.152,47.561,0.0 14.345999999999998,47.56000000000001,0.0 14.349,47.71399999999999,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Ennstaler Alpen - Gesäuse 1:25.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/CH_N6XgAb5pis5DpXshxXrFTz-xPH0-aN8rc9K0I8o84-yxV_BEyNKj-RyHADDvMOqWMTAKiPrv45QhgiE2uBboo0Pxc1g091fWn" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100024<br>Blattnummer: 16<br>Aktualität: 2009]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100024</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>16</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2009</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/CH_N6XgAb5pis5DpXshxXrFTz-xPH0-aN8rc9K0I8o84-yxV_BEyNKj-RyHADDvMOqWMTAKiPrv45QhgiE2uBboo0Pxc1g091fWn</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>14.452,47.660000000000004,0.0 14.453,47.518,0.0 14.747999999999998,47.519,0.0 14.747999999999998,47.593999999999994,0.0 14.758000000000003,47.594,0.0 14.758,47.660000000000004,0.0 14.452,47.660000000000004,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Langkofel-Sellagruppe 1:25.000</name>
+				<description><![CDATA[Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100067<br>Blattnummer: 52/1<br>Aktualität: 2007]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100067</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>52/1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2007</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.889,46.56,0.0 11.684,46.56,0.0 11.685,46.47200000000001,0.0 11.889,46.47200000000001,0.0 11.889,46.56,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Brentagruppe 1:25.000</name>
+				<description><![CDATA[Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100066<br>Blattnummer: 51<br>Aktualität: 2011]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100066</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>51</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2011</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.799,46.275,0.0 10.801,46.083999999999996,0.0 10.851,46.084,0.0 10.892,46.069,0.0 10.912,46.068,0.0 10.931000000000001,46.085,0.0 10.974,46.085,0.0 10.973,46.27600000000001,0.0 10.922,46.27600000000001,0.0 10.921,46.279,0.0 10.874,46.279,0.0 10.874,46.275,0.0 10.799,46.275,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Verwallgruppe Mitte 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/MqahpkWRMrDQavAe34S7dWBa1FwKgZqmxy0cSohYtEpljFUEfFieiR7pNGAXyc39LiJgKXn-d-SBCr88gSUW04mMWSOmo4KAz_10" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100027<br>Blattnummer: 28/2<br>Aktualität: 2009]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100027</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>28/2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2009</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/MqahpkWRMrDQavAe34S7dWBa1FwKgZqmxy0cSohYtEpljFUEfFieiR7pNGAXyc39LiJgKXn-d-SBCr88gSUW04mMWSOmo4KAz_10</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.093,47.101,0.0 10.093000000000002,46.964,0.0 10.320000000000002,46.963,0.0 10.32,47.101,0.0 10.093,47.101,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Nationalpark Berchtesgaden - Watzmann 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/ZDSVpUsBGShUeqTegSs3W1KByiBVDnkzEmedJzPCcgs9SleheuoG8hC2W9N2sEz0E6JV1pyQ6Njf2o5EywpAVgLhZmuszC13hY0_" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100121<br>Blattnummer: BY21<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100121</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY21</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/ZDSVpUsBGShUeqTegSs3W1KByiBVDnkzEmedJzPCcgs9SleheuoG8hC2W9N2sEz0E6JV1pyQ6Njf2o5EywpAVgLhZmuszC13hY0_</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.787142999999999,47.457592,0.0 13.076303,47.455222,0.0 13.079435,47.61125299999999,0.0 12.789450000000002,47.613694,0.0 12.787142999999999,47.457592,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Berchtesgaden, Untersberg 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/_8MSIAlkNtSpjCMOUJQfG2lbNQetVKbQvNu4XaLr4WdS6mYnqXx3Q25pjtODcfJH0-Vb0efn6-hytl6BhrvKHu2cGCYQYe_kRr38" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100122<br>Blattnummer: BY22<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100122</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY22</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/_8MSIAlkNtSpjCMOUJQfG2lbNQetVKbQvNu4XaLr4WdS6mYnqXx3Q25pjtODcfJH0-Vb0efn6-hytl6BhrvKHu2cGCYQYe_kRr38</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.877457000000001,47.75365,0.0 12.874,47.558394,0.0 13.104,47.555879999999995,0.0 13.108000000000002,47.752,0.0 12.877457000000001,47.75365,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Lattengebirge - Reiteralm 1:25.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/PVwZR_wQQ15TowjX6_VWyQhwp06NE5n34Sl8OJZezHVqGmDKTV03ODNvhDFvZjv5J3_KhXawPSDtLWMhjDS8vG9rvb6WYh6xoAuk" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100120<br>Blattnummer: BY20<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100120</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY20</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/PVwZR_wQQ15TowjX6_VWyQhwp06NE5n34Sl8OJZezHVqGmDKTV03ODNvhDFvZjv5J3_KhXawPSDtLWMhjDS8vG9rvb6WYh6xoAuk</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.732,47.732839,0.0 12.729025999999994,47.537,0.0 12.959,47.53500000000001,0.0 12.963,47.73084,0.0 12.732,47.732839,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Chiemgauer Alpen Mitte - Hochgern, Hochfelln 1:25.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/DtnP9a24lnY-wY8a-uWe4CsSyEZb_Md_Z6I6kKcZWlJUynC_Pg1ZTEbzNX-p3wIzWdUjNQfShTtjZ8PF7kopjs_vJFBRyDuPC0mv" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100118<br>Blattnummer: BY18<br>Aktualität: 2012]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100118</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY18</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2012</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/DtnP9a24lnY-wY8a-uWe4CsSyEZb_Md_Z6I6kKcZWlJUynC_Pg1ZTEbzNX-p3wIzWdUjNQfShTtjZ8PF7kopjs_vJFBRyDuPC0mv</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.436,47.799,0.0 12.435999999999998,47.60199999999999,0.0 12.665000000000001,47.601,0.0 12.668,47.797227,0.0 12.436,47.799,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Chiemgauer Alpen West - Hochries Geigelstein 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/UR_go3sp75sLzh_KA0P1-tbXmljo9Otl8MEZPh75j9_mHrax_hjTZDCqOxXwgsocC7kh8IWRBvo7YehFzcT_gYgu2RliQS6P6VZS" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100117<br>Blattnummer: BY17<br>Aktualität: 2014]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100117</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY17</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2014</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/UR_go3sp75sLzh_KA0P1-tbXmljo9Otl8MEZPh75j9_mHrax_hjTZDCqOxXwgsocC7kh8IWRBvo7YehFzcT_gYgu2RliQS6P6VZS</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.159543,47.653944,0.0 12.449818,47.653271,0.0 12.451193000000002,47.809358,0.0 12.160059999999998,47.81026399999999,0.0 12.159543,47.653944,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Mangfallgebirge Ost - Wendelstein, Großer Traithen 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/-14jin6KY0_V31w75jHG1QG_f8VjRQPboUN-Rx4MFjhe693dsUIAZU9hVq68dpX_plnQQ079X7Nh3FugqdAccaER5U2olmYVdEv9" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100116<br>Blattnummer: BY16<br>Aktualität: 20111]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100116</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY16</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>20111</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/-14jin6KY0_V31w75jHG1QG_f8VjRQPboUN-Rx4MFjhe693dsUIAZU9hVq68dpX_plnQQ079X7Nh3FugqdAccaER5U2olmYVdEv9</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.942000000000002,47.778,0.0 11.942,47.582,0.0 12.173,47.582,0.0 12.173,47.778000000000006,0.0 11.942000000000002,47.778,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Mangfallgebirge Mitte - Spitzingsee, Rotwand 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/uTmHBLUfMMguGHV2Pv7FrqFiXNVmcbiZv1PievTgWwyO5CpNEUya5FXgPAnTYIGLIw_Sevro-XaNsrhUbvZZnx6lpOomOTOsWdRtBuCeL3U" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100115<br>Blattnummer: BY15<br>Aktualität: 2014]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100115</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY15</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2014</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/uTmHBLUfMMguGHV2Pv7FrqFiXNVmcbiZv1PievTgWwyO5CpNEUya5FXgPAnTYIGLIw_Sevro-XaNsrhUbvZZnx6lpOomOTOsWdRtBuCeL3U</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.745779,47.77226499999999,0.0 11.746717,47.576136,0.0 11.977327000000002,47.57643100000001,0.0 11.977317000000001,47.772529,0.0 11.745779,47.77226499999999,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Mangfallgebirge West - Tegernsee, Hirschberg 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/pxmqKW7g_IitriqMjRNqW32lWmH2dXyJb481cssq8Ukho1NEcLPgkVdG-kXIenTN_ShX2VHX2ApO1Sf1VxMWvaAxzXY_TPx5eyKO" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100113<br>Blattnummer: BY13<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100113</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY13</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/pxmqKW7g_IitriqMjRNqW32lWmH2dXyJb481cssq8Ukho1NEcLPgkVdG-kXIenTN_ShX2VHX2ApO1Sf1VxMWvaAxzXY_TPx5eyKO</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.569652,47.77074699999999,0.0 11.571173,47.57452,0.0 11.801825000000001,47.575254,0.0 11.801242999999998,47.77134,0.0 11.569652,47.77074699999999,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Estergebirge - Herzogstand, Wank 1:25.000</name>
+				<description><![CDATA[Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100109<br>Blattnummer: BY9<br>Aktualität: 2016]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100109</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY9</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2016</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.079414,47.486,0.0 11.368841,47.488,0.0 11.365872000000001,47.644471,0.0 11.075999999999999,47.641965,0.0 11.079414,47.486,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Karwendelgebirge Nord - Schafreiter 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/7QL1urvCA6tvwYGnGnCNuN5klysw6a0j2b5ZAhMbKa4o0K_9bRlZFseL0TuHR0ShDASntxDRxJL-deDq1_iNZT_76Xn6rd2dVPUN" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100112<br>Blattnummer: BY12<br>Aktualität: 2010]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100112</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY12</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2010</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/7QL1urvCA6tvwYGnGnCNuN5klysw6a0j2b5ZAhMbKa4o0K_9bRlZFseL0TuHR0ShDASntxDRxJL-deDq1_iNZT_76Xn6rd2dVPUN</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.361964,47.44215599999999,0.0 11.651416999999999,47.443203,0.0 11.650179000000001,47.600217,0.0 11.360825999999998,47.599171,0.0 11.361964,47.44215599999999,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Isarwinkel - Benediktenwand 1:25.000</name>
+				<description><![CDATA[Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100111<br>Blattnummer: BY11<br>Aktualität: 2011]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100111</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY11</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2011</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.335273999999998,47.597484,0.0 11.625174999999999,47.598798,0.0 11.624108,47.754925,0.0 11.333388,47.753633,0.0 11.335273999999998,47.597484,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Ammergebirge West - Hochplatte, Kreuzspitze 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/v4rs7OITAs355IMuwNoa4WYimQm60j___pciDdU4gptvLz7l9SQkkiIdCwMZGn4khxoi23kPmajQrUVu-GHNayjOWIHDR2h3-pep" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&itemno=100106<br>Blattnummer: BY6<br>Aktualität: 2011]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&amp;itemno=100106</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY6</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2011</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/v4rs7OITAs355IMuwNoa4WYimQm60j___pciDdU4gptvLz7l9SQkkiIdCwMZGn4khxoi23kPmajQrUVu-GHNayjOWIHDR2h3-pep</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.731566,47.661069,0.0 10.736185,47.465813,0.0 10.968825,47.468335,0.0 10.964172,47.663608,0.0 10.731566,47.661069,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Tannheimer Berge - Köllenspitze, Gaishorn 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/cH5BANrkYBEa7zVX0z1cBmFZoXA_g04zC3pZFSsRfKUVZE9pJnnKMTwc_eY6iUEA2hDExfxNB1B_tdmocIVNPBEVSTIjNmXUxjik" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&itemno=100105<br>Blattnummer: BY5<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&amp;itemno=100105</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY5</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/cH5BANrkYBEa7zVX0z1cBmFZoXA_g04zC3pZFSsRfKUVZE9pJnnKMTwc_eY6iUEA2hDExfxNB1B_tdmocIVNPBEVSTIjNmXUxjik</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.455311000000002,47.42729,0.0 10.744435000000001,47.430389,0.0 10.740768999999998,47.587387,0.0 10.451747,47.584289,0.0 10.455311000000002,47.42729,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Allgäuer Voralpen Ost - Grünten, Wertacher Hörnle 1:25.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/wbIDtTjVYdz-7trSVcse2Y7X5SbIC6-Ejmt0StD9XnDma6PEw72WqSNTvwEckniEhapmpWg72MroPwE1yv_px1Nhs7dogxl6sMkW" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&itemno=100103<br>Blattnummer: BY3<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&amp;itemno=100103</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY3</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/wbIDtTjVYdz-7trSVcse2Y7X5SbIC6-Ejmt0StD9XnDma6PEw72WqSNTvwEckniEhapmpWg72MroPwE1yv_px1Nhs7dogxl6sMkW</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.261769,47.458497,0.0 10.551035,47.462804,0.0 10.545936,47.619785,0.0 10.256772,47.615479,0.0 10.261769,47.458497,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Kleinwalsertal - Hoher Ifen, Widderstein 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/ubXyYxRdVUGtsYCMEO_GX7I24Q8GUvQdWjkON8poaY4GU8mao_EmLJgjPgk7XypuU6kIbp3_B4g5wqJ_puR6yS0npPQJhdbhT7x-" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&itemno=100102<br>Blattnummer: BY2<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&amp;itemno=100102</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY2</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/ubXyYxRdVUGtsYCMEO_GX7I24Q8GUvQdWjkON8poaY4GU8mao_EmLJgjPgk7XypuU6kIbp3_B4g5wqJ_puR6yS0npPQJhdbhT7x-</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.026088,47.451747,0.0 10.033586999999999,47.256532,0.0 10.266148,47.260658,0.0 10.258614,47.45589,0.0 10.026088,47.451747,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Allgäuer Voralpen West - Nagelfluhkette, Hörnergruppe 1:25.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/yc9_BH5SkLmjcVbiNLKI8uMY-Tv2l9IPcLWnbdxp83JjU7iJlfSBZ2GJbyRcHcjmRJYAOK6Ttt1c0rrqez3KlaXrFvfehL1Fdw0M" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&itemno=100101<br>Blattnummer: BY1<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&amp;itemno=100101</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/yc9_BH5SkLmjcVbiNLKI8uMY-Tv2l9IPcLWnbdxp83JjU7iJlfSBZ2GJbyRcHcjmRJYAOK6Ttt1c0rrqez3KlaXrFvfehL1Fdw0M</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>9.979435,47.411229,0.0 10.268797,47.416099,0.0 10.263046000000001,47.573066999999995,0.0 9.973785000000001,47.568199,0.0 9.979435,47.411229,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Chiemgauer Alpen Ost - Sonntagshorn 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/UR_go3sp75sLzh_KA0P1-tbXmljo9Otl8MEZPh75j9_mHrax_hjTZDCqOxXwgsocC7kh8IWRBvo7YehFzcT_gYgu2RliQS6P6VZS" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100119<br>Blattnummer: BY19<br>Aktualität: 2014]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100119</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY19</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2014</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/UR_go3sp75sLzh_KA0P1-tbXmljo9Otl8MEZPh75j9_mHrax_hjTZDCqOxXwgsocC7kh8IWRBvo7YehFzcT_gYgu2RliQS6P6VZS</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.654000000000002,47.834990000000005,0.0 12.651,47.638,0.0 12.882,47.637437,0.0 12.886,47.833,0.0 12.654000000000002,47.834990000000005,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Ammergebirge Ost - Pürschling, Hörnle 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/jUxQcVK_gtjJZMYoH1q2Xva7E3yH8ulh8YokGmeMZyoTCsHdo_eg-bi2Qw9h8k8VUbjL8SO6SVzzm2EySf4yD9HaD4VaG8kRv7FT" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100107<br>Blattnummer: BY7<br>Aktualität: 2015]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100107</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY7</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2015</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/jUxQcVK_gtjJZMYoH1q2Xva7E3yH8ulh8YokGmeMZyoTCsHdo_eg-bi2Qw9h8k8VUbjL8SO6SVzzm2EySf4yD9HaD4VaG8kRv7FT</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.928362,47.66872,0.0 10.932,47.47346,0.0 11.161,47.475,0.0 11.158999999999999,47.67000000000001,0.0 10.928362,47.66872,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Allgäuer Hochalpen - Hochvogel, Krottenkopf 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/4b2Qc9OoAImeF7Rhr1RQL4Ktb8PFWreKolWP0ifvK_NBXqRD-OMBQhYzGfySCe3W77rbA_jxRjtqw2jH-a5cJfG9hmeDVVzBE5F6" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&itemno=100104<br>Blattnummer: BY4<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=1&amp;itemno=100104</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY4</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/4b2Qc9OoAImeF7Rhr1RQL4Ktb8PFWreKolWP0ifvK_NBXqRD-OMBQhYzGfySCe3W77rbA_jxRjtqw2jH-a5cJfG9hmeDVVzBE5F6</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.490559999999999,47.268314999999994,0.0 10.485617,47.464944,0.0 10.254137000000002,47.461731,0.0 10.259904,47.265776,0.0 10.490559999999999,47.268314999999994,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Wettersteingebirge - Zugspitze 1:25.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/yEsu1cPdO_c9Osm8ItolfWHa_2Oy2e_cMkPkSSemEGqv3aBZ31Ebv_16stS5x2axh2z7FNlAe3KPPWoZo7hjGKv4LQq4S4nZnVmyJV_29Yw" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI:https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100108<br>Blattnummer: BY8<br>Aktualität: 2014]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI:https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100108</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY8</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2014</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/yEsu1cPdO_c9Osm8ItolfWHa_2Oy2e_cMkPkSSemEGqv3aBZ31Ebv_16stS5x2axh2z7FNlAe3KPPWoZo7hjGKv4LQq4S4nZnVmyJV_29Yw</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.918159,47.36612,0.0 11.207665000000002,47.368288,0.0 11.205111,47.525294,0.0 10.915704000000002,47.523128,0.0 10.918159,47.36612,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Mangfallgebirge Süd - Guffert, Unnütz, Juifen 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/etAHUsKlldvUF8eFfYbPqFVJ91koVlYNCRAl8ifyGZrNOEY9oLYY9dUziH3PpIZCPusokf7MWPaon9ncaFzInaXeueuOqv-ynLZ7" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100114<br>Blattnummer: BY14<br>Aktualität: 2010]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100114</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY14</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2010</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/etAHUsKlldvUF8eFfYbPqFVJ91koVlYNCRAl8ifyGZrNOEY9oLYY9dUziH3PpIZCPusokf7MWPaon9ncaFzInaXeueuOqv-ynLZ7</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.623440999999998,47.4891,0.0 11.912896999999997,47.489606,0.0 11.912297000000002,47.646622,0.0 11.622942000000002,47.646116,0.0 11.623440999999998,47.4891,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Karwendel Nordwest - Soierngruppe 1:25.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/ZzSOuwUPNmSLH0jBtP1QjwpUYg00jxOhvyaOaL1NE3tTuxF2gSPzHw0T3tmXv-J4_uS-VZWXuMrZT4XnbQU_FBxxb-LzEAslXPK_" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100110<br>Blattnummer: BY10<br>Aktualität: 2016]]></description>
+				<styleUrl>#poly-4186F0-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100110</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>BY10</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2016</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/ZzSOuwUPNmSLH0jBtP1QjwpUYg00jxOhvyaOaL1NE3tTuxF2gSPzHw0T3tmXv-J4_uS-VZWXuMrZT4XnbQU_FBxxb-LzEAslXPK_</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.189039,47.532158,0.0 11.190683000000002,47.375147,0.0 11.479764000000001,47.376625,0.0 11.478017,47.533637,0.0 11.189039,47.532158,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Glocknergruppe 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/AaQDc9RPDTPFj69tEaTfTXTjm5rpyOtXC2qQhi7OCuzXb2Q-tE9WMgEuKj2veooCrDgcFaKEiAoFNMVhXg0niuBzaz7ylgOqP6PH" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100058<br>Blattnummer: 40<br>Aktualität: 2006]]></description>
+				<styleUrl>#poly-009D57-2-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100058</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>40</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2006</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/AaQDc9RPDTPFj69tEaTfTXTjm5rpyOtXC2qQhi7OCuzXb2Q-tE9WMgEuKj2veooCrDgcFaKEiAoFNMVhXg0niuBzaz7ylgOqP6PH</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.617000000000003,47.22200000000001,0.0 12.621000000000002,47.028,0.0 12.848,47.031354,0.0 12.844000000000001,47.225,0.0 12.617000000000003,47.22200000000001,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Allgäuer-Lechtaler Alpen West 1:25.000</name>
+				<description><![CDATA[Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100001<br>Blattnummer: 2/1<br>Aktualität: 2012]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100001</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>2/1</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2012</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>10.214,47.416,0.0 10.219,47.24600000000001,0.0 10.389999999999999,47.247,0.0 10.386999999999999,47.418,0.0 10.214,47.416,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Kaisergebirge 1:25.000</name>
+				<description><![CDATA[<img src="https://lh3.googleusercontent.com/proxy/8z_qmYNDsEqxB8STHgW_rFsBwFupjgkTJD9Yl3AUFJyMD1i12iLQcQzLi9SvKgYpeM1E5HQuBebNquOy-TDuhJVBK6B7kTnZzgmj" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich:<br>Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100014<br>Blattnummer: 8<br>Aktualität: 2012]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich:
+Ausgabe WEG und SKI: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100014</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>8</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2012</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh3.googleusercontent.com/proxy/8z_qmYNDsEqxB8STHgW_rFsBwFupjgkTJD9Yl3AUFJyMD1i12iLQcQzLi9SvKgYpeM1E5HQuBebNquOy-TDuhJVBK6B7kTnZzgmj</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.153018000000001,47.613254,0.0 12.153000000000002,47.516,0.0 12.388,47.516,0.0 12.388,47.652,0.0 12.189406,47.65287000000001,0.0 12.196120000000002,47.644433,0.0 12.199641,47.636275000000005,0.0 12.200452,47.635287,0.0 12.201339,47.631537,0.0 12.202073999999998,47.626951,0.0 12.202731,47.62266799999999,0.0 12.205804999999998,47.61729699999999,0.0 12.207494,47.61331,0.0 12.207123000000001,47.61152,0.0 12.205602000000003,47.608513,0.0 12.203744000000004,47.60716200000001,0.0 12.201852999999998,47.606654999999996,0.0 12.201314000000002,47.60670700000001,0.0 12.196423999999999,47.609443999999996,0.0 12.191964,47.612839,0.0 12.189203000000001,47.615651,0.0 12.186897,47.61593,0.0 12.181095,47.617019,0.0 12.179144,47.616791,0.0 12.168038,47.615807,0.0 12.153018000000001,47.613254,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Loferer u. Leoganger Steinberge 1:25.000</name>
+				<description><![CDATA[<img src="https://lh5.googleusercontent.com/proxy/519ASBIPwXbfGk212dTAlU8Vbpi7KcC0KNTD8mAeQvkhjMGb8rI52sZQVW_UVIy8IOidqi9Ic4GhP5iS_40lIEl-fbm573Nyviy1" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100015<br>Blattnummer: 9<br>Aktualität: 2012]]></description>
+				<styleUrl>#poly-009D57-2-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100015</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>9</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2012</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh5.googleusercontent.com/proxy/519ASBIPwXbfGk212dTAlU8Vbpi7KcC0KNTD8mAeQvkhjMGb8rI52sZQVW_UVIy8IOidqi9Ic4GhP5iS_40lIEl-fbm573Nyviy1</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>12.751,47.599000000000004,0.0 12.558,47.596,0.0 12.562000000000001,47.477,0.0 12.601,47.477,0.0 12.602000000000002,47.43500000000001,0.0 12.834494000000001,47.438823000000006,0.0 12.832999999999998,47.539148,0.0 12.753,47.539148,0.0 12.751,47.599000000000004,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Rofan 1:25.000</name>
+				<description><![CDATA[<img src="https://lh4.googleusercontent.com/proxy/K1g0MGltO0zhtzzLDOxO9zzY1GXGHqhwoIuM6YoLqIpVcLcNm1hdx7OX3b1rihiHK3XqhN6vut4y_4lA2BsHKZABy2kT3MZH4DQl" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&itemno=100013<br>Blattnummer: 6<br>Aktualität: 2013]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=57&amp;itemno=100013</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>6</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2013</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh4.googleusercontent.com/proxy/K1g0MGltO0zhtzzLDOxO9zzY1GXGHqhwoIuM6YoLqIpVcLcNm1hdx7OX3b1rihiHK3XqhN6vut4y_4lA2BsHKZABy2kT3MZH4DQl</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>11.696,47.521,0.0 11.699000000000002,47.408698,0.0 11.873,47.411,0.0 11.869999999999997,47.523,0.0 11.696,47.521,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+			<Placemark>
+				<name>Tennengebirge 1:25.000</name>
+				<description><![CDATA[<img src="https://lh6.googleusercontent.com/proxy/wLHvOtZ8WhmNUmalShI2I7BwHNPIdJn3PkBskFq36Cm_Yco_0ZY4-YhIHgbd2NWzrrcLYJ0Nf0Z2jurv3TmBTpg1CPxLlmjCyhWp" height="200" width="auto" /><br><br>Beschreibung: Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=1&itemno=100075<br>Blattnummer: 13<br>Aktualität: 2012]]></description>
+				<styleUrl>#poly-009D57-1-76</styleUrl>
+				<ExtendedData>
+					<Data name='Beschreibung'>
+						<value>Hier erhältlich: https://www.dav-shop.de/productdetails.aspx?id=1&amp;itemno=100075</value>
+					</Data>
+					<Data name='Blattnummer'>
+						<value>13</value>
+					</Data>
+					<Data name='Aktualität'>
+						<value>2012</value>
+					</Data>
+					<Data name='gx_media_links'>
+						<value>https://lh6.googleusercontent.com/proxy/wLHvOtZ8WhmNUmalShI2I7BwHNPIdJn3PkBskFq36Cm_Yco_0ZY4-YhIHgbd2NWzrrcLYJ0Nf0Z2jurv3TmBTpg1CPxLlmjCyhWp</value>
+					</Data>
+				</ExtendedData>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<tessellate>1</tessellate>
+							<coordinates>13.165408999999999,47.452304,0.0 13.226818000000002,47.452431,0.0 13.229034,47.450931999999995,0.0 13.232994000000001,47.45094000000001,0.0 13.235203,47.452448,0.0 13.432331,47.452614,0.0 13.432329000000001,47.506,0.0 13.434521999999998,47.50748899999999,0.0 13.434519000000002,47.519223,0.0 13.432331,47.520703,0.0 13.432321000000002,47.594305,0.0 13.312498,47.594236,0.0 13.310019999999998,47.595909,0.0 13.294736,47.595892,0.0 13.292273,47.594214,0.0 13.164686999999999,47.593981,0.0 13.165027999999998,47.527770000000004,0.0 13.163176,47.526506,0.0 13.16324,47.513692,0.0 13.165106,47.51243100000001,0.0 13.165408999999999,47.452304,0.0</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</Placemark>
+		</Folder>
+		<Style id='poly-009D57-1-73-normal'>
+			<LineStyle>
+				<color>ff579D00</color>
+				<width>1</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>49579D00</color>
+				<fill>1</fill>
+				<outline>1</outline>
+			</PolyStyle>
+		</Style>
+		<Style id='poly-009D57-1-73-highlight'>
+			<LineStyle>
+				<color>ff579D00</color>
+				<width>2.0</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>49579D00</color>
+				<fill>1</fill>
+				<outline>1</outline>
+			</PolyStyle>
+		</Style>
+		<StyleMap id='poly-009D57-1-73'>
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#poly-009D57-1-73-normal</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#poly-009D57-1-73-highlight</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id='poly-009D57-1-76-normal'>
+			<LineStyle>
+				<color>ff579D00</color>
+				<width>1</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>4C579D00</color>
+				<fill>1</fill>
+				<outline>1</outline>
+			</PolyStyle>
+		</Style>
+		<Style id='poly-009D57-1-76-highlight'>
+			<LineStyle>
+				<color>ff579D00</color>
+				<width>2.0</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>4C579D00</color>
+				<fill>1</fill>
+				<outline>1</outline>
+			</PolyStyle>
+		</Style>
+		<StyleMap id='poly-009D57-1-76'>
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#poly-009D57-1-76-normal</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#poly-009D57-1-76-highlight</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id='poly-009D57-2-76-normal'>
+			<LineStyle>
+				<color>ff579D00</color>
+				<width>2</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>4C579D00</color>
+				<fill>1</fill>
+				<outline>1</outline>
+			</PolyStyle>
+		</Style>
+		<Style id='poly-009D57-2-76-highlight'>
+			<LineStyle>
+				<color>ff579D00</color>
+				<width>3.0</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>4C579D00</color>
+				<fill>1</fill>
+				<outline>1</outline>
+			</PolyStyle>
+		</Style>
+		<StyleMap id='poly-009D57-2-76'>
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#poly-009D57-2-76-normal</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#poly-009D57-2-76-highlight</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id='poly-4186F0-1-76-normal'>
+			<LineStyle>
+				<color>ffF08641</color>
+				<width>1</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>4CF08641</color>
+				<fill>1</fill>
+				<outline>1</outline>
+			</PolyStyle>
+		</Style>
+		<Style id='poly-4186F0-1-76-highlight'>
+			<LineStyle>
+				<color>ffF08641</color>
+				<width>2.0</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>4CF08641</color>
+				<fill>1</fill>
+				<outline>1</outline>
+			</PolyStyle>
+		</Style>
+		<StyleMap id='poly-4186F0-1-76'>
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#poly-4186F0-1-76-normal</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#poly-4186F0-1-76-highlight</styleUrl>
+			</Pair>
+		</StyleMap>
+		<Style id='poly-F4EB37-1-76-normal'>
+			<LineStyle>
+				<color>ff37EBF4</color>
+				<width>1</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>4C37EBF4</color>
+				<fill>1</fill>
+				<outline>1</outline>
+			</PolyStyle>
+		</Style>
+		<Style id='poly-F4EB37-1-76-highlight'>
+			<LineStyle>
+				<color>ff37EBF4</color>
+				<width>2.0</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>4C37EBF4</color>
+				<fill>1</fill>
+				<outline>1</outline>
+			</PolyStyle>
+		</Style>
+		<StyleMap id='poly-F4EB37-1-76'>
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#poly-F4EB37-1-76-normal</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#poly-F4EB37-1-76-highlight</styleUrl>
+			</Pair>
+		</StyleMap>
+	</Document>
+</kml>

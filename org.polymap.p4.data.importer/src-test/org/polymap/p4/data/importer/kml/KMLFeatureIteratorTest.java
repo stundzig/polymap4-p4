@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.opengis.feature.GeometryAttribute;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
@@ -31,7 +32,9 @@ public class KMLFeatureIteratorTest {
         SimpleFeatureType featureType = it.getFeatureType();
         int i = 0;
         while (it.hasNext()) {
-            it.next();
+            SimpleFeature feature = (SimpleFeature)it.next();
+            Object defaultGeometry = feature.getDefaultGeometry();
+            GeometryAttribute defaultGeometryProperty = feature.getDefaultGeometryProperty();
             i++;
         }
         it.close();

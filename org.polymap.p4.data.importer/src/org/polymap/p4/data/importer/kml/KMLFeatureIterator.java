@@ -28,6 +28,7 @@ import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeImpl;
 import org.geotools.feature.type.GeometryDescriptorImpl;
 import org.geotools.feature.type.GeometryTypeImpl;
+import org.geotools.referencing.CRS;
 import org.geotools.xml.PullParser;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -35,8 +36,6 @@ import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.feature.type.GeometryType;
 
 import org.apache.commons.io.FilenameUtils;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Read a KML or a KMZ file directly.
@@ -61,7 +60,7 @@ public class KMLFeatureIterator
 
         if (FilenameUtils.getExtension( file.getName() ).equals( "kmz" )) {
             zip = new ZipFile( file );
-            // there should be only one element
+            // we use only the first element, but thekmz can contain more elements
             fis = zip.getInputStream( zip.entries().nextElement() );
         }
         else {
@@ -79,15 +78,14 @@ public class KMLFeatureIterator
 
             SimpleFeatureType originalSchema = f != null ? f.getType() : null;
             if (originalSchema != null) {
-                // originalSchema = SimpleFeatureTypeBuilder.retype( originalSchema,
-                // CRS.decode( "EPSG:4326" ) );
+//                originalSchema = SimpleFeatureTypeBuilder.retype( originalSchema, CRS.decode( "EPSG:4326" ) );
                 GeometryDescriptor originalGeom = originalSchema.getGeometryDescriptor();
                 GeometryType geomType = originalGeom.getType();
-                if (geomType.getBinding() == Geometry.class && f.getDefaultGeometryProperty() != null) {
-                    geomType = new GeometryTypeImpl( geomType.getName(), f.getDefaultGeometryProperty().getValue().getClass(), geomType.getCoordinateReferenceSystem(), geomType.isIdentified(), geomType.isAbstract(), geomType.getRestrictions(), geomType.getSuper(), geomType.getDescription() );
+                if (f.getDefaultGeometryProperty() != null) {
+                    geomType = new GeometryTypeImpl( f.getDefaultGeometryProperty().getName(), f.getDefaultGeometryProperty().getValue().getClass(), CRS.decode( "EPSG:4326" ), geomType.isIdentified(), geomType.isAbstract(), geomType.getRestrictions(), geomType.getSuper(), geomType.getDescription() );
                 }
-                GeometryDescriptor geom = new GeometryDescriptorImpl( geomType, originalGeom.getName(), originalGeom.getMinOccurs(), originalGeom.getMaxOccurs(), originalGeom.isNillable(), originalGeom.getDefaultValue() );
-                type = new SimpleFeatureTypeImpl( new NameImpl( schemaName ), originalSchema.getAttributeDescriptors(), geom, originalSchema.isAbstract(), originalSchema.getRestrictions(), originalSchema.getSuper(), originalSchema.getDescription() );
+                GeometryDescriptor geom = new GeometryDescriptorImpl( geomType, geomType.getName(), originalGeom.getMinOccurs(), originalGeom.getMaxOccurs(), originalGeom.isNillable(), originalGeom.getDefaultValue() );
+                type = new SimpleFeatureTypeImpl( new NameImpl( schemaName ), originalSchema.getAttributeDescriptors(), geom, geomType.isAbstract(), geomType.getRestrictions(), geomType.getSuper(), geomType.getDescription() );
             }
             else {
                 type = null;
