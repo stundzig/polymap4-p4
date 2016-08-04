@@ -364,9 +364,9 @@ public class ImporterContext
                         // check for assignable types
                         else {
                             List<Object> assignable = values.values().stream()
-                                    .filter( v -> f.getType().isAssignableFrom( v.getClass() ) )
+                                    .filter( v -> v != null && f.getType().isAssignableFrom( v.getClass() ) )
                                     .collect( Collectors.toList() );
-                            assert assignable.size() <= 1 : "...";
+                            assert assignable.size() <= 1 : "more than 1 value could be assigned to field " + f.getName() + " in " + cl.getName();
                             if (assignable.size() > 0) {
                                 f.set( obj, assignable.get( 0 ) );
                             }

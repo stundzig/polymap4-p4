@@ -17,6 +17,7 @@ package org.polymap.p4.data.importer.archive;
 import static java.nio.charset.Charset.forName;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import java.io.File;
@@ -30,6 +31,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
@@ -40,9 +42,9 @@ import org.polymap.p4.data.importer.ImportTempDir;
 import org.polymap.p4.data.importer.Importer;
 import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.importer.ImporterPrompt;
-import org.polymap.p4.data.importer.ImporterSite;
 import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.importer.ImporterPrompt.Severity;
+import org.polymap.p4.data.importer.ImporterSite;
 
 /**
  * 
@@ -63,7 +65,9 @@ public class ArchiveFileImporter
     protected File                  file;
     
     @ContextOut
-    protected List<File>            result;
+    protected List<File>            selectedFiles;
+
+    private List<File>              allFiles;
     
     protected Charset               filenameCharset = CHARSETS[2];
     
@@ -126,7 +130,7 @@ public class ArchiveFileImporter
     @Override
     public void verify( IProgressMonitor monitor ) {
         try {
-            result = new ArchiveReader()
+            allFiles = new ArchiveReader()
                     .targetDir.put( ImportTempDir.create() )
                     .charset.put( filenameCharset )
                     .run( file, monitor );
@@ -143,14 +147,32 @@ public class ArchiveFileImporter
     
     @Override
     public void createResultViewer( Composite parent, IPanelToolkit tk ) {
-        if (result == null) {
+        if (allFiles == null) {
             tk.createFlowText( parent,
                     "\nUnable to read the data.\n\n" +
                     "**Reason**: " + exception.getLocalizedMessage() );            
         }
         else {
-            org.eclipse.swt.widgets.List list = tk.createList( parent, SWT.V_SCROLL, SWT.H_SCROLL );
-            result.stream().sorted().forEach( f -> list.add( f.getName() ) );
+            org.eclipse.swt.widgets.List list = tk.createList( parent, SWT.V_SCROLL, SWT.H_SCROLL, SWT.MULTI );
+            allFiles.stream().sorted().forEach( f -> list.add( f.getName() ) );
+            selectedFiles = new ArrayList<File>( allFiles );
+            list.addSelectionListener( new SelectionAdapter() {
+
+                @Override
+                public void widgetSelected( SelectionEvent e ) {
+                    int[] selections = list.getSelectionIndices();
+                    if (selections.length == 0) {
+                        selectedFiles.clear();
+                        selectedFiles.addAll( allFiles );
+                    }
+                    else {
+                        selectedFiles.clear();
+                        for (int i = 0; i < selections.length; i++) {
+                            selectedFiles.add( allFiles.get( selections[i] ) );
+                        }
+                    }
+                }
+            } );
         }
     }
 

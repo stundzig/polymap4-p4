@@ -49,6 +49,13 @@ public class CSVFileImporterFactory
         if (isSupported( file )) {
             builder.newImporter( new CSVFileImporter(), file );
         }
+        if (files != null) {
+            for (File file : files) {
+                if (isSupported( file )) {
+                    builder.newImporter( new CSVFileImporter(), file );
+                }
+            }
+        }
     }
 
 

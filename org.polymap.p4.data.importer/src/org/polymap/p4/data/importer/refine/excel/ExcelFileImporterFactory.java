@@ -13,8 +13,10 @@
  */
 package org.polymap.p4.data.importer.refine.excel;
 
-import java.io.File;
+import java.util.List;
 import java.util.Set;
+
+import java.io.File;
 
 import com.google.common.collect.Sets;
 
@@ -33,20 +35,32 @@ public class ExcelFileImporterFactory
 
     @ContextIn
     protected File                  file;
-    //
-    // @ContextIn
-    // protected List<File> files;
+
+    @ContextIn
+    protected List<File>            files;
 
     @ContextIn
     protected Sheet                 sheet;
 
+
     @Override
     public void createImporters( ImporterBuilder builder ) throws Exception {
-        if (isSupported( file ) || sheet != null) {
-            if (sheet == null) {
-                sheet = new Sheet( file, -1, null );
-            }
+        if (sheet != null) {
             builder.newImporter( new ExcelFileImporter(), sheet, sheet.file() );
+        }
+        else {
+            if (isSupported( file )) {
+                Sheet sheet = new Sheet( file, -1, null );
+                builder.newImporter( new ExcelFileImporter(), sheet, sheet.file() );
+            }
+            if (files != null) {
+                for (File file : files) {
+                    if (isSupported( file )) {
+                        Sheet sheet = new Sheet( file, -1, null );
+                        builder.newImporter( new ExcelFileImporter(), sheet, sheet.file() );
+                    }
+                }
+            }
         }
     }
 

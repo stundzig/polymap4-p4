@@ -58,6 +58,7 @@ import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 import com.google.refine.importing.ImportingJob;
 import com.google.refine.model.Cell;
 import com.google.refine.model.Column;
@@ -253,7 +254,11 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
 
 
     protected void prepare( IProgressMonitor monitor ) throws Exception {
-        ImportResponse<T> response = service.importFile( file, defaultOptions(), monitor );
+        // ImportService removes the original file, so create a copy here
+        File copyOfOriginalFile = new File( Files.createTempDir(), FilenameUtils.getName( file.getName() ) );
+        Files.copy( file, copyOfOriginalFile );
+
+        ImportResponse<T> response = service.importFile( copyOfOriginalFile, defaultOptions(), monitor );
         importJob = response.job();
         formatAndOptions = response.options();
     }

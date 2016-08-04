@@ -44,6 +44,13 @@ public class GeoJSONImporterFactory
         if (isSupported( file )) {
             builder.newImporter( new GeoJSONImporter(), file );
         }
+        if (files != null) {
+            for (File file : files) {
+                if (isSupported( file )) {
+                    builder.newImporter( new GeoJSONImporter(), file );
+                }
+            }
+        }
     }
 
 
