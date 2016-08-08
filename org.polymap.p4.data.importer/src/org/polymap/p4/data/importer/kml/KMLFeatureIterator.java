@@ -14,6 +14,7 @@
  */
 package org.polymap.p4.data.importer.kml;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import java.io.File;
@@ -31,8 +32,11 @@ import org.geotools.referencing.CRS;
 import org.geotools.xml.PullParser;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.feature.type.GeometryType;
+
+import com.google.common.collect.Lists;
 
 /**
  * Reads a KML file.
@@ -64,15 +68,21 @@ public class KMLFeatureIterator
 
             SimpleFeatureType originalSchema = f != null ? f.getType() : null;
             if (originalSchema != null) {
-                // originalSchema = SimpleFeatureTypeBuilder.retype( originalSchema,
-                // CRS.decode( "EPSG:4326" ) );
                 GeometryDescriptor originalGeom = originalSchema.getGeometryDescriptor();
                 GeometryType geomType = originalGeom.getType();
                 if (f.getDefaultGeometryProperty() != null) {
                     geomType = new GeometryTypeImpl( f.getDefaultGeometryProperty().getName(), f.getDefaultGeometryProperty().getValue().getClass(), CRS.decode( "EPSG:4326" ), geomType.isIdentified(), geomType.isAbstract(), geomType.getRestrictions(), geomType.getSuper(), geomType.getDescription() );
                 }
                 GeometryDescriptor geom = new GeometryDescriptorImpl( geomType, geomType.getName(), originalGeom.getMinOccurs(), originalGeom.getMaxOccurs(), originalGeom.isNillable(), originalGeom.getDefaultValue() );
-                type = new SimpleFeatureTypeImpl( new NameImpl( schemaName ), originalSchema.getAttributeDescriptors(), geom, geomType.isAbstract(), geomType.getRestrictions(), geomType.getSuper(), geomType.getDescription() );
+                List<AttributeDescriptor> attributeDescriptors = Lists.newArrayList();
+                for (AttributeDescriptor attr : originalSchema.getAttributeDescriptors()) {
+                    if (attr.getLocalName().equals( geom.getLocalName())) {
+                        attributeDescriptors.add( geom );
+                    } else {
+                        attributeDescriptors.add( attr );
+                    }
+                }
+                type = new SimpleFeatureTypeImpl( new NameImpl( schemaName ), attributeDescriptors, geom, geomType.isAbstract(), geomType.getRestrictions(), geomType.getSuper(), geomType.getDescription() );
             }
             else {
                 type = null;

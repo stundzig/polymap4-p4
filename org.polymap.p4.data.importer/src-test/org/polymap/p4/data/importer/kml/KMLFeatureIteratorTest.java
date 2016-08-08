@@ -16,36 +16,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.File;
-import java.io.IOException;
-
+import org.geotools.referencing.CRS;
 import org.junit.Test;
 import org.opengis.feature.GeometryAttribute;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.GeometryDescriptor;
 
 public class KMLFeatureIteratorTest {
 
     @Test
-    public void zippedFile() throws IOException {
-        File file = new File( this.getClass().getResource( "BTW2013BE_Abgeordnetenhauswahlkreise.kmz" ).getFile() );
-        KMLFeatureIterator it = new KMLFeatureIterator( file, "foo" );
-        SimpleFeatureType featureType = it.getFeatureType();
-        int i = 0;
-        while (it.hasNext()) {
-            SimpleFeature feature = (SimpleFeature)it.next();
-            Object defaultGeometry = feature.getDefaultGeometry();
-            GeometryAttribute defaultGeometryProperty = feature.getDefaultGeometryProperty();
-            i++;
-        }
-        it.close();
-        assertEquals( 78, i );
-        assertEquals( null, featureType.getName().getNamespaceURI() );
-        assertEquals( "foo", featureType.getName().getLocalPart() );
-    }
-
-
-    @Test
-    public void normalFile() throws IOException {
+    public void normalFile() throws Exception {
         File file = new File( this.getClass().getResource( "doc.kml" ).getFile() );
         KMLFeatureIterator it = new KMLFeatureIterator( file, "foo" );
         SimpleFeatureType featureType = it.getFeatureType();
@@ -53,8 +34,14 @@ public class KMLFeatureIteratorTest {
         while (it.hasNext()) {
             SimpleFeature feature = it.next();
             assertNull( feature.getIdentifier());
+            assertEquals( CRS.decode( "EPSG:4326" ), feature.getType().getCoordinateReferenceSystem());
+            Object defaultGeometry = feature.getDefaultGeometry();
+            GeometryAttribute defaultGeometryProperty = feature.getDefaultGeometryProperty();
+            GeometryDescriptor geometryDescriptor = feature.getType().getGeometryDescriptor();
+            GeometryDescriptor geometryDescriptor2 = featureType.getGeometryDescriptor();
             i++;
         }
+        assertEquals( CRS.decode( "EPSG:4326" ), featureType.getCoordinateReferenceSystem());
         it.close();
         assertEquals( 78, i );
         assertEquals( null, featureType.getName().getNamespaceURI() );
