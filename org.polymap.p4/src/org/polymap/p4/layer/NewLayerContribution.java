@@ -30,8 +30,9 @@ import org.eclipse.swt.widgets.Button;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.data.util.NameImpl;
 import org.polymap.core.operation.OperationSupport;
+import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
-import org.polymap.core.project.operations.NewLayerOperation;
+import org.polymap.core.project.ops.NewLayerOperation;
 import org.polymap.core.style.DefaultStyle;
 import org.polymap.core.style.model.FeatureStyle;
 import org.polymap.core.ui.StatusDispatcher;
@@ -46,7 +47,6 @@ import org.polymap.rhei.batik.contribution.IContributionSite;
 import org.polymap.rhei.batik.contribution.IFabContribution;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
-import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.ResourceInfoPanel;
 import org.polymap.p4.project.ProjectRepository;
@@ -108,8 +108,6 @@ public class NewLayerContribution
         }
         log.info( "FeatureStyle.id: " + featureStyle.id() );
         
-        UnitOfWork uow = ProjectRepository.unitOfWork();
-        
         if (res.get().getName() == null) {
             MdToolkit tk = (MdToolkit)site.toolkit();
             tk.createSimpleDialog( "WMS Resource" )
@@ -121,11 +119,14 @@ public class NewLayerContribution
             return;
         }
         NewLayerOperation op = new NewLayerOperation()
-                .uow.put( uow.newUnitOfWork() )
+                .uow.put( ProjectRepository.unitOfWork() )
                 .map.put( map.get() )
-                .label.put( res.get().getName() )
-                .resourceIdentifier.put( resId )
-                .styleIdentifier.put( featureStyle.id() );
+                .initializer.put( (ILayer proto) -> {
+                    proto.label.set( res.get().getName() );
+                    proto.resourceIdentifier.set( resId );
+                    proto.styleIdentifier.set( featureStyle.id() );
+                    return proto;
+                });
 
         OperationSupport.instance().execute2( op, true, false, ev2 -> asyncFast( () -> {
             if (ev2.getResult().isOK()) {

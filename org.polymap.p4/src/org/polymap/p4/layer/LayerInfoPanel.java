@@ -30,7 +30,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.project.ILayer;
-import org.polymap.core.project.operations.DeleteLayerOperation;
+import org.polymap.core.project.ops.DeleteLayerOperation;
+import org.polymap.core.project.ops.UpdateLayerOperation;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.ui.StatusDispatcher;
@@ -51,7 +52,6 @@ import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.batik.toolkit.Snackbar.Appearance;
 
-import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.project.ProjectRepository;
@@ -71,29 +71,15 @@ public class LayerInfoPanel
     public static final String          DASHBOARD_ID = "org.polymap.p4.project.layer";
     
     @Scope( P4Plugin.Scope )
-    private Context<ILayer>             contextLayer;
+    private Context<ILayer>             layer;
     
-    /** The local, modifiable nested {@link UnitOfWork}. */
-    private UnitOfWork                  nested;
-    
-    /** The local, modifiable Entity which belongs to {@link #nested}. */
-    private ILayer                      layer;
-
     private Dashboard                   dashboard;
 
     private Button                      fab;
 
     
     @Override
-    public void init() {
-        nested = ProjectRepository.unitOfWork().newUnitOfWork();
-        layer = nested.entity( contextLayer.get() );
-    }
-
-
-    @Override
     public void dispose() {
-        nested.close();
         EventManager.instance().unsubscribe( this );
     }
 
@@ -101,11 +87,11 @@ public class LayerInfoPanel
     @Override
     public void createContents( Composite parent ) {
         site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH );
-        site().title.set( layer.label.get() );
+        site().title.set( layer.get().label.get() );
         ContributionManager.instance().contributeTo( this, this );
         
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
-        dashboard.addDashlet( new BasicInfoDashlet( layer ) );
+        dashboard.addDashlet( new BasicInfoDashlet( layer.get() ) );
         //dashboard.addDashlet( new DeleteLayerDashlet() );
         dashboard.createContents( parent );
 
@@ -119,8 +105,16 @@ public class LayerInfoPanel
                     for (IDashlet dashlet : dashboard.dashlets()) {
                         ((ISubmitableDashlet)dashlet).submit( new NullProgressMonitor() );
                     }
-                    nested.commit();
-                    tk().createSnackbar( Appearance.FadeIn, "Saved" );
+                    UpdateLayerOperation op = new UpdateLayerOperation()
+                            .uow.put( layer.get().belongsTo() )
+                            .layer.put( layer.get() );
+                    
+                    // XXX not async until op progress indicator is inplace
+                    OperationSupport.instance().execute2( op, false, false, ev2 -> asyncFast( () -> {
+                        if (ev2.getResult().isOK()) {
+                            tk().createSnackbar( Appearance.FadeIn, "Saved" );
+                        }
+                    }));
                 }
                 catch (Exception e) {
                     StatusDispatcher.handleError( "Unable to submit all changes.", e );
@@ -168,8 +162,8 @@ public class LayerInfoPanel
 //                    snackbar.showIssue( MessageType.WARNING, "We are going to delete the project." );
                     
                     DeleteLayerOperation op = new DeleteLayerOperation();
-                    op.uow.set( ProjectRepository.unitOfWork().newUnitOfWork() );
-                    op.layer.set( layer );
+                    op.uow.set( ProjectRepository.unitOfWork() );
+                    op.layer.set( layer.get() );
 
                     OperationSupport.instance().execute2( op, true, false, ev2 -> asyncFast( () -> {
                         if (ev2.getResult().isOK()) {

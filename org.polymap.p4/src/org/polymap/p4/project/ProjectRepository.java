@@ -33,13 +33,8 @@ import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.session.SessionContext;
 import org.polymap.core.runtime.session.SessionSingleton;
 
-import org.polymap.model2.Entity;
-import org.polymap.model2.query.Query;
-import org.polymap.model2.runtime.ConcurrentEntityModificationException;
 import org.polymap.model2.runtime.EntityRepository;
-import org.polymap.model2.runtime.ModelRuntimeException;
 import org.polymap.model2.runtime.UnitOfWork;
-import org.polymap.model2.runtime.ValueInitializer;
 import org.polymap.model2.runtime.locking.OptimisticLocking;
 import org.polymap.model2.store.recordstore.RecordStoreAdapter;
 import org.polymap.p4.P4Plugin;
@@ -105,106 +100,103 @@ public class ProjectRepository {
 
     
     /**
-     * The instance of the current {@link SessionContext}. This is the <b>read</b>
-     * cache for all entities used by the UI.
-     * <p/>
-     * Do <b>not</b> use this for <b>modifications</b> that might be canceled or
-     * otherwise may left pending changes! Create a
-     * {@link UnitOfWorkWrapper#newUnitOfWork()} nested instance for that. This
-     * prevents your modifications from being committed by another party are leaving
-     * half-done, uncommitted changes. Commiting a nested instance commits also the
-     * parent, hence making changes persistent, in one atomic action. If that fails
-     * the <b>parent</b> is rolled back.
+     * The instance of the current {@link SessionContext}.
      */
     public static UnitOfWork unitOfWork() {
-        return UnitOfWorkWrapper.instance( UnitOfWorkWrapper.class );
+        return SessionHolder.instance( SessionHolder.class ).uow;
     }
 
+    
+    static class SessionHolder
+            extends SessionSingleton {
+        UnitOfWork uow = repo.newUnitOfWork();
+    }
+    
     
     public static UnitOfWork newUnitOfWork() {
         return repo.newUnitOfWork();
     }
     
     
-    /**
-     * 
-     */
-    static class UnitOfWorkWrapper
-            extends SessionSingleton
-            implements UnitOfWork {
-        
-        private UnitOfWork          delegate;
-        
-        private UnitOfWork          parent;
-
-        /** This is the {@link SessionSingleton} ctor. */
-        public UnitOfWorkWrapper() {
-            this.delegate = repo.newUnitOfWork();    
-        }
-        
-        /** This is the ctor fpr nested instances. */
-        public UnitOfWorkWrapper( UnitOfWork parent ) {
-            this.delegate = parent.newUnitOfWork();
-            this.parent = parent;
-        }
-        
-        public <T extends Entity> T entityForState( Class<T> entityClass, Object state ) {
-            return delegate.entityForState( entityClass, state );
-        }
-
-        public <T extends Entity> T entity( Class<T> entityClass, Object id ) {
-            return delegate.entity( entityClass, id );
-        }
-
-        public <T extends Entity> T entity( T entity ) {
-            return delegate.entity( entity );
-        }
-
-        public <T extends Entity> T createEntity( Class<T> entityClass, Object id, ValueInitializer<T>... initializers ) {
-            return delegate.createEntity( entityClass, id, initializers );
-        }
-
-        public void removeEntity( Entity entity ) {
-            delegate.removeEntity( entity );
-        }
-
-        public void prepare() throws IOException, ConcurrentEntityModificationException {
-            throw new RuntimeException( "the nested UoW thing does not (yet) support prepare()." );
-            //delegate.prepare();
-        }
-
-        public void commit() throws ModelRuntimeException {
-            synchronized( parent) {
-                try {
-                    delegate.commit();
-                    parent.commit();
-                }
-                catch (Exception e) {
-                    log.info( "Commit nested ProjectRepository failed.", e );
-                    parent.rollback();
-                }
-            }
-        }
-
-        public void rollback() throws ModelRuntimeException {
-            delegate.rollback();
-        }
-
-        public void close() {
-            delegate.close();
-        }
-
-        public boolean isOpen() {
-            return delegate.isOpen();
-        }
-
-        public <T extends Entity> Query<T> query( Class<T> entityClass ) {
-            return delegate.query( entityClass );
-        }
-
-        public UnitOfWork newUnitOfWork() {
-            return new UnitOfWorkWrapper( delegate );
-        }
-    }
+//    /**
+//     * 
+//     */
+//    static class UnitOfWorkWrapper
+//            extends SessionSingleton
+//            implements UnitOfWork {
+//        
+//        private UnitOfWork          delegate;
+//        
+//        private UnitOfWork          parent;
+//
+//        /** This is the {@link SessionSingleton} ctor. */
+//        public UnitOfWorkWrapper() {
+//            this.delegate = repo.newUnitOfWork();    
+//        }
+//        
+//        /** This is the ctor fpr nested instances. */
+//        public UnitOfWorkWrapper( UnitOfWork parent ) {
+//            this.delegate = parent.newUnitOfWork();
+//            this.parent = parent;
+//        }
+//        
+//        public <T extends Entity> T entityForState( Class<T> entityClass, Object state ) {
+//            return delegate.entityForState( entityClass, state );
+//        }
+//
+//        public <T extends Entity> T entity( Class<T> entityClass, Object id ) {
+//            return delegate.entity( entityClass, id );
+//        }
+//
+//        public <T extends Entity> T entity( T entity ) {
+//            return delegate.entity( entity );
+//        }
+//
+//        public <T extends Entity> T createEntity( Class<T> entityClass, Object id, ValueInitializer<T>... initializers ) {
+//            return delegate.createEntity( entityClass, id, initializers );
+//        }
+//
+//        public void removeEntity( Entity entity ) {
+//            delegate.removeEntity( entity );
+//        }
+//
+//        public void prepare() throws IOException, ConcurrentEntityModificationException {
+//            throw new RuntimeException( "the nested UoW thing does not (yet) support prepare()." );
+//            //delegate.prepare();
+//        }
+//
+//        public void commit() throws ModelRuntimeException {
+//            synchronized( parent) {
+//                try {
+//                    delegate.commit();
+//                    parent.commit();
+//                }
+//                catch (Exception e) {
+//                    log.info( "Commit nested ProjectRepository failed.", e );
+//                    parent.rollback();
+//                }
+//            }
+//        }
+//
+//        public void rollback() throws ModelRuntimeException {
+//            delegate.rollback();
+//        }
+//
+//        public void close() {
+//            delegate.close();
+//        }
+//
+//        public boolean isOpen() {
+//            return delegate.isOpen();
+//        }
+//
+//        public <T extends Entity> Query<T> query( Class<T> entityClass ) {
+//            return delegate.query( entityClass );
+//        }
+//
+//        public UnitOfWork newUnitOfWork() {
+//            return new UnitOfWorkWrapper( delegate );
+//        }
+//    }
     
 }

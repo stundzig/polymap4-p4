@@ -45,6 +45,7 @@ import org.polymap.core.operation.DefaultOperation;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
+import org.polymap.core.project.ops.TwoPhaseCommitOperation;
 import org.polymap.core.project.ui.ProjectNodeContentProvider;
 import org.polymap.core.project.ui.ProjectNodeLabelProvider;
 import org.polymap.core.runtime.event.EventHandler;
@@ -62,11 +63,9 @@ import org.polymap.rhei.batik.toolkit.md.CheckboxActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
-import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.map.ProjectMapPanel;
-import org.polymap.p4.project.ProjectRepository;
 
 /**
  * 
@@ -232,17 +231,13 @@ public class LayersPanel
 
         @Override
         public void perform( MdListViewer viewer, Object elm ) {
-            DefaultOperation op = new DefaultOperation( "Layer up" ) {
+            DefaultOperation op = new TwoPhaseCommitOperation( "Layer up" ) {
                 @Override
-                protected IStatus doExecute( IProgressMonitor monitor, IAdaptable info ) throws Exception {
-                    try (
-                        UnitOfWork nested = ProjectRepository.unitOfWork().newUnitOfWork();
-                    ){
-                        ILayer nestedLayer = nested.entity( (ILayer)elm );
-                        nestedLayer.orderUp( monitor );
-                        nested.commit();
-                        return Status.OK_STATUS;
-                    }
+                protected IStatus doWithCommit( IProgressMonitor monitor, IAdaptable info ) throws Exception {
+                    ILayer layer = (ILayer)elm;
+                    register( layer.belongsTo() );
+                    layer.orderUp( monitor );
+                    return Status.OK_STATUS;
                 }
             };
             OperationSupport.instance().execute( op, false, false );
@@ -266,17 +261,13 @@ public class LayersPanel
 
         @Override
         public void perform( MdListViewer viewer, Object elm ) {
-            DefaultOperation op = new DefaultOperation( "Layer up" ) {
+            DefaultOperation op = new TwoPhaseCommitOperation( "Layer down" ) {
                 @Override
-                protected IStatus doExecute( IProgressMonitor monitor, IAdaptable info ) throws Exception {
-                    try (
-                        UnitOfWork nested = ProjectRepository.unitOfWork().newUnitOfWork();
-                    ){
-                        ILayer nestedLayer = nested.entity( (ILayer)elm );
-                        nestedLayer.orderDown( monitor );
-                        nested.commit();
-                        return Status.OK_STATUS;
-                    }
+                protected IStatus doWithCommit( IProgressMonitor monitor, IAdaptable info ) throws Exception {
+                    ILayer layer = (ILayer)elm;
+                    register( layer.belongsTo() );
+                    layer.orderDown( monitor );
+                    return Status.OK_STATUS;
                 }
             };
             OperationSupport.instance().execute( op, false, false );

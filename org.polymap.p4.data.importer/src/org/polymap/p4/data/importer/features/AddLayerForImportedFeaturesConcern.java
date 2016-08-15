@@ -33,8 +33,9 @@ import org.polymap.core.operation.IOperationConcernFactory;
 import org.polymap.core.operation.OperationConcernAdapter;
 import org.polymap.core.operation.OperationInfo;
 import org.polymap.core.operation.OperationSupport;
+import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
-import org.polymap.core.project.operations.NewLayerOperation;
+import org.polymap.core.project.ops.NewLayerOperation;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.style.DefaultStyle;
 import org.polymap.core.style.model.FeatureStyle;
@@ -136,11 +137,14 @@ public class AddLayerForImportedFeaturesConcern
             featureStyle.store();
             
             NewLayerOperation op = new NewLayerOperation()
-                    .uow.put( ProjectRepository.unitOfWork().newUnitOfWork() )
+                    .uow.put( ProjectRepository.unitOfWork() )
                     .map.put( map.get() )
-                    .label.put( label )
-                    .resourceIdentifier.put( resId )
-                    .styleIdentifier.put( featureStyle.id() );
+                    .initializer.put( (ILayer proto) -> {
+                        proto.label.set( label );
+                        proto.resourceIdentifier.set( resId );
+                        proto.styleIdentifier.set( featureStyle.id() );
+                        return proto;
+                    });
 
             OperationSupport.instance().execute( op, true, false );
         }

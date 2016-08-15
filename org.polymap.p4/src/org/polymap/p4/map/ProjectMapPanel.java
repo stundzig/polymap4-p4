@@ -58,7 +58,6 @@ import org.polymap.rhei.batik.toolkit.Snackbar.Appearance;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
-import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.Messages;
 import org.polymap.p4.P4AppDesign;
 import org.polymap.p4.P4Panel;
@@ -90,10 +89,9 @@ public class ProjectMapPanel
 
     /**
      * The map of this P4 instance. This instance belongs to
-     * {@link ProjectRepository#unitOfWork()}. Don't forget to load a local copy for
-     * an nested {@link UnitOfWork} if you are going to modify anything.
+     * {@link ProjectRepository#unitOfWork()}.
      */
-    @Scope(P4Plugin.Scope)
+    @Scope( P4Plugin.Scope )
     protected Context<IMap>             map;
 
     public MapViewer<ILayer>            mapViewer;
