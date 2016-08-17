@@ -104,7 +104,7 @@ public class CatalogPanel
                     cell.setImage( P4Plugin.images().svgImage( "book-open-variant.svg", NORMAL24 ) );
                 }
                 else if (cell.getElement() instanceof IMetadata) {
-                    cell.setImage( P4Plugin.images().svgImage( "buffer.svg", NORMAL24 ) );
+                    cell.setImage( P4Plugin.images().svgImage( "buffer.svg", SvgImageRegistryHelper.NORMAL12 ) );
                 }
                 else if (cell.getElement() == MetadataContentProvider.LOADING) {
                     cell.setImage( BatikPlugin.images().image( "resources/icons/loading24.gif" ) );

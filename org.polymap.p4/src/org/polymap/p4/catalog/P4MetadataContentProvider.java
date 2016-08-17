@@ -14,6 +14,7 @@
  */
 package org.polymap.p4.catalog;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +30,8 @@ import org.polymap.core.catalog.resolve.IMetadataResourceResolver;
 import org.polymap.core.catalog.ui.MetadataContentProvider;
 
 /**
- * 
+ * Creates a dummy entry if not {@link LocalCatalog} and
+ * {@link IMetadataCatalog#ALL_QUERY}.
  *
  * @author Falko Bräutigam
  */
@@ -38,6 +40,38 @@ public class P4MetadataContentProvider
         implements IContentProvider {
 
     private static final Log log = LogFactory.getLog( P4MetadataContentProvider.class );
+
+    /**
+     * 
+     */
+    public static final IMetadata DUMMY = new IMetadata() {
+        @Override
+        public String getTitle() {
+            return "A lot of entries...";
+        }
+        @Override
+        public String getDescription() {
+            return "Enter a search to filter entries!";
+        }
+        @Override
+        public Date getModified() {
+            throw new RuntimeException( "not yet implemented." );
+        }
+        @Override
+        public Set<String> getKeywords() {
+            throw new RuntimeException( "not yet implemented." );
+        }
+        @Override
+        public String getIdentifier() {
+            throw new RuntimeException( "not yet implemented." );
+        }
+        @Override
+        public Map<String,String> getConnectionParams() {
+            // not resolvable
+            return Collections.EMPTY_MAP;
+        }
+    };
+
     
     public P4MetadataContentProvider( IMetadataResourceResolver resolver ) {
         super( resolver );
@@ -48,34 +82,7 @@ public class P4MetadataContentProvider
     protected void updateMetadataCatalog( IMetadataCatalog elm, int currentChildCount ) {
         if (!(elm instanceof LocalCatalog) 
                 && catalogQuery.get().equals( IMetadataCatalog.ALL_QUERY )) {
-            IMetadata dummy = new IMetadata() {
-                @Override
-                public String getTitle() {
-                    return "??? entries...";
-                }
-                @Override
-                public String getDescription() {
-                    return "Do a search to filter entries";
-                }
-                @Override
-                public Date getModified() {
-                    throw new RuntimeException( "not yet implemented." );
-                }
-                @Override
-                public Set<String> getKeywords() {
-                    throw new RuntimeException( "not yet implemented." );
-                }
-                @Override
-                public String getIdentifier() {
-                    throw new RuntimeException( "not yet implemented." );
-                }
-                @Override
-                public Map<String,String> getConnectionParams() {
-                    // XXX Auto-generated method stub
-                    throw new RuntimeException( "not yet implemented." );
-                }
-            };
-            updateChildren( elm, new IMetadata[] {dummy}, currentChildCount );
+            updateChildren( elm, new IMetadata[] {DUMMY}, currentChildCount );
         }
         else {
             super.updateMetadataCatalog( elm, currentChildCount );
