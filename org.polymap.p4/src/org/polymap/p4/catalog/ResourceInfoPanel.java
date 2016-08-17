@@ -21,15 +21,20 @@ import java.util.stream.Collectors;
 import org.geotools.data.wms.WebMapServer;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.base.Joiner;
+
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.ui.forms.widgets.ColumnLayoutData;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.polymap.core.catalog.IMetadata;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.data.util.Geometries;
 import org.polymap.core.mapeditor.MapViewer;
@@ -38,6 +43,7 @@ import org.polymap.core.mapeditor.OlLayerProvider;
 import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.UIJob;
 import org.polymap.core.runtime.UIThreadExecutor;
+import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.PanelIdentifier;
@@ -49,6 +55,11 @@ import org.polymap.rhei.batik.dashboard.DefaultDashlet;
 import org.polymap.rhei.batik.toolkit.MinHeightConstraint;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+import org.polymap.rhei.field.PlainValuePropertyAdapter;
+import org.polymap.rhei.field.TextFormField;
+import org.polymap.rhei.form.DefaultFormPage;
+import org.polymap.rhei.form.IFormPageSite;
+import org.polymap.rhei.form.batik.BatikFormContainer;
 
 import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
@@ -87,10 +98,10 @@ public class ResourceInfoPanel
     
     public static final String          DASHBOARD_ID = "org.polymap.p4.catalog.resource";
     
-    @Scope(P4Plugin.Scope)
+    @Scope( P4Plugin.Scope )
     private Context<IMap>               map;
     
-    @Scope(P4Plugin.Scope)
+    @Scope( P4Plugin.Scope )
     private Context<IResourceInfo>      res;
 
     private Dashboard                   dashboard;
@@ -99,12 +110,11 @@ public class ResourceInfoPanel
 
     @Override
     public void createContents( Composite parent ) {
-        site().title.set( "Resource" );
-        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH );
+        site().title.set( res.get().getTitle() );
+        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH*5/4, SIDE_PANEL_WIDTH*3/2 );
         
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
         dashboard.addDashlet( new BasicInfoDashlet() );
-        dashboard.addDashlet( new MetadataDashlet() );
         //dashboard.addDashlet( new MapDashlet() );
         dashboard.createContents( parent );
 
@@ -115,7 +125,55 @@ public class ResourceInfoPanel
     /**
      * 
      */
-    class MapDashlet
+    protected class BasicInfoDashlet
+            extends DefaultDashlet {
+    
+        @Override
+        public void init( DashletSite site ) {
+            super.init( site );
+            site.title.set( res.get().getTitle() );
+            site.constraints.get().add( new PriorityConstraint( 100 ) );
+            site.constraints.get().add( new MinWidthConstraint( 300, 1 ) );
+        }
+    
+        @Override
+        public void createContents( Composite parent ) {
+            parent.setLayout( new FillLayout() );
+            BatikFormContainer form = new BatikFormContainer( new Form() );
+            form.createContents( parent );
+            form.setEnabled( false );
+        }
+        
+        /**
+         * 
+         */
+        class Form
+                extends DefaultFormPage {
+            
+            @Override
+            public void createFormContents( IFormPageSite site ) {
+                super.createFormContents( site );
+                
+                Composite body = site.getPageBody();
+                body.setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).create() );
+                
+//                site.newFormField( new PlainValuePropertyAdapter( "title", res.get().getTitle() ) ).create();
+
+                site.newFormField( new PlainValuePropertyAdapter( "description", res.get().getDescription() ) )
+                        .field.put( new TextFormField() )
+                        .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, MetadataInfoPanel.TEXTFIELD_HEIGHT ) );
+        
+                site.newFormField( new PlainValuePropertyAdapter( "keywords", 
+                        Joiner.on( ", " ).skipNulls().join( res.get().getKeywords() ) ) ).create();
+            }
+        }
+    }
+
+
+    /**
+     * 
+     */
+    protected class MapDashlet
             extends DefaultDashlet {
 
         private MapViewer           mapViewer;
@@ -283,52 +341,6 @@ public class ResourceInfoPanel
             ReferencedEnvelope finalBounds = bounds;
             UIThreadExecutor.async( () -> mapViewer.zoomTo( finalBounds ), UIThreadExecutor.logErrorMsg( "" ) );
         }
-    }
-    
-    
-    /**
-     * 
-     */
-    class BasicInfoDashlet
-            extends DefaultDashlet {
-
-        @Override
-        public void init( DashletSite site ) {
-            super.init( site );
-            site.title.set( res.get().getTitle() );
-            site.constraints.get().add( new PriorityConstraint( 100 ) );
-            site.constraints.get().add( new MinWidthConstraint( 300, 1 ) );
-        }
-
-        @Override
-        public void createContents( Composite parent ) {
-            getSite().toolkit().createFlowText( parent, res.get().getDescription() );
-        }        
-    }
-    
-    
-    /**
-     * 
-     */
-    class MetadataDashlet
-            extends DefaultDashlet {
-
-        private IMetadata           metadata;
-
-        @Override
-        public void init( DashletSite site ) {
-            super.init( site );
-            metadata = res.get().getServiceInfo().getMetadata();
-            site.title.set( metadata.getTitle() );
-            site.constraints.get().add( new PriorityConstraint( 10 ) );
-            site.constraints.get().add( new MinWidthConstraint( 300, 1 ) );
-        }
-
-        @Override
-        public void createContents( Composite parent ) {
-            getSite().toolkit().createFlowText( parent, metadata.getDescription() );
-        }
-        
     }
     
 }

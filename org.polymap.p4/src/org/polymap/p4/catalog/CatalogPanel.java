@@ -14,31 +14,24 @@
  */
 package org.polymap.p4.catalog;
 
-import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.ViewerCell;
 
 import org.polymap.core.catalog.IMetadata;
-import org.polymap.core.catalog.IMetadataCatalog;
 import org.polymap.core.catalog.resolve.IResourceInfo;
-import org.polymap.core.catalog.ui.MetadataContentProvider;
 import org.polymap.core.catalog.ui.MetadataDescriptionProvider;
 import org.polymap.core.catalog.ui.MetadataLabelProvider;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
 
-import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.Scope;
@@ -60,7 +53,8 @@ import org.polymap.p4.map.ProjectMapPanel;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class CatalogPanel
-        extends P4Panel {
+        extends P4Panel 
+        implements IOpenListener {
 
     private static Log log = LogFactory.getLog( CatalogPanel.class );
 
@@ -68,8 +62,11 @@ public class CatalogPanel
 
     private MdListViewer                viewer;
 
-    @Scope(P4Plugin.Scope)
-    private Context<IResourceInfo>      res;
+    @Scope( P4Plugin.Scope )
+    private Context<IResourceInfo>      selectedResource;
+    
+    @Scope( P4Plugin.Scope )
+    private Context<IMetadata>          selectedMetadata;
     
     
     @Override
@@ -97,37 +94,8 @@ public class CatalogPanel
         viewer.setContentProvider( new P4MetadataContentProvider( P4Plugin.localResolver() ) );
         viewer.firstLineLabelProvider.set( new MetadataLabelProvider() );
         viewer.secondLineLabelProvider.set( new MetadataDescriptionProvider() );
-        viewer.iconProvider.set( new CellLabelProvider() {
-            @Override
-            public void update( ViewerCell cell ) {
-                if (cell.getElement() instanceof IMetadataCatalog) {
-                    cell.setImage( P4Plugin.images().svgImage( "book-open-variant.svg", NORMAL24 ) );
-                }
-                else if (cell.getElement() instanceof IMetadata) {
-                    cell.setImage( P4Plugin.images().svgImage( "buffer.svg", SvgImageRegistryHelper.NORMAL12 ) );
-                }
-                else if (cell.getElement() == MetadataContentProvider.LOADING) {
-                    cell.setImage( BatikPlugin.images().image( "resources/icons/loading24.gif" ) );
-                }
-                else {
-                    cell.setImage( null );
-                }
-            }
-        });
-        viewer.addOpenListener( new IOpenListener() {
-            @Override
-            public void open( OpenEvent ev ) {
-                SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
-                    if (elm instanceof IResourceInfo) {
-                        res.set( (IResourceInfo)elm );
-                        getContext().openPanel( getSite().getPath(), ResourceInfoPanel.ID );                        
-                    }
-                    else {
-                        viewer.toggleItemExpand( elm );
-                    }
-                });
-            }
-        });
+        viewer.iconProvider.set( new MetadataIconProvider() );
+        viewer.addOpenListener( this );
         viewer.setInput( P4Plugin.catalogs() );
 
         // search field
@@ -158,5 +126,23 @@ public class CatalogPanel
         viewer.setInput( P4Plugin.catalogs() );
         viewer.expandToLevel( 2 );
     }
+
     
+    @Override
+    public void open( OpenEvent ev ) {
+        SelectionAdapter.on( ev.getSelection() ).forEach( elm -> {
+            if (elm instanceof IMetadata) {
+                selectedMetadata.set( (IMetadata)elm );
+                getContext().openPanel( getSite().getPath(), MetadataInfoPanel.ID );                        
+            }
+            else if (elm instanceof IResourceInfo) {
+                selectedResource.set( (IResourceInfo)elm );
+                getContext().openPanel( getSite().getPath(), ResourceInfoPanel.ID );                        
+            }
+            else {
+                viewer.toggleItemExpand( elm );
+            }
+        });
+    }
+
 }

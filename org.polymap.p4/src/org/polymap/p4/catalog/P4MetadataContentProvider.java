@@ -70,6 +70,14 @@ public class P4MetadataContentProvider
             // not resolvable
             return Collections.EMPTY_MAP;
         }
+        @Override
+        public String getPublisher() {
+            throw new RuntimeException( "not yet implemented." );
+        }
+        @Override
+        public String getRights() {
+            throw new RuntimeException( "not yet implemented." );
+        }
     };
 
     
