@@ -130,7 +130,7 @@ public class MetadataInfoPanel
         public void createContents( Composite parent ) {
             parent.setLayout( FormLayoutFactory.defaults().create() );
             viewer = tk().createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION, SWT.SINGLE );
-            viewer.setContentProvider( new P4MetadataContentProvider( P4Plugin.localResolver() ) );
+            viewer.setContentProvider( new P4MetadataContentProvider( P4Plugin.allResolver() ) );
             viewer.firstLineLabelProvider.set( new MetadataLabelProvider() );
             viewer.secondLineLabelProvider.set( new MetadataDescriptionProvider() );
             viewer.iconProvider.set( new MetadataIconProvider() );

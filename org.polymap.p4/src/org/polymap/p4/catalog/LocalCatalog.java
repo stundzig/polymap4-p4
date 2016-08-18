@@ -87,7 +87,7 @@ public class LocalCatalog
     public IResolvableInfo localFeaturesStoreInfo() {
         try {
             IMetadata metadata = localFeaturesStoreEntry();
-            return P4Plugin.localResolver().resolve( metadata, new NullProgressMonitor() );
+            return P4Plugin.allResolver().resolve( metadata, new NullProgressMonitor() );
         }
         catch (Exception e) {
             throw new RuntimeException( e );

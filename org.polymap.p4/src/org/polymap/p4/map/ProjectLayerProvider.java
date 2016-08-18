@@ -37,7 +37,7 @@ import org.polymap.core.project.ILayer;
 import org.polymap.core.runtime.BlockingReference2;
 import org.polymap.core.runtime.UIJob;
 import org.polymap.p4.P4Plugin;
-import org.polymap.p4.catalog.LocalResolver;
+import org.polymap.p4.catalog.AllResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
 import org.polymap.rap.openlayers.layer.ImageLayer;
 import org.polymap.rap.openlayers.layer.Layer;
@@ -92,7 +92,7 @@ public class ProjectLayerProvider
                 @Override
                 protected void runWithException( IProgressMonitor monitor ) throws Exception {
                     // resolve service
-                    DataSourceDescription dsd = LocalResolver.instance().connectLayer( layer, monitor )
+                    DataSourceDescription dsd = AllResolver.instance().connectLayer( layer, monitor )
                             .orElseThrow( () -> new RuntimeException( "No data source for layer: " + layer ) );
 
                     // feature style

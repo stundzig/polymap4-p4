@@ -16,6 +16,7 @@ package org.polymap.p4;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import java.io.File;
 
@@ -48,7 +49,7 @@ import org.polymap.rhei.batik.contribution.IContributionProvider;
 import org.polymap.rhei.batik.toolkit.BatikDialogStatusAdapter;
 
 import org.polymap.p4.catalog.LocalCatalog;
-import org.polymap.p4.catalog.LocalResolver;
+import org.polymap.p4.catalog.AllResolver;
 import org.polymap.p4.layer.FeatureSelectionTableContrib;
 import org.polymap.p4.layer.NewLayerContribution;
 import org.polymap.p4.style.LayerStyleContrib;
@@ -87,7 +88,7 @@ public class P4Plugin
     }
     
     /**
-     * All catalogs of this instance, including the {@link #localCatalog}. 
+     * All catalogs, including the {@link #localCatalog}. 
      */
     public static List<IMetadataCatalog> catalogs() {
         return instance().catalogs;
@@ -97,8 +98,8 @@ public class P4Plugin
         return instance().localCatalog;
     }
     
-    public static LocalResolver localResolver() {
-        return instance().localResolver;
+    public static AllResolver allResolver() {
+        return instance().allResolver;
     }
 
     public static StyleRepository styleRepo() {
@@ -113,7 +114,7 @@ public class P4Plugin
     
     private LocalCatalog            localCatalog;
 
-    private LocalResolver           localResolver;
+    private AllResolver             allResolver;
 
     private Optional<HttpService>   httpService = Optional.empty();
     
@@ -162,7 +163,9 @@ public class P4Plugin
         catalogs = CatalogProviderExtension.createAllCatalogs();
         localCatalog = (LocalCatalog)catalogs.stream().filter( c -> c instanceof LocalCatalog ).findAny()
                 .orElseThrow( () -> new IllegalStateException( "No LocalCatalog found." ) );
-        localResolver = new LocalResolver( localCatalog );
+        List<IMetadataCatalog> localFirst = catalogs.stream()
+                .sorted( (c1,c2) -> c1 instanceof LocalCatalog ? -1 : 0 ).collect( Collectors.toList() );
+        allResolver = new AllResolver( localFirst );
         
         // Style
         File styleDataDir = CorePlugin.getDataLocation( StylePlugin.instance() );

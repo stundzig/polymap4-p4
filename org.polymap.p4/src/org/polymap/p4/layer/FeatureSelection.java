@@ -53,7 +53,7 @@ import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.session.SessionSingleton;
 
 import org.polymap.p4.P4Panel;
-import org.polymap.p4.catalog.LocalResolver;
+import org.polymap.p4.catalog.AllResolver;
 import org.polymap.p4.data.P4PipelineIncubator;
 
 /**
@@ -230,7 +230,7 @@ public class FeatureSelection {
     protected PipelineFeatureSource doConnectLayer( IProgressMonitor monitor ) throws PipelineIncubationException, Exception {
         log.info( "doConnectLayer(): " + layer.label.get() );
         // resolve service
-        DataSourceDescription dsd = LocalResolver.instance().connectLayer( layer, monitor )
+        DataSourceDescription dsd = AllResolver.instance().connectLayer( layer, monitor )
                 .orElseThrow( () -> new RuntimeException( "No data source for layer: " + layer ) );
 
         // create pipeline for it

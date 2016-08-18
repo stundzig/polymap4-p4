@@ -76,7 +76,7 @@ public class ImportFeaturesOperation
     public String resourceIdentifier() {
         IResolvableInfo info = P4Plugin.localCatalog().localFeaturesStoreInfo();
         IResourceInfo res = ((RServiceInfo)info.getServiceInfo()).resource( fs );
-        return P4Plugin.localResolver().resourceIdentifier( res );
+        return P4Plugin.allResolver().resourceIdentifier( res );
     }
 
     

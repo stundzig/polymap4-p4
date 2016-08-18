@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright (C) 2015, Falko Bräutigam. All rights reserved.
+ * Copyright (C) 2015-2016, Falko Bräutigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.polymap.core.catalog.IMetadata;
+import org.polymap.core.catalog.IMetadataCatalog;
 import org.polymap.core.catalog.resolve.IMetadataResourceResolver;
 import org.polymap.core.catalog.resolve.IResolvableInfo;
 import org.polymap.core.catalog.resolve.IResourceInfo;
@@ -41,28 +42,31 @@ import org.polymap.p4.P4Plugin;
  * Provides the connection between an {@link ILayer} -> {@link IMetadata} ->
  * {@link IServiceInfo} and back.
  * <p/>
- * Holds a list of metadata {@link #resolvers} which are responsible of actually
+ * Holds a list of delegate {@link #resolvers} which are responsible of actually
  * creating a service/resource out of a metadata entry. A {@link ILayer} is connected
  * to a metadata entry via the {@link #resourceIdentifier(IResourceInfo)} which
  * consists of the metadata identifier and the resource name.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class LocalResolver
+public class AllResolver
         implements IMetadataResourceResolver {
 
-    private static Log log = LogFactory.getLog( LocalResolver.class );
+    private static Log log = LogFactory.getLog( AllResolver.class );
 
     public static final String                      ID_DELIMITER = "|";
     
-    public static LocalResolver instance() {
-        return P4Plugin.localResolver();
+    /**
+     * Returns {@link P4Plugin#allResolver()}.
+     */
+    public static AllResolver instance() {
+        return P4Plugin.allResolver();
     }
     
     
     // instance *******************************************
     
-    private LocalCatalog                    localCatalog;
+    private List<IMetadataCatalog>          catalogs;
 
     /** The delegates. */
     private List<IMetadataResourceResolver> resolvers; 
@@ -74,9 +78,9 @@ public class LocalResolver
     private Cache<IMetadata,IResolvableInfo> resolved = CacheConfig.defaults().initSize( 128 ).createCache();
     
     
-    public LocalResolver( LocalCatalog localCatalog ) {
-        assert localCatalog != null;
-        this.localCatalog = localCatalog;
+    public AllResolver( List<IMetadataCatalog> catalogs ) {
+        assert !catalogs.isEmpty();
+        this.catalogs = catalogs;
         this.resolvers = ResourceResolverExtension.createAllResolvers(); 
     }
 
@@ -103,20 +107,20 @@ public class LocalResolver
         String metadataId = tokens.nextToken();
         String resName = tokens.nextToken();
         
-        IMetadata metadata = localCatalog.entry( metadataId, monitor ).get();
-        
-        if (metadata != null) {
-            IServiceInfo serviceInfo = (IServiceInfo)resolve( metadata, monitor );
-            Object service = serviceInfo.createService( monitor );
-            
-            DataSourceDescription result = new DataSourceDescription();
-            result.service.set( service );
-            result.resourceName.set( resName );
-            return Optional.of( result );
+        for (IMetadataCatalog catalog : catalogs) {
+            IMetadata metadata = catalog.entry( metadataId, monitor ).orElse( null );
+
+            if (metadata != null) {
+                IServiceInfo serviceInfo = (IServiceInfo)resolve( metadata, monitor );
+                Object service = serviceInfo.createService( monitor );
+
+                DataSourceDescription result = new DataSourceDescription();
+                result.service.set( service );
+                result.resourceName.set( resName );
+                return Optional.of( result );
+            }
         }
-        else {
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
     
     

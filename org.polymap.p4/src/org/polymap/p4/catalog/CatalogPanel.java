@@ -91,7 +91,7 @@ public class CatalogPanel
         
         // tree/list viewer
         viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.VIRTUAL, SWT.FULL_SELECTION, SWT.SINGLE );
-        viewer.setContentProvider( new P4MetadataContentProvider( P4Plugin.localResolver() ) );
+        viewer.setContentProvider( new P4MetadataContentProvider( P4Plugin.allResolver() ) );
         viewer.firstLineLabelProvider.set( new MetadataLabelProvider() );
         viewer.secondLineLabelProvider.set( new MetadataDescriptionProvider() );
         viewer.iconProvider.set( new MetadataIconProvider() );
