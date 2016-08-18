@@ -87,26 +87,19 @@ public class NewLayerContribution
 
 
     protected void execute( IContributionSite site ) {
-        String resId = P4Plugin.localResolver().resourceIdentifier( res.get() );
+        String resId = P4Plugin.allResolver().resourceIdentifier( res.get() );
         
         // create default style
         // XXX 86: [Style] Default style (http://github.com/Polymap4/polymap4-p4/issues/issue/86
         // see AddLayerOperationConcern
         FeatureStyle featureStyle = P4Plugin.styleRepo().newFeatureStyle();
-        FeatureSource featureSource = null;
         try {
-            featureSource = P4Plugin.localCatalog().localFeaturesStore().getFeatureSource( new NameImpl( res.get().getName() ) );
+            FeatureSource fs = P4Plugin.localCatalog().localFeaturesStore().getFeatureSource( new NameImpl( res.get().getName() ) );
+            DefaultStyle.create( featureStyle, fs.getSchema() );
         }
         catch (IOException e) {
-            // do nothing
-        }
-        if (featureSource != null) {
-            DefaultStyle.create( featureStyle, featureSource.getSchema() );
-        }
-        else {
             DefaultStyle.createAllStyles( featureStyle );
         }
-        log.info( "FeatureStyle.id: " + featureStyle.id() );
         
         if (res.get().getName() == null) {
             MdToolkit tk = (MdToolkit)site.toolkit();
