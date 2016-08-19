@@ -141,7 +141,7 @@ public class ResourceInfoPanel
             parent.setLayout( new FillLayout() );
             BatikFormContainer form = new BatikFormContainer( new Form() );
             form.createContents( parent );
-            //form.setEnabled( false );
+            form.setEnabled( false );
         }
         
         /**
@@ -161,14 +161,11 @@ public class ResourceInfoPanel
 
                 site.newFormField( new PlainValuePropertyAdapter( "description", res.get().getDescription() ) )
                         .field.put( new TextFormField() )
-                        .fieldEnabled.put( false )
                         .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, MetadataInfoPanel.TEXTFIELD_HEIGHT ) );
         
                 String keywords = Joiner.on( ", " ).skipNulls().join( res.get().getKeywords() );
                 site.newFormField( new PlainValuePropertyAdapter( "keywords", keywords ) )
-                        .tooltip.put( keywords )
                         .field.put( new TextFormField() )
-                        .fieldEnabled.put( false )
                         .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, MetadataInfoPanel.TEXTFIELD_HEIGHT ) );
             }
         }
