@@ -16,6 +16,10 @@ package org.polymap.p4.layer;
 
 import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
 
+import java.io.IOException;
+
+import org.geotools.data.FeatureSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,8 +28,11 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 
 import org.polymap.core.catalog.resolve.IResourceInfo;
+import org.polymap.core.data.util.NameImpl;
 import org.polymap.core.operation.OperationSupport;
 import org.polymap.core.project.IMap;
+import org.polymap.core.style.DefaultStyle;
+import org.polymap.core.style.model.FeatureStyle;
 import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.BatikApplication;
@@ -78,8 +85,21 @@ public class NewLayerContribution
 
 
     protected void execute( IContributionSite site ) {
+        // create default style
+        // XXX 86: [Style] Default style (http://github.com/Polymap4/polymap4-p4/issues/issue/86
+        // see AddLayerOperationConcern
+        FeatureStyle featureStyle = P4Plugin.styleRepo().newFeatureStyle();
+        try {
+            FeatureSource fs = P4Plugin.localCatalog().localFeaturesStore().getFeatureSource( new NameImpl( res.get().getName() ) );
+            DefaultStyle.create( featureStyle, fs.getSchema() );
+        }
+        catch (IOException e) {
+            DefaultStyle.createAllStyles( featureStyle );
+        }
+        
         NewLayerOperation op = new NewLayerOperation()
                 .res.put( res.get() )
+                .featureStyle.put( featureStyle )
                 .uow.put( ProjectRepository.unitOfWork() )
                 .map.put( map.get() );
 

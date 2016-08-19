@@ -33,9 +33,7 @@ import org.polymap.core.operation.IOperationConcernFactory;
 import org.polymap.core.operation.OperationConcernAdapter;
 import org.polymap.core.operation.OperationInfo;
 import org.polymap.core.operation.OperationSupport;
-import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
-import org.polymap.core.project.ops.NewLayerOperation;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.style.DefaultStyle;
 import org.polymap.core.style.model.FeatureStyle;
@@ -49,6 +47,7 @@ import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.toolkit.SimpleDialog;
 
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.layer.NewLayerOperation;
 import org.polymap.p4.project.ProjectRepository;
 
 /**
@@ -125,26 +124,18 @@ public class AddLayerForImportedFeaturesConcern
         }
 
         protected void createLayer() {
-            String resId = delegate.resourceIdentifier();
-            String label = input.getText();
-            
             // create default style
             // XXX 86: [Style] Default style (http://github.com/Polymap4/polymap4-p4/issues/issue/86
             // XXX this isn't a good place (see also NewLayerContribution)
             FeatureStyle featureStyle = P4Plugin.styleRepo().newFeatureStyle();
             DefaultStyle.create( featureStyle, delegate.features().getSchema() );
-            log.info( "FeatureStyle.id: " + featureStyle.id() );
-            featureStyle.store();
-            
+
             NewLayerOperation op = new NewLayerOperation()
+                    .label.put( input.getText() )
+                    .resId.put( delegate.resourceIdentifier() )
+                    .featureStyle.put( featureStyle )
                     .uow.put( ProjectRepository.unitOfWork() )
-                    .map.put( map.get() )
-                    .initializer.put( (ILayer proto) -> {
-                        proto.label.set( label );
-                        proto.resourceIdentifier.set( resId );
-                        proto.styleIdentifier.set( featureStyle.id() );
-                        return proto;
-                    });
+                    .map.put( map.get() );
 
             OperationSupport.instance().execute( op, true, false );
         }
