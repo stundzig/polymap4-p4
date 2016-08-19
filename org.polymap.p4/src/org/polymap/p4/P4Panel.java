@@ -40,6 +40,8 @@ public abstract class P4Panel
     
     public static final int                 SIDE_PANEL_WIDTH = 380;
     
+    public static final int                 SIDE_PANEL_WIDTH2 = 420;
+    
     /**
      * The <b>active</b> layer and the <b>selected</b> features from this layer.
      * There is just one active layer at a given time. This layer is selected by

@@ -16,10 +16,6 @@ package org.polymap.p4.layer;
 
 import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
 
-import java.io.IOException;
-
-import org.geotools.data.FeatureSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,13 +24,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 
 import org.polymap.core.catalog.resolve.IResourceInfo;
-import org.polymap.core.data.util.NameImpl;
 import org.polymap.core.operation.OperationSupport;
-import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
-import org.polymap.core.project.ops.NewLayerOperation;
-import org.polymap.core.style.DefaultStyle;
-import org.polymap.core.style.model.FeatureStyle;
 import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.BatikApplication;
@@ -62,11 +53,11 @@ public class NewLayerContribution
     private static Log log = LogFactory.getLog( NewLayerContribution.class );
     
     @Mandatory
-    @Scope(P4Plugin.Scope)
+    @Scope( P4Plugin.Scope )
     private Context<IMap>               map;
     
     @Mandatory
-    @Scope(P4Plugin.Scope)
+    @Scope( P4Plugin.Scope )
     private Context<IResourceInfo>      res;
 
     
@@ -87,44 +78,13 @@ public class NewLayerContribution
 
 
     protected void execute( IContributionSite site ) {
-        String resId = P4Plugin.allResolver().resourceIdentifier( res.get() );
-        
-        // create default style
-        // XXX 86: [Style] Default style (http://github.com/Polymap4/polymap4-p4/issues/issue/86
-        // see AddLayerOperationConcern
-        FeatureStyle featureStyle = P4Plugin.styleRepo().newFeatureStyle();
-        try {
-            FeatureSource fs = P4Plugin.localCatalog().localFeaturesStore().getFeatureSource( new NameImpl( res.get().getName() ) );
-            DefaultStyle.create( featureStyle, fs.getSchema() );
-        }
-        catch (IOException e) {
-            DefaultStyle.createAllStyles( featureStyle );
-        }
-        
-        if (res.get().getName() == null) {
-            MdToolkit tk = (MdToolkit)site.toolkit();
-            tk.createSimpleDialog( "WMS Resource" )
-                    .addOkAction( () -> true )
-                    .setContents( parent -> {
-                        tk.createFlowText( parent, "This WMS resource has no name.<br/> It does not seem to be an addable layer." );
-                    })
-                    .open();
-            return;
-        }
         NewLayerOperation op = new NewLayerOperation()
+                .res.put( res.get() )
                 .uow.put( ProjectRepository.unitOfWork() )
-                .map.put( map.get() )
-                .initializer.put( (ILayer proto) -> {
-                    proto.label.set( res.get().getName() );
-                    proto.resourceIdentifier.set( resId );
-                    proto.styleIdentifier.set( featureStyle.id() );
-                    return proto;
-                });
+                .map.put( map.get() );
 
         OperationSupport.instance().execute2( op, true, false, ev2 -> asyncFast( () -> {
             if (ev2.getResult().isOK()) {
-                featureStyle.store();
-                
                 PanelPath parentPath = site.panelSite().path().removeLast( 1 );
                 BatikApplication.instance().getContext().closePanel( parentPath );
 

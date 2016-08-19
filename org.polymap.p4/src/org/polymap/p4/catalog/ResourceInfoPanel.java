@@ -112,13 +112,13 @@ public class ResourceInfoPanel
     public void createContents( Composite parent ) {
         site().title.set( res.get().getTitle() );
         site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH*5/4, SIDE_PANEL_WIDTH*3/2 );
+        ContributionManager.instance().contributeTo( this, this );
         
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
         dashboard.addDashlet( new BasicInfoDashlet() );
         //dashboard.addDashlet( new MapDashlet() );
         dashboard.createContents( parent );
-
-        ContributionManager.instance().contributeTo( this, this );
+        ContributionManager.instance().contributeTo( dashboard, this );
     }
 
     
@@ -130,10 +130,10 @@ public class ResourceInfoPanel
     
         @Override
         public void init( DashletSite site ) {
-            super.init( site );
             site.title.set( res.get().getTitle() );
             site.constraints.get().add( new PriorityConstraint( 100 ) );
-            site.constraints.get().add( new MinWidthConstraint( 300, 1 ) );
+            site.constraints.get().add( new MinWidthConstraint( 400, 1 ) );
+            super.init( site );
         }
     
         @Override
@@ -141,7 +141,7 @@ public class ResourceInfoPanel
             parent.setLayout( new FillLayout() );
             BatikFormContainer form = new BatikFormContainer( new Form() );
             form.createContents( parent );
-            form.setEnabled( false );
+            //form.setEnabled( false );
         }
         
         /**
@@ -161,10 +161,15 @@ public class ResourceInfoPanel
 
                 site.newFormField( new PlainValuePropertyAdapter( "description", res.get().getDescription() ) )
                         .field.put( new TextFormField() )
+                        .fieldEnabled.put( false )
                         .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, MetadataInfoPanel.TEXTFIELD_HEIGHT ) );
         
-                site.newFormField( new PlainValuePropertyAdapter( "keywords", 
-                        Joiner.on( ", " ).skipNulls().join( res.get().getKeywords() ) ) ).create();
+                String keywords = Joiner.on( ", " ).skipNulls().join( res.get().getKeywords() );
+                site.newFormField( new PlainValuePropertyAdapter( "keywords", keywords ) )
+                        .tooltip.put( keywords )
+                        .field.put( new TextFormField() )
+                        .fieldEnabled.put( false )
+                        .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, MetadataInfoPanel.TEXTFIELD_HEIGHT ) );
             }
         }
     }
@@ -180,10 +185,10 @@ public class ResourceInfoPanel
 
         @Override
         public void init( DashletSite site ) {
-            super.init( site );
             site.title.set( "Resource Data" );
             site.constraints.get().add( new MinWidthConstraint( 500, 1 ) );
             site.constraints.get().add( new MinHeightConstraint( 500, 1 ) );
+            super.init( site );
         }
 
         @Override

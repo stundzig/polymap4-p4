@@ -40,8 +40,10 @@ import org.polymap.p4.PropertyAdapter;
 
 /**
  * 
+ * 
+ * @author Falko Bräutigam
  */
-class BasicInfoDashlet
+class BasicLayerInfoDashlet
         extends DefaultDashlet
         implements ISubmitableDashlet {
 
@@ -50,14 +52,14 @@ class BasicInfoDashlet
     private BatikFormContainer      form;
 
     
-    public BasicInfoDashlet( ILayer layer ) {
+    public BasicLayerInfoDashlet( ILayer layer ) {
         this.layer = layer;
     }
 
     @Override
     public void init( DashletSite site ) {
         super.init( site );
-        site.title.set( "Basic settings" );
+        site.title.set( layer.label.get() );
         site.constraints.get().add( new PriorityConstraint( 100 ) );
         site.constraints.get().add( new MinWidthConstraint( 350, 1 ) );
     }
@@ -106,20 +108,26 @@ class BasicInfoDashlet
                     .field.put( new TextFormField() )
                     .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 80 ) );
             
-//            // keywords
-//            site.newFormField( new PropertyAdapter( layer.keywords ) )
-//                    .label.put( "Description" )
-//                    .tooltip.put( "Describes the content and purpose of this layer." )
-//                    .create();            
+            // keywords
+            site.newFormField( new PropertyAdapter( layer.keywords ) )
+                    .label.put( "Keywords" )
+                    .tooltip.put( "..." )
+                    .validator.put( new KeywordsValidator() )
+                    .field.put( new TextFormField() )
+                    .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 80 ) );
         }
 
         @Override
         public void fieldChange( FormFieldEvent ev ) {
             if (ev.getEventCode() == VALUE_CHANGE) {
                 getSite().enableSubmit( form.isValid() && form.isDirty() );
+                
+                if (ev.getFieldName().equals( layer.label.info().getName() )) {
+                    getSite().title.set( (String)ev.getNewModelValue().orElse( "???" ) );
+                }
             }
         }
         
     }
-    
+
 }

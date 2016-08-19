@@ -86,12 +86,12 @@ public class LayerInfoPanel
 
     @Override
     public void createContents( Composite parent ) {
-        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH );
-        site().title.set( layer.get().label.get() );
+        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH2, SIDE_PANEL_WIDTH2 );
+        site().title.set( "Layer" ); // + layer.get().label.get() );
         ContributionManager.instance().contributeTo( this, this );
         
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
-        dashboard.addDashlet( new BasicInfoDashlet( layer.get() ) );
+        dashboard.addDashlet( new BasicLayerInfoDashlet( layer.get() ) );
         //dashboard.addDashlet( new DeleteLayerDashlet() );
         dashboard.createContents( parent );
 
