@@ -122,7 +122,8 @@ public class LayerStylePanel
     @Scope( P4Plugin.StyleScope )
     protected Context<StyleEditorInput> styleEditorInput;
 
-    private List<StylePropertyField> fields = Lists.newArrayList();
+    private List<StylePropertyField>    fields = Lists.newArrayList();
+    
 
     @Override
     public boolean beforeInit() {
@@ -140,6 +141,7 @@ public class LayerStylePanel
     @Override
     public void init() {
         super.init();
+        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH2, Integer.MAX_VALUE );
         try {
             featureStyle = P4Plugin.styleRepo().featureStyle( styleEditorInput.get().styleIdentifier() )
                     .orElseThrow( () -> new IllegalStateException( "Layer has no style.") );

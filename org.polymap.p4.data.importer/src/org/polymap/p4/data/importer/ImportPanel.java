@@ -133,7 +133,7 @@ public class ImportPanel
     @Override
     public void init() {
         super.init();
-        site().setSize( SIDE_PANEL_WIDTH, (int)(SIDE_PANEL_WIDTH*1.75), Integer.MAX_VALUE );
+        site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH2, Integer.MAX_VALUE );
         site().title.set( "Import" );
         context = nextContext.isPresent() ? nextContext.get() : new ImporterContext(); 
 

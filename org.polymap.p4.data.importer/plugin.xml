@@ -5,7 +5,8 @@
          point="org.polymap.rhei.batik.panels">
       <panel
             class="org.polymap.p4.data.importer.ImportPanel"
-            id="org.polymap.p4.data.imports.ImportPanel">
+            id="org.polymap.p4.data.imports.ImportPanel"
+            stackPriority="98">
       </panel>
    </extension>
    <extension

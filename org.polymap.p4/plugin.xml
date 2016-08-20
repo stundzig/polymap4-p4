@@ -49,7 +49,8 @@
       </panel>
       <panel
             class="org.polymap.p4.catalog.CatalogPanel"
-            id="org.polymap.p4.CatalogPanel">
+            id="org.polymap.p4.CatalogPanel"
+            stackPriority="99">
       </panel>
       <panel
             class="org.polymap.p4.catalog.ResourceInfoPanel"
@@ -58,11 +59,6 @@
       <panel
             class="org.polymap.p4.layer.LayerInfoPanel"
             id="org.polymap.p4.project.LayerPanel">
-      </panel>
-      <panel
-            class="org.polymap.p4.project.ProjectInfoPanel"
-            id="org.polymap.p4.project.ProjectInfoPanel"
-            stackPriority="-100">
       </panel>
       <panel
             class="org.polymap.p4.layer.FeaturePanel"
