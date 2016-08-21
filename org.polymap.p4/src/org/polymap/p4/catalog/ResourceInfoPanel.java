@@ -130,10 +130,11 @@ public class ResourceInfoPanel
     
         @Override
         public void init( DashletSite site ) {
+            super.init( site );
             site.title.set( res.get().getTitle() );
             site.constraints.get().add( new PriorityConstraint( 100 ) );
             site.constraints.get().add( new MinWidthConstraint( 400, 1 ) );
-            super.init( site );
+            site.border.set( false );
         }
     
         @Override
@@ -159,7 +160,7 @@ public class ResourceInfoPanel
                 
 //                site.newFormField( new PlainValuePropertyAdapter( "title", res.get().getTitle() ) ).create();
 
-                site.newFormField( new PlainValuePropertyAdapter( "description", res.get().getDescription() ) )
+                site.newFormField( new PlainValuePropertyAdapter( "description", res.get().getDescription().orElse( "" ) ) )
                         .field.put( new TextFormField() )
                         .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, MetadataInfoPanel.TEXTFIELD_HEIGHT ) );
         

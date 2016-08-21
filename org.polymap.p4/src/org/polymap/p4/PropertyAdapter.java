@@ -30,8 +30,8 @@ import org.polymap.model2.CollectionProperty;
 import org.polymap.model2.runtime.PropertyInfo;
 
 /**
- * Adapts {@link org.polymap.model2.Property} to {@link org.opengis.feature.Property}
- * to be used by forms.
+ * Adapts {@link org.polymap.model2.Property} or {@link CollectionProperty} to
+ * {@link org.opengis.feature.Property} to be used by forms.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */

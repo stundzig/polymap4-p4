@@ -14,6 +14,8 @@
  */
 package org.polymap.p4.catalog;
 
+import java.text.DateFormat;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -38,9 +40,12 @@ import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
+import org.polymap.core.ui.StatusDispatcher;
 
+import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.Scope;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.contribution.ContributionManager;
@@ -52,6 +57,7 @@ import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
+import org.polymap.rhei.field.DateValidator;
 import org.polymap.rhei.field.PlainValuePropertyAdapter;
 import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
@@ -61,6 +67,7 @@ import org.polymap.rhei.form.batik.BatikFormContainer;
 
 import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.layer.NewLayerContribution;
 
 /**
  * 
@@ -121,9 +128,10 @@ public class MetadataInfoPanel
         public void init( DashletSite site ) {
             super.init( site );
             site.title.set( "Data sets" );
-            site.constraints.get().add( new PriorityConstraint( 0 ) );
-            site.constraints.get().add( new MinWidthConstraint( 300, 1 ) );
+            site.addConstraint( new PriorityConstraint( 0 ) );
+            site.addConstraint( new MinWidthConstraint( 400, 1 ) );
             site.constraints.get().add( new MinHeightConstraint( 400, 1 ) );
+            //site.border.set( false );
         }
 
         @Override
@@ -140,7 +148,7 @@ public class MetadataInfoPanel
             viewer.setInput( md.get() );
             
             viewer.getTree().setLayoutData( FormDataFactory.filled().height( 400 ).create() );
-            viewer.expandToLevel( 2 );
+            //viewer.expandToLevel( 2 );
         }
 
         @Override
@@ -161,7 +169,7 @@ public class MetadataInfoPanel
     /**
      * 
      */
-    protected static class CreateLayerAction
+    protected class CreateLayerAction
             extends ActionProvider {
 
         @Override
@@ -174,7 +182,16 @@ public class MetadataInfoPanel
 
         @Override
         public void perform( MdListViewer viewer, Object elm ) {
-            throw new RuntimeException( "working on it..." );
+            IResourceInfo res = (IResourceInfo)elm;
+            NewLayerContribution.createLayer( res, map.get(), ev -> {
+                if (ev.getResult().isOK()) {
+                    PanelPath parentPath = site().path().removeLast( 1 );
+                    BatikApplication.instance().getContext().closePanel( parentPath );
+                }
+                else {
+                    StatusDispatcher.handleError( "Unable to create new layer.", ev.getResult().getException() );
+                }
+            });
         }    
     }
 
@@ -190,8 +207,9 @@ public class MetadataInfoPanel
         public void init( DashletSite site ) {
             super.init( site );
             site.title.set( md.get().getTitle() );
-            site.constraints.get().add( new PriorityConstraint( 100 ) );
-            site.constraints.get().add( new MinWidthConstraint( 300, 1 ) );
+            site.addConstraint( new PriorityConstraint( 100 ) );
+            site.addConstraint( new MinWidthConstraint( 300, 1 ) );
+            site.border.set( false );
         }
 
         @Override
@@ -217,25 +235,25 @@ public class MetadataInfoPanel
                 
 //                site.newFormField( new PlainValuePropertyAdapter( "title", md.get().getTitle() ) ).create();
 
-                site.newFormField( new PlainValuePropertyAdapter( "description", md.get().getDescription() ) )
+                site.newFormField( new PlainValuePropertyAdapter( "description", md.get().getDescription().orElse( "-" ) ) )
                         .field.put( new TextFormField() )
                         .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, TEXTFIELD_HEIGHT ) );
                 
                 site.newFormField( new PlainValuePropertyAdapter( "keywords", 
                         Joiner.on( ", " ).skipNulls().join( md.get().getKeywords() ) ) ).create();
                 
-                site.newFormField( new PlainValuePropertyAdapter( "modified", md.get().getModified() ) )
+                site.newFormField( new PlainValuePropertyAdapter( "modified", md.get().getModified().orElse( null ) ) )
                         .field.put( new StringFormField() )
-                        .validator.put( new DateValidator() )
+                        .validator.put( new DateValidator( DateFormat.MEDIUM ) )
                         .create();
 
-                site.newFormField( new PlainValuePropertyAdapter( "publisher", md.get().getPublisher() ) )
-                        .field.put( new TextFormField() )
-                        .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, TEXTFIELD_HEIGHT ) );
-        
-                site.newFormField( new PlainValuePropertyAdapter( "rights", md.get().getRights() ) )
-                        .field.put( new TextFormField() )
-                        .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, TEXTFIELD_HEIGHT ) );
+//                site.newFormField( new PlainValuePropertyAdapter( "publisher", md.get().getPublisher() ) )
+//                        .field.put( new TextFormField() )
+//                        .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, TEXTFIELD_HEIGHT ) );
+//        
+//                site.newFormField( new PlainValuePropertyAdapter( "rights", md.get().getRights() ) )
+//                        .field.put( new TextFormField() )
+//                        .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, TEXTFIELD_HEIGHT ) );
             }
         }
         

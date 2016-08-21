@@ -50,7 +50,7 @@ public class LocalCatalog
 
     private static final File       LOCAL_FEATURES_STORE_DIR = new File( CorePlugin.getDataLocation( P4Plugin.instance() ), "features" );
 
-    private static final String     LOCAL_FEATURES_STORE_ID = "_local_features_store_";
+    public static final String      LOCAL_FEATURES_STORE_ID = "_local_features_store_";
 
     private LuceneRecordStore       store;
 
@@ -117,18 +117,18 @@ public class LocalCatalog
                 LOCAL_FEATURES_STORE_DIR.mkdirs();
                 update.newEntry( metadata -> {
                     metadata.setIdentifier( LOCAL_FEATURES_STORE_ID );
-                    metadata.setTitle( "Project database" );
-                    metadata.setDescription( "The local database of this project" );
+                    metadata.setTitle( "Data store" );
+                    metadata.setDescription( "The data store of this project" );
                     metadata.setConnectionParams( RServiceResolver.createParams( LOCAL_FEATURES_STORE_DIR ) );
                 });
                 update.newEntry( metadata -> {
                     metadata.setTitle( "OSM WMS" );
-                    metadata.setDescription( "OpenStreetMap data served by terrestris.de" );
+                    metadata.setDescription( "-test entry-" );
                     metadata.setConnectionParams( WmsServiceResolver.createParams( "http://ows.terrestris.de/osm/service/" ) );
                 });
                 update.newEntry( metadata -> {
                     metadata.setTitle( "Schutzgebiete Mittelsachsen" );
-                    metadata.setDescription( "Standardeintrag" );
+                    metadata.setDescription( "-test entry-" );
                     metadata.setConnectionParams( WmsServiceResolver.createParams( "http://www.mittelsachsen-atlas.de/polymap-atlas/services/INSPIRE/Schutzgebiete" ) );
                 });
 //                update.newEntry( metadata -> {

@@ -22,6 +22,7 @@ import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.polymap.core.project.ILayer;
+import org.polymap.core.ui.ColumnDataFactory;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.dashboard.DashletSite;
@@ -95,23 +96,29 @@ class BasicLayerInfoDashlet
                     .spacing( 5 /*panelSite.getLayoutPreference( LAYOUT_SPACING_KEY ) / 4*/ )
                     .margins( 0 /*getSite().getLayoutPreference().getSpacing() / 2 )*/ ).create() );
             
+            ColumnDataFactory.on( site.getToolkit().createLabel( body, 
+                    "Basic information about this layer. This should help you, your team-mates and other users to find and identify the data." +
+                    "<br/><br/>All the information are publicly readable.", SWT.WRAP ) )
+                    .heightHint( 80 ).widthHint( 100 ).control()
+                    .setEnabled( false );
+            
             // label/title
             site.newFormField( new PropertyAdapter( layer.label ) )
                     .label.put( "Title" )
-                    .tooltip.put( "The title of this layer." )
+                    .tooltip.put( "The humand readable title of this layer" )
                     .create();
             
             // description
             site.newFormField( new PropertyAdapter( layer.description ) )
                     .label.put( "Description" )
-                    .tooltip.put( "Describes the content and purpose of this layer." )
+                    .tooltip.put( "Describes the content and purpose of this layer" )
                     .field.put( new TextFormField() )
                     .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 80 ) );
             
             // keywords
             site.newFormField( new PropertyAdapter( layer.keywords ) )
                     .label.put( "Keywords" )
-                    .tooltip.put( "..." )
+                    .tooltip.put( "Comma separated list of keywords helping other users to identify and search this layer" )
                     .validator.put( new KeywordsValidator() )
                     .field.put( new TextFormField() )
                     .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 80 ) );

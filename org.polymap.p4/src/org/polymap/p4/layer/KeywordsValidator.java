@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
-import org.polymap.rhei.field.NullValidator;
+import org.polymap.rhei.field.IFormFieldValidator;
 
 /**
  * 
@@ -29,7 +29,7 @@ import org.polymap.rhei.field.NullValidator;
  * @author Falko Bräutigam
  */
 public class KeywordsValidator
-        extends NullValidator<String,Collection<String>> {
+        implements IFormFieldValidator<String,Collection<String>> {
 
     private static final Log log = LogFactory.getLog( KeywordsValidator.class );
 

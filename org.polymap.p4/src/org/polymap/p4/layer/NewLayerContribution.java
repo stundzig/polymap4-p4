@@ -16,6 +16,8 @@ package org.polymap.p4.layer;
 
 import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
 
+import java.util.function.Consumer;
+
 import java.io.IOException;
 
 import org.geotools.data.FeatureSource;
@@ -26,6 +28,8 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
+
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.data.util.NameImpl;
@@ -47,7 +51,6 @@ import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.catalog.ResourceInfoPanel;
-import org.polymap.p4.project.ProjectRepository;
 
 /**
  * 
@@ -72,25 +75,38 @@ public class NewLayerContribution
     public void fillFab( IContributionSite site, IPanel panel ) {
         if (panel instanceof ResourceInfoPanel) {
             Button fab = ((MdToolkit)site.toolkit()).createFab();
-            fab.setImage( P4Plugin.images().svgImage( "plus.svg", P4Plugin.HEADER_ICON_CONFIG ) );
-            fab.setToolTipText( "Create a new layer for this data" );
+            fab.setImage( P4Plugin.images().svgImage( "layers.svg", P4Plugin.HEADER_ICON_CONFIG ) );
+            fab.setToolTipText( "Create a new layer for this data set" );
             fab.addSelectionListener( new SelectionAdapter() {
                 @Override
                 public void widgetSelected( SelectionEvent ev ) {
                     execute( site );
                 }
-            } );
+            });
         }
     }
 
 
     protected void execute( IContributionSite site ) {
+        createLayer( res.get(), map.get(), ev -> {
+            if (ev.getResult().isOK()) {
+                PanelPath parentPath = site.panelSite().path().removeLast( 1 );
+                BatikApplication.instance().getContext().closePanel( parentPath );
+            }
+            else {
+                StatusDispatcher.handleError( "Unable to create new layer.", ev.getResult().getException() );
+            }
+        });
+    }
+
+    
+    public static void createLayer( IResourceInfo res, IMap map, Consumer<IJobChangeEvent> finalizer ) {
         // create default style
         // XXX 86: [Style] Default style (http://github.com/Polymap4/polymap4-p4/issues/issue/86
         // see AddLayerOperationConcern
         FeatureStyle featureStyle = P4Plugin.styleRepo().newFeatureStyle();
         try {
-            FeatureSource fs = P4Plugin.localCatalog().localFeaturesStore().getFeatureSource( new NameImpl( res.get().getName() ) );
+            FeatureSource fs = P4Plugin.localCatalog().localFeaturesStore().getFeatureSource( new NameImpl( res.getName() ) );
             DefaultStyle.create( featureStyle, fs.getSchema() );
         }
         catch (IOException e) {
@@ -98,23 +114,14 @@ public class NewLayerContribution
         }
         
         NewLayerOperation op = new NewLayerOperation()
-                .res.put( res.get() )
+                .res.put( res )
                 .featureStyle.put( featureStyle )
-                .uow.put( ProjectRepository.unitOfWork() )
-                .map.put( map.get() );
+                .uow.put( map.belongsTo() )
+                .map.put( map );
 
         OperationSupport.instance().execute2( op, true, false, ev2 -> asyncFast( () -> {
-            if (ev2.getResult().isOK()) {
-                PanelPath parentPath = site.panelSite().path().removeLast( 1 );
-                BatikApplication.instance().getContext().closePanel( parentPath );
-
-//                // close panel and parent, assuming that project map is root
-//                site.getContext().openPanel( PanelPath.ROOT, new PanelIdentifier( "start" ) );
-            }
-            else {
-                StatusDispatcher.handleError( "Unable to create new layer.", ev2.getResult().getException() );
-            }
+            finalizer.accept( ev2 );
         }));
     }
-
+    
 }

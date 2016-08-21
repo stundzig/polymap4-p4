@@ -21,9 +21,9 @@ import org.eclipse.jface.viewers.ViewerCell;
 
 import org.polymap.core.catalog.IMetadata;
 import org.polymap.core.catalog.IMetadataCatalog;
+import org.polymap.core.catalog.local.LocalMetadata;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.catalog.ui.MetadataContentProvider;
-
 import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 
@@ -39,16 +39,34 @@ class MetadataIconProvider
 
     @Override
     public void update( ViewerCell cell ) {
-        if (cell.getElement() instanceof IMetadataCatalog) {
+        Object elm = cell.getElement();
+        if (elm instanceof IMetadataCatalog) {
             cell.setImage( P4Plugin.images().svgImage( "book-open-variant.svg", NORMAL24 ) );
         }
-        else if (cell.getElement() instanceof IMetadata) {
-            cell.setImage( P4Plugin.images().svgImage( "buffer.svg", SvgImageRegistryHelper.NORMAL12 ) );
+        else if (elm instanceof LocalMetadata) {
+            if (((LocalMetadata)elm).getIdentifier().equals( LocalCatalog.LOCAL_FEATURES_STORE_ID )) {
+                cell.setImage( P4Plugin.images().svgImage( "database.svg", SvgImageRegistryHelper.NORMAL12 ) );
+            }
+            else {
+                cell.setImage( P4Plugin.images().svgImage( "earth.svg", SvgImageRegistryHelper.NORMAL12 ) );
+            }
         }
-        else if (cell.getElement() instanceof IResourceInfo) {
-            cell.setImage( P4Plugin.images().svgImage( "layers.svg", SvgImageRegistryHelper.NORMAL12 ) );
+        else if (elm instanceof IMetadata) {
+            cell.setImage( P4Plugin.images().svgImage( "human-greeting.svg", SvgImageRegistryHelper.NORMAL12 ) );
         }
-        else if (cell.getElement() == MetadataContentProvider.LOADING) {
+        else if (elm instanceof IResourceInfo) {
+            cell.setImage( P4Plugin.images().svgImage( "chevron-right.svg", SvgImageRegistryHelper.NORMAL12 ) );
+//            if (elm instanceof RServiceInfo.RResourceInfo) {
+//                cell.setImage( P4Plugin.images().svgImage( "human-greeting.svg", SvgImageRegistryHelper.NORMAL12 ) );
+//            }
+//            else if (elm instanceof WmsResourceInfo) {
+//                cell.setImage( P4Plugin.images().svgImage( "earth.svg", SvgImageRegistryHelper.NORMAL12 ) );
+//            }
+//            else {
+//                cell.setImage( null );
+//            }
+        }
+        else if (elm == MetadataContentProvider.LOADING) {
             cell.setImage( BatikPlugin.images().image( "resources/icons/loading24.gif" ) );
         }
         else {

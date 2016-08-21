@@ -14,16 +14,14 @@
  */
 package org.polymap.p4.catalog;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.jface.viewers.IContentProvider;
 
+import org.polymap.core.catalog.DefaultMetadata;
 import org.polymap.core.catalog.IMetadata;
 import org.polymap.core.catalog.IMetadataCatalog;
 import org.polymap.core.catalog.resolve.IMetadataResourceResolver;
@@ -44,38 +42,17 @@ public class P4MetadataContentProvider
     /**
      * 
      */
-    public static final IMetadata DUMMY = new IMetadata() {
+    public static final IMetadata DUMMY = new DefaultMetadata() {
         @Override
         public String getTitle() {
             return "A lot of entries...";
         }
         @Override
-        public String getDescription() {
-            return "Enter a search to filter entries!";
-        }
-        @Override
-        public Date getModified() {
-            throw new RuntimeException( "not yet implemented." );
-        }
-        @Override
-        public Set<String> getKeywords() {
-            throw new RuntimeException( "not yet implemented." );
+        public Optional<String> getDescription() {
+            return Optional.of( "Enter a search to filter entries!" );
         }
         @Override
         public String getIdentifier() {
-            throw new RuntimeException( "not yet implemented." );
-        }
-        @Override
-        public Map<String,String> getConnectionParams() {
-            // not resolvable
-            return Collections.EMPTY_MAP;
-        }
-        @Override
-        public String getPublisher() {
-            throw new RuntimeException( "not yet implemented." );
-        }
-        @Override
-        public String getRights() {
             throw new RuntimeException( "not yet implemented." );
         }
     };

@@ -75,7 +75,7 @@ public class CatalogPanel
                 .filter( parent -> parent instanceof ProjectMapPanel )
                 .map( parent -> {
                     site().title.set( "" );
-                    site().tooltip.set( "Data catalog" );
+                    site().tooltip.set( "Data catalogs" );
                     site().icon.set( P4Plugin.images().svgImage( "book-open-page-variant.svg", P4Plugin.HEADER_ICON_CONFIG ) );
                     return true;
                 })
@@ -85,7 +85,7 @@ public class CatalogPanel
 
     @Override
     public void createContents( Composite parent ) {
-        site().title.set( "Catalog" );
+        site().title.set( "Catalogs" );
         site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH );
         parent.setLayout( FormLayoutFactory.defaults().margins( 0, 5 ).create() );
         

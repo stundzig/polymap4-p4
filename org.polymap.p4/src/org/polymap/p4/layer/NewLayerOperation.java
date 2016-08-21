@@ -106,8 +106,7 @@ public class NewLayerOperation
             proto.label.set( label
                     .orElse( () -> res.get().getName() ) );
             proto.description.set( res
-                    .map( r -> r.getDescription() )
-                    .orElse( "" ) );
+                    .map( r -> r.getDescription().orElse( "" ) ).get() );
             proto.resourceIdentifier.set( resId
                     .orElse( () -> P4Plugin.allResolver().resourceIdentifier( res.get() ) ) );
             proto.styleIdentifier.set( featureStyle
