@@ -15,20 +15,11 @@ package org.polymap.p4.data.importer.wms;
 import static org.polymap.core.ui.FormDataFactory.on;
 
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import java.net.URL;
 
-import org.geotools.data.ows.Layer;
 import org.geotools.data.ows.Service;
 import org.geotools.data.ows.WMSCapabilities;
 import org.geotools.data.wms.WebMapServer;
-import org.opengis.metadata.citation.Address;
-import org.opengis.metadata.citation.Contact;
-import org.opengis.metadata.citation.ResponsibleParty;
-import org.opengis.metadata.citation.Telephone;
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -42,11 +33,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.polymap.core.catalog.IMetadata;
 import org.polymap.core.catalog.IUpdateableMetadataCatalog.Updater;
 import org.polymap.core.data.wms.catalog.WmsServiceResolver;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormLayoutFactory;
+
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.rhei.batik.toolkit.SimpleDialog;
@@ -68,9 +62,9 @@ import org.polymap.p4.data.importer.Messages;
 public class WmsImporter
         implements Importer {
 
-    private static Log             log        = LogFactory.getLog( WmsImporter.class );
+    private static Log             log = LogFactory.getLog( WmsImporter.class );
 
-    private static final IMessages i18nWMS    = Messages.forPrefix( "WMS" );
+    private static final IMessages i18n = Messages.forPrefix( "WMS" );
 
     public static final Pattern    urlPattern = Pattern.compile( "((https?):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)" );
 
@@ -97,8 +91,8 @@ public class WmsImporter
     public void init( @SuppressWarnings( "hiding" ) ImporterSite site, IProgressMonitor monitor ) {
         this.site = site;
         site.icon.set( ImporterPlugin.images().svgImage( "earth.svg", SvgImageRegistryHelper.NORMAL24 ) );
-        site.summary.set( i18nWMS.get( "summary" ) );
-        site.description.set( i18nWMS.get( "description" ) );
+        site.summary.set( i18n.get( "summary" ) );
+        site.description.set( i18n.get( "description" ) );
         site.terminal.set( true );
     }
 
@@ -155,7 +149,7 @@ public class WmsImporter
                         .filter( metadata -> metadata.getTitle().equals( title ) )
                         .findAny()
                         .isPresent()) {
-                    throw new Exception( i18nWMS.get( "entryExists", title ) );
+                    throw new Exception( i18n.get( "entryExists", title ) );
                 }
                 site.ok.set( true );
                 exception = null;
@@ -180,86 +174,18 @@ public class WmsImporter
         final Composite content = parent;
         
         if (exception != null) {
-            tk.createFlowText( content, i18nWMS.get( "exception", exception.getMessage() ) );
+            tk.createFlowText( content, i18n.get( "exception", exception.getMessage() ) );
         }
         else if (wms == null) {
-            tk.createFlowText( content, i18nWMS.get( "noUrl" ) );
+            tk.createFlowText( content, i18n.get( "noUrl" ) );
         }
         else {
-            StringBuilder msg = new StringBuilder();
             WMSCapabilities capabilities = wms.getCapabilities();
-            Service serviceInfo = capabilities.getService();
-            msg.append( "### " + serviceInfo.getTitle() + " (" + serviceInfo.getName() + ")\n\n" );
-            if (!StringUtils.isBlank( serviceInfo.get_abstract() )) {
-                msg.append( serviceInfo.get_abstract() ).append( "\n\n" );
-            }
-            if (serviceInfo.getOnlineResource()  != null) {
-                msg.append( "### " ).append( i18nWMS.get( "onlineResource" ) ).append( "\n" );
-                msg.append( serviceInfo.getOnlineResource() ).append( "\n" );
-                
-            }
-            ResponsibleParty contactInformation = serviceInfo.getContactInformation();
-            if (contactInformation != null) {
-                msg.append( "### " ).append( i18nWMS.get( "contactInfo" ) ).append( "\n" );
-                if (!StringUtils.isBlank( contactInformation.getOrganisationName() )) {
-                    msg.append( "  * " ).append( i18nWMS.get( "organisationName" ) ).append( ": " ).append( contactInformation.getOrganisationName() ).append( "\n" );
-                }
-                if (!StringUtils.isBlank( contactInformation.getIndividualName() )) {
-                    msg.append( "  * " ).append( i18nWMS.get( "individualName" ) ).append( ": " ).append( contactInformation.getIndividualName() ).append( "\n" );
-                }
-                if (!StringUtils.isBlank( contactInformation.getPositionName() )) {
-                    msg.append( "  * " ).append( i18nWMS.get( "positionName" ) ).append( ": " ).append( contactInformation.getPositionName() ).append( "\n" );
-                }
-                msg.append( "\n" );
-                Contact contactInfo = contactInformation.getContactInfo();
-                if (contactInfo != null) {
-                    contactInfo.getContactInstructions();
-                    contactInfo.getHoursOfService();
-                    Address address = contactInfo.getAddress();
-                    if (address != null) {
-                        msg.append( "### " ).append( i18nWMS.get( "address" ) ).append( "\n" );
-                        if (!StringUtils.isBlank( address.getCountry() )) {
-                            msg.append( "  * " ).append( i18nWMS.get( "country" ) ).append( ": " ).append( address.getCountry() ).append( "\n" );
-                        }
-                        if (!StringUtils.isBlank( address.getAdministrativeArea() )) {
-                            msg.append( "  * " ).append( i18nWMS.get( "administrativeArea" ) ).append( ": " ).append( address.getAdministrativeArea() ).append( "\n" );
-                        }
-                        if (!StringUtils.isBlank( address.getCity() )) {
-                            msg.append( "  * " ).append( i18nWMS.get( "city" ) ).append( ": " ).append( address.getCity() ).append( "\n" );
-                        }
-                        if (!StringUtils.isBlank( address.getPostalCode() )) {
-                            msg.append( "  * " ).append( i18nWMS.get( "postalCode" ) ).append( ": " ).append( address.getPostalCode() ).append( "\n" );
-                        }
-                        if (address.getDeliveryPoints() != null && !address.getDeliveryPoints().isEmpty()) {
-                            msg.append( "  * " ).append( i18nWMS.get( "deliveryPoints" ) ).append( ": " ).append( address.getDeliveryPoints().stream().collect( Collectors.joining( ", " ) ) ).append( "\n" );
-                        }
-                        if (address.getElectronicMailAddresses() != null
-                                && !address.getElectronicMailAddresses().isEmpty()) {
-                            msg.append( "  * " ).append( i18nWMS.get( "emails" ) ).append( ": " ).append( address.getElectronicMailAddresses().stream().collect( Collectors.joining( ", " ) ) ).append( "\n" );
-                        }
-                    }
-                    Telephone phone = contactInfo.getPhone();
-                    if (phone != null) {
-                        if (phone.getVoices() != null && !phone.getVoices().isEmpty()) {
-                            msg.append( "  * " ).append( i18nWMS.get( "phoneVoices" ) ).append( ": " ).append( phone.getVoices().stream().collect( Collectors.joining( ", " ) ) ).append( "\n" );
-                        }
-                        if (phone.getFacsimiles() != null && !phone.getFacsimiles().isEmpty()) {
-                            msg.append( "  * " ).append( i18nWMS.get( "phoneFacsimiles" ) ).append( ": " ).append( phone.getFacsimiles().stream().collect( Collectors.joining( ", " ) ) ).append( "\n" );
-                        }
-                    }
-
-                    if (!StringUtils.isBlank( contactInfo.getHoursOfService() )) {
-                        msg.append( "  * " ).append( i18nWMS.get( "hoursOfService" ) ).append( ": " ).append( contactInfo.getHoursOfService() ).append( "\n" );
-                    }
-                    msg.append( "\n" );
-                }
-            }
-            msg.append( "### " ).append( i18nWMS.get( "layers" ) ).append( "\n" );
-            for (Layer layer : capabilities.getLayerList()) {
-                msg.append( "  * " + layer.getTitle() + "\n" );
-            }
-            msg.append( "\n" );
-            tk.createFlowText( content, msg.toString() );
+            OwsMetadata md = new OwsMetadata()
+                    .markdown( capabilities.getService() )
+                    .markdown( capabilities.getLayerList() );
+            tk.createFlowText( content, md.toString() );
+            
 //            content.layout( true );
 //            scrolledComposite.setMinSize( content.computeSize( SWT.DEFAULT, SWT.DEFAULT ) );
         }
@@ -270,13 +196,23 @@ public class WmsImporter
     public void execute( IProgressMonitor monitor ) throws Exception {
         // create catalog entry
         try (Updater update = P4Plugin.localCatalog().prepareUpdate()) {
-            Service info = wms.getCapabilities().getService();
+            Service service = wms.getCapabilities().getService();
             update.newEntry( metadata -> {
-                metadata.setTitle( info.getTitle() );
-                metadata.setDescription( info.get_abstract() );
-                if (info.getKeywordList() != null) {
-                    metadata.setKeywords( Sets.newHashSet( info.getKeywordList() ) );
+                metadata.setTitle( service.getTitle() );
+                metadata.setDescription( service.get_abstract() );
+                metadata.setType( "Service" );
+                metadata.setFormats( Sets.newHashSet( "WMS" ) );
+                
+                if (service.getKeywordList() != null) {
+                    metadata.setKeywords( Sets.newHashSet( service.getKeywordList() ) );
                 }
+                
+                // WMS provides some more but GeoTools does not deliver more info
+                metadata.setDescription( IMetadata.Field.Publisher,
+                        new OwsMetadata().markdown( service.getContactInformation() ).toString() );
+//                metadata.setDescription( IMetadata.Field.Creator,
+//                        new OwsMetadata().markdown( service.getContactInformation() ).toString() );
+                
                 metadata.setConnectionParams( WmsServiceResolver.createParams( url ) );
             } );
             update.commit();
@@ -287,9 +223,12 @@ public class WmsImporter
             SimpleDialog dialog = new SimpleDialog();
             dialog.title.put( "Information" );
             dialog.setContents( parent -> {
-                toolkit.createFlowText( parent, "Entry has been created in the data catalog.\n\nOpen a resource from the catalog in order to create a new layer." );
+                toolkit.createFlowText( parent, i18n.get( "infoAdded" ) );
             } );
-            dialog.addOkAction( () -> dialog.close() );
+            dialog.addOkAction( () -> {
+                dialog.close();
+                return true;
+            });
             dialog.open();
         } );
     }
