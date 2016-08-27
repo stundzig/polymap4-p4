@@ -54,6 +54,8 @@ import org.polymap.rhei.batik.toolkit.Snackbar.Appearance;
 
 import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.catalog.MetadataInfoDashlet;
+import org.polymap.p4.catalog.ResourceInfoDashlet;
 import org.polymap.p4.project.ProjectRepository;
 
 /**
@@ -89,12 +91,28 @@ public class LayerInfoPanel
         site().setSize( SIDE_PANEL_WIDTH, SIDE_PANEL_WIDTH2, SIDE_PANEL_WIDTH2 );
         site().title.set( "Layer" ); // + layer.get().label.get() );
         ContributionManager.instance().contributeTo( this, this );
-        
+
+        // dashboard
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
-        dashboard.addDashlet( new BasicLayerInfoDashlet( layer.get() ) );
-        //dashboard.addDashlet( new DeleteLayerDashlet() );
+        dashboard.addDashlet( new LayerInfoDashlet( layer.get() )
+                .addConstraint( new PriorityConstraint( 100 ) ) );
+        try {
+            NullProgressMonitor monitor = new NullProgressMonitor();
+            P4Plugin.allResolver().metadata( layer.get(), monitor ).ifPresent( serviceInfo -> {
+                dashboard.addDashlet( new MetadataInfoDashlet( serviceInfo )
+                        .addConstraint( new PriorityConstraint( 9 ) ) );            
+            });
+            P4Plugin.allResolver().resInfo( layer.get(), monitor ).ifPresent( resInfo -> {
+                dashboard.addDashlet( new ResourceInfoDashlet( resInfo )
+                        .addConstraint( new PriorityConstraint( 10 ) ) );            
+            });
+        }
+        catch (Exception e) {
+            log.warn( "", e );
+        }
         dashboard.createContents( parent );
 
+        // fab
         fab = tk().createFab();
         fab.setToolTipText( "Submit changes" );
         fab.setVisible( false );

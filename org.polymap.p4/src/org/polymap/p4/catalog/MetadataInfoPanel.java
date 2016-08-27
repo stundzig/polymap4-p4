@@ -14,29 +14,21 @@
  */
 package org.polymap.p4.catalog;
 
-import java.text.DateFormat;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.common.base.Joiner;
-
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.ViewerCell;
 
-import org.eclipse.ui.forms.widgets.ColumnLayoutData;
-
 import org.polymap.core.catalog.IMetadata;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.catalog.ui.MetadataDescriptionProvider;
 import org.polymap.core.catalog.ui.MetadataLabelProvider;
 import org.polymap.core.project.IMap;
-import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
@@ -57,13 +49,6 @@ import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.batik.toolkit.md.ActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
-import org.polymap.rhei.field.DateValidator;
-import org.polymap.rhei.field.PlainValuePropertyAdapter;
-import org.polymap.rhei.field.StringFormField;
-import org.polymap.rhei.field.TextFormField;
-import org.polymap.rhei.form.DefaultFormPage;
-import org.polymap.rhei.form.IFormPageSite;
-import org.polymap.rhei.form.batik.BatikFormContainer;
 
 import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
@@ -108,7 +93,8 @@ public class MetadataInfoPanel
         ContributionManager.instance().contributeTo( this, this );
         
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
-        dashboard.addDashlet( new BasicFormDashlet() );
+        dashboard.addDashlet( new MetadataInfoDashlet( md.get() )
+                .addConstraint( new PriorityConstraint( 100 ) ) );
         dashboard.addDashlet( new ResourcesDashlet() );
         dashboard.createContents( parent );
         ContributionManager.instance().contributeTo( dashboard, this );
@@ -193,70 +179,6 @@ public class MetadataInfoPanel
                 }
             });
         }    
-    }
-
-    
-
-    /**
-     * Basic fields of the {@link IMetadata}. 
-     */
-    protected class BasicFormDashlet
-            extends DefaultDashlet {
-
-        @Override
-        public void init( DashletSite site ) {
-            super.init( site );
-            site.title.set( md.get().getTitle() );
-            site.addConstraint( new PriorityConstraint( 100 ) );
-            site.addConstraint( new MinWidthConstraint( 300, 1 ) );
-            site.border.set( false );
-        }
-
-        @Override
-        public void createContents( Composite parent ) {
-            parent.setLayout( new FillLayout() );
-            BatikFormContainer form = new BatikFormContainer( new Form() );
-            form.createContents( parent );
-            form.setEnabled( false );
-        }
-
-        /**
-         * 
-         */
-        class Form
-                extends DefaultFormPage {
-            
-            @Override
-            public void createFormContents( IFormPageSite site ) {
-                super.createFormContents( site );
-                
-                Composite body = site.getPageBody();
-                body.setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).create() );
-                
-//                site.newFormField( new PlainValuePropertyAdapter( "title", md.get().getTitle() ) ).create();
-
-                site.newFormField( new PlainValuePropertyAdapter( "description", md.get().getDescription().orElse( "-" ) ) )
-                        .field.put( new TextFormField() )
-                        .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, TEXTFIELD_HEIGHT ) );
-                
-                site.newFormField( new PlainValuePropertyAdapter( "keywords", 
-                        Joiner.on( ", " ).skipNulls().join( md.get().getKeywords() ) ) ).create();
-                
-                site.newFormField( new PlainValuePropertyAdapter( "modified", md.get().getModified().orElse( null ) ) )
-                        .field.put( new StringFormField() )
-                        .validator.put( new DateValidator( DateFormat.MEDIUM ) )
-                        .create();
-
-//                site.newFormField( new PlainValuePropertyAdapter( "publisher", md.get().getPublisher() ) )
-//                        .field.put( new TextFormField() )
-//                        .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, TEXTFIELD_HEIGHT ) );
-//        
-//                site.newFormField( new PlainValuePropertyAdapter( "rights", md.get().getRights() ) )
-//                        .field.put( new TextFormField() )
-//                        .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, TEXTFIELD_HEIGHT ) );
-            }
-        }
-        
     }
     
 }

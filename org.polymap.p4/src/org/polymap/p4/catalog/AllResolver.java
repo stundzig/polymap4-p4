@@ -72,10 +72,15 @@ public class AllResolver
     private List<IMetadataResourceResolver> resolvers; 
 
     /**
-     * Cache {@link IResolvableInfo} instances in order to have just one underlying
+     * Caches {@link IResolvableInfo} instances in order to have just one underlying
      * service instances (WMS, Shape, RDataStore, etc.) per JVM.
      */
     private Cache<IMetadata,IResolvableInfo> resolved = CacheConfig.defaults().initSize( 128 ).createCache();
+    
+    /**
+     * Caches {@link IMetadata} 
+     */
+    private Cache<String,IMetadata>         metadataCache = CacheConfig.defaults().initSize( 128 ).createCache();
     
     
     public AllResolver( List<IMetadataCatalog> catalogs ) {
@@ -93,34 +98,75 @@ public class AllResolver
     
     
     /**
-     * {@link DataSourceDescription} for the given layer with potentially cached
-     * service instance.
+     * {@link DataSourceDescription} for the given layer with (cached) service
+     * instance.
      *
      * @param layer
      * @param monitor
-     * @return Newly created {@link DataSourceDescription} with potentially cached
-     *         service instance.
+     * @return Newly created {@link DataSourceDescription} with (cached) service
+     *         instance.
      * @throws Exception
      */
     public Optional<DataSourceDescription> connectLayer( ILayer layer, IProgressMonitor monitor ) throws Exception {
-        StringTokenizer tokens = new StringTokenizer( layer.resourceIdentifier.get(), ID_DELIMITER );
-        String metadataId = tokens.nextToken();
-        String resName = tokens.nextToken();
+        IServiceInfo serviceInfo = serviceInfo( layer, monitor ).orElse( null );
         
-        for (IMetadataCatalog catalog : catalogs) {
-            IMetadata metadata = catalog.entry( metadataId, monitor ).orElse( null );
+        if (serviceInfo != null) {
+            StringTokenizer tokens = new StringTokenizer( layer.resourceIdentifier.get(), ID_DELIMITER );
+            @SuppressWarnings( "unused" )
+            String metadataId = tokens.nextToken();
+            String resName = tokens.nextToken();
 
-            if (metadata != null) {
-                IServiceInfo serviceInfo = (IServiceInfo)resolve( metadata, monitor );
-                Object service = serviceInfo.createService( monitor );
-
-                DataSourceDescription result = new DataSourceDescription();
-                result.service.set( service );
-                result.resourceName.set( resName );
-                return Optional.of( result );
-            }
+            Object service = serviceInfo.createService( monitor );
+            
+            return Optional.of( new DataSourceDescription()
+                    .service.put( service )
+                    .resourceName.put( resName ) );
         }
         return Optional.empty();
+    }
+    
+
+    public Optional<IMetadata> metadata( ILayer layer, IProgressMonitor monitor ) throws Exception {
+        StringTokenizer tokens = new StringTokenizer( layer.resourceIdentifier.get(), ID_DELIMITER );
+        String metadataId = tokens.nextToken();
+        
+        return Optional.ofNullable( metadataCache.get( metadataId, key -> {
+            for (IMetadataCatalog catalog : catalogs) {
+                Optional<? extends IMetadata> result = catalog.entry( metadataId, monitor );
+                if (result.isPresent()) {
+                    return result.get();
+                }
+            }
+            return null;
+        }));
+    }
+    
+    
+    
+    public Optional<IServiceInfo> serviceInfo( ILayer layer, IProgressMonitor monitor ) throws Exception {
+        IMetadata metadata = metadata( layer, monitor ).orElse( null );
+
+        return Optional.ofNullable( metadata != null
+                ? (IServiceInfo)resolve( metadata, monitor ) : null ); 
+    }
+    
+    
+    public Optional<IResourceInfo> resInfo( ILayer layer, IProgressMonitor monitor ) throws Exception {
+        IServiceInfo serviceInfo = serviceInfo( layer, monitor ).orElse( null );
+        
+        if (serviceInfo != null) {
+            StringTokenizer tokens = new StringTokenizer( layer.resourceIdentifier.get(), ID_DELIMITER );
+            @SuppressWarnings( "unused" )
+            String metadataId = tokens.nextToken();
+            String resName = tokens.nextToken();
+
+            for (IResourceInfo info : serviceInfo.getResources( monitor )) {
+                if (info.getName().equals( resName )) {
+                    return Optional.of( info );
+                }
+            }
+        }
+        return Optional.empty();        
     }
     
     

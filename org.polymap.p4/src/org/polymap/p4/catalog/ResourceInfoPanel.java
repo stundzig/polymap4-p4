@@ -25,13 +25,8 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.common.base.Joiner;
-
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -43,7 +38,6 @@ import org.polymap.core.mapeditor.OlLayerProvider;
 import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.UIJob;
 import org.polymap.core.runtime.UIThreadExecutor;
-import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.PanelIdentifier;
@@ -54,12 +48,6 @@ import org.polymap.rhei.batik.dashboard.DashletSite;
 import org.polymap.rhei.batik.dashboard.DefaultDashlet;
 import org.polymap.rhei.batik.toolkit.MinHeightConstraint;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
-import org.polymap.rhei.batik.toolkit.PriorityConstraint;
-import org.polymap.rhei.field.PlainValuePropertyAdapter;
-import org.polymap.rhei.field.TextFormField;
-import org.polymap.rhei.form.DefaultFormPage;
-import org.polymap.rhei.form.IFormPageSite;
-import org.polymap.rhei.form.batik.BatikFormContainer;
 
 import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
@@ -115,64 +103,13 @@ public class ResourceInfoPanel
         ContributionManager.instance().contributeTo( this, this );
         
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
-        dashboard.addDashlet( new BasicInfoDashlet() );
+        dashboard.addDashlet( new ResourceInfoDashlet( res.get() ) );
         //dashboard.addDashlet( new MapDashlet() );
         dashboard.createContents( parent );
         ContributionManager.instance().contributeTo( dashboard, this );
     }
 
     
-    /**
-     * 
-     */
-    protected class BasicInfoDashlet
-            extends DefaultDashlet {
-    
-        @Override
-        public void init( DashletSite site ) {
-            super.init( site );
-            site.title.set( res.get().getTitle() );
-            site.constraints.get().add( new PriorityConstraint( 100 ) );
-            site.constraints.get().add( new MinWidthConstraint( 400, 1 ) );
-            site.border.set( false );
-        }
-    
-        @Override
-        public void createContents( Composite parent ) {
-            parent.setLayout( new FillLayout() );
-            BatikFormContainer form = new BatikFormContainer( new Form() );
-            form.createContents( parent );
-            form.setEnabled( false );
-        }
-        
-        /**
-         * 
-         */
-        class Form
-                extends DefaultFormPage {
-            
-            @Override
-            public void createFormContents( IFormPageSite site ) {
-                super.createFormContents( site );
-                
-                Composite body = site.getPageBody();
-                body.setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).create() );
-                
-//                site.newFormField( new PlainValuePropertyAdapter( "title", res.get().getTitle() ) ).create();
-
-                site.newFormField( new PlainValuePropertyAdapter( "description", res.get().getDescription().orElse( "" ) ) )
-                        .field.put( new TextFormField() )
-                        .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, MetadataInfoPanel.TEXTFIELD_HEIGHT ) );
-        
-                String keywords = Joiner.on( ", " ).skipNulls().join( res.get().getKeywords() );
-                site.newFormField( new PlainValuePropertyAdapter( "keywords", keywords ) )
-                        .field.put( new TextFormField() )
-                        .create().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, MetadataInfoPanel.TEXTFIELD_HEIGHT ) );
-            }
-        }
-    }
-
-
     /**
      * 
      */

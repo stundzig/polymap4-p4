@@ -14,8 +14,11 @@
  */
 package org.polymap.p4;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.google.common.base.Joiner;
 
 import org.eclipse.swt.widgets.Composite;
 
@@ -41,6 +44,14 @@ public abstract class P4Panel
     public static final int                 SIDE_PANEL_WIDTH = 380;
     
     public static final int                 SIDE_PANEL_WIDTH2 = 430;
+    
+    public static String title( String type, String name ) {
+        return StringUtils.abbreviate( 
+                Joiner.on( ": " ).skipNulls().join( type, name ), 300 );    
+    }
+    
+    
+    // instance *******************************************
     
     /**
      * The <b>active</b> layer and the <b>selected</b> features from this layer.

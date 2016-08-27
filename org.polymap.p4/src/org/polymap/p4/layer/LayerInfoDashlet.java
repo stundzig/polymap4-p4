@@ -29,7 +29,6 @@ import org.polymap.rhei.batik.dashboard.DashletSite;
 import org.polymap.rhei.batik.dashboard.DefaultDashlet;
 import org.polymap.rhei.batik.dashboard.ISubmitableDashlet;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
-import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.field.FormFieldEvent;
 import org.polymap.rhei.field.IFormFieldListener;
 import org.polymap.rhei.field.TextFormField;
@@ -37,6 +36,7 @@ import org.polymap.rhei.form.DefaultFormPage;
 import org.polymap.rhei.form.IFormPageSite;
 import org.polymap.rhei.form.batik.BatikFormContainer;
 
+import org.polymap.p4.P4Panel;
 import org.polymap.p4.PropertyAdapter;
 
 /**
@@ -44,7 +44,7 @@ import org.polymap.p4.PropertyAdapter;
  * 
  * @author Falko Bräutigam
  */
-class BasicLayerInfoDashlet
+public class LayerInfoDashlet
         extends DefaultDashlet
         implements ISubmitableDashlet {
 
@@ -53,15 +53,15 @@ class BasicLayerInfoDashlet
     private BatikFormContainer      form;
 
     
-    public BasicLayerInfoDashlet( ILayer layer ) {
+    public LayerInfoDashlet( ILayer layer ) {
         this.layer = layer;
     }
 
     @Override
     public void init( DashletSite site ) {
         super.init( site );
-        site.title.set( layer.label.get() );
-        site.constraints.get().add( new PriorityConstraint( 100 ) );
+        site.title.set( P4Panel.title( "Layer", layer.label.get() ) );
+        //site.constraints.get().add( new PriorityConstraint( 100 ) );
         site.constraints.get().add( new MinWidthConstraint( 350, 1 ) );
     }
     

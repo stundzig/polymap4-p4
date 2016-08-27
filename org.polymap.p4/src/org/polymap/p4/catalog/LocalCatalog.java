@@ -30,8 +30,6 @@ import org.polymap.core.catalog.IMetadata;
 import org.polymap.core.catalog.local.LocalMetadataCatalog;
 import org.polymap.core.catalog.resolve.IResolvableInfo;
 import org.polymap.core.data.rs.catalog.RServiceResolver;
-import org.polymap.core.data.wms.catalog.WmsServiceResolver;
-
 import org.polymap.rhei.fulltext.store.lucene.LuceneFulltextIndex;
 
 import org.polymap.model2.store.recordstore.RecordStoreAdapter;
@@ -117,24 +115,20 @@ public class LocalCatalog
                 LOCAL_FEATURES_STORE_DIR.mkdirs();
                 update.newEntry( metadata -> {
                     metadata.setIdentifier( LOCAL_FEATURES_STORE_ID );
-                    metadata.setTitle( "Data store" );
+                    metadata.setTitle( "Datastore" );
                     metadata.setDescription( "The data store of this project" );
+                    metadata.setType( "Database" );
                     metadata.setConnectionParams( RServiceResolver.createParams( LOCAL_FEATURES_STORE_DIR ) );
                 });
-                update.newEntry( metadata -> {
-                    metadata.setTitle( "OSM WMS" );
-                    metadata.setDescription( "-test entry-" );
-                    metadata.setConnectionParams( WmsServiceResolver.createParams( "http://ows.terrestris.de/osm/service/" ) );
-                });
-                update.newEntry( metadata -> {
-                    metadata.setTitle( "Schutzgebiete Mittelsachsen" );
-                    metadata.setDescription( "-test entry-" );
-                    metadata.setConnectionParams( WmsServiceResolver.createParams( "http://www.mittelsachsen-atlas.de/polymap-atlas/services/INSPIRE/Schutzgebiete" ) );
-                });
 //                update.newEntry( metadata -> {
-//                    metadata.setTitle( "Allgemeinmediziner" );
-//                    metadata.setDescription( "Aus Daten des Mittelsachsen-Atlas" );
-//                    metadata.setConnectionParams( ShapefileServiceResolver.createParams( "file:///home/falko/Data/lka/allgemeinmediziner.shp" ) );
+//                    metadata.setTitle( "OSM WMS" );
+//                    metadata.setDescription( "-test entry-" );
+//                    metadata.setConnectionParams( WmsServiceResolver.createParams( "http://ows.terrestris.de/osm/service/" ) );
+//                });
+//                update.newEntry( metadata -> {
+//                    metadata.setTitle( "Schutzgebiete Mittelsachsen" );
+//                    metadata.setDescription( "-test entry-" );
+//                    metadata.setConnectionParams( WmsServiceResolver.createParams( "http://www.mittelsachsen-atlas.de/polymap-atlas/services/INSPIRE/Schutzgebiete" ) );
 //                });
                 update.commit();
             }
