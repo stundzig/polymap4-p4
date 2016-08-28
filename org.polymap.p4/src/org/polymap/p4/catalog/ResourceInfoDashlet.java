@@ -14,6 +14,8 @@
  */
 package org.polymap.p4.catalog;
 
+import java.io.CharArrayWriter;
+
 import com.google.common.base.Joiner;
 
 import org.eclipse.swt.SWT;
@@ -27,12 +29,12 @@ import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.dashboard.DashletSite;
 import org.polymap.rhei.batik.dashboard.DefaultDashlet;
+import org.polymap.rhei.batik.toolkit.MarkdownBuilder;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.field.PlainValuePropertyAdapter;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.DefaultFormPage;
 import org.polymap.rhei.form.IFormPageSite;
-import org.polymap.rhei.form.batik.BatikFormContainer;
 
 import org.polymap.p4.P4Panel;
 
@@ -66,9 +68,18 @@ public class ResourceInfoDashlet
     @Override
     public void createContents( Composite parent ) {
         parent.setLayout( new FillLayout() );
-        BatikFormContainer form = new BatikFormContainer( new Form() );
-        form.createContents( parent );
-        form.setEnabled( false );
+        
+        CharArrayWriter out = new CharArrayWriter( 1024 );
+        MarkdownBuilder markdown = new MarkdownBuilder( out );
+        
+        markdown.paragraph( res.getDescription().orElse( null ) )
+                .join( ", ", res.getKeywords() );
+        
+        getSite().toolkit().createFlowText( parent, out.toString() );
+        
+//        BatikFormContainer form = new BatikFormContainer( new Form() );
+//        form.createContents( parent );
+//        form.setEnabled( false );
     }
 
     

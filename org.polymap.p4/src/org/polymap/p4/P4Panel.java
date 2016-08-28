@@ -47,7 +47,7 @@ public abstract class P4Panel
     
     public static String title( String type, String name ) {
         return StringUtils.abbreviate( 
-                Joiner.on( ": " ).skipNulls().join( type, name ), 300 );    
+                Joiner.on( ": " ).skipNulls().join( type, name ), 32 );    
     }
     
     

@@ -14,6 +14,7 @@
  */
 package org.polymap.p4.catalog;
 
+import java.io.CharArrayWriter;
 import java.text.DateFormat;
 
 import com.google.common.base.Joiner;
@@ -29,6 +30,7 @@ import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.dashboard.DashletSite;
 import org.polymap.rhei.batik.dashboard.DefaultDashlet;
+import org.polymap.rhei.batik.toolkit.MarkdownBuilder;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.field.DateValidator;
 import org.polymap.rhei.field.PlainValuePropertyAdapter;
@@ -65,24 +67,25 @@ public class MetadataInfoDashlet
     public void createContents( Composite parent ) {
         parent.setLayout( new FillLayout() );
         
-        StringBuilder buf = new StringBuilder( 1024 );
+        CharArrayWriter out = new CharArrayWriter( 1024 );
+        MarkdownBuilder markdown = new MarkdownBuilder( out );
         
-        buf.append( "*" );
-        md.getType().ifPresent( v -> buf.append( v ).append( " " ) );
-        buf.append( Joiner.on( " " ).skipNulls().join( md.getFormats() ) );
-        buf.append( "*\n\n" );
-
-        md.getDescription().ifPresent( v -> buf.append( v ).append( "\n\n" ) );
+        markdown.paragraph( () -> {
+            markdown.em( () -> {
+               markdown.join( " ", md.getType().orElse( null ), md.getFormats() );
+            });
+        });
+        markdown.paragraph( () -> {
+            markdown.add( md.getDescription().orElse( null ) );
+        });
 
         for (IMetadata.Field f : IMetadata.Field.values()) {
             md.getDescription( f ).ifPresent( v -> {
-                //getSite().toolkit().createPanelSection( parent )
-                buf.append( "### " ).append( f.name() ).append( "\n\n" ).append( v ).append( "\n\n" );
+                markdown.h3( f.name() ).paragraph( v );
             });
         }
-        
-        getSite().toolkit().createFlowText( parent, buf.toString() );
-        
+        getSite().toolkit().createFlowText( parent, out.toString() );
+
 //        BatikFormContainer form = new BatikFormContainer( new Form() );
 //        form.createContents( parent );
 //        form.setEnabled( false );

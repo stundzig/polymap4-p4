@@ -20,6 +20,8 @@ import java.net.URL;
 import org.geotools.data.ows.Service;
 import org.geotools.data.ows.WMSCapabilities;
 import org.geotools.data.wms.WebMapServer;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -199,7 +201,7 @@ public class WmsImporter
             Service service = wms.getCapabilities().getService();
             update.newEntry( metadata -> {
                 metadata.setTitle( service.getTitle() );
-                metadata.setDescription( service.get_abstract() );
+                metadata.setDescription( normalize( service.get_abstract() ) );
                 metadata.setType( "Service" );
                 metadata.setFormats( Sets.newHashSet( "WMS" ) );
                 
@@ -209,9 +211,9 @@ public class WmsImporter
                 
                 // WMS provides some more but GeoTools does not deliver more info
                 metadata.setDescription( IMetadata.Field.Publisher,
-                        new OwsMetadata().markdown( service.getContactInformation() ).toString() );
+                        normalize( new OwsMetadata().markdown( service.getContactInformation() ).toString() ) );
 //                metadata.setDescription( IMetadata.Field.Creator,
-//                        new OwsMetadata().markdown( service.getContactInformation() ).toString() );
+//                        normalize( new OwsMetadata().markdown( service.getContactInformation() ).toString() ) );
                 
                 metadata.setConnectionParams( WmsServiceResolver.createParams( url ) );
             } );
@@ -233,4 +235,9 @@ public class WmsImporter
         } );
     }
 
+    
+    protected String normalize( String s ) {
+        return StringUtils.defaultIfBlank( s, null );    
+    }
+    
 }
