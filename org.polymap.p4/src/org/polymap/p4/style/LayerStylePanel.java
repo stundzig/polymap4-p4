@@ -318,7 +318,7 @@ public class LayerStylePanel
                         i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) ), 
                         TREE_NODE, Section.SHORT_TITLE_BAR, Section.FOCUS_TITLE, SWT.BORDER );
                 section.setToolTipText( i18nStyle.get( propInfo.getDescription().orElse( propInfo.getName() ) + "Tooltip" ) );
-                section.setExpanded( level == 1 );
+                section.setExpanded( false );
                 section.setBackground( UIUtils.getColor( sectionBackgroundColor.getRed() * (11-level) /10, sectionBackgroundColor.getGreen()* (11-level) /10, sectionBackgroundColor.getBlue()* (11-level) /10) );
                 ((Composite)section.getClient()).setLayout( ColumnLayoutFactory.defaults()
                         .columns( 1, 1 ).margins( 0, 0, 5, 0 ).spacing( 5 ).create() );
