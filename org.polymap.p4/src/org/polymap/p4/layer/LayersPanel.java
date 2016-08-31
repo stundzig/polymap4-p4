@@ -14,6 +14,8 @@
  */
 package org.polymap.p4.layer;
 
+import static org.polymap.core.project.ui.ProjectNodeLabelProvider.PropType.Description;
+import static org.polymap.core.project.ui.ProjectNodeLabelProvider.PropType.Label;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 
@@ -124,8 +126,9 @@ public class LayersPanel
         
         viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.SINGLE, SWT.FULL_SELECTION );
         viewer.setContentProvider( new ProjectNodeContentProvider() );
-        viewer.firstLineLabelProvider.set( new ProjectNodeLabelProvider() );
-        
+
+        viewer.firstLineLabelProvider.set( new ProjectNodeLabelProvider( Label ) );
+        viewer.secondLineLabelProvider.set( new ProjectNodeLabelProvider( Description ) );
         viewer.iconProvider.set( new LayerIconProvider() );
         
         viewer.firstSecondaryActionProvider.set( new LayerVisibleAction());

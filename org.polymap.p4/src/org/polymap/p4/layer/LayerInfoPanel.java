@@ -121,7 +121,9 @@ public class LayerInfoPanel
             public void widgetSelected( SelectionEvent ev ) {
                 try {
                     for (IDashlet dashlet : dashboard.dashlets()) {
-                        ((ISubmitableDashlet)dashlet).submit( new NullProgressMonitor() );
+                        if (dashlet instanceof ISubmitableDashlet) {
+                            ((ISubmitableDashlet)dashlet).submit( new NullProgressMonitor() );
+                        }
                     }
                     UpdateLayerOperation op = new UpdateLayerOperation()
                             .uow.put( layer.get().belongsTo() )

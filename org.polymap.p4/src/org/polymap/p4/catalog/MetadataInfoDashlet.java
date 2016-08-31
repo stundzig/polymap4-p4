@@ -16,7 +16,6 @@ package org.polymap.p4.catalog;
 
 import java.io.CharArrayWriter;
 import java.text.DateFormat;
-
 import com.google.common.base.Joiner;
 
 import org.eclipse.swt.SWT;
@@ -26,11 +25,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
 import org.polymap.core.catalog.IMetadata;
+import org.polymap.core.runtime.text.MarkdownBuilder;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.dashboard.DashletSite;
 import org.polymap.rhei.batik.dashboard.DefaultDashlet;
-import org.polymap.rhei.batik.toolkit.MarkdownBuilder;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.field.DateValidator;
 import org.polymap.rhei.field.PlainValuePropertyAdapter;
@@ -38,6 +37,7 @@ import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.DefaultFormPage;
 import org.polymap.rhei.form.IFormPageSite;
+
 import org.polymap.p4.P4Panel;
 
 /**
@@ -78,6 +78,12 @@ public class MetadataInfoDashlet
         markdown.paragraph( () -> {
             markdown.add( md.getDescription().orElse( null ) );
         });
+//        markdown.paragraph( () -> {
+//            DateFormat df = SimpleDateFormat.getDateInstance( SimpleDateFormat.MEDIUM, RWT.getLocale() );
+//            markdown.bullet( "created: {0} - modified: {1}", 
+//                    md.getCreated().map( v -> df.format( v ) ).orElse( "?" ),
+//                    md.getModified().map( v -> df.format( v ) ).orElse( "?" ) );
+//        });
 
         for (IMetadata.Field f : IMetadata.Field.values()) {
             md.getDescription( f ).ifPresent( v -> {
