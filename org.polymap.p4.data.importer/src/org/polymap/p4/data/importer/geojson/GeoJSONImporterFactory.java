@@ -20,8 +20,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import org.apache.commons.io.FilenameUtils;
-
 import org.polymap.p4.data.importer.ContextIn;
 import org.polymap.p4.data.importer.ImporterFactory;
 
@@ -58,12 +56,15 @@ public class GeoJSONImporterFactory
         if (file == null) {
             return false;
         }
-        if ("geojson".equalsIgnoreCase( FilenameUtils.getExtension( file.getName() ) )) {
+        if (file.getName().toLowerCase().endsWith("geojson")) {
+            return true;
+        }
+        if (file.getName().toLowerCase().endsWith( "geojson.txt")) {
             return true;
         }
         try {
             // XXX brute force
-            if ("json".equalsIgnoreCase( FilenameUtils.getExtension( file.getName() ) )) {
+            if (file.getName().toLowerCase().endsWith( "json")) {
                 BufferedReader reader = null;
                 try {
                     reader = new BufferedReader( new FileReader( file ) );

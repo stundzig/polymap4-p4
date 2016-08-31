@@ -125,14 +125,16 @@ public class GeoJSONImporter
             String encoding = charsetPrompt.selection().name();
             FeatureJSON featureJSON = new FeatureJSON();
             isr = new InputStreamReader( new FileInputStream( geojsonFile ), encoding );
+            SimpleFeatureType schema = GeoJSONUtil.parse( new LaxFeatureTypeHandler( schemaNamePrompt.selection(), crsPrompt.selection() ), isr, false );
+            isr.close();
+            featureJSON.setFeatureType( schema );
+            ListFeatureCollection featureList = new ListFeatureCollection( schema );
+
+            isr = new InputStreamReader( new FileInputStream( geojsonFile ), encoding );
             featureIterator = featureJSON.streamFeatureCollection( isr );
-            ListFeatureCollection featureList = null;
             int i = 0;
             while (i < 100 && featureIterator.hasNext()) {
                 SimpleFeature next = featureIterator.next();
-                if (featureList == null) {
-                    featureList = new ListFeatureCollection( next.getFeatureType() );
-                }
                 featureList.add( next );
                 i++;
             }
@@ -143,6 +145,7 @@ public class GeoJSONImporter
         catch (Exception e) {
             site.ok.set( false );
             exception = e;
+            e.printStackTrace();
         }
         finally {
             if (isr != null) {
@@ -168,9 +171,6 @@ public class GeoJSONImporter
             isr = new InputStreamReader( new FileInputStream( geojsonFile ), CharsetPrompt.DEFAULT );
             FeatureJSON featureJSON = new FeatureJSON();
             predefinedCRS = featureJSON.readCRS( isr );
-            if (predefinedCRS == null) {
-                predefinedCRS = CRS.decode( "EPSG:4326" );
-            }
         }
         catch (Exception ioe) {
             exception = ioe;
@@ -219,6 +219,8 @@ public class GeoJSONImporter
         Timer t = new Timer();
         InputStreamReader isr = new InputStreamReader( new FileInputStream( geojsonFile ), encoding );
         SimpleFeatureType schema = GeoJSONUtil.parse( new LaxFeatureTypeHandler( schemaNamePrompt.selection(), crsPrompt.selection() ), isr, false );
+        featureJSON.setFeatureType( schema );
+
         System.out.println( "readschema needs " + t.elapsedTime() );
         // FeatureIterator<SimpleFeature> featureIterator =
         // featureJSON.streamFeatureCollection( isr );
@@ -242,6 +244,7 @@ public class GeoJSONImporter
                     return featureJSON.streamFeatureCollection( new InputStreamReader( new FileInputStream( geojsonFile ), encoding ) );
                 }
                 catch (Exception e) {
+                    e.printStackTrace( );
                     throw new RuntimeException( e );
                 }
             }
