@@ -37,8 +37,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.geotools.data.Query;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.referencing.ReferencingFactoryFinder;
+import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
 import org.polymap.core.runtime.Streams;
@@ -94,6 +97,7 @@ public class ShpImporter
 
 
     @Override
+    @SuppressWarnings( "hiding" )
     public void init( ImporterSite site, IProgressMonitor monitor ) {
         this.site = site;
         site.icon.set( ImporterPlugin.images().svgImage( "shp.svg", SvgImageRegistryHelper.NORMAL24 ) );
@@ -146,9 +150,28 @@ public class ShpImporter
             ds.setCharset( charsetPrompt.selection() );
             ds.forceSchemaCRS( crsPrompt.selection() );
             
+            ContentFeatureSource fs = ds.getFeatureSource();
             Query query = new Query();
+            
+            // check all features
+            try (
+                SimpleFeatureIterator it = fs.getFeatures( query ).features();
+            ){
+                SimpleFeatureType schema = fs.getSchema();
+                while (it.hasNext()) {
+                    SimpleFeature feature = it.next();
+                    // geometry
+                    if (schema.getGeometryDescriptor() != null
+                            && feature.getDefaultGeometry() == null) {
+                        throw new RuntimeException( "Feature has no geometry: " + feature.getIdentifier().getID() );                        
+                    }
+                    // other checks...?
+                }
+            }
+
+            // get the first 100 to display
             query.setMaxFeatures( 100 );
-            features = ds.getFeatureSource().getFeatures( query );
+            features = fs.getFeatures( query );
 
             site.ok.set( true );
             exception = null;
