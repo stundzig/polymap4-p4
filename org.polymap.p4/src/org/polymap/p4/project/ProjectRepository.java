@@ -18,8 +18,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.referencing.CRS;
-import org.opengis.geometry.Envelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import org.apache.commons.logging.Log;
@@ -78,16 +76,17 @@ public class ProjectRepository {
         try (UnitOfWork uow = repo.newUnitOfWork()) {
             if (uow.entity( IMap.class, "root" ) == null) {
                 String srs = "EPSG:3857";
-                CoordinateReferenceSystem crs = Geometries.crs( srs );
-                Envelope extent = CRS.getEnvelope( crs ) != null
-                        ? CRS.getEnvelope( crs )
-                        : ReferencedEnvelope.EVERYTHING;
-                
+                CoordinateReferenceSystem epsg3857 = Geometries.crs( srs );
+                ReferencedEnvelope maxExtent = new ReferencedEnvelope( 
+                        -20026376.39, 20026376.39,
+                        -20048966.10, 20048966.10,
+                        epsg3857 );
+
                 // The one and only project of a P4 instance
                 uow.createEntity( IMap.class, "root", (IMap proto) -> {
                     proto.label.set( "Project" );
                     proto.srsCode.set( srs );
-                    proto.maxExtent.createValue( EnvelopeComposite.defaults( extent ) );
+                    proto.maxExtent.createValue( EnvelopeComposite.defaults( maxExtent ) );
                     return proto;
                 });
                 uow.commit();

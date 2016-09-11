@@ -14,6 +14,7 @@
  */
 package org.polymap.p4.map;
 
+import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
 import static org.polymap.p4.layer.FeatureSelection.ff;
 
@@ -44,6 +45,9 @@ import org.polymap.core.data.util.Geometries;
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.IMap;
+import org.polymap.core.project.ProjectNode.ProjectNodeCommittedEvent;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.security.SecurityContext;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -113,19 +117,35 @@ public class ProjectMapPanel
                 throw new RuntimeException( "Default/fake login did not succeed." );
             }
         }
+        
+        // listen to maxExtent changes
+        EventManager.instance().subscribe( this, ifType( ProjectNodeCommittedEvent.class, ev -> 
+                ev.getEntityId().equals( map.get().id() ) ) );
     }
 
     
     @Override
     public void dispose() {
+        EventManager.instance().unsubscribe( this );
     }
 
+    
+    @EventHandler( display=true )
+    protected void onMapChange( ProjectNodeCommittedEvent ev ) {
+        ReferencedEnvelope mapMaxExtent = map.get().maxExtent();
+        ReferencedEnvelope viewerMaxExtent = mapViewer.maxExtent.get();
+        if (!mapMaxExtent.equals( viewerMaxExtent )) {
+            mapViewer.maxExtent.set( mapMaxExtent );
+            mapViewer.mapExtent.set( mapMaxExtent );
+        }
+    }
 
+    
     @Override
     public void createContents( Composite parent ) {
         // title and layout
         site().title.set( P4AppDesign.appTitle );
-        site().setSize( SIDE_PANEL_WIDTH, Integer.MAX_VALUE, Integer.MAX_VALUE );
+        site().setSize( 250, Integer.MAX_VALUE, Integer.MAX_VALUE );
         
         //parent.setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
         parent.setLayout( FormLayoutFactory.defaults().margins( 0, 0, 5, 0 ).spacing( 0 ).create() );
@@ -147,9 +167,9 @@ public class ProjectMapPanel
             mapViewer.contentProvider.set( new ProjectContentProvider() );
             mapViewer.layerProvider.set( new ProjectLayerProvider() );
             
-            // FIXME
-            CoordinateReferenceSystem epsg3857 = Geometries.crs( "EPSG:3857" );
-            mapViewer.maxExtent.set( new ReferencedEnvelope( 1380000, 1390000, 6680000, 6690000, epsg3857 ) );
+            ReferencedEnvelope maxExtent = map.get().maxExtent();
+            log.info( "maxExtent: " + maxExtent );
+            mapViewer.maxExtent.set( maxExtent );
             
             mapViewer.addMapControl( new MousePositionControl() );
             mapViewer.addMapControl( new ScaleLineControl() );
@@ -159,6 +179,8 @@ public class ProjectMapPanel
             mapViewer.getControl().moveBelow( null );
             mapViewer.getControl().setBackground( UIUtils.getColor( 0xff, 0xff, 0xff ) );
             
+            mapViewer.mapExtent.set( maxExtent );
+
             //
             OlMap olmap = mapViewer.getMap();
             olmap.addEventListener( Event.click, this );
