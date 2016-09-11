@@ -31,12 +31,17 @@ import org.polymap.core.catalog.resolve.IResolvableInfo;
 import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.catalog.resolve.IServiceInfo;
 import org.polymap.core.catalog.resolve.ResourceResolverExtension;
+import org.polymap.core.data.PipelineFeatureSource;
 import org.polymap.core.data.pipeline.DataSourceDescription;
+import org.polymap.core.data.pipeline.Pipeline;
+import org.polymap.core.data.pipeline.PipelineIncubationException;
+import org.polymap.core.data.pipeline.PipelineProcessor;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.runtime.cache.Cache;
 import org.polymap.core.runtime.cache.CacheConfig;
 
 import org.polymap.p4.P4Plugin;
+import org.polymap.p4.data.P4PipelineIncubator;
 
 /**
  * Provides the connection between an {@link ILayer} -> {@link IMetadata} ->
@@ -125,7 +130,26 @@ public class AllResolver
         return Optional.empty();
     }
     
+    
+    public Optional<PipelineFeatureSource> connectLayer( ILayer layer, Class<PipelineProcessor> usecase, IProgressMonitor monitor )
+            throws Exception {
+        // resolve service
+        Optional<DataSourceDescription> dsd = AllResolver.instance().connectLayer( layer, monitor );
+        
+        if (dsd.isPresent()) {
+            // create pipeline for it
+            Pipeline pipeline = P4PipelineIncubator.forLayer( layer ).newPipeline( usecase, dsd.get(), null );
+            if (pipeline == null || pipeline.length() == 0) {
+                throw new PipelineIncubationException( "Unable to build pipeline for: " + dsd );
+            }
+            return Optional.of( new PipelineFeatureSource( pipeline ) );
+        }
+        else {
+            return Optional.empty();
+        }
+    }
 
+    
     public Optional<IMetadata> metadata( ILayer layer, IProgressMonitor monitor ) throws Exception {
         StringTokenizer tokens = new StringTokenizer( layer.resourceIdentifier.get(), ID_DELIMITER );
         String metadataId = tokens.nextToken();

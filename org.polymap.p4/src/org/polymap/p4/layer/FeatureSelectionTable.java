@@ -146,7 +146,7 @@ public class FeatureSelectionTable {
     
         // add columns
         DefaultFeatureTableColumn first = null;
-        for (PropertyDescriptor prop : features.getSchema().getDescriptors()) {
+        for (PropertyDescriptor prop : fs.getSchema().getDescriptors()) {
             if (Geometry.class.isAssignableFrom( prop.getType().getBinding() )) {
                 // skip Geometry
             }
@@ -154,6 +154,14 @@ public class FeatureSelectionTable {
                 DefaultFeatureTableColumn column = new DefaultFeatureTableColumn( prop );
                 viewer.addColumn( column );
                 first = first != null ? first : column;
+                
+                column.getViewerColumn().getColumn().addSelectionListener( new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected( SelectionEvent e ) {
+                        // XXX Auto-generated method stub
+                        throw new RuntimeException( "not yet implemented." );
+                    }
+                });
             }
         }
         
@@ -162,7 +170,8 @@ public class FeatureSelectionTable {
         first.sort( SWT.DOWN );
         
         //
-        viewer.setContent( features );
+        viewer.setContentProvider( new LazyFeatureContentProvider() );
+        viewer.setInput( fs );
 
         // selection -> FeaturePanel
         viewer.addSelectionChangedListener( ev -> {
