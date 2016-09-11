@@ -94,6 +94,7 @@ public class ProjectRepository {
             else {
                 // convert legacy setting
                 if (map.maxExtent().equals( ReferencedEnvelope.EVERYTHING )) {
+                    log.info( "Converting old EVERYTHING envelope..." );
                     map.srsCode.set( srs );
                     map.maxExtent.createValue( EnvelopeComposite.defaults( maxExtent ) );
                 }
