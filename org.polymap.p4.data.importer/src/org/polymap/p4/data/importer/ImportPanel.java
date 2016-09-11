@@ -122,8 +122,8 @@ public class ImportPanel
                 .filter( parent -> parent instanceof ProjectMapPanel )
                 .map( parent -> {
                     site().title.set( "" );
-                    site().tooltip.set( "Import new data into the catalog" );
-                    site().icon.set( ImporterPlugin.images().svgImage( "plus-circle-outline.svg", P4Plugin.HEADER_ICON_CONFIG ) );
+                    site().tooltip.set( "Import new data into this project" );
+                    site().icon.set( ImporterPlugin.images().svgImage( "file-import.svg", P4Plugin.HEADER_ICON_CONFIG ) );
                     return true;
                 } )
                 .orElse( false );
@@ -172,7 +172,7 @@ public class ImportPanel
         Upload upload = null;
         if (!nextContext.isPresent()) {
             upload = tk.adapt( new Upload( parent, SWT.NONE/* , Upload.SHOW_PROGRESS */), false, false );
-            upload.setImage( ImporterPlugin.images().svgImage( "file-multiple.svg", WHITE24 ) );
+            upload.setImage( ImporterPlugin.images().svgImage( "file-import.svg", WHITE24 ) );
             upload.setText( "" );
             upload.setToolTipText( "<b>Drop</b> files here<br/>or <b>click</b> to open file dialog" );
             upload.setHandler( this );
@@ -247,7 +247,7 @@ public class ImportPanel
             }
             else {
                 fab = tk.createFab( ImporterPlugin.images().svgImage( "arrow-right.svg", WHITE24 ), SWT.RIGHT );
-                fab.setToolTipText( "Send data to the next importer" );
+                fab.setToolTipText( "Send these data to the next stage" );
             }
             fab.getParent().layout();
             
