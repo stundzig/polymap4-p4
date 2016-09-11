@@ -125,7 +125,7 @@ public class ProjectLayerProvider
     public Layer getLayer( ILayer elm ) {
         // start creating pipeline
         String layerName = createPipeline( elm );
-        return buildLayer( layerName );
+        return buildTiledLayer( layerName );
     }
     
 
@@ -146,6 +146,7 @@ public class ProjectLayerProvider
     protected Layer buildTiledLayer( String layerName ) {
         return new TileLayer()
                 .source.put( new TileWMSSource()
+                        //.tileGrid.put( new TileGrid( "ol.tilegrid.TileGrid" ) {}.tileSize.put( new Size( 1024, 1024 ) ) )
                         .url.put( ".." + alias )
                         .params.put( new WMSRequestParams()
                                 .version.put( "1.1.1" )  // send "SRS" param
