@@ -16,6 +16,7 @@ package org.polymap.p4.layer;
 
 import static org.polymap.core.runtime.UIThreadExecutor.asyncFast;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.COLOR_DANGER;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,12 +36,15 @@ import org.polymap.core.project.ops.UpdateLayerOperation;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.ui.StatusDispatcher;
+import org.polymap.core.ui.UIUtils;
 
 import org.polymap.rhei.batik.BatikApplication;
+import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.Scope;
+import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.contribution.ContributionManager;
 import org.polymap.rhei.batik.dashboard.Dashboard;
 import org.polymap.rhei.batik.dashboard.DashletSite;
@@ -96,6 +100,8 @@ public class LayerInfoPanel
         dashboard = new Dashboard( getSite(), DASHBOARD_ID );
         dashboard.addDashlet( new LayerInfoDashlet( layer.get() )
                 .addConstraint( new PriorityConstraint( 100 ) ) );
+        dashboard.addDashlet( new DeleteLayerDashlet()
+                .addConstraint( new PriorityConstraint( 0 ) ) );
         try {
             NullProgressMonitor monitor = new NullProgressMonitor();
             P4Plugin.allResolver().metadata( layer.get(), monitor ).ifPresent( serviceInfo -> {
@@ -160,21 +166,25 @@ public class LayerInfoPanel
     /**
      * 
      */
-    class DeleteLayerDashlet
+    protected class DeleteLayerDashlet
             extends DefaultDashlet {
 
         @Override
         public void init( DashletSite site ) {
             super.init( site );
             site.title.set( "Danger zone" );
-            site.constraints.get().add( new PriorityConstraint( 0 ) );
             site.constraints.get().add( new MinWidthConstraint( 350, 1 ) );
+            site.border.set( false );
         }
 
         @Override
         public void createContents( Composite parent ) {
-            Button deleteBtn = tk().createButton( parent, "Delete this layer", SWT.PUSH );
-            deleteBtn.setToolTipText( "Delete this layer." );
+            getSite().getTitleControl().setForeground( UIUtils.getColor( COLOR_DANGER ) );
+            
+            Button deleteBtn = tk().createButton( parent, "Delete this layer", SWT.PUSH, SWT.FLAT );
+            //deleteBtn.setForeground( UIUtils.getColor( COLOR_DANGER ) );
+            deleteBtn.setImage( BatikPlugin.images().svgImage( "delete-circle.svg", SvgImageRegistryHelper.ACTION24 ) );
+            deleteBtn.setToolTipText( "Delete this layer and all its settings.<br/>Data is kept in catalog." );
             deleteBtn.addSelectionListener( new SelectionAdapter() {
                 @Override
                 public void widgetSelected( SelectionEvent e ) {
@@ -194,7 +204,7 @@ public class LayerInfoPanel
 //                            getContext().openPanel( PanelPath.ROOT, new PanelIdentifier( "start" ) );
                         }
                         else {
-                            StatusDispatcher.handleError( "Unable to delete project.", ev2.getResult().getException() );
+                            StatusDispatcher.handleError( "Unable to delete layer.", ev2.getResult().getException() );
                         }
                     }));
                 }

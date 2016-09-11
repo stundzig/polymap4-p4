@@ -53,6 +53,7 @@ import org.polymap.rhei.batik.toolkit.RadioItem;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 
 import org.polymap.model2.runtime.EntityRuntimeContext.EntityStatus;
+import org.polymap.model2.runtime.UnitOfWork;
 import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.map.ProjectMapPanel;
@@ -81,6 +82,8 @@ public class FeatureSelectionTableContrib
     private MdToolbar2                  toolbar;
     
     private Map<String,RadioItem>       createdLayerIds = new HashMap();
+
+    private UnitOfWork                  uow;
     
 
     @Override
@@ -91,13 +94,26 @@ public class FeatureSelectionTableContrib
             
             this.site = site;
             this.toolbar = toolbar;
+            this.uow = map.get().belongsTo();
+            
             for (ILayer layer : map.get().layers) {
                 createLayerItem( toolbar, layer );
             }
             
-            EventManager.instance().subscribe( this, ifType( ProjectNodeCommittedEvent.class, ev -> 
-                    ev.getSource() instanceof ILayer && 
-                    map.get().containsLayer( ev.getEntity( map.get().belongsTo() ) ) ) );
+            EventManager.instance().subscribe( this, ifType( ProjectNodeCommittedEvent.class, ev -> {
+                if (ev.getSource() instanceof ILayer) {
+                    // update or removed
+                    if (createdLayerIds.containsKey( ev.getEntityId() )) {
+                        return true;
+                    }
+                    // created
+                    ILayer layer = ev.getEntity( uow );
+                    if (map.get().containsLayer( layer )) {
+                        return true;
+                    }
+                }
+                return false;
+            }));
         }
     }
 
@@ -119,22 +135,22 @@ public class FeatureSelectionTableContrib
         else {
             Set<String> handledLayerIds = new HashSet();
             for (ProjectNodeCommittedEvent ev : evs) {
-                ILayer layer = ev.getEntity( map.get().belongsTo() );
-                if (!handledLayerIds.contains( layer.id() )) {
-                    handledLayerIds.add( layer.id() );
+                if (!handledLayerIds.contains( ev.getEntityId() )) {
+                    handledLayerIds.add( ev.getEntityId() );
                     
+                    // removed
+                    if (ev.getSource().status().equals( EntityStatus.REMOVED )) {
+                        RadioItem item = createdLayerIds.remove( ev.getEntityId() );
+                        item.dispose();
+                    }
                     // newly created
-                    if (!createdLayerIds.containsKey( layer.id() )) {
+                    else if (!createdLayerIds.containsKey( ev.getEntityId() )) {
+                        ILayer layer = ev.getEntity( uow );
                         createLayerItem( toolbar, layer );                    
                     }
-                    // removed
-                    else if (layer.status().equals( EntityStatus.REMOVED )) {
-                        log.info( "XXX not yet implemented!" );
-                        // RadioItem item = createdLayerIds.remove( layer.id() );
-                        // item.dispose();
-                    }
                     // modified
-                    else if (createdLayerIds.containsKey( layer.id() )) {
+                    else if (createdLayerIds.containsKey( ev.getEntityId() )) {
+                        ILayer layer = ev.getEntity( uow );
                         RadioItem item = createdLayerIds.get( layer.id() );
                         item.text.set( label( layer ) );
                     }
