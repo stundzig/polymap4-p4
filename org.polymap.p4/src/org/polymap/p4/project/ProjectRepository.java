@@ -73,24 +73,32 @@ public class ProjectRepository {
     }
     
     protected static void checkInitRepo() {
-        try (UnitOfWork uow = repo.newUnitOfWork()) {
-            if (uow.entity( IMap.class, "root" ) == null) {
-                String srs = "EPSG:3857";
-                CoordinateReferenceSystem epsg3857 = Geometries.crs( srs );
-                ReferencedEnvelope maxExtent = new ReferencedEnvelope( 
-                        -20026376.39, 20026376.39,
-                        -20048966.10, 20048966.10,
-                        epsg3857 );
+        try (
+            UnitOfWork uow = repo.newUnitOfWork()
+        ){
+            String srs = "EPSG:3857";
+            CoordinateReferenceSystem epsg3857 = Geometries.crs( srs );
+            ReferencedEnvelope maxExtent = new ReferencedEnvelope( 
+                    -20026376.39, 20026376.39, -20048966.10, 20048966.10, epsg3857 );
 
+            IMap map = uow.entity( IMap.class, "root" );
+            if (map == null) {
                 // The one and only project of a P4 instance
-                uow.createEntity( IMap.class, "root", (IMap proto) -> {
+                map = uow.createEntity( IMap.class, "root", (IMap proto) -> {
                     proto.label.set( "Project" );
                     proto.srsCode.set( srs );
                     proto.maxExtent.createValue( EnvelopeComposite.defaults( maxExtent ) );
                     return proto;
                 });
-                uow.commit();
             }
+            else {
+                // convert legacy setting
+                if (map.maxExtent().equals( ReferencedEnvelope.EVERYTHING )) {
+                    map.srsCode.set( srs );
+                    map.maxExtent.createValue( EnvelopeComposite.defaults( maxExtent ) );
+                }
+            }
+            uow.commit();
         }
         catch (Exception e) {
             throw new RuntimeException( e );
