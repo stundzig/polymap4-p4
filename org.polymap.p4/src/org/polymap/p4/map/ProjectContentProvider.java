@@ -72,11 +72,10 @@ public class ProjectContentProvider
         projectNodeListener = new ProjectNodeListener();
         EventManager.instance().subscribe( projectNodeListener, ifType( ProjectNodeCommittedEvent.class, ev -> {
                 ProjectNode src = ev.getEntity( map.belongsTo() );
-                return 
-                        src instanceof IMap && map.id().equals( src.id() ) ||
-                        src instanceof ILayer && map.containsLayer( (ILayer)src );
+                return src instanceof IMap && map.id().equals( src.id() ) 
+                    || src instanceof ILayer && map.containsLayer( (ILayer)src );
                 // XXX check if structural change or just label changed
-        } ) );
+        }));
 
         // listen to LayerUserSettings#visible
         propertyListener = new PropertyListener();
@@ -88,7 +87,7 @@ public class ProjectContentProvider
                         .findAny().isPresent();
             }
             return false;
-        } ) );
+        }));
         
         styleListener = new StyleListener();
         EventManager.instance().subscribe( styleListener, ifType( FeatureStyleCommitedEvent.class, ev -> {
@@ -96,7 +95,7 @@ public class ProjectContentProvider
                     .filter( l -> l.userSettings.get().visible.get() )
                     .filter( l -> l.styleIdentifier.get().equals( ev.getSource().id() )  )
                     .findAny().isPresent();
-        } ) );
+        }));
     }
 
     
@@ -122,6 +121,9 @@ public class ProjectContentProvider
     class ProjectNodeListener {
         @EventHandler( display=true, delay=100 )
         protected void onCommit( List<ProjectNodeCommittedEvent> evs ) {
+//            for (ProjectNodeCommittedEvent ev : evs) {
+//                log.info( "ev: " + ev.getEntityId() );
+//            }
             viewer.refresh();
         }
     }
