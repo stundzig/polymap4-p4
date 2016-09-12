@@ -70,12 +70,12 @@ public class KMLImporter
 
 
     @Override
-    public void init( ImporterSite site, IProgressMonitor monitor ) throws Exception {
-        this.site = site;
-        site.icon.set( ImporterPlugin.images().svgImage( "file-xml.svg", SvgImageRegistryHelper.NORMAL24 ) );
-        site.summary.set( "KML file: " + kmlFile.getName() );
-        site.description.set( "Keyhole Markup Language (KML) is for expressing geographic annotation and visualization within Internet-based, two-dimensional maps." );
-        site.terminal.set( true );
+    public void init( ImporterSite importerSite, IProgressMonitor monitor ) throws Exception {
+        this.site = importerSite;
+        importerSite.icon.set( ImporterPlugin.images().svgImage( "file-xml.svg", SvgImageRegistryHelper.NORMAL24 ) );
+        importerSite.summary.set( "KML file: " + kmlFile.getName() );
+        importerSite.description.set( "Keyhole Markup Language (KML) is for expressing geographic annotation and visualization within Internet-based, two-dimensional maps." );
+        importerSite.terminal.set( true );
     }
 
 

@@ -19,7 +19,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.polymap.core.data.refine.impl.LineBasedFormatAndOptions;
 import org.polymap.core.ui.FormDataFactory;
-import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 

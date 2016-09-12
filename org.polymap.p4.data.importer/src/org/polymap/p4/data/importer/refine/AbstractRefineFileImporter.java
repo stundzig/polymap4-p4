@@ -168,7 +168,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
         TypedContent content = typedContent();
         final SimpleFeatureType TYPE = buildFeatureType( content.columns() );
         final SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder( TYPE );
-        FeatureCollection features = new DefaultFeatureCollection( null, TYPE );
+        FeatureCollection currentFeatures = new DefaultFeatureCollection( null, TYPE );
         // TODO FeatureTable shows always latest created on top, therefore reverse
         // the order
         List<RefineRow> rows = content.rows();
@@ -222,13 +222,13 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                 // null ? cell.value.getClass() : "null"));
                 featureBuilder.add( cell == null ? null : cell.guessedValue() );
             }
-            ((DefaultFeatureCollection)features).add( featureBuilder.buildFeature( null ) );
+            ((DefaultFeatureCollection)currentFeatures).add( featureBuilder.buildFeature( null ) );
             if (count % 10000 == 0) {
                 log.info( "created " + count );
             }
             count++;
         }
-        return features;
+        return currentFeatures;
     }
 
 

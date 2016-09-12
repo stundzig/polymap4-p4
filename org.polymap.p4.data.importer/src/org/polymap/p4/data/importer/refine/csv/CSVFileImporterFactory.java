@@ -50,21 +50,21 @@ public class CSVFileImporterFactory
             builder.newImporter( new CSVFileImporter(), file );
         }
         if (files != null) {
-            for (File file : files) {
-                if (isSupported( file )) {
-                    builder.newImporter( new CSVFileImporter(), file );
+            for (File currentFile : files) {
+                if (isSupported( currentFile )) {
+                    builder.newImporter( new CSVFileImporter(), currentFile );
                 }
             }
         }
     }
 
 
-    private boolean isSupported( File file ) {
-        if (file == null) {
+    private boolean isSupported( File f ) {
+        if (f == null) {
             return false;
         }
         for (String type : supportedTypes) {
-            if (file.getName().toLowerCase().endsWith( type )) {
+            if (f.getName().toLowerCase().endsWith( type )) {
                 return true;
             }
         }

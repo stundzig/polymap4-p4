@@ -40,16 +40,16 @@ public class KMLImporterFactory
             builder.newImporter( new KMLImporter(), file );
         }
         if (files != null) {
-            for (File file : files) {
-                if (isSupported( file )) {
-                    builder.newImporter( new KMLImporter(), file );
+            for (File currentFile : files) {
+                if (isSupported( currentFile )) {
+                    builder.newImporter( new KMLImporter(), currentFile );
                 }
             }
         }
     }
 
 
-    private boolean isSupported( File file ) {
-        return file != null && ("kml".equalsIgnoreCase( FilenameUtils.getExtension( file.getName() ) ));
+    private boolean isSupported( File f ) {
+        return f != null && ("kml".equalsIgnoreCase( FilenameUtils.getExtension( f.getName() ) ));
     }
 }

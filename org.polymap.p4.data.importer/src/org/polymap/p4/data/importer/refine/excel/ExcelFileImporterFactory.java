@@ -50,14 +50,14 @@ public class ExcelFileImporterFactory
         }
         else {
             if (isSupported( file )) {
-                Sheet sheet = new Sheet( file, -1, null );
-                builder.newImporter( new ExcelFileImporter(), sheet, sheet.file() );
+                Sheet newSheet = new Sheet( file, -1, null );
+                builder.newImporter( new ExcelFileImporter(), newSheet, newSheet.file() );
             }
             if (files != null) {
-                for (File file : files) {
-                    if (isSupported( file )) {
-                        Sheet sheet = new Sheet( file, -1, null );
-                        builder.newImporter( new ExcelFileImporter(), sheet, sheet.file() );
+                for (File currentFile : files) {
+                    if (isSupported( currentFile )) {
+                        Sheet newSheet = new Sheet( currentFile, -1, null );
+                        builder.newImporter( new ExcelFileImporter(), newSheet, newSheet.file() );
                     }
                 }
             }
@@ -65,12 +65,12 @@ public class ExcelFileImporterFactory
     }
 
 
-    private boolean isSupported( File file ) {
-        if (file == null) {
+    private boolean isSupported( File f ) {
+        if (f == null) {
             return false;
         }
         for (String type : supportedTypes) {
-            if (file.getName().toLowerCase().endsWith( type )) {
+            if (f.getName().toLowerCase().endsWith( type )) {
                 return true;
             }
         }

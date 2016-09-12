@@ -84,12 +84,12 @@ public class GeoJSONImporter
 
 
     @Override
-    public void init( ImporterSite site, IProgressMonitor monitor ) throws Exception {
-        this.site = site;
-        site.icon.set( ImporterPlugin.images().svgImage( "json.svg", SvgImageRegistryHelper.NORMAL24 ) );
-        site.summary.set( "GeoJSON file: " + geojsonFile.getName() );
-        site.description.set( "GeoJSON is a format for encoding a variety of geographic data structures." );
-        site.terminal.set( true );
+    public void init( ImporterSite importerSite, IProgressMonitor monitor ) throws Exception {
+        this.site = importerSite;
+        importerSite.icon.set( ImporterPlugin.images().svgImage( "json.svg", SvgImageRegistryHelper.NORMAL24 ) );
+        importerSite.summary.set( "GeoJSON file: " + geojsonFile.getName() );
+        importerSite.description.set( "GeoJSON is a format for encoding a variety of geographic data structures." );
+        importerSite.terminal.set( true );
     }
 
 

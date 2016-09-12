@@ -43,31 +43,31 @@ public class GeoJSONImporterFactory
             builder.newImporter( new GeoJSONImporter(), file );
         }
         if (files != null) {
-            for (File file : files) {
-                if (isSupported( file )) {
-                    builder.newImporter( new GeoJSONImporter(), file );
+            for (File currentFile : files) {
+                if (isSupported( currentFile )) {
+                    builder.newImporter( new GeoJSONImporter(), currentFile );
                 }
             }
         }
     }
 
 
-    private boolean isSupported( File file ) {
-        if (file == null) {
+    private boolean isSupported( File f ) {
+        if (f == null) {
             return false;
         }
-        if (file.getName().toLowerCase().endsWith("geojson")) {
+        if (f.getName().toLowerCase().endsWith("geojson")) {
             return true;
         }
-        if (file.getName().toLowerCase().endsWith( "geojson.txt")) {
+        if (f.getName().toLowerCase().endsWith( "geojson.txt")) {
             return true;
         }
         try {
             // XXX brute force
-            if (file.getName().toLowerCase().endsWith( "json")) {
+            if (f.getName().toLowerCase().endsWith( "json")) {
                 BufferedReader reader = null;
                 try {
-                    reader = new BufferedReader( new FileReader( file ) );
+                    reader = new BufferedReader( new FileReader( f ) );
                     String line;
                     // search for the second {
                     boolean firstBracketFound = false;

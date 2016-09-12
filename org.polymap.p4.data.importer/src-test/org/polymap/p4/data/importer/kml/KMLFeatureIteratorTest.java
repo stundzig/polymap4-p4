@@ -13,6 +13,7 @@
 package org.polymap.p4.data.importer.kml;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.File;
@@ -33,15 +34,20 @@ public class KMLFeatureIteratorTest {
         int i = 0;
         while (it.hasNext()) {
             SimpleFeature feature = it.next();
-            assertNull( feature.getIdentifier());
-            assertEquals( CRS.decode( "EPSG:4326" ), feature.getType().getCoordinateReferenceSystem());
+            assertNull( feature.getIdentifier() );
+            assertEquals( CRS.decode( "EPSG:4326" ), feature.getType().getCoordinateReferenceSystem() );
             Object defaultGeometry = feature.getDefaultGeometry();
+            assertNotNull( defaultGeometry );
             GeometryAttribute defaultGeometryProperty = feature.getDefaultGeometryProperty();
+            assertNotNull( defaultGeometryProperty );
             GeometryDescriptor geometryDescriptor = feature.getType().getGeometryDescriptor();
+            assertNotNull( geometryDescriptor );
             GeometryDescriptor geometryDescriptor2 = featureType.getGeometryDescriptor();
+            assertNotNull( geometryDescriptor2 );
+            assertEquals( geometryDescriptor, geometryDescriptor2 );
             i++;
         }
-        assertEquals( CRS.decode( "EPSG:4326" ), featureType.getCoordinateReferenceSystem());
+        assertEquals( CRS.decode( "EPSG:4326" ), featureType.getCoordinateReferenceSystem() );
         it.close();
         assertEquals( 78, i );
         assertEquals( null, featureType.getName().getNamespaceURI() );
