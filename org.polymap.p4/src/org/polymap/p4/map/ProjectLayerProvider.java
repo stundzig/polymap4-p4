@@ -125,7 +125,7 @@ public class ProjectLayerProvider
     public Layer getLayer( ILayer elm ) {
         // start creating pipeline
         String layerName = createPipeline( elm );
-        return buildLayer( layerName );
+        return buildTiledLayer( layerName );
     }
     
 
