@@ -203,13 +203,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     
     private FeatureCollection createFeatures() {
         TypedContent content = typedContent();
-        final SimpleFeatureType TYPE = buildFeatureType( content.columns() );
-        final SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder( TYPE );
-        ListFeatureCollection currentFeatures = new ListFeatureCollection( TYPE );
-        // TODO FeatureTable shows always latest created on top, therefore reverse
-        // the order
-        List<RefineRow> rows = content.rows();
-        Collections.reverse( rows );
+        
         int latitudeColumnIndex = content.columnIndex( latitudeColumn() );
         int longitudeColumnIndex = content.columnIndex( longitudeColumn() );
         // coordinate columns selected, but final file parsing contains crappy data,
@@ -222,10 +216,19 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
             latitudeColumnIndex = -1;
             longitudeColumnIndex = -1;
         }
+        boolean containsGeom = latitudeColumnIndex != -1 && longitudeColumnIndex != -1;
+        
+        final SimpleFeatureType TYPE = buildFeatureType( containsGeom, content.columns() );
+        final SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder( TYPE );
+        ListFeatureCollection currentFeatures = new ListFeatureCollection( TYPE );
+        // TODO FeatureTable shows always latest created on top, therefore reverse
+        // the order
+        List<RefineRow> rows = content.rows();
+        Collections.reverse( rows );
 
         int count = 0;
         for (RefineRow row : rows) {
-            if (latitudeColumnIndex != -1 && longitudeColumnIndex != -1) {
+            if (containsGeom) {
                 // construct the coordinate
                 try {
                     Number latitude = null;
@@ -251,9 +254,9 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                     featureBuilder.add( null );
                 }
             }
-            else {
-                featureBuilder.add( null );
-            }
+//            else {
+//                featureBuilder.add( null );
+//            }
             for (RefineCell cell : row.cells()) {
                 // log.info( "cell with type " + (cell != null && cell.value !=
                 // null ? cell.value.getClass() : "null"));
@@ -325,15 +328,16 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     }
 
 
-    private SimpleFeatureType buildFeatureType( List<TypedColumn> columns ) {
+    private SimpleFeatureType buildFeatureType( boolean containsGeom, List<TypedColumn> columns ) {
         SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
         // no namespace for imported features
         builder.setName( new NameImpl( layerName() ) );
         builder.setCRS( crsPrompt.selection() );
-        // add the default GEOM
-        builder.setDefaultGeometry( "theGeom" );
-        builder.add( "theGeom", Point.class );
-
+        if (containsGeom) {
+            // add the default GEOM
+            builder.setDefaultGeometry( "theGeom" );
+            builder.add( "theGeom", Point.class );
+        }
         for (TypedColumn column : columns) {
             builder.add( column.name(), column.type() );
         }
