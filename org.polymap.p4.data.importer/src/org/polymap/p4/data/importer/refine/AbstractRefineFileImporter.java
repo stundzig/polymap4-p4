@@ -13,48 +13,28 @@
  */
 package org.polymap.p4.data.importer.refine;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import java.io.File;
+
+import org.geotools.data.collection.ListFeatureCollection;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.NameImpl;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureImpl;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.geometry.jts.JTSFactoryFinder;
+import org.geotools.referencing.CRS;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.osgi.framework.ServiceReference;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.geotools.feature.DefaultFeatureCollection;
-import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.NameImpl;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.geometry.jts.JTSFactoryFinder;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.osgi.framework.ServiceReference;
-import org.polymap.core.data.refine.RefineService;
-import org.polymap.core.data.refine.impl.FormatAndOptions;
-import org.polymap.core.data.refine.impl.ImportResponse;
-import org.polymap.core.runtime.i18n.IMessages;
-import org.polymap.core.ui.FormDataFactory;
-import org.polymap.p4.P4Plugin;
-import org.polymap.p4.data.importer.ContextIn;
-import org.polymap.p4.data.importer.ContextOut;
-import org.polymap.p4.data.importer.Importer;
-import org.polymap.p4.data.importer.ImporterPrompt;
-import org.polymap.p4.data.importer.ImporterSite;
-import org.polymap.p4.data.importer.Messages;
-import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
-import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
-
-import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -67,6 +47,36 @@ import com.google.refine.model.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.polymap.core.data.refine.RefineService;
+import org.polymap.core.data.refine.impl.FormatAndOptions;
+import org.polymap.core.data.refine.impl.ImportResponse;
+import org.polymap.core.runtime.i18n.IMessages;
+import org.polymap.core.ui.FormDataFactory;
+
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+
+import org.polymap.p4.P4Plugin;
+import org.polymap.p4.data.importer.ContextIn;
+import org.polymap.p4.data.importer.ContextOut;
+import org.polymap.p4.data.importer.Importer;
+import org.polymap.p4.data.importer.ImporterPrompt;
+import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
+import org.polymap.p4.data.importer.ImporterSite;
+import org.polymap.p4.data.importer.Messages;
+import org.polymap.p4.data.importer.prompts.CrsPrompt;
+import org.polymap.p4.data.importer.prompts.SchemaNamePrompt;
+import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
@@ -126,6 +136,10 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
 
     private boolean                      shouldUpdateOptions = false;
 
+    private CrsPrompt crsPrompt;
+
+    private SchemaNamePrompt schemaNamePrompt;
+
 
     // private Composite tableComposite;
 
@@ -164,11 +178,34 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     }
 
 
+    @Override
+    public void createPrompts( IProgressMonitor monitor ) throws Exception {
+        site.newPrompt( "coordinates" )
+            .summary.put( i18nPrompt.get( "coordinatesSummary" ) )
+            .description.put( i18nPrompt.get( "coordinatesDescription" ) )
+            .value.put( coordinatesPromptLabel() )
+            .extendedUI.put( coordinatesPromptUiBuilder() );
+
+        crsPrompt = new CrsPrompt( site, i18nPrompt.get("crsSummary"), i18nPrompt.get( "crsDescription" ), () -> {
+                    try {
+                        return CRS.decode( "EPSG:4326" );
+                    }
+                    catch (Exception e) {
+                        // do nothing
+                    }
+                    return null;
+                } );
+        schemaNamePrompt = new SchemaNamePrompt( site, i18nPrompt.get("schemaSummary"), i18nPrompt.get( "schemaDescription" ), () -> {
+            return layerName();
+        } );
+    }
+    
+    
     private FeatureCollection createFeatures() {
         TypedContent content = typedContent();
         final SimpleFeatureType TYPE = buildFeatureType( content.columns() );
         final SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder( TYPE );
-        FeatureCollection currentFeatures = new DefaultFeatureCollection( null, TYPE );
+        ListFeatureCollection currentFeatures = new ListFeatureCollection( TYPE );
         // TODO FeatureTable shows always latest created on top, therefore reverse
         // the order
         List<RefineRow> rows = content.rows();
@@ -222,7 +259,9 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                 // null ? cell.value.getClass() : "null"));
                 featureBuilder.add( cell == null ? null : cell.guessedValue() );
             }
-            ((DefaultFeatureCollection)currentFeatures).add( featureBuilder.buildFeature( null ) );
+            // features are build with a default id, thats wrong here
+            SimpleFeature simpleFeature = featureBuilder.buildFeature( null );
+            currentFeatures.add( new SimpleFeatureImpl( simpleFeature.getAttributes(), TYPE, null ) );
             if (count % 10000 == 0) {
                 log.info( "created " + count );
             }
@@ -290,8 +329,7 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
         SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
         // no namespace for imported features
         builder.setName( new NameImpl( layerName() ) );
-        // TODO the CRS should be a separate prompt
-        builder.setCRS( DefaultGeographicCRS.WGS84 );
+        builder.setCRS( crsPrompt.selection() );
         // add the default GEOM
         builder.setDefaultGeometry( "theGeom" );
         builder.add( "theGeom", Point.class );
@@ -384,7 +422,12 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
 
 
     protected String layerName() {
-        return FilenameUtils.getBaseName( file.getName() ).replace( ".", "_" );
+        if (schemaNamePrompt == null) {
+            return FilenameUtils.getBaseName( file.getName() ).replace( ".", "_" );
+        }
+        else {
+            return schemaNamePrompt.selection();
+        }
     }
 
 

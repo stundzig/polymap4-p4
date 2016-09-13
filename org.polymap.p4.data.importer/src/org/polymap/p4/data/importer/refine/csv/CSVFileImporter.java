@@ -58,12 +58,14 @@ import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.importer.ImporterPrompt;
-import org.polymap.p4.data.importer.ImporterSite;
-import org.polymap.p4.data.importer.Messages;
 import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.importer.ImporterPrompt.Severity;
+import org.polymap.p4.data.importer.ImporterSite;
+import org.polymap.p4.data.importer.Messages;
 import org.polymap.p4.data.importer.prompts.ComboBasedPromptUiBuilder;
+import org.polymap.p4.data.importer.prompts.CrsPrompt;
 import org.polymap.p4.data.importer.prompts.NumberfieldBasedPromptUiBuilder;
+import org.polymap.p4.data.importer.prompts.SchemaNamePrompt;
 import org.polymap.p4.data.importer.refine.AbstractRefineFileImporter;
 import org.polymap.p4.data.importer.refine.RefineCell;
 import org.polymap.p4.data.importer.refine.RefineRow;
@@ -85,6 +87,10 @@ public class CSVFileImporter
     private List<String>          potentialEncodingProblems = null;
 
     private GuessedQuoteCharacter guessedQuoteCharacter     = null;
+
+    private CrsPrompt crsPrompt;
+
+    private SchemaNamePrompt schemaNamePrompt;
 
     private static final IMessages i18nCsv = Messages.forPrefix( "ImporterCsv" );
 
@@ -230,11 +236,7 @@ public class CSVFileImporter
                                 .put( formatAndOptions().encoding() ).extendedUI
                                         .put( encodingPromptUiBuilder() ).severity
                                                 .set( Severity.REQUIRED );
-        site.newPrompt( "coordinates" ).summary
-                .put( i18nPrompt.get( "coordinatesSummary" ) ).description
-                        .put( i18nPrompt.get( "coordinatesDescription" ) ).value
-                                .put( coordinatesPromptLabel() ).extendedUI
-                                        .put( coordinatesPromptUiBuilder() );
+        super.createPrompts( monitor );
     }
 
 
