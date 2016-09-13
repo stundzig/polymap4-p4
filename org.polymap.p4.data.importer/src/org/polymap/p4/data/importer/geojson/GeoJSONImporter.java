@@ -25,7 +25,6 @@ import java.nio.charset.Charset;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
-import org.geotools.geojson.GeoJSONUtil;
 import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
@@ -43,8 +42,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.polymap.core.runtime.Timer;
 
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
@@ -66,21 +63,21 @@ import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 public class GeoJSONImporter
         implements Importer {
 
-    private ImporterSite      site      = null;
+    private ImporterSite        site      = null;
 
     @ContextIn
-    protected File            geojsonFile;
+    protected File              geojsonFile;
 
     @ContextOut
-    private FeatureCollection features  = null;
+    protected FeatureCollection features  = null;
 
-    private Exception         exception = null;
+    private Exception           exception = null;
 
-    private CrsPrompt         crsPrompt;
+    private CrsPrompt           crsPrompt;
 
-    private CharsetPrompt     charsetPrompt;
+    private CharsetPrompt       charsetPrompt;
 
-    private SchemaNamePrompt  schemaNamePrompt;
+    private SchemaNamePrompt    schemaNamePrompt;
 
 
     @Override
@@ -119,19 +116,10 @@ public class GeoJSONImporter
     @Override
     public void verify( IProgressMonitor monitor ) {
         System.err.println( "verify " + System.currentTimeMillis() );
-        InputStreamReader isr = null;
-        FeatureIterator<SimpleFeature> featureIterator = null;
+        GeoJSONFeatureIterator featureIterator = new GeoJSONFeatureIterator( geojsonFile, charsetPrompt.selection(), schemaNamePrompt.selection(), crsPrompt.selection(), monitor );
         try {
-            String encoding = charsetPrompt.selection().name();
-            FeatureJSON featureJSON = new FeatureJSON();
-            isr = new InputStreamReader( new FileInputStream( geojsonFile ), encoding );
-            SimpleFeatureType schema = GeoJSONUtil.parse( new LaxFeatureTypeHandler( schemaNamePrompt.selection(), crsPrompt.selection() ), isr, false );
-            isr.close();
-            featureJSON.setFeatureType( schema );
-            ListFeatureCollection featureList = new ListFeatureCollection( schema );
 
-            isr = new InputStreamReader( new FileInputStream( geojsonFile ), encoding );
-            featureIterator = featureJSON.streamFeatureCollection( isr );
+            ListFeatureCollection featureList = new ListFeatureCollection( featureIterator.getFeatureType() );
             int i = 0;
             while (i < 100 && featureIterator.hasNext()) {
                 SimpleFeature next = featureIterator.next();
@@ -148,14 +136,6 @@ public class GeoJSONImporter
             e.printStackTrace();
         }
         finally {
-            if (isr != null) {
-                try {
-                    isr.close();
-                }
-                catch (IOException e) {
-                    // do nothing
-                }
-            }
             if (featureIterator != null) {
                 featureIterator.close();
             }
@@ -164,7 +144,7 @@ public class GeoJSONImporter
     }
 
 
-    private CoordinateReferenceSystem getPredefinedCRS() {
+    CoordinateReferenceSystem getPredefinedCRS() {
         CoordinateReferenceSystem predefinedCRS = null;
         InputStreamReader isr = null;
         try {
@@ -213,46 +193,18 @@ public class GeoJSONImporter
 
     @Override
     public void execute( IProgressMonitor monitor ) throws Exception {
-        // load all per streamiterator
-        String encoding = charsetPrompt.selection().name();
-        FeatureJSON featureJSON = new FeatureJSON();
-        Timer t = new Timer();
-        InputStreamReader isr = new InputStreamReader( new FileInputStream( geojsonFile ), encoding );
-        SimpleFeatureType schema = GeoJSONUtil.parse( new LaxFeatureTypeHandler( schemaNamePrompt.selection(), crsPrompt.selection() ), isr, false );
-        featureJSON.setFeatureType( schema );
-
-        System.out.println( "readschema needs " + t.elapsedTime() );
-        // FeatureIterator<SimpleFeature> featureIterator =
-        // featureJSON.streamFeatureCollection( isr );
-        // // hasNext must be called before the first next()
-        // featureIterator.hasNext();
-        // final SimpleFeature first = featureIterator.next();
-        // featureIterator.close();
-        isr.close();
-        // final SimpleFeatureType originalSchema = SimpleFeatureTypeBuilder.retype(
-        // first.getFeatureType(), crsPrompt.selection() );
-        // final FeatureType schema = new SimpleFeatureTypeImpl( new NameImpl(
-        // schemaNamePrompt.selection() ), originalSchema.getAttributeDescriptors(),
-        // originalSchema.getGeometryDescriptor(), originalSchema.isAbstract(),
-        // originalSchema.getRestrictions(), originalSchema.getSuper(),
-        // originalSchema.getDescription() );
+        final GeoJSONFeatureIterator featureIterator = new GeoJSONFeatureIterator( geojsonFile, charsetPrompt.selection(), schemaNamePrompt.selection(), crsPrompt.selection(), monitor );
         features = new FeatureCollection() {
 
             @Override
             public FeatureIterator features() {
-                try {
-                    return featureJSON.streamFeatureCollection( new InputStreamReader( new FileInputStream( geojsonFile ), encoding ) );
-                }
-                catch (Exception e) {
-                    e.printStackTrace( );
-                    throw new RuntimeException( e );
-                }
+                return featureIterator;
             }
 
 
             @Override
             public FeatureType getSchema() {
-                return schema;
+                return featureIterator.getFeatureType();
             }
 
 

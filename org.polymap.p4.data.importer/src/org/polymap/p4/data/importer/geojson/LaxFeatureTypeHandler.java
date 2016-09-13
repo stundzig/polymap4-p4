@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Stack;
 
 import java.io.IOException;
 
@@ -45,26 +46,30 @@ public class LaxFeatureTypeHandler
         extends DelegatingHandler<SimpleFeatureType>
         implements IContentHandler<SimpleFeatureType> {
 
+    private Stack<String>             path          = new Stack<String>();
+
     SimpleFeatureType                 featureType;
 
-    private boolean                   inFeatures    = false;
+    // private boolean inFeatures = false;
 
     private Map<String,Class<?>>      propertyTypes = new LinkedHashMap<String,Class<?>>();
 
     private boolean                   inProperties;
 
-    private String                    currentProp;
+    // private String currentProp;
 
-    private final CoordinateReferenceSystem crs;
+    private CoordinateReferenceSystem crs;
 
     private boolean                   nullValuesEncoded;
 
     private GeometryDescriptor        geom;
 
-    private final String schemaName;
+    private final String              schemaName;
+
+    private FeatureHandler            featureHandler;
 
 
-    public LaxFeatureTypeHandler(final String schemaName, CoordinateReferenceSystem coordinateReferenceSystem) {
+    public LaxFeatureTypeHandler( final String schemaName, CoordinateReferenceSystem coordinateReferenceSystem ) {
         this.schemaName = schemaName;
         this.nullValuesEncoded = false;
         this.crs = coordinateReferenceSystem;
@@ -74,55 +79,70 @@ public class LaxFeatureTypeHandler
     @Override
     public boolean startObjectEntry( String key ) throws ParseException,
             IOException {
+        System.out.println( "startObjectEntry: " + path + " with key " + key );
+
+        if (!path.isEmpty() && path.peek().equals( "properties" ) && delegate != NULL
+                && delegate instanceof FeatureHandler) {
+            inProperties = true;
+            if (!propertyTypes.containsKey( key )) {
+                // found previously unknown property
+                propertyTypes.put( key, Object.class );
+            }
+        }
+
+        path.push( key );
+
         if ("crs".equals( key )) {
             delegate = new CRSHandler();
             return true;
         }
-        if ("features".equals( key )) {
-            delegate = UNINITIALIZED;
-            inFeatures = true;
+        else if ("features".equals( key )) {
+            featureHandler = new FeatureHandler( null, new DefaultAttributeIO() );
+            if (crs != null) {
+                featureHandler.setCRS( crs );
+            }
+            delegate = featureHandler;
+            // inFeatures = true;
             return true;
-        }
-        if (inFeatures /* && delegate == NULL */) {
-            if ("properties".equals( key )) {
-                inProperties = true;
-                return true;
-            }
-            if (inProperties) {
-                if (!propertyTypes.containsKey( key )) {
-                    // found previously unknown property
-                    propertyTypes.put( key, Object.class );
-                }
-                currentProp = key;
-                return true;
-            }
         }
         return super.startObjectEntry( key );
     }
-
-
-    @Override
-    public boolean startArray() throws ParseException, IOException {
-
-        /*
-         * Use FeatureHandler for the first feature only, to initialize the property
-         * list and obtain the geometry attribute descriptor
-         */
-        if (delegate == UNINITIALIZED) {
-            delegate = new FeatureHandler( null, new DefaultAttributeIO() );
-            return true;
-        }
-
-        return super.startArray();
-    }
+    //
+    //
+    // @Override
+    // public boolean startArray() throws ParseException, IOException {
+    //
+    // /*
+    // * Use GeoJSONFeatureHandler for the first feature only, to initialize the
+    // property
+    // * list and obtain the geometry attribute descriptor
+    // */
+    // if (delegate == UNINITIALIZED) {
+    // delegate =
+    // return true;
+    // }
+    //
+    // return super.startArray();
+    // }
 
 
     @Override
     public boolean endObject() throws ParseException, IOException {
+        System.out.println( "endObject: " + path );
         super.endObject();
 
+        if (delegate instanceof CRSHandler) {
+            CoordinateReferenceSystem coordinateReferenceSystem = ((CRSHandler)delegate).getValue();
+            if (coordinateReferenceSystem != null) {
+                crs = coordinateReferenceSystem;
+                if (featureHandler != null) {
+                    featureHandler.setCRS( crs );
+                }
+            }
+        }
         if (delegate instanceof FeatureHandler) {
             // obtain a type from the first feature
+            delegate.endObject();
             SimpleFeature feature = ((FeatureHandler)delegate).getValue();
             if (feature != null) {
                 if (geom == null && feature.getFeatureType().getGeometryDescriptor() != null) {
@@ -130,7 +150,8 @@ public class LaxFeatureTypeHandler
                 }
                 List<AttributeDescriptor> attributeDescriptors = feature.getFeatureType().getAttributeDescriptors();
                 for (AttributeDescriptor ad : attributeDescriptors) {
-                    if (!ad.equals( geom ) && (!propertyTypes.containsKey(ad.getLocalName()) || propertyTypes.get(ad.getLocalName()) == Object.class)) {
+                    if (!ad.equals( geom ) && (!propertyTypes.containsKey( ad.getLocalName() )
+                            || propertyTypes.get( ad.getLocalName() ) == Object.class)) {
                         propertyTypes.put( ad.getLocalName(), ad.getType().getBinding() );
                     }
                 }
@@ -141,17 +162,24 @@ public class LaxFeatureTypeHandler
                     return false;
                 }
             }
+            // create a new builder
+            featureHandler = new FeatureHandler( null, new DefaultAttributeIO() );
+            if (crs != null) {
+                featureHandler.setCRS( crs );
+            }
+            delegate = featureHandler;
         }
-
         return true;
     }
 
 
     @Override
     public boolean primitive( Object value ) throws ParseException, IOException {
+        System.out.println( "primitive: " + value + " in " + path );
 
-        if (value != null) {
+        if (value != null && inProperties) {
             Class<?> newType = value.getClass();
+            String currentProp = path.peek();
             if (currentProp != null) {
                 Class<?> knownType = propertyTypes.get( currentProp );
                 // sst change here
@@ -203,21 +231,25 @@ public class LaxFeatureTypeHandler
     @Override
     public boolean endObjectEntry() throws ParseException, IOException {
 
+        System.out.println( "endObjectEntry: " + path );
         super.endObjectEntry();
 
-        if (delegate != null && delegate instanceof CRSHandler) {
-            // do nothing
-//            crs = ((CRSHandler)delegate).getValue();
-//            if (crs != null) {
-//                delegate = NULL;
-//            }
+        // remove CRS Handler
+        if (path.peek().equals( "crs" ) && delegate instanceof CRSHandler) {
+            CoordinateReferenceSystem coordinateReferenceSystem = ((CRSHandler)delegate).getValue();
+            if (coordinateReferenceSystem != null) {
+                crs = coordinateReferenceSystem;
+            }
+            delegate = featureHandler;
+            if (featureHandler != null) {
+                featureHandler.setCRS( crs );
+            }
+            delegate = featureHandler;
         }
-        else if (currentProp != null) {
-            currentProp = null;
-        }
-        else if (inProperties) {
+        else if (path.peek().equals( "properties" )) {
             inProperties = false;
         }
+        path.pop();
         return true;
     }
 
@@ -233,7 +265,7 @@ public class LaxFeatureTypeHandler
         SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
         typeBuilder.setName( new NameImpl( schemaName ) );
 
-        typeBuilder.add( geom.getLocalName(), geom.getType().getBinding(), crs );
+        typeBuilder.add( geom.getLocalName(), geom.getType().getBinding(), geom.getType().getCoordinateReferenceSystem() );
 
         if (propertyTypes != null) {
             Set<Entry<String,Class<?>>> entrySet = propertyTypes.entrySet();
