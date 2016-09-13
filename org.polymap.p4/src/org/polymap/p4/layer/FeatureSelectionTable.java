@@ -14,19 +14,25 @@
  */
 package org.polymap.p4.layer;
 
+import static org.opengis.filter.sort.SortOrder.ASCENDING;
+import static org.opengis.filter.sort.SortOrder.DESCENDING;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
 import static org.polymap.core.ui.SelectionAdapter.on;
+
+import java.io.IOException;
 
 import org.geotools.data.FeatureEvent;
 import org.geotools.data.FeatureEvent.Type;
 import org.geotools.data.FeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
+import org.opengis.feature.Feature;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.PropertyIsLike;
+import org.opengis.filter.sort.SortOrder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +50,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.viewers.StructuredSelection;
+
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -55,7 +63,6 @@ import org.polymap.rhei.batik.contribution.ContributionManager;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.rhei.table.DefaultFeatureTableColumn;
-import org.polymap.rhei.table.FeatureCollectionContentProvider.FeatureTableElement;
 import org.polymap.rhei.table.FeatureTableViewer;
 import org.polymap.rhei.table.IFeatureTableElement;
 
@@ -87,6 +94,8 @@ public class FeatureSelectionTable {
     private Button                      searchBtn;
 
     private MdToolbar2                  toolbar;
+
+    private LazyFeatureContentProvider contentProvider;
 
     
     public FeatureSelectionTable( Composite parent, FeatureSelection featureSelection, IPanel panel ) {
@@ -143,6 +152,7 @@ public class FeatureSelectionTable {
     
     protected void createTableViewer( Composite parent ) {
         viewer = new FeatureTableViewer( parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER );
+        contentProvider = new LazyFeatureContentProvider();
     
         // add columns
         DefaultFeatureTableColumn first = null;
@@ -152,14 +162,19 @@ public class FeatureSelectionTable {
             }
             else {
                 DefaultFeatureTableColumn column = new DefaultFeatureTableColumn( prop );
+                // disable default sorting behaviour
+                column.setSortable( false );
                 viewer.addColumn( column );
                 first = first != null ? first : column;
                 
                 column.getViewerColumn().getColumn().addSelectionListener( new SelectionAdapter() {
+                    private SortOrder currentOrder = SortOrder.ASCENDING;
                     @Override
-                    public void widgetSelected( SelectionEvent e ) {
-                        // XXX Auto-generated method stub
-                        throw new RuntimeException( "not yet implemented." );
+                    public void widgetSelected( SelectionEvent ev ) {
+                        // with selection RAP produces huge JS which fails in browser
+                        viewer.setSelection( StructuredSelection.EMPTY );
+                        currentOrder = currentOrder.equals( ASCENDING ) ? DESCENDING : ASCENDING;
+                        contentProvider.sort( column, currentOrder );
                     }
                 });
             }
@@ -167,18 +182,18 @@ public class FeatureSelectionTable {
         
         // it is important to sort any column; otherwise preserving selection during refresh()
         // always selects a new element, which causes an event, which causes a refresh() ...
-        first.sort( SWT.DOWN );
+        contentProvider.sort( first, SortOrder.ASCENDING );
+//      first.sort( SWT.DOWN );
         
         //
-        viewer.setContentProvider( new LazyFeatureContentProvider() );
+        viewer.setContentProvider( contentProvider );
         viewer.setInput( fs );
 
         // selection -> FeaturePanel
         viewer.addSelectionChangedListener( ev -> {
-            log.info( "" + ev.getSelection() );
-            on( ev.getSelection() ).first( FeatureTableElement.class ).ifPresent( elm -> {
+            on( ev.getSelection() ).first( IFeatureTableElement.class ).ifPresent( elm -> {
                 log.info( "selection: " + elm );
-                featureSelection.setClicked( elm.getFeature() );
+                featureSelection.setClicked( elm.unwrap( Feature.class ).get() );
             
                 BatikApplication.instance().getContext().openPanel( panel.site().path(), FeaturePanel.ID );
             });
@@ -187,12 +202,15 @@ public class FeatureSelectionTable {
     
 
     @EventHandler( display=true )
-    protected void onFeatureClick( FeatureClickEvent ev ) {
+    protected void onFeatureClick( FeatureClickEvent ev ) throws IOException {
         if (!viewer.getTable().isDisposed()) {
             IFeatureTableElement[] selected = viewer.getSelectedElements();
             String clickedFid = ev.clicked.get().getIdentifier().getID();
             if (selected.length != 1 || !selected[0].fid().equals( clickedFid )) {
-                viewer.selectElement( clickedFid, true, false );
+                // viewer.setSelection() does not work with LazyContentProvider
+                int index = contentProvider.indexOfFid( clickedFid );
+                viewer.getTable().select( index );
+                viewer.getTable().showSelection();
             }
         }
         else {
