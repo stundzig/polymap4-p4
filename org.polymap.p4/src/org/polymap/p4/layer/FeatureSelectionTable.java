@@ -20,6 +20,7 @@ import static org.polymap.core.data.DataPlugin.ff;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
 import static org.polymap.core.ui.SelectionAdapter.on;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.DISABLED12;
 
 import java.io.IOException;
 
@@ -39,16 +40,9 @@ import org.apache.commons.logging.LogFactory;
 import com.vividsolutions.jts.geom.Geometry;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
-
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.polymap.core.runtime.event.EventHandler;
@@ -57,8 +51,10 @@ import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.IPanel;
-import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.contribution.ContributionManager;
+import org.polymap.rhei.batik.toolkit.ActionText;
+import org.polymap.rhei.batik.toolkit.ClearTextAction;
+import org.polymap.rhei.batik.toolkit.TextActionItem;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.rhei.table.DefaultFeatureTableColumn;
@@ -82,17 +78,13 @@ public class FeatureSelectionTable {
     
     private FeatureStore                fs;
     
-//    private FeatureCollection           features;
-
     private IPanel                      panel;
     
     private FeatureTableViewer          viewer;
     
     private LazyFeatureContentProvider  contentProvider;
 
-    private Text                        searchText;
-
-    private Button                      searchBtn;
+    private ActionText                  searchText;
 
     private MdToolbar2                  toolbar;
 
@@ -120,8 +112,7 @@ public class FeatureSelectionTable {
     
         // seach
         createTextSearch( topbar );
-        on( searchBtn ).fill().noLeft().right( 60 );
-        on( searchText ).fill().right( searchBtn );
+        on( searchText.getControl() ).fill().right( 38 );
         
         // toolbar
         toolbar = tk().createToolbar( topbar,  SWT.FLAT );
@@ -232,45 +223,31 @@ public class FeatureSelectionTable {
     
     
     protected void createTextSearch( Composite topbar ) {
-        searchText = tk().createText( topbar, null, SWT.BORDER );
-        searchText.setToolTipText( "Text to search for in all properties.<br/>" +
-                "\"Tex\" finds: \"Text\", \"Texts\", etc.<br/>" +
-                "Wildcard: *, ?");
-        //searchText.forceFocus();
-        searchText.addModifyListener( new ModifyListener() {
-            @Override
-            public void modifyText( ModifyEvent ev ) {
-                searchBtn.setEnabled( searchText.getText().length() > 1 );
-            }
-        });
-        searchText.addKeyListener( new KeyAdapter() {
-            @Override
-            public void keyReleased( KeyEvent ev ) {
-                if (ev.keyCode == SWT.Selection) {
-                    search();
-                }
-            }
-        });
-
-        searchBtn = tk().createButton( topbar, null, SWT.PUSH );
-        searchBtn.setToolTipText( "Start search" );
-        searchBtn.setImage( P4Plugin.images().svgImage( "magnify.svg", SvgImageRegistryHelper.WHITE24 ) );
-        searchBtn.addSelectionListener( new SelectionAdapter() {
-            @Override
-            public void widgetSelected( SelectionEvent ev ) {
-                search();
-            }
-        });
+        searchText = tk().createActionText( topbar, null, SWT.BORDER );
+        searchText.performOnEnter.put( true );
+        
+        new TextActionItem( searchText, TextActionItem.Type.DEFAULT )
+                .action.put( ev -> doSearch() )
+                .text.put( "Search..." )
+                .tooltip.put( "Search in all text properties. " +
+                        "Allowed wildcards are: * and ?<br/>" +
+                        "* is appended by default if no other wildcard is given" )
+                .icon.put( P4Plugin.images().svgImage( "magnify.svg", DISABLED12 ) );
+        
+        new ClearTextAction( searchText );
     }
     
     
-    protected void search() {
+    protected void doSearch() {
         Filter filter = featureSelection.filter();
-        String s = searchText.getText();
+        String s = searchText.getText().getText();
         if (!StringUtils.isBlank( s )) {
+            if (!s.contains( "*" ) && !s.contains( "?" ) ) {
+                s = s + "*";
+            }
             for (PropertyDescriptor prop : fs.getSchema().getDescriptors()) {
                 if (String.class.isAssignableFrom( prop.getType().getBinding() )) {
-                    PropertyIsLike isLike = ff.like( ff.property( prop.getName() ), s + "*", "*", "?", "\\" );
+                    PropertyIsLike isLike = ff.like( ff.property( prop.getName() ), s, "*", "?", "\\" );
                     filter = filter == Filter.INCLUDE ? isLike : ff.or( filter, isLike ); 
                 }
             }
