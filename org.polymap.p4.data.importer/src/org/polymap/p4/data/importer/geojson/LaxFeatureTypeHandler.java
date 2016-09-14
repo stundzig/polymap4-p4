@@ -79,7 +79,7 @@ public class LaxFeatureTypeHandler
     @Override
     public boolean startObjectEntry( String key ) throws ParseException,
             IOException {
-        System.out.println( "startObjectEntry: " + path + " with key " + key );
+//        System.out.println( "startObjectEntry: " + path + " with key " + key );
 
         if (!path.isEmpty() && path.peek().equals( "properties" ) && delegate != NULL
                 && delegate instanceof FeatureHandler) {
@@ -128,7 +128,7 @@ public class LaxFeatureTypeHandler
 
     @Override
     public boolean endObject() throws ParseException, IOException {
-        System.out.println( "endObject: " + path );
+//        System.out.println( "endObject: " + path );
         super.endObject();
 
         if (delegate instanceof CRSHandler) {
@@ -175,7 +175,7 @@ public class LaxFeatureTypeHandler
 
     @Override
     public boolean primitive( Object value ) throws ParseException, IOException {
-        System.out.println( "primitive: " + value + " in " + path );
+//        System.out.println( "primitive: " + value + " in " + path );
 
         if (value != null && inProperties) {
             Class<?> newType = value.getClass();
@@ -231,7 +231,7 @@ public class LaxFeatureTypeHandler
     @Override
     public boolean endObjectEntry() throws ParseException, IOException {
 
-        System.out.println( "endObjectEntry: " + path );
+        // System.out.println( "endObjectEntry: " + path );
         super.endObjectEntry();
 
         // remove CRS Handler

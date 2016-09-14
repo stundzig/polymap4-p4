@@ -115,7 +115,6 @@ public class GeoJSONImporter
 
     @Override
     public void verify( IProgressMonitor monitor ) {
-        System.err.println( "verify " + System.currentTimeMillis() );
         GeoJSONFeatureIterator featureIterator = new GeoJSONFeatureIterator( geojsonFile, charsetPrompt.selection(), schemaNamePrompt.selection(), crsPrompt.selection(), monitor );
         try {
 
@@ -140,7 +139,6 @@ public class GeoJSONImporter
                 featureIterator.close();
             }
         }
-        System.err.println( "verify done " + System.currentTimeMillis() );
     }
 
 

@@ -46,7 +46,7 @@ public class CharsetPrompt {
                 .summary.put( summary )
                 .description.put( description )
                 .value.put( selection.name() )
-                .severity.put( Severity.VERIFY )
+                .severity.put( Severity.REQUIRED )
                 .extendedUI.put( new FilteredListPromptUIBuilder() {
                     
                     @Override

@@ -235,7 +235,7 @@ public class CSVFileImporter
                         .put( i18nPrompt.get( "encodingDescription" ) ).value
                                 .put( formatAndOptions().encoding() ).extendedUI
                                         .put( encodingPromptUiBuilder() ).severity
-                                                .set( Severity.REQUIRED );
+                                                .set( Severity.VERIFY );
         super.createPrompts( monitor );
     }
 
