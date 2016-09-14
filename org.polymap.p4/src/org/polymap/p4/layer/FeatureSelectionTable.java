@@ -16,6 +16,7 @@ package org.polymap.p4.layer;
 
 import static org.opengis.filter.sort.SortOrder.ASCENDING;
 import static org.opengis.filter.sort.SortOrder.DESCENDING;
+import static org.polymap.core.data.DataPlugin.ff;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
 import static org.polymap.core.ui.SelectionAdapter.on;
@@ -25,15 +26,13 @@ import java.io.IOException;
 import org.geotools.data.FeatureEvent;
 import org.geotools.data.FeatureEvent.Type;
 import org.geotools.data.FeatureStore;
-import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.feature.FeatureCollection;
 import org.opengis.feature.Feature;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.PropertyIsLike;
 import org.opengis.filter.sort.SortOrder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -83,19 +82,19 @@ public class FeatureSelectionTable {
     
     private FeatureStore                fs;
     
-    private FeatureCollection           features;
+//    private FeatureCollection           features;
 
     private IPanel                      panel;
     
     private FeatureTableViewer          viewer;
     
+    private LazyFeatureContentProvider  contentProvider;
+
     private Text                        searchText;
 
     private Button                      searchBtn;
 
     private MdToolbar2                  toolbar;
-
-    private LazyFeatureContentProvider contentProvider;
 
     
     public FeatureSelectionTable( Composite parent, FeatureSelection featureSelection, IPanel panel ) {
@@ -107,7 +106,7 @@ public class FeatureSelectionTable {
 
         try {
             this.fs = featureSelection.waitForFs().get();  // already loaded by LayerFeatureTableContribution
-            this.features = fs.getFeatures( featureSelection.filter() );
+//            this.features = fs.getFeatures( featureSelection.filter() );
         }
         catch (Exception e) {
             log.warn( "", e );
@@ -153,6 +152,7 @@ public class FeatureSelectionTable {
     protected void createTableViewer( Composite parent ) {
         viewer = new FeatureTableViewer( parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER );
         contentProvider = new LazyFeatureContentProvider();
+        contentProvider.filter( featureSelection.filter() );
     
         // add columns
         DefaultFeatureTableColumn first = null;
@@ -183,7 +183,6 @@ public class FeatureSelectionTable {
         // it is important to sort any column; otherwise preserving selection during refresh()
         // always selects a new element, which causes an event, which causes a refresh() ...
         contentProvider.sort( first, SortOrder.ASCENDING );
-//      first.sort( SWT.DOWN );
         
         //
         viewer.setContentProvider( contentProvider );
@@ -266,21 +265,21 @@ public class FeatureSelectionTable {
     
     
     protected void search() {
-        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( null );
-        Filter filter = Filter.INCLUDE;
-        for (PropertyDescriptor prop : features.getSchema().getDescriptors()) {
-            if (Geometry.class.isAssignableFrom( prop.getType().getBinding() )) {
-                // skip Geometry
-            }
-            else {
-                PropertyIsLike isLike = ff.like( ff.property( prop.getName() ), searchText.getText() + "*", "*", "?", "\\" );
-                filter = filter == Filter.INCLUDE ? isLike : ff.or( filter, isLike ); 
+        Filter filter = featureSelection.filter();
+        String s = searchText.getText();
+        if (!StringUtils.isBlank( s )) {
+            for (PropertyDescriptor prop : fs.getSchema().getDescriptors()) {
+                if (String.class.isAssignableFrom( prop.getType().getBinding() )) {
+                    PropertyIsLike isLike = ff.like( ff.property( prop.getName() ), s + "*", "*", "?", "\\" );
+                    filter = filter == Filter.INCLUDE ? isLike : ff.or( filter, isLike ); 
+                }
             }
         }
+        viewer.setSelection( StructuredSelection.EMPTY );
         log.info( "FILTER: "  + filter );
-        FeatureCollection filtered = features.subCollection( filter );
-        log.info( "RESULT: "  + filtered.size() );
-        viewer.setContent( filtered );
+//        FeatureCollection filtered = features.subCollection( filter );
+//        log.info( "RESULT: "  + filtered.size() );
+        contentProvider.filter( filter );
     }
     
 }

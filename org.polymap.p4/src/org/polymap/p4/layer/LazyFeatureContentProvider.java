@@ -108,6 +108,9 @@ public class LazyFeatureContentProvider
                 UIThreadExecutor.async( () -> {
                     if (!viewer.getControl().isDisposed()) {
                         viewer.setItemCount( size );
+                        if (size >= 1) {
+                            updateElement( 0 );
+                        }
                     }
                 });
             }
@@ -121,13 +124,18 @@ public class LazyFeatureContentProvider
 
     
     public void filter( Filter newFilter ) {
-        throw new RuntimeException( "not yet implemented." );        
+        this.filter = newFilter;
+
+        if (viewer != null) {
+            inputChanged( viewer, fs, fs );
+        }
     }
     
     
     public void sort( DefaultFeatureTableColumn column, SortOrder order ) {
         this.sortedBy = column;
         this.sortOrder = order;
+
         cache.clear();
         if (viewer != null) {
             viewer.refresh();
