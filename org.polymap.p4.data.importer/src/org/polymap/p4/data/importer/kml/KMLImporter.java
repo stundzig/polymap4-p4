@@ -18,6 +18,7 @@ import java.util.Collection;
 
 import java.io.File;
 import java.io.IOException;
+
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
@@ -37,6 +38,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.table.FeatureCollectionContentProvider;
 
 import org.polymap.p4.data.importer.ContextIn;
 import org.polymap.p4.data.importer.ContextOut;
@@ -52,15 +54,15 @@ import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 public class KMLImporter
         implements Importer {
 
-    private ImporterSite      site      = null;
+    private ImporterSite      site;
 
     @ContextIn
     protected File            kmlFile;
 
     @ContextOut
-    private FeatureCollection features  = null;
+    private FeatureCollection features;
 
-    private Exception         exception = null;
+    private Exception         exception;
 
     // private CrsPrompt crsPrompt;
 
@@ -147,7 +149,8 @@ public class KMLImporter
         else {
             SimpleFeatureType schema = (SimpleFeatureType)features.getSchema();
             ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, schema );
-            table.setContent( features );
+            table.setContentProvider( new FeatureCollectionContentProvider() );
+            table.setInput( features );
         }
     }
 

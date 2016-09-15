@@ -14,6 +14,9 @@
  */
 package org.polymap.p4.data.importer.shapefile;
 
+import org.geotools.data.FeatureSource;
+import org.geotools.feature.FeatureCollection;
+import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.PropertyDescriptor;
 
@@ -27,9 +30,12 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.polymap.rhei.table.DefaultFeatureTableColumn;
 import org.polymap.rhei.table.FeatureTableViewer;
+import org.polymap.rhei.table.LazyFeatureContentProvider;
 
 /**
- * 
+ * Provides default columns for all {@link Feature} properties. Uses an
+ * {@link LazyFeatureContentProvider}, which supports {@link FeatureSource} and
+ * {@link FeatureCollection} inputs.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
@@ -41,7 +47,9 @@ public class ShpFeatureTableViewer
 
     public ShpFeatureTableViewer( Composite parent, SimpleFeatureType schema ) {
         super( parent, /* SWT.VIRTUAL*/  SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION );
-        
+
+//        setContentProvider( new LazyFeatureContentProvider() );
+
         for (PropertyDescriptor prop : schema.getDescriptors()) {
             if (Geometry.class.isAssignableFrom( prop.getType().getBinding() )) {
                 // skip Geometry

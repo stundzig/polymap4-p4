@@ -13,23 +13,12 @@
  */
 package org.polymap.p4.data.importer.refine;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import java.io.File;
+
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.NameImpl;
@@ -39,22 +28,11 @@ import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.osgi.framework.ServiceReference;
-import org.polymap.core.data.refine.RefineService;
-import org.polymap.core.data.refine.impl.FormatAndOptions;
-import org.polymap.core.data.refine.impl.ImportResponse;
-import org.polymap.core.runtime.i18n.IMessages;
-import org.polymap.core.ui.FormDataFactory;
-import org.polymap.p4.P4Plugin;
-import org.polymap.p4.data.importer.ContextIn;
-import org.polymap.p4.data.importer.ContextOut;
-import org.polymap.p4.data.importer.Importer;
-import org.polymap.p4.data.importer.ImporterPrompt;
-import org.polymap.p4.data.importer.ImporterSite;
-import org.polymap.p4.data.importer.Messages;
-import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
-import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 
-import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -67,6 +45,35 @@ import com.google.refine.model.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.polymap.core.data.refine.RefineService;
+import org.polymap.core.data.refine.impl.FormatAndOptions;
+import org.polymap.core.data.refine.impl.ImportResponse;
+import org.polymap.core.runtime.i18n.IMessages;
+import org.polymap.core.ui.FormDataFactory;
+
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.table.FeatureCollectionContentProvider;
+
+import org.polymap.p4.P4Plugin;
+import org.polymap.p4.data.importer.ContextIn;
+import org.polymap.p4.data.importer.ContextOut;
+import org.polymap.p4.data.importer.Importer;
+import org.polymap.p4.data.importer.ImporterPrompt;
+import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
+import org.polymap.p4.data.importer.ImporterSite;
+import org.polymap.p4.data.importer.Messages;
+import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 
 /**
  * @author <a href="http://stundzig.it">Steffen Stundzig</a>
@@ -247,7 +254,8 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
 
             SimpleFeatureType schema = (SimpleFeatureType)features.getSchema();
             ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, schema );
-            table.setContent( features );
+            table.setContentProvider( new FeatureCollectionContentProvider() );
+            table.setInput( features );
             FormDataFactory.on( table.getControl() ).fill().top( label, 5 );
         }
     }

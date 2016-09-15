@@ -14,6 +14,7 @@
 package org.polymap.p4.data.importer.shapefile;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
@@ -38,6 +39,7 @@ import org.geotools.data.Query;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.data.store.ContentFeatureCollection;
 import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.referencing.ReferencingFactoryFinder;
@@ -49,7 +51,7 @@ import org.polymap.core.runtime.Streams.ExceptionCollector;
 
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
-
+import org.polymap.rhei.table.FeatureCollectionContentProvider;
 import org.polymap.p4.data.importer.ContextIn;
 import org.polymap.p4.data.importer.ContextOut;
 import org.polymap.p4.data.importer.Importer;
@@ -84,6 +86,8 @@ public class ShpImporter
     private Exception               exception;
 
     private ShapefileDataStore      ds;
+
+    private ContentFeatureSource    fs;
 
     private CharsetPrompt           charsetPrompt;
 
@@ -150,12 +154,11 @@ public class ShpImporter
             ds.setCharset( charsetPrompt.selection() );
             ds.forceSchemaCRS( crsPrompt.selection() );
             
-            ContentFeatureSource fs = ds.getFeatureSource();
-            Query query = new Query();
+            fs = ds.getFeatureSource();
             
             // check all features
             try (
-                SimpleFeatureIterator it = fs.getFeatures( query ).features();
+                SimpleFeatureIterator it = fs.getFeatures().features();
             ){
                 SimpleFeatureType schema = fs.getSchema();
                 while (it.hasNext()) {
@@ -168,10 +171,7 @@ public class ShpImporter
                     // other checks...?
                 }
             }
-
-            // get the first 100 to display
-            query.setMaxFeatures( 100 );
-            features = fs.getFeatures( query );
+            log.info( "Verified: ok" );
 
             site.ok.set( true );
             exception = null;
@@ -189,11 +189,24 @@ public class ShpImporter
             tk.createFlowText( parent, "\nUnable to read the data.\n\n**Reason**: " + exception.getMessage() );
         }
         else {
-            SimpleFeatureType schema = (SimpleFeatureType)features.getSchema();
-            //log.info( "Features: " + features.size() + " : " + schema.getTypeName() );
-            // tk.createFlowText( parent, "Features: *" + features.size() + "*" );
-            ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, schema );
-            table.setContent( features );
+            try {
+                SimpleFeatureType schema = (SimpleFeatureType)fs.getSchema();
+                //log.info( "Features: " + features.size() + " : " + schema.getTypeName() );
+                // tk.createFlowText( parent, "Features: *" + features.size() + "*" );
+                
+                ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, schema );
+                table.setContentProvider( new FeatureCollectionContentProvider() );
+                
+                // XXX GeoTools shapefile impl does not handle setFirstResult() well
+                // so we can just display 100 features :(
+                Query query = new Query();
+                query.setMaxFeatures( 1000 );
+                ContentFeatureCollection content = fs.getFeatures( query );
+                table.setInput( content );
+            }
+            catch (IOException e) {
+                tk.createFlowText( parent, "\nUnable to read the data.\n\n**Reason**: " + exception.getMessage() );
+            }
         }
     }
 
@@ -201,7 +214,7 @@ public class ShpImporter
     @Override
     public void execute( IProgressMonitor monitor ) throws Exception {
         // no maxResults restriction
-        features = ds.getFeatureSource().getFeatures();
+        features = fs.getFeatures();
     }
 
 }

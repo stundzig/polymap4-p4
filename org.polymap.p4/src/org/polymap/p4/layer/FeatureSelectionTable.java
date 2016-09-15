@@ -14,35 +14,30 @@
  */
 package org.polymap.p4.layer;
 
+import static org.polymap.core.data.DataPlugin.ff;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
 import static org.polymap.core.ui.SelectionAdapter.on;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.DISABLED12;
+
+import java.io.IOException;
 
 import org.geotools.data.FeatureEvent;
 import org.geotools.data.FeatureEvent.Type;
 import org.geotools.data.FeatureStore;
-import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.feature.FeatureCollection;
+import org.opengis.feature.Feature;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.PropertyIsLike;
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.vividsolutions.jts.geom.Geometry;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -50,14 +45,16 @@ import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.BatikApplication;
 import org.polymap.rhei.batik.IPanel;
-import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.contribution.ContributionManager;
+import org.polymap.rhei.batik.toolkit.ActionText;
+import org.polymap.rhei.batik.toolkit.ClearTextAction;
+import org.polymap.rhei.batik.toolkit.TextActionItem;
 import org.polymap.rhei.batik.toolkit.md.MdToolbar2;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.rhei.table.DefaultFeatureTableColumn;
-import org.polymap.rhei.table.FeatureCollectionContentProvider.FeatureTableElement;
 import org.polymap.rhei.table.FeatureTableViewer;
 import org.polymap.rhei.table.IFeatureTableElement;
+import org.polymap.rhei.table.LazyFeatureContentProvider;
 
 import org.polymap.p4.P4Plugin;
 
@@ -76,15 +73,13 @@ public class FeatureSelectionTable {
     
     private FeatureStore                fs;
     
-    private FeatureCollection           features;
-
     private IPanel                      panel;
     
     private FeatureTableViewer          viewer;
     
-    private Text                        searchText;
+    private LazyFeatureContentProvider  contentProvider;
 
-    private Button                      searchBtn;
+    private ActionText                  searchText;
 
     private MdToolbar2                  toolbar;
 
@@ -98,7 +93,7 @@ public class FeatureSelectionTable {
 
         try {
             this.fs = featureSelection.waitForFs().get();  // already loaded by LayerFeatureTableContribution
-            this.features = fs.getFeatures( featureSelection.filter() );
+//            this.features = fs.getFeatures( featureSelection.filter() );
         }
         catch (Exception e) {
             log.warn( "", e );
@@ -112,8 +107,7 @@ public class FeatureSelectionTable {
     
         // seach
         createTextSearch( topbar );
-        on( searchBtn ).fill().noLeft().right( 60 );
-        on( searchText ).fill().right( searchBtn );
+        on( searchText.getControl() ).fill().right( 38 );
         
         // toolbar
         toolbar = tk().createToolbar( topbar,  SWT.FLAT );
@@ -143,33 +137,49 @@ public class FeatureSelectionTable {
     
     protected void createTableViewer( Composite parent ) {
         viewer = new FeatureTableViewer( parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER );
+
+        contentProvider = new LazyFeatureContentProvider();
+        contentProvider.filter( featureSelection.filter() );
+        viewer.setContentProvider( contentProvider );
     
         // add columns
         DefaultFeatureTableColumn first = null;
-        for (PropertyDescriptor prop : features.getSchema().getDescriptors()) {
+        for (PropertyDescriptor prop : fs.getSchema().getDescriptors()) {
             if (Geometry.class.isAssignableFrom( prop.getType().getBinding() )) {
                 // skip Geometry
             }
             else {
                 DefaultFeatureTableColumn column = new DefaultFeatureTableColumn( prop );
+                // disable default sorting behaviour
+                //column.setSortable( false );
                 viewer.addColumn( column );
                 first = first != null ? first : column;
+                
+//                column.getViewerColumn().getColumn().addSelectionListener( new SelectionAdapter() {
+//                    private SortOrder currentOrder = SortOrder.ASCENDING;
+//                    @Override
+//                    public void widgetSelected( SelectionEvent ev ) {
+//                        // with selection RAP produces huge JS which fails in browser
+//                        viewer.setSelection( StructuredSelection.EMPTY );
+//                        currentOrder = currentOrder.equals( ASCENDING ) ? DESCENDING : ASCENDING;
+//                        contentProvider.sort( column, currentOrder );
+//                    }
+//                });
             }
         }
         
         // it is important to sort any column; otherwise preserving selection during refresh()
         // always selects a new element, which causes an event, which causes a refresh() ...
-        first.sort( SWT.DOWN );
+        first.sort( SWT.UP );
         
         //
-        viewer.setContent( features );
+        viewer.setInput( fs );
 
         // selection -> FeaturePanel
         viewer.addSelectionChangedListener( ev -> {
-            log.info( "" + ev.getSelection() );
-            on( ev.getSelection() ).first( FeatureTableElement.class ).ifPresent( elm -> {
+            on( ev.getSelection() ).first( IFeatureTableElement.class ).ifPresent( elm -> {
                 log.info( "selection: " + elm );
-                featureSelection.setClicked( elm.getFeature() );
+                featureSelection.setClicked( elm.unwrap( Feature.class ).get() );
             
                 BatikApplication.instance().getContext().openPanel( panel.site().path(), FeaturePanel.ID );
             });
@@ -178,12 +188,15 @@ public class FeatureSelectionTable {
     
 
     @EventHandler( display=true )
-    protected void onFeatureClick( FeatureClickEvent ev ) {
+    protected void onFeatureClick( FeatureClickEvent ev ) throws IOException {
         if (!viewer.getTable().isDisposed()) {
             IFeatureTableElement[] selected = viewer.getSelectedElements();
             String clickedFid = ev.clicked.get().getIdentifier().getID();
             if (selected.length != 1 || !selected[0].fid().equals( clickedFid )) {
-                viewer.selectElement( clickedFid, true, false );
+                // viewer.setSelection() does not work with LazyContentProvider
+                int index = contentProvider.indexOfFid( clickedFid );
+                viewer.getTable().select( index );
+                viewer.getTable().showSelection();
             }
         }
         else {
@@ -206,54 +219,40 @@ public class FeatureSelectionTable {
     
     
     protected void createTextSearch( Composite topbar ) {
-        searchText = tk().createText( topbar, null, SWT.BORDER );
-        searchText.setToolTipText( "Text to search for in all properties.<br/>" +
-                "\"Tex\" finds: \"Text\", \"Texts\", etc.<br/>" +
-                "Wildcard: *, ?");
-        //searchText.forceFocus();
-        searchText.addModifyListener( new ModifyListener() {
-            @Override
-            public void modifyText( ModifyEvent ev ) {
-                searchBtn.setEnabled( searchText.getText().length() > 1 );
-            }
-        });
-        searchText.addKeyListener( new KeyAdapter() {
-            @Override
-            public void keyReleased( KeyEvent ev ) {
-                if (ev.keyCode == SWT.Selection) {
-                    search();
-                }
-            }
-        });
-
-        searchBtn = tk().createButton( topbar, null, SWT.PUSH );
-        searchBtn.setToolTipText( "Start search" );
-        searchBtn.setImage( P4Plugin.images().svgImage( "magnify.svg", SvgImageRegistryHelper.WHITE24 ) );
-        searchBtn.addSelectionListener( new SelectionAdapter() {
-            @Override
-            public void widgetSelected( SelectionEvent ev ) {
-                search();
-            }
-        });
+        searchText = tk().createActionText( topbar, null, SWT.BORDER );
+        searchText.performOnEnter.put( true );
+        
+        new TextActionItem( searchText, TextActionItem.Type.DEFAULT )
+                .action.put( ev -> doSearch() )
+                .text.put( "Search..." )
+                .tooltip.put( "Search in all text properties. " +
+                        "Allowed wildcards are: * and ?<br/>" +
+                        "* is appended by default if no other wildcard is given" )
+                .icon.put( P4Plugin.images().svgImage( "magnify.svg", DISABLED12 ) );
+        
+        new ClearTextAction( searchText );
     }
     
     
-    protected void search() {
-        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( null );
-        Filter filter = Filter.INCLUDE;
-        for (PropertyDescriptor prop : features.getSchema().getDescriptors()) {
-            if (Geometry.class.isAssignableFrom( prop.getType().getBinding() )) {
-                // skip Geometry
+    protected void doSearch() {
+        Filter filter = featureSelection.filter();
+        String s = searchText.getText().getText();
+        if (!StringUtils.isBlank( s )) {
+            if (!s.contains( "*" ) && !s.contains( "?" ) ) {
+                s = s + "*";
             }
-            else {
-                PropertyIsLike isLike = ff.like( ff.property( prop.getName() ), searchText.getText() + "*", "*", "?", "\\" );
-                filter = filter == Filter.INCLUDE ? isLike : ff.or( filter, isLike ); 
+            for (PropertyDescriptor prop : fs.getSchema().getDescriptors()) {
+                if (String.class.isAssignableFrom( prop.getType().getBinding() )) {
+                    PropertyIsLike isLike = ff.like( ff.property( prop.getName() ), s, "*", "?", "\\" );
+                    filter = filter == Filter.INCLUDE ? isLike : ff.or( filter, isLike ); 
+                }
             }
         }
+        viewer.setSelection( StructuredSelection.EMPTY );
         log.info( "FILTER: "  + filter );
-        FeatureCollection filtered = features.subCollection( filter );
-        log.info( "RESULT: "  + filtered.size() );
-        viewer.setContent( filtered );
+//        FeatureCollection filtered = features.subCollection( filter );
+//        log.info( "RESULT: "  + filtered.size() );
+        contentProvider.filter( filter );
     }
     
 }
