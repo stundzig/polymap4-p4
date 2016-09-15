@@ -48,6 +48,7 @@ import org.polymap.core.runtime.Timer;
 
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.table.FeatureCollectionContentProvider;
 
 import org.polymap.p4.data.importer.ContextIn;
 import org.polymap.p4.data.importer.ContextOut;
@@ -66,15 +67,15 @@ import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 public class GeoJSONImporter
         implements Importer {
 
-    private ImporterSite      site      = null;
+    private ImporterSite      site;
 
     @ContextIn
     protected File            geojsonFile;
 
     @ContextOut
-    private FeatureCollection features  = null;
+    private FeatureCollection features;
 
-    private Exception         exception = null;
+    private Exception         exception;
 
     private CrsPrompt         crsPrompt;
 
@@ -84,8 +85,8 @@ public class GeoJSONImporter
 
 
     @Override
-    public void init( ImporterSite site, IProgressMonitor monitor ) throws Exception {
-        this.site = site;
+    public void init( ImporterSite newSite, IProgressMonitor monitor ) throws Exception {
+        this.site = newSite;
         site.icon.set( ImporterPlugin.images().svgImage( "json.svg", SvgImageRegistryHelper.NORMAL24 ) );
         site.summary.set( "GeoJSON file: " + geojsonFile.getName() );
         site.description.set( "GeoJSON is a format for encoding a variety of geographic data structures." );
@@ -206,7 +207,8 @@ public class GeoJSONImporter
         else {
             SimpleFeatureType schema = (SimpleFeatureType)features.getSchema();
             ShpFeatureTableViewer table = new ShpFeatureTableViewer( parent, schema );
-            table.setContent( features );
+            table.setContentProvider( new FeatureCollectionContentProvider() );
+            table.setInput( features );
         }
     }
 
