@@ -14,8 +14,6 @@
  */
 package org.polymap.p4.layer;
 
-import static org.opengis.filter.sort.SortOrder.ASCENDING;
-import static org.opengis.filter.sort.SortOrder.DESCENDING;
 import static org.polymap.core.data.DataPlugin.ff;
 import static org.polymap.core.runtime.event.TypeEventFilter.ifType;
 import static org.polymap.core.ui.FormDataFactory.on;
@@ -31,8 +29,6 @@ import org.opengis.feature.Feature;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.Filter;
 import org.opengis.filter.PropertyIsLike;
-import org.opengis.filter.sort.SortOrder;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,8 +36,6 @@ import org.apache.commons.logging.LogFactory;
 import com.vividsolutions.jts.geom.Geometry;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -60,6 +54,7 @@ import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 import org.polymap.rhei.table.DefaultFeatureTableColumn;
 import org.polymap.rhei.table.FeatureTableViewer;
 import org.polymap.rhei.table.IFeatureTableElement;
+import org.polymap.rhei.table.LazyFeatureContentProvider;
 
 import org.polymap.p4.P4Plugin;
 
@@ -142,8 +137,10 @@ public class FeatureSelectionTable {
     
     protected void createTableViewer( Composite parent ) {
         viewer = new FeatureTableViewer( parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER );
+
         contentProvider = new LazyFeatureContentProvider();
         contentProvider.filter( featureSelection.filter() );
+        viewer.setContentProvider( contentProvider );
     
         // add columns
         DefaultFeatureTableColumn first = null;
@@ -154,29 +151,28 @@ public class FeatureSelectionTable {
             else {
                 DefaultFeatureTableColumn column = new DefaultFeatureTableColumn( prop );
                 // disable default sorting behaviour
-                column.setSortable( false );
+                //column.setSortable( false );
                 viewer.addColumn( column );
                 first = first != null ? first : column;
                 
-                column.getViewerColumn().getColumn().addSelectionListener( new SelectionAdapter() {
-                    private SortOrder currentOrder = SortOrder.ASCENDING;
-                    @Override
-                    public void widgetSelected( SelectionEvent ev ) {
-                        // with selection RAP produces huge JS which fails in browser
-                        viewer.setSelection( StructuredSelection.EMPTY );
-                        currentOrder = currentOrder.equals( ASCENDING ) ? DESCENDING : ASCENDING;
-                        contentProvider.sort( column, currentOrder );
-                    }
-                });
+//                column.getViewerColumn().getColumn().addSelectionListener( new SelectionAdapter() {
+//                    private SortOrder currentOrder = SortOrder.ASCENDING;
+//                    @Override
+//                    public void widgetSelected( SelectionEvent ev ) {
+//                        // with selection RAP produces huge JS which fails in browser
+//                        viewer.setSelection( StructuredSelection.EMPTY );
+//                        currentOrder = currentOrder.equals( ASCENDING ) ? DESCENDING : ASCENDING;
+//                        contentProvider.sort( column, currentOrder );
+//                    }
+//                });
             }
         }
         
         // it is important to sort any column; otherwise preserving selection during refresh()
         // always selects a new element, which causes an event, which causes a refresh() ...
-        contentProvider.sort( first, SortOrder.ASCENDING );
+        first.sort( SWT.UP );
         
         //
-        viewer.setContentProvider( contentProvider );
         viewer.setInput( fs );
 
         // selection -> FeaturePanel
