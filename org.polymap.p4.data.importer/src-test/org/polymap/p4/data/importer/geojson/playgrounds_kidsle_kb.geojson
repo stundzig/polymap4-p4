@@ -1,0 +1,48 @@
+{
+	"type": "FeatureCollection",
+	"features": [
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					12.41971803,
+					51.32465755
+				]
+			},
+			"properties": {
+				"town": "Leipzig",
+				"district": "Probstheida,Südost",
+				"title": "Spielplatz Freundschaftspark",
+				"local_traffic": "['Straßenbahn: 15 (Haltestelle Prager Straße/Russenstraße)','Bus: 79 (Haltestelle Prager Straße/Russenstraße)']",
+				"gaming_devices": "['Tischtennisplatte','Drehscheibe','Pendelmast']",
+				"equipment": "['Spielwiese','Bänke','Sandspielfläche','Parkmöglichkeit:','öffentliche Parkplätze vorhanden']",
+				"address": "Prager Straße / Augustinerstraße",
+				"Wird geprüft durch": "Pascal",
+				"Geprüft": "Pascal"
+			}
+		},
+		{
+			"type": "Feature",
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					12.3343505,
+					51.3166794
+				]
+			},
+			"properties": {
+				"town": "Leipzig",
+				"district": "Kleinzschocher,Südwest",
+				"title": "Spielplatz Volkspark Kleinzschocher - Ballspielplatz",
+				"local_traffic": "['Straßenbahn: 1, 2 (Haltestelle Rödelstraße)','Bus: 60, 74 (Haltestelle Rödelstraße)']",
+				"gaming_devices": "['Kletterpyramide','Rutsche','Seilstrecke','Streetballkorb','Tischtennisplatten','Torwände aus Stein']",
+				"equipment": "['Bänke','Spielwiese','Parkmöglichkeit:','öffentliche Parkplätze vorhanden']",
+				"address": "im Volkspark",
+				"Wird geprüft durch": "René",
+				"Geprüft": "René",
+				"compatible-to-osm": "true"
+			}
+		}
+	]
+}

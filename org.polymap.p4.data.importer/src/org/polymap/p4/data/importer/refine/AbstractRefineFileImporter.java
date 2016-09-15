@@ -19,13 +19,15 @@ import java.util.Set;
 
 import java.io.File;
 
-import org.geotools.feature.DefaultFeatureCollection;
+import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTSFactoryFinder;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.geotools.referencing.CRS;
+import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.osgi.framework.ServiceReference;
 
@@ -73,6 +75,8 @@ import org.polymap.p4.data.importer.ImporterPrompt;
 import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.importer.ImporterSite;
 import org.polymap.p4.data.importer.Messages;
+import org.polymap.p4.data.importer.prompts.CrsPrompt;
+import org.polymap.p4.data.importer.prompts.SchemaNamePrompt;
 import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 
 /**
@@ -133,6 +137,10 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
 
     private boolean                      shouldUpdateOptions = false;
 
+    private CrsPrompt crsPrompt;
+
+    private SchemaNamePrompt schemaNamePrompt;
+
 
     // private Composite tableComposite;
 
@@ -171,15 +179,32 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     }
 
 
+    @Override
+    public void createPrompts( IProgressMonitor monitor ) throws Exception {
+        site.newPrompt( "coordinates" )
+            .summary.put( i18nPrompt.get( "coordinatesSummary" ) )
+            .description.put( i18nPrompt.get( "coordinatesDescription" ) )
+            .value.put( coordinatesPromptLabel() )
+            .extendedUI.put( coordinatesPromptUiBuilder() );
+
+        crsPrompt = new CrsPrompt( site, i18nPrompt.get("crsSummary"), i18nPrompt.get( "crsDescription" ), () -> {
+                    try {
+                        return CRS.decode( "EPSG:4326" );
+                    }
+                    catch (Exception e) {
+                        // do nothing
+                    }
+                    return null;
+                } );
+        schemaNamePrompt = new SchemaNamePrompt( site, i18nPrompt.get("schemaSummary"), i18nPrompt.get( "schemaDescription" ), () -> {
+            return layerName();
+        } );
+    }
+    
+    
     private FeatureCollection createFeatures() {
         TypedContent content = typedContent();
-        final SimpleFeatureType TYPE = buildFeatureType( content.columns() );
-        final SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder( TYPE );
-        FeatureCollection currentFeatures = new DefaultFeatureCollection( null, TYPE );
-        // TODO FeatureTable shows always latest created on top, therefore reverse
-        // the order
-        List<RefineRow> rows = content.rows();
-        Collections.reverse( rows );
+        
         int latitudeColumnIndex = content.columnIndex( latitudeColumn() );
         int longitudeColumnIndex = content.columnIndex( longitudeColumn() );
         // coordinate columns selected, but final file parsing contains crappy data,
@@ -192,10 +217,19 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
             latitudeColumnIndex = -1;
             longitudeColumnIndex = -1;
         }
+        boolean containsGeom = latitudeColumnIndex != -1 && longitudeColumnIndex != -1;
+        
+        final SimpleFeatureType TYPE = buildFeatureType( containsGeom, content.columns() );
+        final SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder( TYPE );
+        ListFeatureCollection currentFeatures = new ListFeatureCollection( TYPE );
+        // TODO FeatureTable shows always latest created on top, therefore reverse
+        // the order
+        List<RefineRow> rows = content.rows();
+        Collections.reverse( rows );
 
         int count = 0;
         for (RefineRow row : rows) {
-            if (latitudeColumnIndex != -1 && longitudeColumnIndex != -1) {
+            if (containsGeom) {
                 // construct the coordinate
                 try {
                     Number latitude = null;
@@ -221,15 +255,17 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
                     featureBuilder.add( null );
                 }
             }
-            else {
-                featureBuilder.add( null );
-            }
+//            else {
+//                featureBuilder.add( null );
+//            }
             for (RefineCell cell : row.cells()) {
                 // log.info( "cell with type " + (cell != null && cell.value !=
                 // null ? cell.value.getClass() : "null"));
                 featureBuilder.add( cell == null ? null : cell.guessedValue() );
             }
-            ((DefaultFeatureCollection)currentFeatures).add( featureBuilder.buildFeature( null ) );
+            // features are build with a default id, thats wrong here
+            SimpleFeature simpleFeature = featureBuilder.buildFeature( null );
+            currentFeatures.add( new SimpleFeatureImpl( simpleFeature.getAttributes(), TYPE, null ) );
             if (count % 10000 == 0) {
                 log.info( "created " + count );
             }
@@ -294,16 +330,16 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
     }
 
 
-    private SimpleFeatureType buildFeatureType( List<TypedColumn> columns ) {
+    private SimpleFeatureType buildFeatureType( boolean containsGeom, List<TypedColumn> columns ) {
         SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
         // no namespace for imported features
         builder.setName( new NameImpl( layerName() ) );
-        // TODO the CRS should be a separate prompt
-        builder.setCRS( DefaultGeographicCRS.WGS84 );
-        // add the default GEOM
-        builder.setDefaultGeometry( "theGeom" );
-        builder.add( "theGeom", Point.class );
-
+        builder.setCRS( crsPrompt.selection() );
+        if (containsGeom) {
+            // add the default GEOM
+            builder.setDefaultGeometry( "theGeom" );
+            builder.add( "theGeom", Point.class );
+        }
         for (TypedColumn column : columns) {
             builder.add( column.name(), column.type() );
         }
@@ -392,7 +428,12 @@ public abstract class AbstractRefineFileImporter<T extends FormatAndOptions>
 
 
     protected String layerName() {
-        return FilenameUtils.getBaseName( file.getName() ).replace( ".", "_" );
+        if (schemaNamePrompt == null) {
+            return FilenameUtils.getBaseName( file.getName() ).replace( ".", "_" );
+        }
+        else {
+            return schemaNamePrompt.selection();
+        }
     }
 
 

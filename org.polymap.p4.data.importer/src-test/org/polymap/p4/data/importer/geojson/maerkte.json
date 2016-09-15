@@ -1,0 +1,31 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "crs": {
+          "type": "name",
+          "properties": {
+            "name": "EPSG:25832"
+          }
+        },
+        "coordinates": [
+          362025.8533,
+          5619845.526
+        ]
+      },
+      "properties": {
+        "point_id": 744011,
+        "wochenmarkt_name": "Am Schickshof",
+        "oeffnungszeiten": "Di, Fr, Sa - 08.00 - 13.00 Uhr",
+        "strasse": 4305,
+        "strassen_bez": "Am Schickshof",
+        "oeffentlich": 1,
+        "kategorie_nr": 514,
+        "kategorie": "Wochenmärkte"
+      }
+    }
+  ]
+}

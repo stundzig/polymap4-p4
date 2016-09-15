@@ -14,11 +14,10 @@
  */
 package org.polymap.p4.data.importer.prompts;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
 import java.util.function.Supplier;
 
 import org.geotools.referencing.CRS;
@@ -51,7 +50,7 @@ public class CrsPrompt {
 
     private CoordinateReferenceSystem   selection;
 
-    private HashMap<String,String>      crsNames;
+    private Map<String,String>      crsNames;
 
 
     public CrsPrompt( final ImporterSite site, final String summary, final String description, final Supplier<CoordinateReferenceSystem> crsSupplier ) {
@@ -84,7 +83,7 @@ public class CrsPrompt {
                     
                     @Override
                     protected Set<String> listItems() {
-                        return new HashSet( crsNames.values() );  //CRS.getSupportedCodes( "EPSG" );
+                        return crsNames.keySet();
                     }
                     
                     @Override
@@ -101,10 +100,7 @@ public class CrsPrompt {
                     @Override
                     protected void handleSelection( String selected ) {
                         try {
-                            String code = crsNames.entrySet().stream()
-                                    .filter( entry -> entry.getValue().equals( selected ) )
-                                    .map( entry -> entry.getKey() )
-                                    .findAny().get();
+                            String code = crsNames.get( selected );
                             selection = Geometries.crs( code );
                             assert selection != null;
                         }
@@ -126,7 +122,15 @@ public class CrsPrompt {
 
     protected String crsName( CoordinateReferenceSystem crs ) {
         String code = CRS.toSRS( crs );
-        return crsNames.computeIfAbsent( code, key -> key );
+        String crsName = crsNames.entrySet().stream()
+                .filter( entry -> entry.getValue().equals( code ) )
+                .map( entry -> entry.getKey() )
+                .findAny().get();
+        if (crsName == null) {
+            crsName = code;
+            crsNames.put( crsName, crsName );
+        }
+        return crsName;
     }
     
 
@@ -134,8 +138,8 @@ public class CrsPrompt {
      * All CRS Names from all available CRS authorities.
      */
     protected void initCrsNames() {
-        crsNames = new HashMap<String,String>();
-        Set<String> descriptions = new TreeSet<String>();
+        crsNames = new TreeMap<String,String>();
+//        Set<String> descriptions = new TreeSet<String>();
         for (Object object : ReferencingFactoryFinder.getCRSAuthorityFactories( null )) {
             CRSAuthorityFactory factory = (CRSAuthorityFactory)object;
             try {
@@ -147,8 +151,8 @@ public class CrsPrompt {
                     if (code != null && code.startsWith( "EPSG" )) {
                         try {
                             String description = Joiner.on( "" ).join( factory.getDescriptionText( code ).toString(), " (", code, ")" );
-                            descriptions.add( description );
-                            crsNames.put( code, description );
+//                            descriptions.add( description );
+                            crsNames.put( description, code );
                         }
                         catch (Exception e1) {
                             // XXX falko: no UNNAMED CRSs

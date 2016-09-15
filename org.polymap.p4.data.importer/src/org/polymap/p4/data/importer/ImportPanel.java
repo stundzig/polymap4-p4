@@ -67,7 +67,6 @@ import org.polymap.core.ui.StatusDispatcher;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.PanelIdentifier;
-import org.polymap.rhei.batik.PanelPath;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.SimpleDialog;
 import org.polymap.rhei.batik.toolkit.Snackbar.Appearance;
@@ -306,8 +305,7 @@ public class ImportPanel
         }
         
         // close panel
-        // XXX assuming that ImportPanel is child of root
-        getContext().openPanel( PanelPath.ROOT, new PanelIdentifier( "start" ) );
+        getContext().closePanel( site().path() );
     }
     
     

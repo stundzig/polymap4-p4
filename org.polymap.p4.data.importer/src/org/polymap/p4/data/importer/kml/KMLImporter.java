@@ -110,16 +110,13 @@ public class KMLImporter
     @Override
     public void verify( IProgressMonitor monitor ) {
         // System.err.println( "verify " + System.currentTimeMillis() );
-        FeatureIterator<SimpleFeature> featureIterator = null;
+        KMLFeatureIterator featureIterator = null;
         try {
             featureIterator = new KMLFeatureIterator( kmlFile, schemaNamePrompt.selection() );
-            ListFeatureCollection featureList = null;
+            ListFeatureCollection featureList = new ListFeatureCollection( featureIterator.getFeatureType() );
             int i = 0;
             while (i < 100 && featureIterator.hasNext()) {
                 SimpleFeature next = featureIterator.next();
-                if (featureList == null) {
-                    featureList = new ListFeatureCollection( next.getFeatureType() );
-                }
                 featureList.add( next );
                 i++;
             }

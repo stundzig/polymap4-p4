@@ -22,8 +22,13 @@ import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import java.beans.PropertyChangeEvent;
+
+import org.geotools.data.DataAccess;
+import org.opengis.feature.type.FeatureType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,8 +45,11 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
+import org.polymap.core.data.pipeline.DataSourceDescription;
+import org.polymap.core.data.util.NameImpl;
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.operation.DefaultOperation;
 import org.polymap.core.operation.OperationSupport;
@@ -52,9 +60,12 @@ import org.polymap.core.project.ui.ProjectNodeContentProvider;
 import org.polymap.core.project.ui.ProjectNodeLabelProvider;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
+import org.polymap.core.ui.StatusDispatcher;
+import org.polymap.core.ui.StatusDispatcher.Style;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.Mandatory;
@@ -65,6 +76,7 @@ import org.polymap.rhei.batik.toolkit.md.CheckboxActionProvider;
 import org.polymap.rhei.batik.toolkit.md.MdListViewer;
 import org.polymap.rhei.batik.toolkit.md.MdToolkit;
 
+import org.polymap.p4.Messages;
 import org.polymap.p4.P4Panel;
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.map.ProjectMapPanel;
@@ -78,6 +90,8 @@ public class LayersPanel
         extends P4Panel {
 
     private static Log log = LogFactory.getLog( LayersPanel.class );
+
+    protected static final IMessages    i18n = Messages.forPrefix( "LayersPanel" );
 
     public static final PanelIdentifier ID = PanelIdentifier.parse( "layers" );
 
@@ -121,7 +135,7 @@ public class LayersPanel
 
     @Override
     public void createContents( Composite parent ) {
-        site().title.set( "Layers" );
+        site().title.set( i18n.get( "title" ) );
         parent.setLayout( FormLayoutFactory.defaults().create() );
         
         viewer = ((MdToolkit)getSite().toolkit()).createListViewer( parent, SWT.SINGLE, SWT.FULL_SELECTION );
@@ -162,7 +176,23 @@ public class LayersPanel
                 ev -> ev.getSource() instanceof ILayer && map.get().containsLayer( (ILayer)ev.getSource() ) ) );
     }
 
-
+    protected boolean canBeVisible( ILayer layer ) {
+        try {
+            Optional<DataSourceDescription> dsd = P4Plugin.allResolver().connectLayer( layer, new NullProgressMonitor());
+            if (dsd.isPresent() && dsd.get().service.get() instanceof DataAccess) {
+                FeatureType schema = P4Plugin.localCatalog().localFeaturesStore().getSchema( new NameImpl( dsd.get().resourceName.get() ) );
+                if (schema != null && schema.getGeometryDescriptor() == null) {
+                    // no geometries, hide it
+                    return false;
+                } // true in all other cases
+            }
+        }
+        catch (Exception e) {
+            // do nothing here, shows the layer
+        }
+        return true;
+    }
+    
     @EventHandler( display=true, delay=10 )
     protected void layerChanged( List<PropertyChangeEvent> evs ) {
         if (viewer == null || viewer.getControl().isDisposed()) {
@@ -208,9 +238,20 @@ public class LayersPanel
     
         @Override
         protected boolean initSelection( MdListViewer _viewer, Object elm ) {
-            return ((ILayer)elm).userSettings.get().visible.get();
+            return canBeVisible( (ILayer)elm ) && ((ILayer)elm).userSettings.get().visible.get();
         }
-    
+
+
+        @Override
+        public void perform( MdListViewer viewer, Object elm ) {
+            if (canBeVisible( (ILayer)elm )) {
+                super.perform( viewer, elm );
+            }
+            else {
+                StatusDispatcher.handle( new Status( IStatus.INFO, P4Plugin.ID, i18n.get( "invisible" ) ), Style.SHOW, Style.LOG );
+            }
+        }
+        
         @Override
         protected void onSelectionChange( MdListViewer _viewer, Object elm ) {
             ((ILayer)elm).userSettings.get().visible.set( isSelected( elm ) );

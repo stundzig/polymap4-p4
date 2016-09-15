@@ -186,6 +186,16 @@ public class ImporterContext
             @Override
             protected void runWithException( IProgressMonitor monitor ) throws Exception {
                 importer.verify( monitor );
+                if (site().ok.get()) {
+                    // check if all prompts also ok
+                    for (ImporterPrompt prompt : prompts.values()) {
+                        if (prompt.severity.isPresent() && prompt.severity.get().equals( Severity.REQUIRED ) && !prompt.ok.get()) {
+                            // on first false, all is false
+                            site().ok.set( false );
+                            break;
+                        }
+                    }
+                }
             }
         };
         verifier.addJobChangeListener( new JobChangeAdapter() {

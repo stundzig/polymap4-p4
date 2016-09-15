@@ -39,7 +39,9 @@ import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.importer.ImporterPrompt;
 import org.polymap.p4.data.importer.ImporterSite;
 import org.polymap.p4.data.importer.Messages;
+import org.polymap.p4.data.importer.prompts.CrsPrompt;
 import org.polymap.p4.data.importer.prompts.NumberfieldBasedPromptUiBuilder;
+import org.polymap.p4.data.importer.prompts.SchemaNamePrompt;
 import org.polymap.p4.data.importer.refine.AbstractRefineFileImporter;
 
 /**
@@ -57,6 +59,10 @@ public class ExcelFileImporter
     protected Sheet                sheetOut;
 
     protected int                  selectedSheet = -1;
+
+    private CrsPrompt crsPrompt;
+
+    private SchemaNamePrompt schemaNamePrompt;
 
 //    private File                   copyOfOriginalFile;
 
@@ -123,7 +129,7 @@ public class ExcelFileImporter
                     return formatAndOptions().skipDataLines();
                 }
             } );
-            site.newPrompt( "coordinates" ).summary.put( i18nPrompt.get( "coordinatesSummary" ) ).description.put( i18nPrompt.get( "coordinatesDescription" ) ).value.put( coordinatesPromptLabel() ).extendedUI.put( coordinatesPromptUiBuilder() );
+            super.createPrompts( monitor );
         }
     }
 

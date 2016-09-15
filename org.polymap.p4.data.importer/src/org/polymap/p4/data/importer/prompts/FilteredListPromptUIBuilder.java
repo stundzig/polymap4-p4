@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Splitter;
 
 import org.eclipse.swt.SWT;
@@ -31,12 +33,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import org.polymap.p4.data.importer.ImporterPrompt;
 import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
+import org.polymap.p4.data.importer.Messages;
 
 /**
  * 
@@ -45,6 +49,8 @@ import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
  */
 public abstract class FilteredListPromptUIBuilder
         implements PromptUIBuilder {
+
+    protected static final IMessages        i18n          = Messages.forPrefix( "ImporterPrompt" );
 
     protected Set<String>                   items;
     
@@ -64,28 +70,19 @@ public abstract class FilteredListPromptUIBuilder
         
         items = listItems();
         String initiallySelected = initiallySelectedItem();
+        if (StringUtils.isBlank( initiallySelected )) {
+            initiallySelected = i18n.get("filterText");
+        }
         
         Label label = on( new Label( parent, SWT.NONE ) ).fill().noBottom().control();
-        label.setText( "Filter:" );
+        label.setText( i18n.get("filterSummary") );
         
         Text filterText = on( new Text( parent, SWT.BORDER ) ).left( 0 ).top( label ).right( 100 ).control();
-        filterText.setToolTipText( "Filter available items" );
+        filterText.setToolTipText( i18n.get("filterDescription") );
         filterText.forceFocus();
         filterText.setText( initiallySelected );
         filterText.selectAll();
 
-        list = on( new org.eclipse.swt.widgets.List( parent, SWT.V_SCROLL ) )
-                .fill().top( filterText, 10 ).width( 250 ).height( 250 ).control();
-                
-        setListItems( filterSelectable( initiallySelected ) );
-        list.setSelection( new String[] { initiallySelected } );
-        list.addSelectionListener( new SelectionAdapter() {
-            @Override
-            public void widgetSelected( SelectionEvent ev ) {
-                String item = list.getItem( list.getSelectionIndex() );
-                handleSelection( item );
-            }
-        } );
         filterText.addModifyListener( new ModifyListener() {
             @Override
             public void modifyText( ModifyEvent ev ) {
@@ -94,6 +91,19 @@ public abstract class FilteredListPromptUIBuilder
                     list.select( 0 );
                     handleSelection( list.getItem( list.getSelectionIndex() ) );
                 }
+            }
+        } );
+
+        list = on( new org.eclipse.swt.widgets.List( parent, SWT.V_SCROLL ) )
+                .fill().top( filterText, 10 ).width( 350 ).height( 250 ).control();
+                
+        setListItems( filterSelectable( initiallySelected ) );
+        list.setSelection( new String[] { initiallySelected } );
+        list.addSelectionListener( new SelectionAdapter() {
+            @Override
+            public void widgetSelected( SelectionEvent ev ) {
+                String item = list.getItem( list.getSelectionIndex() );
+                handleSelection( item );
             }
         } );
         parent.pack();
