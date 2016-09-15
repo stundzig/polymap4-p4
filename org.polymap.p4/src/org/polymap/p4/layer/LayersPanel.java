@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import java.beans.PropertyChangeEvent;
 
 import org.geotools.data.DataAccess;
@@ -241,11 +239,10 @@ public class LayersPanel
             return canBeVisible( (ILayer)elm ) && ((ILayer)elm).userSettings.get().visible.get();
         }
 
-
         @Override
-        public void perform( MdListViewer viewer, Object elm ) {
+        public void perform( MdListViewer _viewer, Object elm ) {
             if (canBeVisible( (ILayer)elm )) {
-                super.perform( viewer, elm );
+                super.perform( _viewer, elm );
             }
             else {
                 StatusDispatcher.handle( new Status( IStatus.INFO, P4Plugin.ID, i18n.get( "invisible" ) ), Style.SHOW, Style.LOG );
