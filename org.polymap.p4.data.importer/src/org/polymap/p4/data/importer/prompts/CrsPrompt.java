@@ -50,7 +50,8 @@ public class CrsPrompt {
 
     private CoordinateReferenceSystem   selection;
 
-    private Map<String,String>      crsNames;
+    /** description -> code */
+    private Map<String,String>          crsNames;
 
 
     public CrsPrompt( final ImporterSite site, final String summary, final String description, final Supplier<CoordinateReferenceSystem> crsSupplier ) {
@@ -58,15 +59,8 @@ public class CrsPrompt {
         
         initCrsNames();
         
-        
         // read *.prj file
-        String readError = null;
-        try {
-            selection = crsSupplier.get();
-        }
-        catch (Exception e) {
-            readError = e.getMessage();
-        }
+        selection = crsSupplier.get();
 
         site.newPrompt( "crs" )
                 .summary.put( summary )
@@ -125,7 +119,7 @@ public class CrsPrompt {
         String crsName = crsNames.entrySet().stream()
                 .filter( entry -> entry.getValue().equals( code ) )
                 .map( entry -> entry.getKey() )
-                .findAny().get();
+                .findAny().orElse( null );
         if (crsName == null) {
             crsName = code;
             crsNames.put( crsName, crsName );
@@ -140,6 +134,7 @@ public class CrsPrompt {
     protected void initCrsNames() {
         crsNames = new TreeMap<String,String>();
 //        Set<String> descriptions = new TreeSet<String>();
+        
         for (Object object : ReferencingFactoryFinder.getCRSAuthorityFactories( null )) {
             CRSAuthorityFactory factory = (CRSAuthorityFactory)object;
             try {

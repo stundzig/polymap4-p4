@@ -123,6 +123,7 @@ public class ShpImporter
             }
             return crs;
         } );
+        
         crsPrompt = new CrsPrompt( site, "CRS", "The Coordinate Reference System.", () -> {
             Optional<File> prjFile = files.stream().filter( f -> "prj".equalsIgnoreCase( FilenameUtils.getExtension( f.getName() ) ) ).findAny();
             if (prjFile.isPresent()) {
