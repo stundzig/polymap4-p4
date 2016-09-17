@@ -43,6 +43,8 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.polymap.core.runtime.i18n.IMessages;
+
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.rhei.table.FeatureCollectionContentProvider;
@@ -52,6 +54,7 @@ import org.polymap.p4.data.importer.ContextOut;
 import org.polymap.p4.data.importer.Importer;
 import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.importer.ImporterSite;
+import org.polymap.p4.data.importer.Messages;
 import org.polymap.p4.data.importer.prompts.CharsetPrompt;
 import org.polymap.p4.data.importer.prompts.CrsPrompt;
 import org.polymap.p4.data.importer.prompts.SchemaNamePrompt;
@@ -64,21 +67,23 @@ import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 public class GeoJSONImporter
         implements Importer {
 
-    protected ImporterSite      site;
+    private static final IMessages i18nPrompt = Messages.forPrefix( "ImporterPrompt" );
+
+    protected ImporterSite         site;
 
     @ContextIn
-    protected File              geojsonFile;
+    protected File                 geojsonFile;
 
     @ContextOut
-    protected FeatureCollection features;
+    protected FeatureCollection    features;
 
-    private Exception           exception;
+    private Exception              exception;
 
-    private CrsPrompt           crsPrompt;
+    private CrsPrompt              crsPrompt;
 
-    private CharsetPrompt       charsetPrompt;
+    private CharsetPrompt          charsetPrompt;
 
-    private SchemaNamePrompt    schemaNamePrompt;
+    private SchemaNamePrompt       schemaNamePrompt;
 
 
     @Override
@@ -100,15 +105,14 @@ public class GeoJSONImporter
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         // charset prompt
-        charsetPrompt = new CharsetPrompt( site, "Content encoding", "The encoding of the feature content. If unsure use UTF-8.", () -> {
+        charsetPrompt = new CharsetPrompt( site, i18nPrompt.get("encodingSummary"), i18nPrompt.get( "encodingDescription" ), () -> {
             return Charset.forName( "UTF-8" );
         } );
         // http://geojson.org/geojson-spec.html#coordinate-reference-system-objects
-        crsPrompt = new CrsPrompt( site, "Coordinate reference system", "The coordinate reference system for projecting the feature content."
-                + "If unsure use EPSG:4326.", () -> {
+        crsPrompt = new CrsPrompt( site, i18nPrompt.get("crsSummary"), i18nPrompt.get( "crsDescription" ), () -> {
                     return getPredefinedCRS();
                 } );
-        schemaNamePrompt = new SchemaNamePrompt( site, "Name of the dataset ", "Each dataset has its own name in the local database. The name must be unqiue.", () -> {
+        schemaNamePrompt = new SchemaNamePrompt( site, i18nPrompt.get("schemaSummary"), i18nPrompt.get( "schemaDescription" ), () -> {
             return FilenameUtils.getBaseName( geojsonFile.getName() );
         } );
     }

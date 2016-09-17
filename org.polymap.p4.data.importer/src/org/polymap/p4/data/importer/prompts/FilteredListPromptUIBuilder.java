@@ -15,6 +15,7 @@
 package org.polymap.p4.data.importer.prompts;
 
 import static org.polymap.core.ui.FormDataFactory.on;
+import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.DISABLED12;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +32,17 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
 import org.polymap.core.runtime.i18n.IMessages;
+import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.toolkit.ActionText;
+import org.polymap.rhei.batik.toolkit.ClearTextAction;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.batik.toolkit.TextActionItem;
 
+import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.importer.ImporterPrompt;
 import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.importer.Messages;
@@ -50,12 +55,12 @@ import org.polymap.p4.data.importer.Messages;
 public abstract class FilteredListPromptUIBuilder
         implements PromptUIBuilder {
 
-    protected static final IMessages        i18n          = Messages.forPrefix( "ImporterPrompt" );
+    protected static final IMessages       i18n = Messages.forPrefix( "ImporterPrompt" );
+    
+    protected Set<String>                  items;
 
-    protected Set<String>                   items;
-    
-    private org.eclipse.swt.widgets.List    list;
-    
+    protected org.eclipse.swt.widgets.List list;
+
     
     protected abstract Set<String> listItems();
 
@@ -68,34 +73,41 @@ public abstract class FilteredListPromptUIBuilder
     public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
         parent.setLayout( FormLayoutFactory.defaults().spacing( 0 ).create() );
         
+        Label desc = FormDataFactory.on( tk.createLabel( parent, prompt.description.get(), SWT.WRAP ) ).top( 0 ).left( 0 ).width( 350 ).control();
+
         items = listItems();
         String initiallySelected = initiallySelectedItem();
         if (StringUtils.isBlank( initiallySelected )) {
-            initiallySelected = i18n.get("filterText");
+            initiallySelected = i18n.get("filterAction");
         }
         
-        Label label = on( new Label( parent, SWT.NONE ) ).fill().noBottom().control();
-        label.setText( i18n.get("filterSummary") );
+        Label label = on( tk.createLabel( parent, summary(), SWT.NONE ) ).fill().top( desc, 15 ).noBottom().control();
         
-        Text filterText = on( new Text( parent, SWT.BORDER ) ).left( 0 ).top( label ).right( 100 ).control();
-        filterText.setToolTipText( i18n.get("filterDescription") );
-        filterText.forceFocus();
-        filterText.setText( initiallySelected );
-        filterText.selectAll();
+        ActionText actionText = tk.createActionText( parent, initiallySelected, SWT.BORDER ) ;
+        on( actionText.getControl() ).left( 0 ).top( label ).right( 100 );
+        new TextActionItem( actionText, TextActionItem.Type.DEFAULT )
+            .action.put( ev -> updateList( actionText.getText().getText() ) )
+            .text.put( initiallySelected )
+            .tooltip.put( description() )
+            .icon.put( P4Plugin.images().svgImage( "magnify.svg", DISABLED12 ) );
 
-        filterText.addModifyListener( new ModifyListener() {
+        new ClearTextAction( actionText ).action.put( ev -> {
+            actionText.getText().setText( "" );
+            updateList( "" );
+        } );
+        // XXX performDelayMillies doesnt work currently
+        actionText.performOnEnter.set( false );
+        actionText.performDelayMillis.set( 100 );
+       
+        actionText.getText().addModifyListener( new ModifyListener() {
             @Override
             public void modifyText( ModifyEvent ev ) {
-                setListItems( filterSelectable( filterText.getText() ) );
-                if (list.getItems().length > 0) {
-                    list.select( 0 );
-                    handleSelection( list.getItem( list.getSelectionIndex() ) );
-                }
+                updateList( actionText.getText().getText() );
             }
         } );
 
-        list = on( new org.eclipse.swt.widgets.List( parent, SWT.V_SCROLL ) )
-                .fill().top( filterText, 10 ).width( 350 ).height( 250 ).control();
+        list = on( tk.createList( parent, SWT.V_SCROLL, SWT.H_SCROLL ) )
+                .left(0).top( actionText.getControl(), 10 ).right( 100 ).width( 350 ).height( 200 ).control();
                 
         setListItems( filterSelectable( initiallySelected ) );
         list.setSelection( new String[] { initiallySelected } );
@@ -106,10 +118,21 @@ public abstract class FilteredListPromptUIBuilder
                 handleSelection( item );
             }
         } );
-        parent.pack();
+    }
+    
+    private void updateList( final String searchText ) {
+        setListItems( filterSelectable( searchText ) );
+        if (list.getItems().length > 0) {
+            list.select( 0 );
+            handleSelection( list.getItem( list.getSelectionIndex() ) );
+        }
     }
 
-    
+
+    protected abstract String description();
+
+    protected abstract String summary();
+
     protected void setListItems( List<String> filtered ) {
         String[] array = filtered.toArray( new String[ filtered.size() ] );
         list.setItems( array );

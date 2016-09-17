@@ -90,44 +90,56 @@ public class ExcelFileImporter
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
         if (sheetIn.index() != -1 || formatAndOptions().sheetRecords().size() == 1) {
-            site.newPrompt( "ignoreBeforeHeadline" ).summary.put( i18nPrompt.get( "ignoreBeforeHeadlineSummary" ) ).description.put( i18nPrompt.get( "ignoreBeforeHeadlineDescription" ) ).value.put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) ).extendedUI.put( new NumberfieldBasedPromptUiBuilder( this ) {
+            site.newPrompt( "ignoreBeforeHeadline" )
+                .summary.put( i18nPrompt.get( "ignoreBeforeHeadlineSummary" ) )
+                .description.put( i18nPrompt.get( "ignoreBeforeHeadlineDescription" ) )
+                .value.put( String.valueOf( Math.max( 0, formatAndOptions().ignoreLines() ) ) )
+                .extendedUI.put( new NumberfieldBasedPromptUiBuilder( this ) {
 
-                @Override
-                public void onSubmit( ImporterPrompt prompt ) {
-                    formatAndOptions().setIgnoreLines( value );
-                }
+                    @Override
+                    public void onSubmit( ImporterPrompt prompt ) {
+                        formatAndOptions().setIgnoreLines( value );
+                    }
 
 
-                @Override
-                protected int initialValue() {
-                    return Math.max( 0, formatAndOptions().ignoreLines() );
-                }
+                    @Override
+                    protected int initialValue() {
+                        return Math.max( 0, formatAndOptions().ignoreLines() );
+                    }
             } );
-            site.newPrompt( "headlines" ).summary.put( i18nPrompt.get( "headlinesSummary" ) ).description.put( i18nPrompt.get( "headlinesDescription" ) ).value.put( String.valueOf( formatAndOptions().headerLines() ) ).extendedUI.put( new NumberfieldBasedPromptUiBuilder( this ) {
+            site.newPrompt( "headlines" )
+                .summary.put( i18nPrompt.get( "headlinesSummary" ) )
+                .description.put( i18nPrompt.get( "headlinesDescription" ) )
+                .value.put( String.valueOf( formatAndOptions().headerLines() ) )
+                .extendedUI.put( new NumberfieldBasedPromptUiBuilder( this ) {
 
-                @Override
-                public void onSubmit( ImporterPrompt prompt ) {
-                    formatAndOptions().setHeaderLines( value );
-                }
+                    @Override
+                    public void onSubmit( ImporterPrompt prompt ) {
+                        formatAndOptions().setHeaderLines( value );
+                    }
 
 
-                @Override
-                protected int initialValue() {
-                    return formatAndOptions().headerLines();
-                }
+                    @Override
+                    protected int initialValue() {
+                        return formatAndOptions().headerLines();
+                    }
             } );
-            site.newPrompt( "ignoreAfterHeadline" ).summary.put( i18nPrompt.get( "ignoreAfterHeadlineSummary" ) ).description.put( i18nPrompt.get( "ignoreAfterHeadlineDescription" ) ).value.put( String.valueOf( formatAndOptions().skipDataLines() ) ).extendedUI.put( new NumberfieldBasedPromptUiBuilder( this ) {
+            site.newPrompt( "ignoreAfterHeadline" )
+                .summary.put( i18nPrompt.get( "ignoreAfterHeadlineSummary" ) )
+                .description.put( i18nPrompt.get( "ignoreAfterHeadlineDescription" ) )
+                .value.put( String.valueOf( formatAndOptions().skipDataLines() ) )
+                .extendedUI.put( new NumberfieldBasedPromptUiBuilder( this ) {
 
-                @Override
-                public void onSubmit( ImporterPrompt prompt ) {
-                    formatAndOptions().setSkipDataLines( value );
-                }
+                    @Override
+                    public void onSubmit( ImporterPrompt prompt ) {
+                        formatAndOptions().setSkipDataLines( value );
+                    }
 
 
-                @Override
-                protected int initialValue() {
-                    return formatAndOptions().skipDataLines();
-                }
+                    @Override
+                    protected int initialValue() {
+                        return formatAndOptions().skipDataLines();
+                    }
             } );
             super.createPrompts( monitor );
         }

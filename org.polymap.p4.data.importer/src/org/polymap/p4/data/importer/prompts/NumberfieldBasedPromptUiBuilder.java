@@ -16,7 +16,9 @@ package org.polymap.p4.data.importer.prompts;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+
 import org.polymap.core.data.refine.impl.LineBasedFormatAndOptions;
 import org.polymap.core.ui.FormDataFactory;
 
@@ -48,8 +50,10 @@ public abstract class NumberfieldBasedPromptUiBuilder
     public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
         parent.setLayout( new FormLayout() );
         // TODO add numbervalidator here
+        Label desc = FormDataFactory.on( tk.createLabel( parent, prompt.description.get(), SWT.WRAP ) ).top( 0 ).left( 0 ).width( 350 ).control();
         Text text = tk.createText( parent, String.valueOf( initialValue() ), SWT.RIGHT | SWT.BORDER );
-        FormDataFactory.on( text ).left( 1 ).top( 5 ).width( 350 );
+        
+        FormDataFactory.on( text ).left( 1 ).top( desc, 15 ).width( 350 );
 
         text.addModifyListener( event -> {
             Text t = (Text)event.getSource();

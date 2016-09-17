@@ -21,6 +21,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
 import org.polymap.core.data.refine.impl.FormatAndOptions;
 import org.polymap.core.ui.FormDataFactory;
 
@@ -51,8 +53,10 @@ public abstract class ComboBasedPromptUiBuilder
     @Override
     public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
         parent.setLayout( new FormLayout() );
+        Label desc = FormDataFactory.on( tk.createLabel( parent, prompt.description.get(), SWT.WRAP ) ).top( 0 ).left( 0 ).right( 100 ).control();
+
         Combo combo = new Combo( parent, SWT.SINGLE | SWT.BORDER | SWT.DROP_DOWN );
-        FormDataFactory.on( combo ).left( 1 ).top( 5 ).width( 500 );
+        FormDataFactory.on( combo ).left( 1 ).top( desc, 15 ).width( 500 );
 
         List<String> allValues = allValues();
         combo.setItems( allValues.stream().toArray( String[]::new ) );

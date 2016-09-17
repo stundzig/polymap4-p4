@@ -32,26 +32,31 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.base.Joiner;
 
 import org.polymap.core.data.util.Geometries;
+import org.polymap.core.runtime.i18n.IMessages;
 
 import org.polymap.p4.data.importer.ImporterPrompt;
 import org.polymap.p4.data.importer.ImporterPrompt.Severity;
 import org.polymap.p4.data.importer.ImporterSite;
+import org.polymap.p4.data.importer.Messages;
 
 /**
- * 
- *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
+ * @author Steffen Stundzig
  */
 public class CrsPrompt {
 
-    private static Log log = LogFactory.getLog( CrsPrompt.class );
-    
-    private ImporterSite                site;
+    private static final IMessages    i18n       = Messages.forPrefix( "CrsPrompt" );
 
-    private CoordinateReferenceSystem   selection;
+    private static final IMessages    i18nPrompt = Messages.forPrefix( "ImporterPrompt" );
+
+    private static Log                log        = LogFactory.getLog( CrsPrompt.class );
+
+    private ImporterSite              site;
+
+    private CoordinateReferenceSystem selection;
 
     /** description -> code */
-    private Map<String,String>          crsNames;
+    private Map<String,String>        crsNames;
 
 
     public CrsPrompt( final ImporterSite site, final String summary, final String description, final Supplier<CoordinateReferenceSystem> crsSupplier ) {
@@ -59,7 +64,6 @@ public class CrsPrompt {
         
         initCrsNames();
         
-        // read *.prj file
         selection = crsSupplier.get();
 
         site.newPrompt( "crs" )
@@ -102,6 +106,16 @@ public class CrsPrompt {
                             throw new RuntimeException( e );
                         }
                     }
+
+                    @Override
+                    protected String description() {
+                        return i18nPrompt.get( "filterDescription" );
+                    }
+
+                    @Override
+                    protected String summary() {
+                        return i18nPrompt.get( "filterSummary" );
+                    }
                 });
     }
 
@@ -133,8 +147,6 @@ public class CrsPrompt {
      */
     protected void initCrsNames() {
         crsNames = new TreeMap<String,String>();
-//        Set<String> descriptions = new TreeSet<String>();
-        
         for (Object object : ReferencingFactoryFinder.getCRSAuthorityFactories( null )) {
             CRSAuthorityFactory factory = (CRSAuthorityFactory)object;
             try {
@@ -146,7 +158,6 @@ public class CrsPrompt {
                     if (code != null && code.startsWith( "EPSG" )) {
                         try {
                             String description = Joiner.on( "" ).join( factory.getDescriptionText( code ).toString(), " (", code, ")" );
-//                            descriptions.add( description );
                             crsNames.put( description, code );
                         }
                         catch (Exception e1) {

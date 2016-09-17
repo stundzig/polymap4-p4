@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.polymap.core.runtime.i18n.IMessages;
+
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.rhei.table.FeatureCollectionContentProvider;
@@ -45,6 +47,7 @@ import org.polymap.p4.data.importer.ContextOut;
 import org.polymap.p4.data.importer.Importer;
 import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.importer.ImporterSite;
+import org.polymap.p4.data.importer.Messages;
 import org.polymap.p4.data.importer.prompts.SchemaNamePrompt;
 import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 
@@ -54,21 +57,19 @@ import org.polymap.p4.data.importer.shapefile.ShpFeatureTableViewer;
 public class KMLImporter
         implements Importer {
 
-    private ImporterSite      site;
+    private static final IMessages i18nPrompt = Messages.forPrefix( "ImporterPrompt" );
+
+    private ImporterSite           site;
 
     @ContextIn
-    protected File            kmlFile;
+    protected File                 kmlFile;
 
     @ContextOut
-    private FeatureCollection features;
+    private FeatureCollection      features;
 
-    private Exception         exception;
+    private Exception              exception;
 
-    // private CrsPrompt crsPrompt;
-
-    // private CharsetPrompt charsetPrompt;
-
-    private SchemaNamePrompt  schemaNamePrompt;
+    private SchemaNamePrompt       schemaNamePrompt;
 
 
     @Override
@@ -89,19 +90,7 @@ public class KMLImporter
 
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
-        // charset prompt
-        // charsetPrompt = new CharsetPrompt( site, "Content encoding", "The encoding
-        // of the feature content. If unsure use UTF-8.", () -> {
-        // return Charset.forName( "UTF-8" );
-        // } );
-        // //
-        // http://geojson.org/geojson-spec.html#coordinate-reference-system-objects
-        // crsPrompt = new CrsPrompt( site, "Coordinate reference system", "The
-        // coordinate reference system for projecting the feature content."
-        // + "If unsure use EPSG:4326.", () -> {
-        // return getPredefinedCRS();
-        // } );
-        schemaNamePrompt = new SchemaNamePrompt( site, "Name of the dataset ", "Each dataset has its own name in the local database. The name must be unqiue.", () -> {
+        schemaNamePrompt = new SchemaNamePrompt( site, i18nPrompt.get("schemaSummary"), i18nPrompt.get( "schemaDescription" ), () -> {
             return FilenameUtils.getBaseName( kmlFile.getName() );
         } );
     }

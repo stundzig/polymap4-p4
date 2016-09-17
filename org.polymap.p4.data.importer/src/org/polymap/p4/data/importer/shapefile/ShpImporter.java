@@ -48,6 +48,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 
 import org.polymap.core.runtime.Streams;
 import org.polymap.core.runtime.Streams.ExceptionCollector;
+import org.polymap.core.runtime.i18n.IMessages;
 
 import org.polymap.rhei.batik.app.SvgImageRegistryHelper;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
@@ -57,6 +58,7 @@ import org.polymap.p4.data.importer.ContextOut;
 import org.polymap.p4.data.importer.Importer;
 import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.importer.ImporterSite;
+import org.polymap.p4.data.importer.Messages;
 import org.polymap.p4.data.importer.prompts.CharsetPrompt;
 import org.polymap.p4.data.importer.prompts.CrsPrompt;
 
@@ -68,30 +70,34 @@ import org.polymap.p4.data.importer.prompts.CrsPrompt;
 public class ShpImporter
         implements Importer {
 
-    private static Log log = LogFactory.getLog( ShpImporter.class );
-    
-    private static final ShapefileDataStoreFactory dsFactory = new ShapefileDataStoreFactory();
-    
-    private ImporterSite            site;
+    private static final IMessages                 i18nPrompt = Messages.forPrefix( "ImporterPrompt" );
+
+    private static final IMessages                 i18n = Messages.forPrefix( "ImporterShp" );
+
+    private static Log                             log        = LogFactory.getLog( ShpImporter.class );
+
+    private static final ShapefileDataStoreFactory dsFactory  = new ShapefileDataStoreFactory();
+
+    private ImporterSite                           site;
 
     @ContextIn
-    protected List<File>            files;
+    protected List<File>                           files;
 
     @ContextIn
-    protected File                  shp;
+    protected File                                 shp;
 
     @ContextOut
-    private FeatureCollection       features;
+    private FeatureCollection                      features;
 
-    private Exception               exception;
+    private Exception                              exception;
 
-    private ShapefileDataStore      ds;
+    private ShapefileDataStore                     ds;
 
-    private ContentFeatureSource    fs;
+    private ContentFeatureSource                   fs;
 
-    private CharsetPrompt           charsetPrompt;
+    private CharsetPrompt                          charsetPrompt;
 
-    private CrsPrompt               crsPrompt;
+    private CrsPrompt                              crsPrompt;
 
 
     @Override
@@ -105,15 +111,15 @@ public class ShpImporter
     public void init( ImporterSite site, IProgressMonitor monitor ) {
         this.site = site;
         site.icon.set( ImporterPlugin.images().svgImage( "shp.svg", SvgImageRegistryHelper.NORMAL24 ) );
-        site.summary.set( "Shapefile: " + shp.getName() );
-        site.description.set( "A Shapefile is a common file format which contains features of the same type." );
+        site.summary.set( i18n.get( "summary", shp.getName() ) );
+        site.description.set( i18n.get( "description") );
         site.terminal.set( true );
     }
 
 
     @Override
     public void createPrompts( IProgressMonitor monitor ) throws Exception {
-        charsetPrompt = new CharsetPrompt( site, "Content encoding", "The encoding of the feature content. If unsure use ISO-8859-1.", () -> {
+        charsetPrompt = new CharsetPrompt( site, i18nPrompt.get("encodingSummary"), i18nPrompt.get( "encodingDescription" ), () -> {
             Charset crs = null;
             try (ExceptionCollector<RuntimeException> exc = Streams.exceptions()) {
                 crs = Charset.forName( files.stream()
@@ -124,7 +130,7 @@ public class ShpImporter
             return crs;
         } );
         
-        crsPrompt = new CrsPrompt( site, "CRS", "The Coordinate Reference System.", () -> {
+        crsPrompt = new CrsPrompt( site, i18nPrompt.get("crsSummary"), i18nPrompt.get( "crsDescription" ), () -> {
             Optional<File> prjFile = files.stream().filter( f -> "prj".equalsIgnoreCase( FilenameUtils.getExtension( f.getName() ) ) ).findAny();
             if (prjFile.isPresent()) {
                 try {
@@ -167,7 +173,7 @@ public class ShpImporter
                     // geometry
                     if (schema.getGeometryDescriptor() != null
                             && feature.getDefaultGeometry() == null) {
-                        throw new RuntimeException( "Feature has no geometry: " + feature.getIdentifier().getID() );                        
+                        throw new RuntimeException( "Feature has no geometry: " + feature.getIdentifier().getID() );
                     }
                     // other checks...?
                 }

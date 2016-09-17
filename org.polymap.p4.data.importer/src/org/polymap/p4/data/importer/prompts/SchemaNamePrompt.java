@@ -22,15 +22,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.polymap.core.runtime.i18n.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
-
 import org.polymap.p4.P4Plugin;
 import org.polymap.p4.data.importer.ImporterPrompt;
 import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
 import org.polymap.p4.data.importer.ImporterPrompt.Severity;
 import org.polymap.p4.data.importer.ImporterSite;
+import org.polymap.p4.data.importer.Messages;
 
 /**
  * Prompt toshow duplicate schema names *before* importing them.
@@ -39,6 +40,8 @@ import org.polymap.p4.data.importer.ImporterSite;
  */
 public class SchemaNamePrompt {
 
+    private static final IMessages    i18n       = Messages.forPrefix( "SchemaNamePrompt" );
+    
     private String currentName = null;
 
 
@@ -68,17 +71,43 @@ public class SchemaNamePrompt {
             @Override
             public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
                 parent.setLayout( new FormLayout() );
-                Label l = tk.createLabel( parent, "", SWT.NONE );
-                Text text = tk.createText( parent, currentName, SWT.BORDER );
+                Label desc = FormDataFactory.on( tk.createLabel( parent, prompt.description.get(), SWT.WRAP ) ).top( 0 ).left( 0 ).width( 350 ).control();
+                Label l = tk.createLabel( parent, "", SWT.WRAP );
+                // XXX use form here, but without label. I don't know, how do suppress the label.
+//                BatikFormContainer form = new BatikFormContainer( new DefaultFormPage() {
+//                    
+//                    @Override
+//                    public void createFormContents( IFormPageSite site ) {
+//                        site.newFormField( new PlainValuePropertyAdapter( "name", currentName ) )
+//                        .field.put( new StringFormField() ).validator.put( new NotEmptyValidator() {
+//                            @Override
+//                            public String validate( Object fieldValue ) {
+//                                currentName = (String)fieldValue;
+//                                if (nameExists()) {
+//                                    return i18n.get( "wrongName" );
+//                                }
+//                                return null;
+//                            }
+//                        } )
+//                        
+//                        .label.put( "label" ).tooltip.put( "tooltip" )
+//                        .create();
+//                    }
+//                } );
+//                form.createContents( parent );
+//                
+//                FormDataFactory.on( form.getContents() ).left( 1 ).top( desc, 15 ).width( 350 );
 
+                Text text = tk.createText( parent, currentName, SWT.BORDER );
                 text.addModifyListener( event -> {
                     Text t = (Text)event.getSource();
                     currentName = t.getText();
                     checkName( prompt, l );
                 } );
 
-                FormDataFactory.on( text ).left( 1 ).top( 5 ).width( 350 );
-                FormDataFactory.on( l ).left( 1 ).top( text, 5 );
+//                FormDataFactory.on( text ).left( 1 ).top( form.getContents(), 15 ).width( 350 );
+                FormDataFactory.on( text ).left( 1 ).top( desc, 15 ).width( 350 );
+                FormDataFactory.on( l ).left( 1 ).top( text, 15 ).width( 350 );
 
                 checkName( prompt, l );
             }
@@ -86,11 +115,11 @@ public class SchemaNamePrompt {
 
             private void checkName( ImporterPrompt prompt, Label l ) {
                 if (nameExists()) {
-                    l.setText( "This name always exists in your database. Please use another name." );
+                    l.setText( i18n.get( "wrongName" ) );
                     prompt.ok.set( false );
                 }
                 else {
-                    l.setText( "" );
+                    l.setText( i18n.get( "rightName" ) );
                     prompt.ok.set( true );
                 }
             }

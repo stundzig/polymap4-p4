@@ -18,7 +18,7 @@ import static org.polymap.rhei.batik.app.SvgImageRegistryHelper.NORMAL24;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -32,36 +32,16 @@ import com.google.refine.model.Cell;
 import com.google.refine.model.Column;
 import com.google.refine.model.Row;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnPixelData;
-import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.TableLayout;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.polymap.core.data.refine.impl.CSVFormatAndOptions;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.i18n.IMessages;
-import org.polymap.core.ui.FormDataFactory;
-
-import org.polymap.rhei.batik.toolkit.IPanelToolkit;
-
 import org.polymap.p4.data.importer.ImporterPlugin;
 import org.polymap.p4.data.importer.ImporterPrompt;
-import org.polymap.p4.data.importer.ImporterPrompt.PromptUIBuilder;
-import org.polymap.p4.data.importer.ImporterPrompt.Severity;
 import org.polymap.p4.data.importer.ImporterSite;
 import org.polymap.p4.data.importer.Messages;
+import org.polymap.p4.data.importer.prompts.CharsetPrompt;
 import org.polymap.p4.data.importer.prompts.ComboBasedPromptUiBuilder;
 import org.polymap.p4.data.importer.prompts.CrsPrompt;
 import org.polymap.p4.data.importer.prompts.NumberfieldBasedPromptUiBuilder;
@@ -78,21 +58,21 @@ import org.polymap.p4.data.importer.refine.TypedContent;
 public class CSVFileImporter
         extends AbstractRefineFileImporter<CSVFormatAndOptions> {
 
-    private static final Log      log                       = LogFactory.getLog( CSVFileImporter.class );
+    private static final Log       log                       = LogFactory.getLog( CSVFileImporter.class );
 
-    private static final Pattern  ASCIIONLY                 = Pattern.compile( "\\p{ASCII}*" );
+    private static final Pattern   ASCIIONLY                 = Pattern.compile( "\\p{ASCII}*" );
 
-    private TypedContent          csvTypedContent;
+    private TypedContent           csvTypedContent;
 
-    private List<String>          potentialEncodingProblems = null;
+    private List<String>           potentialEncodingProblems = null;
 
-    private GuessedQuoteCharacter guessedQuoteCharacter     = null;
+    private GuessedQuoteCharacter  guessedQuoteCharacter     = null;
 
-    private CrsPrompt crsPrompt;
+    private CrsPrompt              crsPrompt;
 
-    private SchemaNamePrompt schemaNamePrompt;
+    private SchemaNamePrompt       schemaNamePrompt;
 
-    private static final IMessages i18nCsv = Messages.forPrefix( "ImporterCsv" );
+    private static final IMessages i18nCsv                   = Messages.forPrefix( "ImporterCsv" );
 
 
     @Override
@@ -230,12 +210,11 @@ public class CSVFileImporter
                                                 // !StringUtils.isBlank( value ) );
                                             }
                                         } );
-        site.newPrompt( "encoding" ).summary
-                .put( i18nPrompt.get( "encodingSummary" )).description
-                        .put( i18nPrompt.get( "encodingDescription" ) ).value
-                                .put( formatAndOptions().encoding() ).extendedUI
-                                        .put( encodingPromptUiBuilder() ).severity
-                                                .set( Severity.VERIFY );
+        new CharsetPrompt( site, i18nPrompt.get( "encodingSummary" ), i18nPrompt.get( "encodingDescription" ), () -> {
+            return Charset.forName( formatAndOptions().encoding() );
+        }, () -> {
+            return potentialEncodingProblems();
+        } );
         super.createPrompts( monitor );
     }
 
@@ -332,93 +311,6 @@ public class CSVFileImporter
         }
         return csvTypedContent;
     }
-
-
-    private PromptUIBuilder encodingPromptUiBuilder() {
-        return new PromptUIBuilder() {
-
-            private String encoding;
-
-
-            @Override
-            public void submit( ImporterPrompt prompt ) {
-                formatAndOptions().setEncoding( encoding );
-                triggerUpdateOptions();
-                prompt.ok.set( true );
-                prompt.value.set( encoding );
-            }
-
-
-            @Override
-            public void createContents( ImporterPrompt prompt, Composite parent, IPanelToolkit tk ) {
-                parent.setLayout( new FormLayout() );
-
-                Combo combo = new Combo( parent, SWT.SINGLE | SWT.BORDER );
-                TableViewer viewer = null;
-                if (potentialEncodingProblems() != null && !potentialEncodingProblems().isEmpty()) {
-                    viewer = new TableViewer( parent, SWT.H_SCROLL |
-                            SWT.V_SCROLL );
-                    // create preview table
-                    ColumnViewerToolTipSupport.enableFor( viewer );
-                    TableLayout layout = new TableLayout();
-                    viewer.getTable().setLayout( layout );
-                    viewer.getTable().setHeaderVisible( true );
-                    viewer.getTable().setLinesVisible( true );
-
-                    layout.addColumnData( new ColumnPixelData( 700 ) );
-                    TableViewerColumn viewerColumn = new TableViewerColumn( viewer, SWT.H_SCROLL );
-                    viewerColumn.getColumn().setText( i18nPrompt.get( "encodingSamples" ) );
-                    viewerColumn.setLabelProvider( new ColumnLabelProvider() {
-
-                        @Override
-                        public String getToolTipText( Object element ) {
-                            return super.getText( element );
-                        }
-                    } );
-
-                    viewer.setContentProvider( ArrayContentProvider.getInstance() );
-                    viewer.setInput( potentialEncodingProblems() );
-
-                    FormDataFactory.on( viewer.getTable() ).left( 1 ).top( combo, 15 ).width( 700 ).height( 400 );
-                }
-
-                final TableViewer finalViewer = viewer;
-                List<String> allValues = allValues();
-                combo.setItems( allValues.stream().toArray( String[]::new ) );
-                combo.addSelectionListener( new SelectionAdapter() {
-
-                    @Override
-                    public void widgetSelected( SelectionEvent e ) {
-                        encoding = allValues.get( combo.getSelectionIndex() );
-                        if (finalViewer != null) {
-                            finalViewer.refresh();
-                        }
-                    }
-                } );
-                encoding = initialValue();
-                int index = allValues.indexOf( encoding );
-                if (index != -1) {
-                    combo.select( index );
-                }
-                prompt.value.set( encoding );
-                FormDataFactory.on( combo ).left( 1 ).top( 5 ).width( 250 );
-            }
-
-
-    protected String initialValue() {
-        return formatAndOptions().encoding();
-    }
-
-
-    protected List<String> allValues() {
-        return Lists.newArrayList( StandardCharsets.ISO_8859_1.name(),
-                StandardCharsets.US_ASCII.name(), StandardCharsets.UTF_8.name(),
-                StandardCharsets.UTF_16.name(),
-                StandardCharsets.UTF_16BE.name(), StandardCharsets.UTF_16LE.name() );
-    }
-
-
-    };}
 
 
     protected List<String> potentialEncodingProblems() {
