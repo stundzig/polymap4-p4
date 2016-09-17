@@ -16,6 +16,8 @@ import java.util.function.Supplier;
 
 import org.geotools.feature.NameImpl;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -114,13 +116,19 @@ public class SchemaNamePrompt {
 
 
             private void checkName( ImporterPrompt prompt, Label l ) {
-                if (nameExists()) {
-                    l.setText( i18n.get( "wrongName" ) );
+                if (StringUtils.isBlank( currentName )) {
+                    l.setText( i18n.get( "noName" ) );
                     prompt.ok.set( false );
                 }
                 else {
-                    l.setText( i18n.get( "rightName" ) );
-                    prompt.ok.set( true );
+                    if (nameExists()) {
+                        l.setText( i18n.get( "wrongName" ) );
+                        prompt.ok.set( false );
+                    }
+                    else {
+                        l.setText( i18n.get( "rightName" ) );
+                        prompt.ok.set( true );
+                    }
                 }
             }
         } );
