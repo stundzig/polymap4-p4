@@ -25,9 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.beans.PropertyChangeEvent;
 
-import org.geotools.data.DataAccess;
-import org.opengis.feature.type.FeatureType;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,8 +43,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
-import org.polymap.core.data.pipeline.DataSourceDescription;
-import org.polymap.core.data.util.NameImpl;
+import org.polymap.core.catalog.resolve.IResourceInfo;
 import org.polymap.core.mapeditor.MapViewer;
 import org.polymap.core.operation.DefaultOperation;
 import org.polymap.core.operation.OperationSupport;
@@ -176,13 +172,11 @@ public class LayersPanel
 
     protected boolean canBeVisible( ILayer layer ) {
         try {
-            Optional<DataSourceDescription> dsd = P4Plugin.allResolver().connectLayer( layer, new NullProgressMonitor());
-            if (dsd.isPresent() && dsd.get().service.get() instanceof DataAccess) {
-                FeatureType schema = P4Plugin.localCatalog().localFeaturesStore().getSchema( new NameImpl( dsd.get().resourceName.get() ) );
-                if (schema != null && schema.getGeometryDescriptor() == null) {
-                    // no geometries, hide it
-                    return false;
-                } // true in all other cases
+            Optional<IResourceInfo> resInfo = P4Plugin.allResolver().resInfo( layer, new NullProgressMonitor() );
+            if (resInfo.isPresent() && (resInfo.get().getBounds() == null || resInfo.get().getBounds().isNull())) {
+                // no geometries, hide it
+                return false;
+                // true in all other cases
             }
         }
         catch (Exception e) {
