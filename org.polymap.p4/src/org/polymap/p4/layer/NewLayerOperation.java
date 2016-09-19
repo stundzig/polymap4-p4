@@ -127,29 +127,17 @@ public class NewLayerOperation
 
         // super
         IStatus superResult = super.doWithCommit( monitor, info );
-        
-//        boolean hasGeom = true;
-//        // XXX: throws java.lang.IllegalStateException: No method for: org.polymap.core.data.feature.GetFeatureTypeRequest
-//        // but this is the better solution, since it checks also *remote* data
-//        //Optional<PipelineFeatureSource> featureSource = P4Plugin.allResolver().connectLayer( layer.get(), EncodedImageProducer.class, new NullProgressMonitor());
-//        //hasGeom = featureSource.isPresent() && featureSource.get().getSchema() != null && featureSource.get().getSchema().getGeometryDescriptor() != null;
-//        // XXX: checks only local ressources
-//        if (label.isPresent() || !StringUtils.isBlank( res.get().getName())) {
-//            FeatureType schema = P4Plugin.localCatalog().localFeaturesStore().getSchema( new NameImpl(label.get()) );
-//            hasGeom = schema != null && schema.getGeometryDescriptor() != null;
-//        }
-//        if (hasGeom) {
+
+        if (superResult.isOK()) {
             if (!res.isPresent()) {
                 res.set( AllResolver.instance().resInfo( layer.get(), monitor ).get() );
             }
             ReferencedEnvelope nativeLayerBounds = res.get().getBounds();
-            if (nativeLayerBounds != null && !nativeLayerBounds.isNull()) { 
+            if (nativeLayerBounds != null && !nativeLayerBounds.isNull()) {
                 // mab bbox
-                if (superResult.isOK()) {
-                    adaptMapBBox( monitor );
-                }
+                adaptMapBBox( monitor );
             }
-//        }
+        }
         return superResult;
     }
 
