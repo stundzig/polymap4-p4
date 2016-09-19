@@ -16,7 +16,6 @@ package org.polymap.p4.layer;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.operation.projection.ProjectionException;
-import org.opengis.feature.type.FeatureType;
 import org.opengis.geometry.BoundingBox;
 
 import org.apache.commons.logging.Log;
@@ -31,7 +30,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.catalog.resolve.IResourceInfo;
-import org.polymap.core.data.util.NameImpl;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.runtime.UIThreadExecutor;
 import org.polymap.core.runtime.config.Config2;
@@ -130,13 +128,28 @@ public class NewLayerOperation
         // super
         IStatus superResult = super.doWithCommit( monitor, info );
         
-        FeatureType schema = P4Plugin.localCatalog().localFeaturesStore().getSchema( new NameImpl(label.get()) );
-        if (schema.getGeometryDescriptor() != null) {
-            // mab bbox
-            if (superResult.isOK()) {
-                adaptMapBBox( monitor );
+//        boolean hasGeom = true;
+//        // XXX: throws java.lang.IllegalStateException: No method for: org.polymap.core.data.feature.GetFeatureTypeRequest
+//        // but this is the better solution, since it checks also *remote* data
+//        //Optional<PipelineFeatureSource> featureSource = P4Plugin.allResolver().connectLayer( layer.get(), EncodedImageProducer.class, new NullProgressMonitor());
+//        //hasGeom = featureSource.isPresent() && featureSource.get().getSchema() != null && featureSource.get().getSchema().getGeometryDescriptor() != null;
+//        // XXX: checks only local ressources
+//        if (label.isPresent() || !StringUtils.isBlank( res.get().getName())) {
+//            FeatureType schema = P4Plugin.localCatalog().localFeaturesStore().getSchema( new NameImpl(label.get()) );
+//            hasGeom = schema != null && schema.getGeometryDescriptor() != null;
+//        }
+//        if (hasGeom) {
+            if (!res.isPresent()) {
+                res.set( AllResolver.instance().resInfo( layer.get(), monitor ).get() );
             }
-        }
+            ReferencedEnvelope nativeLayerBounds = res.get().getBounds();
+            if (nativeLayerBounds != null && !nativeLayerBounds.isNull()) { 
+                // mab bbox
+                if (superResult.isOK()) {
+                    adaptMapBBox( monitor );
+                }
+            }
+//        }
         return superResult;
     }
 
